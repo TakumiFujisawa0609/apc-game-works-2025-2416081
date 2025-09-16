@@ -5,6 +5,10 @@
 
 #include"../../Utility/Utility.h"
 
+#include"../../Manager/Sound/SoundManager.h"
+
+#include"../Player/Player.h"
+
 Rock::Rock()
 {
 }
@@ -56,7 +60,9 @@ void Rock::SubRelease(void)
 
 void Rock::OnCollision(UnitBase* other)
 {
-
-
-    VoxelBase::OnCollision(other);
+    if (dynamic_cast<PlayerPunch*>(other)) {
+        ApplyBrush(other->GetUnit(), 200);
+        Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+        return;
+    }
 }

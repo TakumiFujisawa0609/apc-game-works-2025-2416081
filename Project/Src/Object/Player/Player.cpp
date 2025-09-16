@@ -2,6 +2,8 @@
 
 #include"../../Manager/Input/KeyManager.h"
 
+#include"../../Manager/Sound/SoundManager.h"
+
 #include"../Rock/Rock.h"
 
 Player::Player():
@@ -32,12 +34,12 @@ void Player::Load(void)
 		MV1SetScale(unit_.model_, { 1.0f,1.0f,1.0f });
 	}
 
-
 	unit_.para_.speed = 10.0f;
 
 #pragma region 関数ポインタ配列へ各関数を格納
 
 #define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
+
 	SET_STATE(STATE::NON, &Player::Non);
 	SET_STATE(STATE::MOVE, &Player::Move);
 	SET_STATE(STATE::ATTACK, &Player::Attack);
@@ -47,12 +49,19 @@ void Player::Load(void)
 
 #pragma endregion
 
-#pragma region モーションの初期設定と初期モーション再生
+
+	// モーションの初期設定と初期モーション再生
 	AnimeLoad();
-
 	anime_->Play((int)ANIME_TYPE::IDLE);
-#pragma endregion
 
+
+	// 音声読み込み
+	Smng::GetIns().Load(SOUND::PLAYER_RUN);
+	Smng::GetIns().Load(SOUND::PLAYER_PUNCH);
+	Smng::GetIns().Load(SOUND::PLAYER_EVASION);
+
+
+	// プレイヤーが抱える下位クラスの読み込み処理
 	SubLoad();
 }
 
@@ -79,6 +88,8 @@ void Player::Update(void)
 {
 	// 無敵カウンターの更新
 	Invi();
+
+	prevPos_ = unit_.pos_;
 
 	// ステート遷移条件
 	StateManager();
@@ -120,22 +131,89 @@ void Player::Draw(void)
 
 void Player::Release(void)
 {
+	// プレイヤーが抱えている下位クラスのゲーム終了時処理
 	SubRelease();
 
+	// 音声解放
+	Smng::GetIns().Delete(SOUND::PLAYER_RUN);
+	Smng::GetIns().Delete(SOUND::PLAYER_PUNCH);
+	Smng::GetIns().Delete(SOUND::PLAYER_EVASION);
+
+	// アニメーション管理クラスの解放
 	if (anime_) {
 		anime_->Release();
 		delete anime_;
 		anime_ = nullptr;
 	}
 
+	// モデル解放
 	MV1DeleteModel(unit_.model_);
 }
 
 void Player::OnCollision(UnitBase* other)
 {
 	if (VoxelBase* voxel = dynamic_cast<VoxelBase*>(other)) {
-		
+		// ボクセル形状に沿ってプレイヤーを押し戻す
+		CollisionVoxel(voxel);
+		return;
 	}
+}
+
+void Player::CollisionVoxel(VoxelBase* voxel)
+{
+    // プレイヤーのAABBとボクセルのAABBの衝突判定
+	VECTOR playerMinX = VSub(VAdd({ unit_.pos_.x,prevPos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+	VECTOR playerMaxX = VAdd(VAdd({ unit_.pos_.x,prevPos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+
+	VECTOR playerMinY = VSub(VAdd({ prevPos_.x,unit_.pos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+	VECTOR playerMaxY = VAdd(VAdd({ prevPos_.x,unit_.pos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+
+	VECTOR playerMinZ = VSub(VAdd({ prevPos_.x,prevPos_.y,unit_.pos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+	VECTOR playerMaxZ = VAdd(VAdd({ prevPos_.x,prevPos_.y,unit_.pos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+
+    for (const auto& batch : voxel->GetBatches())
+    {
+		VECTOR voxelMin = VAdd(voxel->GetUnit().pos_, batch.bmin);
+		VECTOR voxelMax = VAdd(voxel->GetUnit().pos_, batch.bmax);
+
+        // AABB同士の衝突判定
+        if (playerMinX.x < voxelMax.x && playerMaxX.x > voxelMin.x &&
+            playerMinX.y < voxelMax.y && playerMaxX.y > voxelMin.y &&
+            playerMinX.z < voxelMax.z && playerMaxX.z > voxelMin.z)
+        {
+            // 衝突時の処理（例: プレイヤーを押し戻す）
+			// X座標のみ最新の座標情報にて衝突したので、X座標だけボクセルの座標をもとに押し出す
+			if (prevPos_.x < unit_.pos_.x) { unit_.pos_.x = voxelMin.x - (unit_.para_.size.x / 2.0f); } // 右方向に移動して衝突した場合
+			else { unit_.pos_.x = voxelMax.x + (unit_.para_.size.x / 2.0f); } // 左方向に移動して衝突した場合
+		}
+
+		// AABB同士の衝突判定
+		if (playerMinY.x < voxelMax.x && playerMaxY.x > voxelMin.x &&
+			playerMinY.y < voxelMax.y && playerMaxY.y > voxelMin.y &&
+			playerMinY.z < voxelMax.z && playerMaxY.z > voxelMin.z)
+		{
+			// 衝突時の処理（例: プレイヤーを押し戻す）
+			// Y座標のみ最新の座標情報にて衝突したので、Y座標だけボクセルの座標をもとに押し出す
+			if (prevPos_.y < unit_.pos_.y) { unit_.pos_.y = voxelMin.y - unit_.para_.size.y; yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
+			else {
+				unit_.pos_.y = voxelMax.y;
+				yAccelSum_ = 0.0f;
+				for (auto& jump : isJump_) { jump = false; }
+				for (auto& cou : jumpKeyCounter_) { cou = 0; }
+			} // 下方向に移動して衝突した場合
+		}
+
+		// AABB同士の衝突判定
+		if (playerMinZ.x < voxelMax.x && playerMaxZ.x > voxelMin.x &&
+			playerMinZ.y < voxelMax.y && playerMaxZ.y > voxelMin.y &&
+			playerMinZ.z < voxelMax.z && playerMaxZ.z > voxelMin.z)
+		{
+			// 衝突時の処理（例: プレイヤーを押し戻す）
+			// Z座標のみ最新の座標情報にて衝突したので、Z座標だけボクセルの座標をもとに押し出す
+			if (prevPos_.z < unit_.pos_.z) { unit_.pos_.z = voxelMin.z - (unit_.para_.size.z / 2.0f); } // 手前方向に移動して衝突した場合
+			else { unit_.pos_.z = voxelMax.z + (unit_.para_.size.z / 2.0f); } // 奥方向に移動して衝突した場合
+		}
+    }
 }
 
 void Player::StateManager(void)
@@ -147,6 +225,7 @@ void Player::StateManager(void)
 	case STATE::MOVE:
 		DoStateAttack();
 		DoStateEvasion();
+		if (state_ != STATE::MOVE) { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
 		break;
 	case STATE::ATTACK:
 		DoStateMove();
@@ -210,6 +289,9 @@ void Player::DoStateAttack(void)
 		anime_->Play((int)ANIME_TYPE::PUNCH_THIRD, false);
 		break;
 	}
+
+	// SE再生
+	Smng::GetIns().Play(SOUND::PLAYER_PUNCH, true, 150);
 }
 void Player::DoStateEvasion(void)
 {
@@ -218,6 +300,9 @@ void Player::DoStateEvasion(void)
 	state_ = STATE::EVASION;
 
 	anime_->Play((int)ANIME_TYPE::EVASION, false);
+
+	// SE再生
+	Smng::GetIns().Play(SOUND::PLAYER_EVASION, true, 150);
 }
 
 void Player::Move(void)
@@ -305,9 +390,14 @@ void Player::Run(void)
 
 	if (Utility::VZERO(vec)) {
 		if (!isJump_[0]) { anime_->Play((int)ANIME_TYPE::IDLE); }
+		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
 	}
 	else {
-		if (!isJump_[0]) { anime_->Play((int)ANIME_TYPE::RUN); }
+		if (!isJump_[0]) {
+			anime_->Play((int)ANIME_TYPE::RUN);
+			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 150, true);
+		}
+		else { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
 
 		unit_.angle_.y = atan2(vec.x, vec.z);
 		unit_.angle_.y += Utility::Deg2RadF(180.0f);

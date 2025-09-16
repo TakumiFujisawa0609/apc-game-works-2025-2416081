@@ -52,6 +52,7 @@ public:
 	virtual void Release(void) = 0;
 
 	const Base& GetUnit(void) const { return unit_; }
+	virtual int GetState(void)const { return -1; }
 	virtual void OnCollision(UnitBase* other) = 0;
 
 protected:

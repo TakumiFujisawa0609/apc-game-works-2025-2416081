@@ -99,7 +99,11 @@ void SoundManager::Init(void)
 	}
 
 	// 使用するデータのパスを入れておく("Data/Sound/～～"←ここから先のパス)
-	sounds_[SOUND::BGM1].path_ = "4m.rarara.mp3";
+	sounds_[SOUND::OBJECT_BREAK].path_ = "Game/Environ/ObjBreak.mp3";
+
+	sounds_[SOUND::PLAYER_RUN].path_ = "Game/Player/Run.mp3";
+	sounds_[SOUND::PLAYER_PUNCH].path_ = "Game/Player/Punch.mp3";
+	sounds_[SOUND::PLAYER_EVASION].path_ = "Game/Player/Evasion.mp3";
 }
 
 void SoundManager:: Release(void)

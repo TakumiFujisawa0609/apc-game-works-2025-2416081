@@ -34,7 +34,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            10.0f,                          // セル(大きさ)
+            20.0f,                          // セル(大きさ)
             unit_.para_.center,             // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);
@@ -337,18 +337,6 @@ bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& c
     return !(batches.empty());
 }
 
-
-void VoxelBase::OnCollision(UnitBase* other)
-{
-    if (dynamic_cast<PlayerPunch*>(other)) {
-        ApplyBrush(other->GetUnit(), 200);
-        return;
-    }
-
-}
-
-
-
 void VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
 {
     if (amount == 0) { return; }
@@ -457,4 +445,188 @@ void VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
 
 void VoxelBase::ApplyBrushCapsule(const Base& other, uint8_t amount)
 {
+}
+
+
+
+bool VoxelBase::ResolveAABBGrid(VECTOR& pos, const VECTOR& half, VECTOR& vel, float dt, bool& grounded)
+{
+    grounded = false;
+    if (Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) return false;
+
+    const float EPS = 1e-4f;
+    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center); // このボクセルの“世界中心”
+    auto cellMinX = [&](int ix) { return gridCenterW.x + (ix - Nx_ / 2) * cell_; };
+    auto cellMinY = [&](int iy) { return gridCenterW.y + (iy - Ny_ / 2) * cell_; };
+    auto cellMinZ = [&](int iz) { return gridCenterW.z + (iz - Nz_ / 2) * cell_; };
+
+    auto solidAt = [&](int x, int y, int z)->bool {
+        if (x < 0 || y < 0 || z < 0 || x >= Nx_ || y >= Ny_ || z >= Nz_) return false;
+        return density_[Idx(x, y, z, Nx_, Ny_)] > 0;
+        };
+
+    // その軸で“先頭スラブ”だけ調べるヘルパ
+    auto sweepAxis = [&](int axis, float& delta)->bool {
+        if (delta == 0.0f) return false;
+
+        // 位置/半サイズ
+        float minX = pos.x - half.x, maxX = pos.x + half.x;
+        float minY = pos.y - half.y, maxY = pos.y + half.y;
+        float minZ = pos.z - half.z, maxZ = pos.z + half.z;
+
+        // いまのスラブ範囲（2軸ぶん）
+        int ix0 = (int)std::floor((minX - gridCenterW.x) / cell_) + Nx_ / 2;
+        int ix1 = (int)std::floor((maxX - gridCenterW.x) / cell_) + Nx_ / 2;
+        int iy0 = (int)std::floor((minY - gridCenterW.y) / cell_) + Ny_ / 2;
+        int iy1 = (int)std::floor((maxY - gridCenterW.y) / cell_) + Ny_ / 2;
+        int iz0 = (int)std::floor((minZ - gridCenterW.z) / cell_) + Nz_ / 2;
+        int iz1 = (int)std::floor((maxZ - gridCenterW.z) / cell_) + Nz_ / 2;
+
+        // 進行方向の“新しい境界インデックス”
+        int step = (delta > 0.0f) ? +1 : -1;
+
+        // 軸ごとに、越えるセル境界を1つずつチェック
+        if (axis == 0) { // X
+            int iOld = (int)std::floor(((delta > 0 ? maxX : minX) - gridCenterW.x) / cell_) + Nx_ / 2;
+            int iNew = (int)std::floor(((delta > 0 ? (maxX + delta) : (minX + delta)) - gridCenterW.x) / cell_) + Nx_ / 2;
+
+            if (delta > 0.0f) {
+                for (int ix = iOld + 1; ix <= iNew; ++ix) {
+                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
+                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
+                    bool hit = false;
+                    for (int iy = y0; iy <= y1 && !hit; ++iy)
+                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
+                            if (solidAt(ix, iy, iz)) hit = true;
+                        }
+                    if (hit) {
+                        // ぶつかったセルの“手前の面”でクランプ
+                        float face = cellMinX(ix); // そのセルの最小面(左側)
+                        pos.x = face - half.x - EPS;
+                        vel.x = 0;
+                        delta = 0;
+                        return true;
+                    }
+                }
+            }
+            else { // delta < 0
+                for (int ix = iOld - 1; ix >= iNew; --ix) {
+                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
+                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
+                    bool hit = false;
+                    for (int iy = y0; iy <= y1 && !hit; ++iy)
+                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
+                            if (solidAt(ix, iy, iz)) hit = true;
+                        }
+                    if (hit) {
+                        // ぶつかったセルの“奥の面”(右側)でクランプ
+                        float face = cellMinX(ix) + cell_; // そのセルの最大面
+                        pos.x = face + half.x + EPS;
+                        vel.x = 0;
+                        delta = 0;
+                        return true;
+                    }
+                }
+            }
+            // 何も無ければ移動
+            pos.x += delta; delta = 0; return false;
+        }
+        else if (axis == 1) { // Y
+            int iOld = (int)std::floor(((delta > 0 ? maxY : minY) - gridCenterW.y) / cell_) + Ny_ / 2;
+            int iNew = (int)std::floor(((delta > 0 ? (maxY + delta) : (minY + delta)) - gridCenterW.y) / cell_) + Ny_ / 2;
+
+            if (delta > 0.0f) {
+                for (int iy = iOld + 1; iy <= iNew; ++iy) {
+                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
+                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
+                    bool hit = false;
+                    for (int ix = x0; ix <= x1 && !hit; ++ix)
+                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
+                            if (solidAt(ix, iy, iz)) hit = true;
+                        }
+                    if (hit) {
+                        float face = cellMinY(iy);
+                        pos.y = face - half.y - EPS;
+                        vel.y = 0;
+                        delta = 0;
+                        return true;
+                    }
+                }
+            }
+            else { // delta < 0（落下）
+                for (int iy = iOld - 1; iy >= iNew; --iy) {
+                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
+                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
+                    bool hit = false;
+                    for (int ix = x0; ix <= x1 && !hit; ++ix)
+                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
+                            if (solidAt(ix, iy, iz)) hit = true;
+                        }
+                    if (hit) {
+                        float face = cellMinY(iy) + cell_;
+                        pos.y = face + half.y + EPS;
+                        grounded = true; // ★接地
+                        if (vel.y < 0) vel.y = 0;
+                        delta = 0;
+                        return true;
+                    }
+                }
+            }
+            pos.y += delta; delta = 0; return false;
+        }
+        else { // Z
+            int iOld = (int)std::floor(((delta > 0 ? maxZ : minZ) - gridCenterW.z) / cell_) + Nz_ / 2;
+            int iNew = (int)std::floor(((delta > 0 ? (maxZ + delta) : (minZ + delta)) - gridCenterW.z) / cell_) + Nz_ / 2;
+
+            if (delta > 0.0f) {
+                for (int iz = iOld + 1; iz <= iNew; ++iz) {
+                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
+                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
+                    bool hit = false;
+                    for (int ix = x0; ix <= x1 && !hit; ++ix)
+                        for (int iy = y0; iy <= y1 && !hit; ++iy) {
+                            if (solidAt(ix, iy, iz)) hit = true;
+                        }
+                    if (hit) {
+                        float face = cellMinZ(iz);
+                        pos.z = face - half.z - EPS;
+                        vel.z = 0;
+                        delta = 0;
+                        return true;
+                    }
+                }
+            }
+            else {
+                for (int iz = iOld - 1; iz >= iNew; --iz) {
+                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
+                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
+                    bool hit = false;
+                    for (int ix = x0; ix <= x1 && !hit; ++ix)
+                        for (int iy = y0; iy <= y1 && !hit; ++iy) {
+                            if (solidAt(ix, iy, iz)) hit = true;
+                        }
+                    if (hit) {
+                        float face = cellMinZ(iz) + cell_;
+                        pos.z = face + half.z + EPS;
+                        vel.z = 0;
+                        delta = 0;
+                        return true;
+                    }
+                }
+            }
+            pos.z += delta; delta = 0; return false;
+        }
+        };
+
+    // 予定移動量
+    float dx = vel.x * dt;
+    float dy = vel.y * dt;
+    float dz = vel.z * dt;
+
+    // 推奨順序：Y→X→Z（重力→水平の自然な解決）
+    sweepAxis(1, dy);          // Y
+    sweepAxis(0, dx);          // X
+    sweepAxis(2, dz);          // Z
+
+    return true;
 }

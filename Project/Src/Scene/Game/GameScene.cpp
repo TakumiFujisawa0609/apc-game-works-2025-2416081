@@ -5,8 +5,10 @@
 
 #include"../../Application/Application.h"
 #include"../../scene/SceneManager/SceneManager.h"
+
 #include"../../Manager/Camera/Camera.h"
 #include"../../Manager/Camera/CameraController.h"
+#include"../../Manager/Sound/SoundManager.h"
 
 #include"../../Utility/Utility.h"
 
@@ -63,6 +65,8 @@ void GameScene::Load(void)
 	collision_->Add(player_);
 	collision_->Add(player_->GetSubIns());
 
+
+	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
 }
 
 void GameScene::Init(void)
@@ -132,6 +136,9 @@ void GameScene::Draw(void)
 
 void GameScene::Release(void)
 {
+	Smng::GetIns().Delete(SOUND::OBJECT_BREAK);
+	
+
 	for (auto& r : rock_) {
 		if (!r) { continue; }
 		r->Release();

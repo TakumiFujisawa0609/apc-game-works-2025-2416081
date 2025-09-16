@@ -17,7 +17,13 @@ public:
 	{
 		NON=-1,
 
-		BGM1,
+		// 環境効果音
+		OBJECT_BREAK,
+
+		// プレイヤー
+		PLAYER_RUN,
+		PLAYER_PUNCH,
+		PLAYER_EVASION,
 
 		MAX,
 	};
@@ -36,7 +42,7 @@ public:
 	/// <param name="volume">音量</param>
 	/// <param name="loop">ループ再生</param>
 	/// <param name="topPlay">最初から再生するか</param>
-	void Play(SOUND s, bool over = false, int volume = 255, bool loop = false, bool topPlay = true);
+	void Play(SOUND s, bool over = false, int volume = 200, bool loop = false, bool topPlay = true);
 
 	/// <summary>
 	/// 指定したサウンドを停止
@@ -79,3 +85,6 @@ private:
 	void Init(void);
 	void Release(void);
 };
+
+using Smng = SoundManager;
+using SOUND = Smng::SOUND;

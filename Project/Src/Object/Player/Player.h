@@ -5,6 +5,8 @@
 
 #include"Punch/PlayerPunch.h"
 
+class VoxelBase;
+
 class Player : public UnitBase
 {
 public:
@@ -34,6 +36,9 @@ public:
 		MAX
 	};
 
+	int GetState(void)const override { return (int)state_; }
+
+
 	// 移動状態で使用する～～-------------------------------------------------------------------
 	// 定数
 	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
@@ -60,6 +65,8 @@ private:
 
 	// 現在の状態
 	STATE state_;
+
+	void CollisionVoxel(VoxelBase* voxel);
 
 	/// <summary>
 	/// 状態ごとに遷移可能のSTATEを振り分けて入力操作に応じてそのSTATEに遷移させる
