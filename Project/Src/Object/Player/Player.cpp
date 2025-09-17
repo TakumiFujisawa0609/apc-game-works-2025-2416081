@@ -25,10 +25,9 @@ Player::Player():
 void Player::Load(void)
 {
 	unit_.para_.colliType = CollisionType::ALLY;
-	unit_.para_.colliShape = CollisionShape::CAPSULE;
+	unit_.para_.colliShape = CollisionShape::AABB;
 	unit_.para_.size = SIZE;
-	unit_.para_.radius = SIZE.z / 2;
-	unit_.para_.capsuleHalfLen = (SIZE.y / 2) - (unit_.para_.radius * 2);
+	unit_.para_.center = CENTER_DIFF;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
 	if (unit_.model_ != -1) {
@@ -68,7 +67,7 @@ void Player::Load(void)
 
 void Player::Init(void)
 {
-	unit_.pos_ = { 0.0f,0.0f,-500.0f };
+	unit_.pos_ = { 0.0f,0.0f,-100.0f };
 	unit_.angle_ = {};
 
 	unit_.isAlive_ = true;
@@ -111,9 +110,9 @@ void Player::Update(void)
 
 
 
-	if (unit_.pos_.y < SIZE.y / 2) {
+	if (unit_.pos_.y < 0.0f) {
 		yAccelSum_ = 0.0f;
-		unit_.pos_.y = SIZE.y / 2;
+		unit_.pos_.y = 0.0f;
 		for (auto& jump : isJump_) { jump = false; }
 		for (auto& cou : jumpKeyCounter_) { cou = 0; }
 	}
@@ -125,7 +124,7 @@ void Player::Draw(void)
 
 	SubDraw();
 
-	MV1SetPosition(unit_.model_, VAdd(unit_.pos_, CENTER_DIFF));
+	MV1SetPosition(unit_.model_, unit_.pos_);
 	MV1SetRotationXYZ(unit_.model_, unit_.angle_);
 	MV1DrawModel(unit_.model_);
 }
@@ -162,8 +161,60 @@ void Player::OnCollision(UnitBase* other)
 
 void Player::CollisionVoxel(VoxelBase* voxel)
 {
-}
+    // プレイヤーのAABBとボクセルのAABBの衝突判定
+	VECTOR playerMinX = VSub(VAdd({ unit_.pos_.x,prevPos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+	VECTOR playerMaxX = VAdd(VAdd({ unit_.pos_.x,prevPos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
 
+	VECTOR playerMinY = VSub(VAdd({ prevPos_.x,unit_.pos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+	VECTOR playerMaxY = VAdd(VAdd({ prevPos_.x,unit_.pos_.y,prevPos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+
+	VECTOR playerMinZ = VSub(VAdd({ prevPos_.x,prevPos_.y,unit_.pos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+	VECTOR playerMaxZ = VAdd(VAdd({ prevPos_.x,prevPos_.y,unit_.pos_.z }, unit_.para_.center), VScale(unit_.para_.size, 0.5f));
+
+    for (const auto& batch : voxel->GetBatches())
+    {
+		VECTOR voxelMin = VAdd(voxel->GetUnit().pos_, batch.bmin);
+		VECTOR voxelMax = VAdd(voxel->GetUnit().pos_, batch.bmax);
+
+        // AABB同士の衝突判定
+        if (playerMinX.x < voxelMax.x && playerMaxX.x > voxelMin.x &&
+            playerMinX.y < voxelMax.y && playerMaxX.y > voxelMin.y &&
+            playerMinX.z < voxelMax.z && playerMaxX.z > voxelMin.z)
+        {
+            // 衝突時の処理（例: プレイヤーを押し戻す）
+			// X座標のみ最新の座標情報にて衝突したので、X座標だけボクセルの座標をもとに押し出す
+			if (prevPos_.x < unit_.pos_.x) { unit_.pos_.x = voxelMin.x - (unit_.para_.size.x / 2.0f); } // 右方向に移動して衝突した場合
+			else { unit_.pos_.x = voxelMax.x + (unit_.para_.size.x / 2.0f); } // 左方向に移動して衝突した場合
+		}
+
+		// AABB同士の衝突判定
+		if (playerMinY.x < voxelMax.x && playerMaxY.x > voxelMin.x &&
+			playerMinY.y < voxelMax.y && playerMaxY.y > voxelMin.y &&
+			playerMinY.z < voxelMax.z && playerMaxY.z > voxelMin.z)
+		{
+			// 衝突時の処理（例: プレイヤーを押し戻す）
+			// Y座標のみ最新の座標情報にて衝突したので、Y座標だけボクセルの座標をもとに押し出す
+			if (prevPos_.y < unit_.pos_.y) { unit_.pos_.y = voxelMin.y - unit_.para_.size.y; yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
+			else {
+				unit_.pos_.y = voxelMax.y;
+				yAccelSum_ = 0.0f;
+				for (auto& jump : isJump_) { jump = false; }
+				for (auto& cou : jumpKeyCounter_) { cou = 0; }
+			} // 下方向に移動して衝突した場合
+		}
+
+		// AABB同士の衝突判定
+		if (playerMinZ.x < voxelMax.x && playerMaxZ.x > voxelMin.x &&
+			playerMinZ.y < voxelMax.y && playerMaxZ.y > voxelMin.y &&
+			playerMinZ.z < voxelMax.z && playerMaxZ.z > voxelMin.z)
+		{
+			// 衝突時の処理（例: プレイヤーを押し戻す）
+			// Z座標のみ最新の座標情報にて衝突したので、Z座標だけボクセルの座標をもとに押し出す
+			if (prevPos_.z < unit_.pos_.z) { unit_.pos_.z = voxelMin.z - (unit_.para_.size.z / 2.0f); } // 手前方向に移動して衝突した場合
+			else { unit_.pos_.z = voxelMax.z + (unit_.para_.size.z / 2.0f); } // 奥方向に移動して衝突した場合
+		}
+    }
+}
 
 void Player::StateManager(void)
 {
