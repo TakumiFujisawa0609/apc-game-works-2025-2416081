@@ -32,7 +32,7 @@ void PlayerPunch::Draw(void)
 {
 	if (!unit_.isAlive_) { return; }
 
-	//DrawSphere3D(unit_.pos_, unit_.para_.radius, 30, 0x000000, 0x000000, true);
+	DrawSphere3D(unit_.pos_, unit_.para_.radius, 30, 0x000000, 0x000000, true);
 }
 
 void PlayerPunch::Release(void)

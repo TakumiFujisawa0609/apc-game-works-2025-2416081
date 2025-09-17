@@ -87,5 +87,14 @@ public:
 	// スプライト画像読み込み（エラーチェック付き）
 	static void LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int XSize, int YSize, int* handleArray);
 	static void LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int XSize, int YSize, std::vector<int>& handleArray);
+
+
+
+
+	// 衝突判定関数
+	static bool CollisionAABB(const VECTOR& pos1, const VECTOR& size1, const VECTOR& pos2, const VECTOR& size2);
+
+
+	static bool SphereVsAABB_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,VECTOR& outN, float& outDepth);
 };
 

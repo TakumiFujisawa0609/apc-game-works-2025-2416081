@@ -34,6 +34,10 @@ public:
 
 	std::vector<MeshBatch> GetBatches(void)const { return batches_; }
 
+	//bool ResolveCapsuleGrid(
+	//	VECTOR& footPos, float radius, float halfH,
+	//	VECTOR& vel, bool& grounded,
+	//	float slopeLimitDeg = 50.0f, int maxIters = 4);
 
 protected:
 	virtual void SubLoad(void) = 0;
@@ -85,9 +89,6 @@ protected:
 	void ApplyBrushAABB(const Base& other, uint8_t amount);
 	// カプセルで削る
 	void ApplyBrushCapsule(const Base& other, uint8_t amount);
-
-	// AABB とグリッドの当たり判定と解決
-	bool ResolveAABBGrid(VECTOR& pos, const VECTOR& half, VECTOR& vel, float dt, bool& grounded);
 };
 
 using MeshBatch = VoxelBase::MeshBatch;

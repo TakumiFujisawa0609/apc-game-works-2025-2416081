@@ -5,8 +5,8 @@
 class PlayerPunch : public UnitBase
 {
 public:
-	static constexpr float RADIUS = 120.0f;
-	static constexpr VECTOR LOCAL_POS = { 0.0f,RADIUS / 2,-70.0f };
+	static constexpr float RADIUS = 150.0f;
+	static constexpr VECTOR LOCAL_POS = { 0.0f,0.0f,-100.0f };
 
 
 	PlayerPunch(const VECTOR& playerPos, const VECTOR& playerAngle);

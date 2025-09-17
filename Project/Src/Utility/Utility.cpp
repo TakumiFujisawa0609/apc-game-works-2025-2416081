@@ -300,9 +300,9 @@ Vector2 Utility::Normalize(const Vector2& v)
 VECTOR Utility::Clamp(const VECTOR& v, const VECTOR& minV, const VECTOR& maxV)
 {
     VECTOR r;
-    r.x = (v.x < minV.x) ? minV.x : (v.x > maxV.x ? maxV.x : v.x);
-    r.y = (v.y < minV.y) ? minV.y : (v.y > maxV.y ? maxV.y : v.y);
-    r.z = (v.z < minV.z) ? minV.z : (v.z > maxV.z ? maxV.z : v.z);
+    r.x = Utility::Clamp(v.x, minV.x, maxV.x);
+    r.y = Utility::Clamp(v.y, minV.y, maxV.y);
+    r.z = Utility::Clamp(v.x, minV.x, maxV.x);
     return r;
 }
 
@@ -354,3 +354,64 @@ void Utility::LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int
     }
 }
 
+bool Utility::CollisionAABB(const VECTOR& pos1, const VECTOR& size1, const VECTOR& pos2, const VECTOR& size2)
+{
+	if (pos1.x + size1.x < pos2.x - size2.x) return false;
+	if (pos1.x - size1.x > pos2.x + size2.x) return false;
+	if (pos1.y + size1.y < pos2.y - size2.y) return false;
+	if (pos1.y - size1.y > pos2.y + size2.y) return false;
+	if (pos1.z + size1.z < pos2.z - size2.z) return false;
+	if (pos1.z - size1.z > pos2.z + size2.z) return false;
+	return true;
+}
+
+// 球 vs AABB の最小押し戻し（MTV）を返す
+bool Utility::SphereVsAABB_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax, VECTOR& outN, float& outDepth)
+{
+    const VECTOR cp = Clamp(C, bmin, bmax);
+    VECTOR d = VSub(C, cp);
+    float L2 = VDot(d, d);
+    if (L2 > R * R) return false;
+
+    if (L2 > 1e-12f) {
+        float L = std::sqrt(L2);
+        outN = VScale(d, 1.0f / L);
+        outDepth = R - L;
+        return true;
+    }
+    else {
+        // 球中心が箱の“内部にいる”ケース：最短軸で押し出す
+        float dx = (std::min)(C.x - bmin.x, bmax.x - C.x);
+        float dy = (std::min)(C.y - bmin.y, bmax.y - C.y);
+        float dz = (std::min)(C.z - bmin.z, bmax.z - C.z);
+        if (dx <= dy && dx <= dz) { outN = { (C.x - (bmin.x + bmax.x) * 0.5f) >= 0 ? +1.f : -1.f, 0, 0 }; outDepth = R + dx; }
+        else if (dy <= dz) { outN = { 0, (C.y - (bmin.y + bmax.y) * 0.5f) >= 0 ? +1.f : -1.f, 0 }; outDepth = R + dy; }
+        else { outN = { 0, 0, (C.z - (bmin.z + bmax.z) * 0.5f) >= 0 ? +1.f : -1.f }; outDepth = R + dz; }
+        return true;
+    }
+}
+
+// 円（XZ）vs 矩形（XZ）のMTV（カプセル側面用、Yは別途範囲チェック）
+static bool CircleXZ_vs_RectXZ_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
+    VECTOR& outN, float& outDepth)
+{
+    float qx = Utility::Clamp(C.x, bmin.x, bmax.x);
+    float qz = Utility::Clamp(C.z, bmin.z, bmax.z);
+    float dx = C.x - qx, dz = C.z - qz;
+    float L2 = dx * dx + dz * dz;
+    if (L2 > R * R) return false;
+    if (L2 > 1e-12f) {
+        float L = std::sqrt(L2);
+        outN = { dx / L, 0.0f, dz / L };
+        outDepth = R - L;
+        return true;
+    }
+    else {
+        // 真上（真下）で重なってる：最近面の法線で
+        float rx = (std::min)(std::abs(C.x - bmin.x), std::abs(bmax.x - C.x));
+        float rz = (std::min)(std::abs(C.z - bmin.z), std::abs(bmax.z - C.z));
+        if (rx <= rz) outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }, outDepth = R + rx;
+        else          outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }, outDepth = R + rz;
+        return true;
+    }
+}
