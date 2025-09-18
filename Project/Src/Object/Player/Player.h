@@ -11,7 +11,7 @@ class Player : public UnitBase
 {
 public:
 	static constexpr VECTOR SIZE = { 80.0f,185.368f,45.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f,-SIZE.y / 2,0.0f };
+	static constexpr VECTOR CENTER_DIFF = { 0.0f,92.684f,0.0f };
 
 	Player();
 	~Player()override {};
