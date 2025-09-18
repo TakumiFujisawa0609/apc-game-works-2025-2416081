@@ -67,7 +67,7 @@ void Player::Load(void)
 
 void Player::Init(void)
 {
-	unit_.pos_ = { 0.0f,0.0f,-100.0f };
+	unit_.pos_ = { 0.0f,0.0f,-400.0f };
 	unit_.angle_ = {};
 
 	unit_.isAlive_ = true;
