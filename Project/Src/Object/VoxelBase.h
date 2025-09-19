@@ -92,7 +92,6 @@ protected:
 	// ƒJƒvƒZƒ‹‚Åí‚é
 	void ApplyBrushCapsule(const Base& other, uint8_t amount);
 
-
 };
 
 using MeshBatch = VoxelBase::MeshBatch;
