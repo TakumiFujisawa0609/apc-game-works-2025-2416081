@@ -1,96 +1,84 @@
 #pragma once
 #include <DxLib.h>
-#include <cmath>
 
-#include"../../Object/VoxelBase.h"
-
-#include"../../Utility/Utility.h"
-
-class Camera {
+class Camera
+{
 public:
-    enum class Mode { FPS, Orbit };
 
-    struct SimpleCam {
-        VECTOR pos;     // 位置
-        VECTOR fwd;     // 正面(正規化)
-        VECTOR right;   // 右(正規化)
-        VECTOR up;      // 上(正規化)
-        float tanHalfFovY;
-        float tanHalfFovX;
-        float nearZ, farZ;
-    };
+	// カメラの初期座標
+	static constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
 
-    Camera();
-    ~Camera();
+	// カメラの初期角度
+	static constexpr VECTOR DERFAULT_ANGLES = {
+	30.0f * DX_PI_F / 180.0f, 0.0f, 0.0f
+	};
 
+	// カメラのクリップ範囲
+	static constexpr float VIEW_NEAR = 1.0f;
+	static constexpr float VIEW_FAR = 30000.0f;
 
-    // ---- 基本設定 ----
-    void SetPerspective(float fovDeg, float nearZ, float farZ) { fovYDeg_ = fovDeg; near_ = nearZ; far_ = farZ; }
-    void SetPosition(const VECTOR& p) { pos_ = p; }
-    void SetYawPitchDeg(float yawDeg, float pitchDeg) { yawDeg_ = yawDeg; pitchDeg_ = pitchDeg; ClampPitch(); }
-    void SetUpVector(const VECTOR& up) { worldUp_ = up; }
-    void SetMode(Mode m) { mode_ = m; }
-
-    // ---- FPSモード専用 ----
-    // ローカル移動（右手: +Z=前, +X=右, +Y=上）
-    void MoveLocal(float dx, float dy, float dz);
-
-    // 角度を増分で回す（度）
-    void AddYawPitchDeg(float dYaw, float dPitch);
-
-    // ---- オービットモード専用 ----
-    void SetOrbitTarget(const VECTOR& t) { target_ = t; }
-    void SetOrbit(float yawDeg, float pitchDeg, float radius);
-    void AddOrbit(float dYawDeg, float dPitchDeg, float dRadius);
-
-    // ---- 適用（DxLibへ反映）----
-    void Apply();
-
-    // 取得系
-    VECTOR GetPosition() const;
-    float  GetYawDeg()   const { return yawDeg_; }
-    float  GetPitchDeg() const { return pitchDeg_; }
+	// カメラモード
+	enum class MODE
+	{
+		NONE,
+		FIXED_POINT, // 定点カメラ
+		FREE,		// フリーモード
+		FOLLOW,		// 追従カメラ
+	};
 
 
-    // AABB中心と半径で近似（球カリング＋FOVコーン）
-    static bool VisibleApprox(const MeshBatch& b, const VECTOR& worldOffset, const SimpleCam& cam);
 
-    // 画面アスペクト(例: 1280/720)を渡すとカリング用パラメータを返す
-    SimpleCam GetCullingParams(float aspect) const;
+	// コンストラクタ
+	Camera(void);
 
-    void OrbitDebugDraw(void);
+	// デストラクタ
+	~Camera(void);
+
+	// 初期化
+	void Init(void);
+
+	// 更新
+	void Update(void);
+
+	// 描画前のカメラ設定
+	void Apply(void);
+
+	// デバッグ用描画
+	void DrawDebug(void);
+
+	// 解放
+	void Release(void);
+
+	// 座標の取得
+	const VECTOR& GetPos(void) const { return pos_; }
+
+	// 角度の取得
+	const VECTOR& GetAngles(void) const { return angles_; }
+
+	// 追従モードのターゲット座標セット
+	void SetLookAtPos(const VECTOR* pos) { lookAt_ = pos; }
+
+
+	// カメラモードの変更
+	void ChangeMode(MODE mode);
+
+
 private:
-    // ---- 内部データ ----
-    Mode mode_;
+	MODE mode_;
 
-    // FPS 用
-    VECTOR pos_;
-    float  yawDeg_;   // +Y軸周り
-    float  pitchDeg_;   // +X軸周り（上下）, 制限あり
+	// カメラの位置
+	VECTOR pos_;
 
-    // Orbit 用
-    VECTOR target_;
-    float  orbitYawDeg_;
-    float  orbitPitchDeg_;
-    float  radius_;
+	// カメラの角度
+	VECTOR angles_;
 
-    // 共通
-    float  fovYDeg_;
-    float  near_, far_;
-    VECTOR worldUp_;
+	const VECTOR* lookAt_;
+	static constexpr VECTOR LOOKAT_DIFF = { 0.0f, 0.0f, -500.0f };
 
-    struct Basis { VECTOR forward, right, up; };
+	float xAngle_;
+	float yAngle_;
 
-    // yaw,pitch から forward/right/up を作る（右手系）
-    Basis BasisFromYawPitch(float yawDeg, float pitchDeg) const;
-    Basis BasisFromYawPitch() const { return BasisFromYawPitch(yawDeg_, pitchDeg_); }
-
-    static VECTOR VAdd(const VECTOR& a, const VECTOR& b) { return { a.x + b.x,a.y + b.y,a.z + b.z }; }
-    static VECTOR VSub(const VECTOR& a, const VECTOR& b) { return { a.x - b.x,a.y - b.y,a.z - b.z }; }
-    static VECTOR VScale(const VECTOR& a, float s) { return { a.x * s,a.y * s,a.z * s }; }
-
-    static VECTOR Cross(const VECTOR& a, const VECTOR& b) { return { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x }; }
-
-    void ClampPitch() { pitchDeg_ = Utility::Clamp(pitchDeg_, -89.0f, 89.0f); }
-    void ClampOrbitPitch() { orbitPitchDeg_ = Utility::Clamp(orbitPitchDeg_, -89.0f, 89.0f); }
+	void SetBeforeDrawFixedPoint(void);
+	void SetBeforeDrawFree(void);
+	void SetBeforeDrawFollow(void);
 };

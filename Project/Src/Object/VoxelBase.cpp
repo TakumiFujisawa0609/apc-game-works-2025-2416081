@@ -71,7 +71,7 @@ void VoxelBase::Draw(void)
 
     SubDraw();
 
-    const VECTOR camPos = camera_->GetPosition();
+    const VECTOR camPos = camera_->GetPos();
 
     for (auto& b : batches_) {
         const VECTOR worldOff = unit_.pos_;
@@ -449,13 +449,70 @@ void VoxelBase::ApplyBrushCapsule(const Base& other, uint8_t amount)
 
 
 
-bool VoxelBase::ResolveAABBGrid(VECTOR& pos, const VECTOR& half, VECTOR& vel, float dt, bool& grounded)
+// 球 vs AABB の最小押し戻し
+static bool SphereVsAABB_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
+    VECTOR& outN, float& outDepth)
+{
+    VECTOR cp = Utility::Clamp(C, bmin, bmax);
+    VECTOR d = VSub(C, cp);
+    float L2 = VDot(d, d);
+    if (L2 > R * R) return false;
+
+    if (L2 > 1e-12f) {
+        float L = std::sqrt(L2);
+        outN = VScale(d, 1.0f / L);
+        outDepth = R - L;
+        return true;
+    }
+    else {
+        float dx = (std::min)(C.x - bmin.x, bmax.x - C.x);
+        float dy = (std::min)(C.y - bmin.y, bmax.y - C.y);
+        float dz = (std::min)(C.z - bmin.z, bmax.z - C.z);
+        if (dx <= dy && dx <= dz) { outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }; outDepth = R + dx; }
+        else if (dy <= dz) { outN = { 0, (C.y < (bmin.y + bmax.y) * 0.5f) ? -1.f : +1.f, 0 }; outDepth = R + dy; }
+        else { outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }; outDepth = R + dz; }
+        return true;
+    }
+}
+
+// 円(XZ) vs 矩形(XZ) の最小押し戻し（カプセル側面用）
+static bool CircleXZ_vs_RectXZ_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
+    VECTOR& outN, float& outDepth)
+{
+    float qx = Utility::Clamp(C.x, bmin.x, bmax.x);
+    float qz = Utility::Clamp(C.z, bmin.z, bmax.z);
+    float dx = C.x - qx, dz = C.z - qz;
+    float L2 = dx * dx + dz * dz;
+    if (L2 > R * R) return false;
+    if (L2 > 1e-12f) {
+        float L = std::sqrt(L2);
+        outN = { dx / L, 0.0f, dz / L };
+        outDepth = R - L;
+        return true;
+    }
+    else {
+        float rx = (std::min)(std::abs(C.x - bmin.x), std::abs(bmax.x - C.x));
+        float rz = (std::min)(std::abs(C.z - bmin.z), std::abs(bmax.z - C.z));
+        if (rx <= rz) { outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }; outDepth = R + rx; }
+        else { outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }; outDepth = R + rz; }
+        return true;
+    }
+}
+
+bool VoxelBase::ResolveCapsule(
+    VECTOR& footPos, float R, float halfH,
+    VECTOR& vel, bool& grounded,
+    float slopeLimitDeg, int maxIters)
 {
     grounded = false;
     if (Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) return false;
 
     const float EPS = 1e-4f;
-    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center); // このボクセルの“世界中心”
+    const float cosSlope = std::cos(slopeLimitDeg * (DX_PI_F / 180.0f));
+
+    // ★このボクセルの“世界中心”（描画と同じオフセット）
+    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
+
     auto cellMinX = [&](int ix) { return gridCenterW.x + (ix - Nx_ / 2) * cell_; };
     auto cellMinY = [&](int iy) { return gridCenterW.y + (iy - Ny_ / 2) * cell_; };
     auto cellMinZ = [&](int iz) { return gridCenterW.z + (iz - Nz_ / 2) * cell_; };
@@ -465,168 +522,99 @@ bool VoxelBase::ResolveAABBGrid(VECTOR& pos, const VECTOR& half, VECTOR& vel, fl
         return density_[Idx(x, y, z, Nx_, Ny_)] > 0;
         };
 
-    // その軸で“先頭スラブ”だけ調べるヘルパ
-    auto sweepAxis = [&](int axis, float& delta)->bool {
-        if (delta == 0.0f) return false;
+    bool any = false;
 
-        // 位置/半サイズ
-        float minX = pos.x - half.x, maxX = pos.x + half.x;
-        float minY = pos.y - half.y, maxY = pos.y + half.y;
-        float minZ = pos.z - half.z, maxZ = pos.z + half.z;
+    for (int it = 0; it < maxIters; ++it) {
+        // 足元→カプセル中心
+        VECTOR C = VAdd(footPos, VGet(0, R + halfH, 0));
+        float halfY = halfH + R;
 
-        // いまのスラブ範囲（2軸ぶん）
-        int ix0 = (int)std::floor((minX - gridCenterW.x) / cell_) + Nx_ / 2;
-        int ix1 = (int)std::floor((maxX - gridCenterW.x) / cell_) + Nx_ / 2;
-        int iy0 = (int)std::floor((minY - gridCenterW.y) / cell_) + Ny_ / 2;
-        int iy1 = (int)std::floor((maxY - gridCenterW.y) / cell_) + Ny_ / 2;
-        int iz0 = (int)std::floor((minZ - gridCenterW.z) / cell_) + Nz_ / 2;
-        int iz1 = (int)std::floor((maxZ - gridCenterW.z) / cell_) + Nz_ / 2;
+        // カプセルの外接AABB → セル範囲
+        VECTOR bbmin = { C.x - R, C.y - halfY, C.z - R };
+        VECTOR bbmax = { C.x + R, C.y + halfY, C.z + R };
 
-        // 進行方向の“新しい境界インデックス”
-        int step = (delta > 0.0f) ? +1 : -1;
+        int ix0 = (int)std::floor((bbmin.x - gridCenterW.x) / cell_) + Nx_ / 2;
+        int iy0 = (int)std::floor((bbmin.y - gridCenterW.y) / cell_) + Ny_ / 2;
+        int iz0 = (int)std::floor((bbmin.z - gridCenterW.z) / cell_) + Nz_ / 2;
+        int ix1 = (int)std::floor((bbmax.x - gridCenterW.x) / cell_) + Nx_ / 2;
+        int iy1 = (int)std::floor((bbmax.y - gridCenterW.y) / cell_) + Ny_ / 2;
+        int iz1 = (int)std::floor((bbmax.z - gridCenterW.z) / cell_) + Nz_ / 2;
 
-        // 軸ごとに、越えるセル境界を1つずつチェック
-        if (axis == 0) { // X
-            int iOld = (int)std::floor(((delta > 0 ? maxX : minX) - gridCenterW.x) / cell_) + Nx_ / 2;
-            int iNew = (int)std::floor(((delta > 0 ? (maxX + delta) : (minX + delta)) - gridCenterW.x) / cell_) + Nx_ / 2;
+        ix0 = (std::max)(0, ix0); iy0 = (std::max)(0, iy0); iz0 = (std::max)(0, iz0);
+        ix1 = (std::min)(Nx_ - 1, ix1); iy1 = (std::min)(Ny_ - 1, iy1); iz1 = (std::min)(Nz_ - 1, iz1);
 
-            if (delta > 0.0f) {
-                for (int ix = iOld + 1; ix <= iNew; ++ix) {
-                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
-                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
-                    bool hit = false;
-                    for (int iy = y0; iy <= y1 && !hit; ++iy)
-                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
-                            if (solidAt(ix, iy, iz)) hit = true;
+        VECTOR bestN{ 0,0,0 }; float bestDepth = 0.0f; bool hit = false;
+
+        for (int z = iz0; z <= iz1; ++z)
+            for (int y = iy0; y <= iy1; ++y)
+                for (int x = ix0; x <= ix1; ++x) {
+                    if (!solidAt(x, y, z)) continue;
+
+                    VECTOR bmin = { cellMinX(x), cellMinY(y), cellMinZ(z) };
+                    VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
+
+                    // 上球・下球
+                    VECTOR N1; float D1;
+                    if (SphereVsAABB_MTV(VAdd(C, VGet(0, +halfH, 0)), R, bmin, bmax, N1, D1) && D1 > bestDepth) {
+                        bestDepth = D1; bestN = N1; hit = true;
+                    }
+                    VECTOR N2; float D2;
+                    if (SphereVsAABB_MTV(VAdd(C, VGet(0, -halfH, 0)), R, bmin, bmax, N2, D2) && D2 > bestDepth) {
+                        bestDepth = D2; bestN = N2; hit = true;
+                    }
+
+                    // 側面（Yが重なっている時のみ XZの円で当てる）
+                    float yOverlap = (std::min)(bmax.y, C.y + halfH) - (std::max)(bmin.y, C.y - halfH);
+                    if (yOverlap > 0.0f) {
+                        VECTOR N3; float D3;
+                        if (CircleXZ_vs_RectXZ_MTV(C, R, bmin, bmax, N3, D3) && D3 > bestDepth) {
+                            bestDepth = D3; bestN = N3; hit = true;
                         }
-                    if (hit) {
-                        // ぶつかったセルの“手前の面”でクランプ
-                        float face = cellMinX(ix); // そのセルの最小面(左側)
-                        pos.x = face - half.x - EPS;
-                        vel.x = 0;
-                        delta = 0;
-                        return true;
                     }
                 }
-            }
-            else { // delta < 0
-                for (int ix = iOld - 1; ix >= iNew; --ix) {
-                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
-                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
-                    bool hit = false;
-                    for (int iy = y0; iy <= y1 && !hit; ++iy)
-                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
-                            if (solidAt(ix, iy, iz)) hit = true;
-                        }
-                    if (hit) {
-                        // ぶつかったセルの“奥の面”(右側)でクランプ
-                        float face = cellMinX(ix) + cell_; // そのセルの最大面
-                        pos.x = face + half.x + EPS;
-                        vel.x = 0;
-                        delta = 0;
-                        return true;
-                    }
-                }
-            }
-            // 何も無ければ移動
-            pos.x += delta; delta = 0; return false;
+
+        if (!hit) break;
+
+        // 押し戻し（中心→足元へ戻す）
+        C = VAdd(C, VScale(bestN, bestDepth + EPS));
+        footPos = VAdd(C, VGet(0, -(R + halfH), 0));
+
+        // 速度の法線成分を殺す（スライド）
+        float vn = VDot(vel, bestN);
+        if (vn < 0.0f) vel = VSub(vel, VScale(bestN, vn));
+
+        // 接地判定
+        if (bestN.y > cosSlope && vel.y <= 0.0f) {
+            grounded = true;
+            if (vel.y < 0) vel.y = 0;
         }
-        else if (axis == 1) { // Y
-            int iOld = (int)std::floor(((delta > 0 ? maxY : minY) - gridCenterW.y) / cell_) + Ny_ / 2;
-            int iNew = (int)std::floor(((delta > 0 ? (maxY + delta) : (minY + delta)) - gridCenterW.y) / cell_) + Ny_ / 2;
+        any = true;
+    }
+    return any;
+}
 
-            if (delta > 0.0f) {
-                for (int iy = iOld + 1; iy <= iNew; ++iy) {
-                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
-                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
-                    bool hit = false;
-                    for (int ix = x0; ix <= x1 && !hit; ++ix)
-                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
-                            if (solidAt(ix, iy, iz)) hit = true;
-                        }
-                    if (hit) {
-                        float face = cellMinY(iy);
-                        pos.y = face - half.y - EPS;
-                        vel.y = 0;
-                        delta = 0;
-                        return true;
-                    }
-                }
+std::vector<VoxelBase::AABB> VoxelBase::GetVoxelAABBs(void) const
+{
+    std::vector<AABB> ret;
+    if (density_.empty() || Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) { return ret; }
+    ret.reserve(1024);
+
+    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
+
+    for (int z = 0; z < Nz_; ++z)
+        for (int y = 0; y < Ny_; ++y)
+            for (int x = 0; x < Nx_; ++x) {
+                if (density_[Idx(x, y, z)] == 0) { continue; }
+
+                VECTOR bmin = {
+                    gridCenterW.x + (x - Nx_ / 2) * cell_,
+                    gridCenterW.y + (y - Ny_ / 2) * cell_,
+                    gridCenterW.z + (z - Nz_ / 2) * cell_
+                };
+                VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
+
+                ret.push_back(AABB{ bmin, bmax });
             }
-            else { // delta < 0（落下）
-                for (int iy = iOld - 1; iy >= iNew; --iy) {
-                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
-                    int z0 = Utility::Clamp(iz0, 0, Nz_ - 1), z1 = Utility::Clamp(iz1, 0, Nz_ - 1);
-                    bool hit = false;
-                    for (int ix = x0; ix <= x1 && !hit; ++ix)
-                        for (int iz = z0; iz <= z1 && !hit; ++iz) {
-                            if (solidAt(ix, iy, iz)) hit = true;
-                        }
-                    if (hit) {
-                        float face = cellMinY(iy) + cell_;
-                        pos.y = face + half.y + EPS;
-                        grounded = true; // ★接地
-                        if (vel.y < 0) vel.y = 0;
-                        delta = 0;
-                        return true;
-                    }
-                }
-            }
-            pos.y += delta; delta = 0; return false;
-        }
-        else { // Z
-            int iOld = (int)std::floor(((delta > 0 ? maxZ : minZ) - gridCenterW.z) / cell_) + Nz_ / 2;
-            int iNew = (int)std::floor(((delta > 0 ? (maxZ + delta) : (minZ + delta)) - gridCenterW.z) / cell_) + Nz_ / 2;
 
-            if (delta > 0.0f) {
-                for (int iz = iOld + 1; iz <= iNew; ++iz) {
-                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
-                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
-                    bool hit = false;
-                    for (int ix = x0; ix <= x1 && !hit; ++ix)
-                        for (int iy = y0; iy <= y1 && !hit; ++iy) {
-                            if (solidAt(ix, iy, iz)) hit = true;
-                        }
-                    if (hit) {
-                        float face = cellMinZ(iz);
-                        pos.z = face - half.z - EPS;
-                        vel.z = 0;
-                        delta = 0;
-                        return true;
-                    }
-                }
-            }
-            else {
-                for (int iz = iOld - 1; iz >= iNew; --iz) {
-                    int x0 = Utility::Clamp(ix0, 0, Nx_ - 1), x1 = Utility::Clamp(ix1, 0, Nx_ - 1);
-                    int y0 = Utility::Clamp(iy0, 0, Ny_ - 1), y1 = Utility::Clamp(iy1, 0, Ny_ - 1);
-                    bool hit = false;
-                    for (int ix = x0; ix <= x1 && !hit; ++ix)
-                        for (int iy = y0; iy <= y1 && !hit; ++iy) {
-                            if (solidAt(ix, iy, iz)) hit = true;
-                        }
-                    if (hit) {
-                        float face = cellMinZ(iz) + cell_;
-                        pos.z = face + half.z + EPS;
-                        vel.z = 0;
-                        delta = 0;
-                        return true;
-                    }
-                }
-            }
-            pos.z += delta; delta = 0; return false;
-        }
-        };
-
-    // 予定移動量
-    float dx = vel.x * dt;
-    float dy = vel.y * dt;
-    float dz = vel.z * dt;
-
-    // 推奨順序：Y→X→Z（重力→水平の自然な解決）
-    sweepAxis(1, dy);          // Y
-    sweepAxis(0, dx);          // X
-    sweepAxis(2, dz);          // Z
-
-    return true;
+    return ret;
 }

@@ -1,148 +1,179 @@
-#include"Camera.h"
+#include "Camera.h"
 
-#include"../../Application/Application.h"
+#include "../../Utility/Utility.h"
+#include "../input/KeyManager.h"
 
+Camera::Camera(void)
+{
+	// DxLibの初期設定では、
+	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
+	// 注視点の位置は x = 320.0f, y = 240.0f, z = 1.0f
+	// カメラの上方向は x = 0.0f, y = 1.0f, z = 0.0f
+	// 右上位置からZ軸のプラス方向を見るようなカメラ
+}
 
-Camera::Camera():
-    mode_(Mode::FPS),
-
-    pos_(0.0f, 2.0f, -10.0f),
-    yawDeg_(0.0f),
-    pitchDeg_(0.0f),
-
-    target_(0.0f, 1.0f, 6.0f),
-    orbitYawDeg_(0.0f),
-    orbitPitchDeg_(-10.0f),
-    radius_(10.0f),
-
-    fovYDeg_(60.0f),
-
-    near_(0.1f),
-    far_(1000.0f),
-    worldUp_(0.0f, 1.0f, 0.0f)
+Camera::~Camera(void)
 {
 }
 
-Camera::~Camera()
+void Camera::Init(void)
+{
+	// カメラの初期位置
+	pos_ = DERFAULT_POS;
+
+	// カメラの初期角度
+	angles_ = DERFAULT_ANGLES;
+
+	xAngle_ = Utility::Deg2RadF(30.0f);
+	yAngle_ = 0.0f;
+}
+
+void Camera::Update(void)
+{
+	switch (mode_)
+	{
+	case Camera::MODE::FIXED_POINT:
+		SetBeforeDrawFixedPoint();
+		break;
+	case Camera::MODE::FREE:
+		SetBeforeDrawFree();
+		break;
+	case Camera::MODE::FOLLOW:
+		SetBeforeDrawFollow();
+		break;
+	}
+}
+
+void Camera::Apply(void)
+{
+	// クリップ距離を設定する(SetDrawScreenでリセットされる)
+	SetCameraNearFar(VIEW_NEAR, VIEW_FAR);
+
+	// カメラの設定(位置と角度による制御)
+	switch (mode_)
+	{
+	case Camera::MODE::FIXED_POINT:
+	case Camera::MODE::FREE:
+		SetCameraPositionAndAngle(
+			pos_,
+			angles_.x,
+			angles_.y,
+			angles_.z
+		);
+		break;
+	case Camera::MODE::FOLLOW:
+		if (lookAt_ != nullptr) { SetCameraPositionAndTarget_UpVecY(pos_, *lookAt_); }
+		break;
+	}
+}
+
+void Camera::SetBeforeDrawFixedPoint(void)
 {
 }
 
-void Camera::MoveLocal(float dx, float dy, float dz)
+void Camera::SetBeforeDrawFree(void)
 {
-    Basis b = BasisFromYawPitch();
-    pos_ = VAdd(pos_, VAdd(VScale(b.right, dx), VAdd(VScale(b.up, dy), VScale(b.forward, dz))));
+	// 矢印キーでカメラの角度を変える
+	float rotPow = 1.0f * DX_PI_F / 180.0f;
+
+	if (CheckHitKey(KEY_INPUT_DOWN)) { angles_.x += rotPow; }
+	if (CheckHitKey(KEY_INPUT_UP)) { angles_.x -= rotPow; }
+	if (CheckHitKey(KEY_INPUT_RIGHT)) { angles_.y += rotPow; }
+	if (CheckHitKey(KEY_INPUT_LEFT)) { angles_.y -= rotPow; }
+
+	// WASDでカメラを移動させる
+	const float movePow = 3.0f;
+	VECTOR dir = {};
+
+	if (CheckHitKey(KEY_INPUT_W)) { dir.z++; }
+	if (CheckHitKey(KEY_INPUT_S)) { dir.z--; }
+	if (CheckHitKey(KEY_INPUT_D)) { dir.x++; }
+	if (CheckHitKey(KEY_INPUT_A)) { dir.x--; }
+	if (CheckHitKey(KEY_INPUT_E)) { dir.y++; }
+	if (CheckHitKey(KEY_INPUT_Q)) { dir.y--; }
+
+	if (!Utility::VZERO(dir))
+	{
+		dir = VScale(Utility::Normalize(dir), movePow);
+
+		// XYZの回転行列
+		// XZ平面移動にする場合は、XZの回転を考慮しないようにする
+		MATRIX mat = MGetIdent();
+		//mat = MMult(mat, MGetRotX(angles_.x));
+		mat = MMult(mat, MGetRotY(angles_.y));
+
+		// 回転行列を使用して、ベクトルを回転させる
+		VECTOR moveDir = VTransform(dir, mat);
+
+		// 方向×スピードで移動量を作って、座標に足して移動
+		pos_ = VAdd(pos_, VScale(moveDir, movePow));
+	}
 }
 
-void Camera::AddYawPitchDeg(float dYaw, float dPitch)
+void Camera::SetBeforeDrawFollow(void)
 {
-    yawDeg_ += dYaw;
-    pitchDeg_ += dPitch; ClampPitch();
+	if (lookAt_ == nullptr) { return; }
+
+    // 追従対象の座標: lookAt_ (VECTOR型)
+    // カメラのY軸回転角度: yAngle_ (float型)
+
+	float rotPow = 1.0f * DX_PI_F / 180.0f;
+	if (CheckHitKey(KEY_INPUT_LEFT)) { yAngle_ -= rotPow; }
+	if (CheckHitKey(KEY_INPUT_RIGHT)) { yAngle_ += rotPow; }
+	if (yAngle_ >= 360.0f) { yAngle_ -= 360.0f; }
+	
+	if (CheckHitKey(KEY_INPUT_DOWN)) { xAngle_ -= rotPow; }
+	if (CheckHitKey(KEY_INPUT_UP)) { xAngle_ += rotPow; }
+	if (xAngle_ < Utility::Deg2RadF(0.0f)) { xAngle_ = Utility::Deg2RadF(0.0f); }
+	if (xAngle_ > Utility::Deg2RadF(89.0f)) { xAngle_ = Utility::Deg2RadF(89.0f); }
+
+	MATRIX mat = MGetIdent();
+	mat = MMult(mat, MGetRotX(xAngle_));
+	mat = MMult(mat, MGetRotY(yAngle_));
+
+
+	pos_ = VAdd(*lookAt_, VTransform(LOOKAT_DIFF, mat));
+
+	VECTOR vec = VSub(*lookAt_, pos_);
+	angles_.x = -atan2f(vec.y, sqrtf(vec.x * vec.x + vec.z * vec.z));
+	angles_.y = atan2f(vec.x, vec.z);
 }
 
-void Camera::SetOrbit(float yawDeg, float pitchDeg, float radius)
+void Camera::DrawDebug(void)
 {
-    orbitYawDeg_ = yawDeg;
-    orbitPitchDeg_ = pitchDeg;
-    radius_ = radius;
-    ClampOrbitPitch();
+	DrawFormatString(
+		0, 10, 0xffffff,
+		"カメラ座標　 ：(% .1f, % .1f, % .1f)",
+		pos_.x, pos_.y, pos_.z
+	);
+	DrawFormatString(
+		0, 30, 0xffffff,
+		"カメラ角度　 ：(% .1f, % .1f, % .1f)",
+		Utility::Rad2DegF(angles_.x),
+		Utility::Rad2DegF(angles_.y),
+		Utility::Rad2DegF(angles_.z)
+	);
+
 }
 
-void Camera::AddOrbit(float dYawDeg, float dPitchDeg, float dRadius)
+void Camera::Release(void)
 {
-    orbitYawDeg_ += dYawDeg;
-    orbitPitchDeg_ += dPitchDeg;
-    radius_ += dRadius;
-    if (radius_ < 0.1f) { radius_ = 0.1f; }
-    ClampOrbitPitch();
 }
 
-void Camera::Apply()
+void Camera::ChangeMode(MODE mode)
 {
-    SetupCamera_Perspective(Utility::Deg2RadF(fovYDeg_));
-    SetCameraNearFar(near_, far_);
+	// カメラモードの変更
+	mode_ = mode;
 
-    switch (mode_)
-    {
+	// 変更時の初期化処理
+	switch (mode_)
+	{
+	case Camera::MODE::FIXED_POINT:
+		break;
+	case Camera::MODE::FREE:
+		break;
+	case Camera::MODE::FOLLOW:
+		break;
+	}
 
-    case Camera::Mode::FPS: {
-        Basis b = BasisFromYawPitch();
-        VECTOR target = VAdd(pos_, b.forward);
-        SetCameraPositionAndTargetAndUpVec(pos_, target, b.up);
-        break;
-    }
-
-    case Camera::Mode::Orbit: {
-        Basis b = BasisFromYawPitch(orbitYawDeg_, orbitPitchDeg_);
-        VECTOR eye = VAdd(target_, VScale(b.forward, -radius_)); // ターゲットを中心に見る
-        SetCameraPositionAndTargetAndUpVec(eye, target_, b.up);
-        break;
-    }
-
-    }
-}
-
-VECTOR Camera::GetPosition() const
-{
-    switch (mode_)
-    {
-    case Camera::Mode::FPS: { return pos_; }
-    case Camera::Mode::Orbit: {
-        Basis b = BasisFromYawPitch(orbitYawDeg_, orbitPitchDeg_);
-        return VAdd(target_, VScale(b.forward, -radius_));
-    }
-    }
-    return pos_;
-}
-
-bool Camera::VisibleApprox(const MeshBatch& b, const VECTOR& worldOffset, const SimpleCam& cam)
-{
-    VECTOR c = VScale(VAdd(b.bmin, b.bmax), 0.5f);
-    VECTOR e = VScale(VSub(b.bmax, b.bmin), 0.5f);
-    float radius = std::sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
-
-    VECTOR cw = VAdd(c, worldOffset);           // ワールド中心
-    VECTOR v = VSub(cw, cam.pos);
-    float dForward = VDot(v, cam.fwd);
-
-    if (dForward + radius < cam.nearZ)  return false;
-    if (dForward - radius > cam.farZ)   return false;
-
-    float dRight = std::fabs(VDot(v, cam.right));
-    float dUp = std::fabs(VDot(v, cam.up));
-
-    // 視野コーン（tanθ * 前方距離 + 半径）で外側なら不可視
-    if (dRight > (cam.tanHalfFovX * dForward + radius)) return false;
-    if (dUp > (cam.tanHalfFovY * dForward + radius)) return false;
-
-    return true;
-}
-
-Camera::SimpleCam Camera::GetCullingParams(float aspect) const
-{
-    Basis b = BasisFromYawPitch();
-    float tanY = std::tan(DX_PI_F * (fovYDeg_ * 0.5f) / 180.0f);
-    return { pos_, b.forward, b.right, b.up, tanY, tanY * aspect, near_, far_ };
-}
-
-void Camera::OrbitDebugDraw(void)
-{
-    Vector2I screen = { Application::SCREEN_SIZE_X,Application::SCREEN_SIZE_Y };
-
-    int fontSize = 32;
-    SetFontSize(fontSize);
-    DrawFormatString(0, screen.y - (fontSize * 3), 0xffffff, "orbitYawDeg_:%.2f", orbitYawDeg_);
-    DrawFormatString(0, screen.y - (fontSize * 2), 0xffffff, "orbitPitchDeg_:%.2f", orbitPitchDeg_);
-    DrawFormatString(0, screen.y - (fontSize * 1), 0xffffff, "radius_:%.2f", radius_);
-    SetFontSize(16);
-}
-
-Camera::Basis Camera::BasisFromYawPitch(float yawDeg, float pitchDeg) const
-{
-    float yaw = Utility::Deg2RadF(yawDeg);
-    float pit = Utility::Deg2RadF(pitchDeg);
-    VECTOR fwd = { std::cos(yaw) * std::cos(pit), std::sin(pit), std::sin(yaw) * std::cos(pit) };
-    VECTOR upw = worldUp_;
-    VECTOR right = Utility::Normalize(Cross(upw, fwd));
-    VECTOR up = Utility::Normalize(Cross(fwd, right));
-    return { Utility::Normalize(fwd), right, up };
 }

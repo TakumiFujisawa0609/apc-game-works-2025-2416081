@@ -34,6 +34,12 @@ public:
 
 	std::vector<MeshBatch> GetBatches(void)const { return batches_; }
 
+	bool ResolveCapsule(VECTOR& footPos, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIters);
+
+
+
+	struct AABB { VECTOR min; VECTOR max; };
+	std::vector<AABB> GetVoxelAABBs(void) const;
 
 protected:
 	virtual void SubLoad(void) = 0;
@@ -58,8 +64,8 @@ protected:
 	bool regeneration_;
 
 
-	int Idx(int x, int y, int z, int Nx, int Ny) { return (z * Ny + y) * Nx + x; }
-	int Idx(int x, int y, int z) { return Idx(x, y, z, Nx_, Ny_); }
+	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }
+	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx_, Ny_); }
 	bool Inb(int x, int y, int z, int Nx, int Ny, int Nz) { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; }
 
 	void SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz);
@@ -86,8 +92,7 @@ protected:
 	// カプセルで削る
 	void ApplyBrushCapsule(const Base& other, uint8_t amount);
 
-	// AABB とグリッドの当たり判定と解決
-	bool ResolveAABBGrid(VECTOR& pos, const VECTOR& half, VECTOR& vel, float dt, bool& grounded);
+
 };
 
 using MeshBatch = VoxelBase::MeshBatch;
