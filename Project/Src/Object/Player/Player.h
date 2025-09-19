@@ -10,10 +10,10 @@ class VoxelBase;
 class Player : public UnitBase
 {
 public:
-	static constexpr VECTOR SIZE = { 80.0f,185.368f,45.0f };
+	static constexpr VECTOR SIZE = { 80.0f-20.0f,185.368f-40.0f,45.0f-15.0f };
 	static constexpr VECTOR CENTER_DIFF = { 0.0f,92.684f,0.0f };
 
-	Player();
+	Player(const VECTOR& cameraAngle);
 	~Player()override {};
 
 	void Load(void)override;
@@ -102,6 +102,8 @@ private:
 	void Jump(void);		//ジャンプ関数
 
 	// 変数
+	const VECTOR& cameraAngle_;	//カメラの角度
+
 	bool isJump_[JUMP_NUM];	//ジャンプしているかの変数
 	int jumpKeyCounter_[JUMP_NUM];
 	//---------------------------------------

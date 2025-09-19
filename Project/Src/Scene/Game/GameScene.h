@@ -9,10 +9,11 @@
 
 
 class Camera;
-class CameraController;
 
 class Rock;
 class Player;
+
+class Grid;
 
 class GameScene : public SceneBase
 {
@@ -53,11 +54,12 @@ public:
 
 private:
 	Camera* camera_;
-	CameraController* cCtl_;
 	Collision* collision_;
 
 	std::vector<Rock*> rock_;
 	Player* player_;
+
+	Grid* grid_;
 
 	// ヒットストップカウンター
 	static int hitStop_;

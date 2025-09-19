@@ -7,14 +7,14 @@
 #include"../../scene/SceneManager/SceneManager.h"
 
 #include"../../Manager/Camera/Camera.h"
-#include"../../Manager/Camera/CameraController.h"
 #include"../../Manager/Sound/SoundManager.h"
 
 #include"../../Utility/Utility.h"
 
 #include"../../Object/Rock/Rock.h"
-#include"../../Object/Destroyer/Brea.h"
 #include"../../Object/Player/Player.h"
+
+#include"../../Object/Grid/Grid.h"
 
 
 int GameScene::hitStop_ = 0;
@@ -29,7 +29,6 @@ ShakeSize GameScene::shakeSize_ = ShakeSize::MEDIUM;
 GameScene::GameScene():
 	mainScreen_(-1),
 	camera_(nullptr),
-	cCtl_(nullptr),
 	collision_(nullptr),
 	rock_(),
 	player_(nullptr)
@@ -47,8 +46,6 @@ void GameScene::Load(void)
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
 	camera_ = new Camera();
-	cCtl_ = new CameraController();
-	cCtl_->Attach(camera_);
 
 	collision_ = new Collision();
 
@@ -60,21 +57,22 @@ void GameScene::Load(void)
 	}
 
 
-	player_ = new Player();
+	player_ = new Player(camera_->GetAngles());
 	player_->Load();
 	collision_->Add(player_);
 	collision_->Add(player_->GetSubIns());
 
+	grid_ = new Grid();
+	
 
 	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
 }
 
 void GameScene::Init(void)
 {
-	camera_->SetMode(Camera::Mode::Orbit);
-	camera_->SetPosition(player_->GetUnit().pos_);
-	camera_->SetOrbitTarget({ 0.0f,0.0f,0.0f });
-	camera_->SetOrbit(90.0f, -20.0f, 900.0f);
+	camera_->Init();
+	camera_->ChangeMode(Camera::MODE::FOLLOW);
+	camera_->SetLookAtPos(&player_->GetUnit().pos_);
 
 	// ヒットストップカウンターの初期化
 	hitStop_ = 0;
@@ -103,12 +101,12 @@ void GameScene::Update(void)
 		if (slow_ % slowInter_ != 0) { return; }
 	}
 
-	cCtl_->Update();
-
 	for (auto& r : rock_) { r->Update(); }
 	player_->Update();
 
 	collision_->Check();
+
+	camera_->Update();
 }
 
 void GameScene::Draw(void)
@@ -121,6 +119,8 @@ void GameScene::Draw(void)
 	using app = Application;
 	int x = app::SCREEN_SIZE_X / 2;
 	int y = app::SCREEN_SIZE_Y / 2;
+
+	grid_->Draw();
 
 	for (auto& r : rock_) { r->Draw(); }
 	player_->Draw();
@@ -156,9 +156,6 @@ void GameScene::Release(void)
 		delete collision_;
 		collision_ = nullptr;
 	}
-
-	delete cCtl_;
-	cCtl_ = nullptr;
 
 	delete camera_;
 	camera_ = nullptr;
