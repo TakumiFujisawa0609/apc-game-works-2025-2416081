@@ -12,9 +12,9 @@ public:
 
 public:
 	// シングルトン（生成・取得・削除）
-	static void CreateInstance(void) { if (instance_ == nullptr) { instance_ = new Application(); instance_->Init(); } }
-	static Application& GetInstance(void) { return *instance_; }
-	static void DeleteInstance(void) { if (instance_ != nullptr) delete instance_; instance_ = nullptr; }
+	static void CreateIns(void) { if (ins_ == nullptr) { ins_ = new Application(); ins_->Init(); } }
+	static Application& GetIns(void) { return *ins_; }
+	static void DeleteIns(void) { if (ins_ != nullptr) delete ins_; ins_ = nullptr; }
 
 public:
 
@@ -52,7 +52,7 @@ private:
 private:
 
 	// 静的インスタンス
-	static Application* instance_;
+	static Application* ins_;
 
 	// 初期化失敗
 	bool isInitFail_;
@@ -66,3 +66,6 @@ private:
 	// FPS
 	FPS* fps_;
 };
+
+// Applicationの省略形
+using App = Application; 

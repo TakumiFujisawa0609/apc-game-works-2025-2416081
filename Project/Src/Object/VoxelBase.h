@@ -83,14 +83,14 @@ protected:
 
 
 	// í‚é
-	void ApplyBrush(const Base& other, uint8_t amount);
+	bool ApplyBrush(const Base& other, uint8_t amount);
 	
 	// ‹…‘Ì‚Åí‚é
-	void ApplyBrushSphere(const Base& other, uint8_t amount);
+	bool ApplyBrushSphere(const Base& other, uint8_t amount);
 	// AABB ‚Åí‚é
-	void ApplyBrushAABB(const Base& other, uint8_t amount);
+	bool ApplyBrushAABB(const Base& other, uint8_t amount);
 	// ƒJƒvƒZƒ‹‚Åí‚é
-	void ApplyBrushCapsule(const Base& other, uint8_t amount);
+	bool ApplyBrushCapsule(const Base& other, uint8_t amount);
 
 };
 

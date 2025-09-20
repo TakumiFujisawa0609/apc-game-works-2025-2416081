@@ -6,7 +6,7 @@
 #include"../Manager/Input/KeyManager.h"
 #include"../Scene/SceneManager/SceneManager.h"
 
-Application* Application::instance_ = nullptr;
+Application* Application::ins_ = nullptr;
 
 // コンストラクタ
 Application::Application(void) :

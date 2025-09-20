@@ -201,8 +201,10 @@ void SceneManager::Init3D(void)
 	SetUseZBuffer3D(true);
 	// Zバッファへの書き込みを有効にする
 	SetWriteZBuffer3D(true);
+
 	// バックカリングを有効にする
 	SetUseBackCulling(false);
+
 	// ライトを有効にする
 	SetUseLighting(true);
 	// ディレクショナルライト方向の設定(正規化されていなくても良い)

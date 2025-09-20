@@ -20,6 +20,7 @@ public:
 	{
 		NON=-1,
 		
+		// プレイヤー操作
 		MOVE_UP,
 		MOVE_DOWN,
 		MOVE_RIGHT,
@@ -27,6 +28,10 @@ public:
 		ATTACK,
 		JUMP,
 		EVASION,
+
+
+		// システム操作
+		GAME_END,
 
 		MAX,
 	};

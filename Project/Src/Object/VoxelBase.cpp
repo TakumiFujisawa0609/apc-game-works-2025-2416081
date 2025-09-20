@@ -337,21 +337,21 @@ bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& c
     return !(batches.empty());
 }
 
-void VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
+bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
 {
-    if (amount == 0) { return; }
-    if (density_.empty() || Nx_ == 0) { return; }
+    if (amount == 0) { return false; }
+    if (density_.empty() || Nx_ == 0) { return false; }
 
     switch (other.para_.colliShape)
     {
     case CollisionShape::NON: { break; }
-    case CollisionShape::SPHERE: { ApplyBrushSphere(other, amount); break; }
-    case CollisionShape::AABB: { ApplyBrushAABB(other, amount); break; }
-    case CollisionShape::CAPSULE: { ApplyBrushCapsule(other, amount); break; }
+    case CollisionShape::SPHERE: { return ApplyBrushSphere(other, amount); }
+    case CollisionShape::OBB: { return ApplyBrushAABB(other, amount); }
+    case CollisionShape::CAPSULE: { return ApplyBrushCapsule(other, amount); }
     }
 }
 
-void VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
+bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
 {
     // ★ローカル→ワールド変換したグリッド中心
     VECTOR centerW = VAdd(unit_.pos_, gridCenter_);
@@ -383,13 +383,15 @@ void VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
                 if (dx * dx + dy * dy + dz * dz > RR) continue;
 
                 if (density_[idx(x, y, z)] > 0) {
-                    density_[idx(x, y, z)] = 0;
+                    density_[idx(x, y, z)] = (std::max)(0, density_[idx(x, y, z)] - amount);
                     regeneration_ = true; // Update() でリメッシュ
                 }
             }
+
+	return regeneration_;
 }
 
-void VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
+bool VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
 {
 
     // 相手のワールドAABB（中心＋サイズ前提）
@@ -415,7 +417,7 @@ void VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
     // クランプ＆早期終了
     ix0 = (std::max)(0, ix0); iy0 = (std::max)(0, iy0); iz0 = (std::max)(0, iz0);
     ix1 = (std::min)(Nx_ - 1, ix1); iy1 = (std::min)(Ny_ - 1, iy1); iz1 = (std::min)(Nz_ - 1, iz1);
-    if (ix0 > ix1 || iy0 > iy1 || iz0 > iz1) return; // そもそも交差なし
+    if (ix0 > ix1 || iy0 > iy1 || iz0 > iz1) { return false; } // そもそも交差なし
 
     bool touched = false;
 
@@ -440,11 +442,14 @@ void VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
                 if (nv != v) { v = nv; touched = true; }
             }
 
-    if (touched) regeneration_ = true;
+    if (touched) { regeneration_ = true; }
+
+	return regeneration_;
 }
 
-void VoxelBase::ApplyBrushCapsule(const Base& other, uint8_t amount)
+bool VoxelBase::ApplyBrushCapsule(const Base& other, uint8_t amount)
 {
+    return regeneration_;
 }
 
 

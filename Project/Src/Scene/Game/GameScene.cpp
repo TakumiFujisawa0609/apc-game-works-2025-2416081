@@ -7,6 +7,7 @@
 #include"../../scene/SceneManager/SceneManager.h"
 
 #include"../../Manager/Camera/Camera.h"
+#include"../../Manager/Input/KeyManager.h"
 #include"../../Manager/Sound/SoundManager.h"
 
 #include"../../Utility/Utility.h"
@@ -31,6 +32,7 @@ GameScene::GameScene():
 	camera_(nullptr),
 	collision_(nullptr),
 	rock_(),
+	grid_(nullptr),
 	player_(nullptr)
 {
 }
@@ -50,7 +52,7 @@ void GameScene::Load(void)
 	collision_ = new Collision();
 
 	for (int i = 0; i < 10; i++) { rock_.emplace_back(new Rock()); }
-	for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->Add(r); }
+	for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }
 	for (int i = 0; i < rock_.size(); i++) {
 		rock_[i]->SetSpeed((float)i - (rock_.size() / 2));
 		for (int j = 0; j < 100; j++) { rock_[i]->InitMove(); }
@@ -59,8 +61,8 @@ void GameScene::Load(void)
 
 	player_ = new Player(camera_->GetAngles());
 	player_->Load();
-	collision_->Add(player_);
-	collision_->Add(player_->GetSubIns());
+	collision_->AddObject(player_);
+	collision_->AddObject(player_->GetSubIns());
 
 	grid_ = new Grid();
 	
@@ -107,6 +109,9 @@ void GameScene::Update(void)
 	collision_->Check();
 
 	camera_->Update();
+	
+
+	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) { App::GetIns().GameEnd(); }
 }
 
 void GameScene::Draw(void)

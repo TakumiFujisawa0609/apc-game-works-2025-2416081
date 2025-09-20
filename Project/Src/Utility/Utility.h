@@ -87,5 +87,30 @@ public:
 	// スプライト画像読み込み（エラーチェック付き）
 	static void LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int XSize, int YSize, int* handleArray);
 	static void LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int XSize, int YSize, std::vector<int>& handleArray);
+
+	
+	// 
+	static MATRIX MatrixAllMultX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZ(const std::initializer_list<VECTOR>& vecs);
+
+	static MATRIX MatrixAllMultXY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXYZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXZY(const std::initializer_list<VECTOR>& vecs);
+
+	static MATRIX MatrixAllMultYX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYXZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYZX(const std::initializer_list<VECTOR>& vecs);
+
+	static MATRIX MatrixAllMultZX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZXY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZYX(const std::initializer_list<VECTOR>& vecs);
+
+
+	// 行列をつかったモデルの座標と向きのセット
+	static void MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializer_list<VECTOR>& angle);
 };
 

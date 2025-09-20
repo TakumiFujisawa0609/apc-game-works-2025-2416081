@@ -7,16 +7,16 @@
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	//アプリケーションクラスの実体化したインスタンスの作成
-	Application::CreateInstance();
-	if (Application::GetInstance().IsInitFail())return -1;
+	Application::CreateIns();
+	if (Application::GetIns().IsInitFail())return -1;
 
 	//ゲーム起動
-	Application::GetInstance().Run();
+	Application::GetIns().Run();
 
 	//解放処理
-	Application::GetInstance().Release();
-	if (Application::GetInstance().IsReleaseFail())return -1;
-	Application::DeleteInstance();
+	Application::GetIns().Release();
+	if (Application::GetIns().IsReleaseFail())return -1;
+	Application::DeleteIns();
 
 	return 0;		//ゲーム終了
 }

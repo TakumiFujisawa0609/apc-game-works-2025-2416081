@@ -5,7 +5,7 @@
 
 #include"../Utility/Utility.h"
 
-enum class CollisionShape { NON = -1, SPHERE, AABB, CAPSULE, MAX };
+enum class CollisionShape { NON = -1, SPHERE, OBB, CAPSULE, MAX };
 enum class CollisionType { NON = -2, ALLY/*味方*/, ENEMY/*敵*/ };
 
 struct Base
@@ -16,8 +16,8 @@ struct Base
 		CollisionShape colliShape = CollisionShape::NON;	// 形状
 		CollisionType colliType = CollisionType::NON;		// 属性
 
-		VECTOR size = { -1.0f, -1.0f, -1.0f };				// AABB 形状の直径(各軸の長さ)
-		float  radius = -1.0f;								// SPHERE 形状の半径
+		VECTOR size = { -1.0f, -1.0f, -1.0f };				// OBB 形状の直径(各軸の長さ)
+		float  radius = -1.0f;								// SPHERE 形状の半径 or CAPSULE 形状の半径
 		float capsuleHalfLen = -1.0f;						// CAPSULE 形状の線分の長さ
 		VECTOR center = { 0.0f, 0.0f, 0.0f };				// 原点からの中心オフセット
 		// ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー

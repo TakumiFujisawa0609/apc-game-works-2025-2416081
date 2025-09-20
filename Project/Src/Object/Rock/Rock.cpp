@@ -1,4 +1,5 @@
 #include "Rock.h"
+
 #include <algorithm>
 #include <queue>
 #include <cmath>
@@ -6,6 +7,8 @@
 #include"../../Utility/Utility.h"
 
 #include"../../Manager/Sound/SoundManager.h"
+
+#include"../../Scene/Game/GameScene.h"
 
 #include"../Player/Player.h"
 
@@ -18,7 +21,7 @@ void Rock::SubLoad(void)
     Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
 
     unit_.para_.colliType = CollisionType::ENEMY;
-    unit_.para_.colliShape = CollisionShape::AABB;
+    unit_.para_.colliShape = CollisionShape::OBB;
 
     float scale = 1.0f;
     unit_.para_.size = VScale(SIZE, scale);
@@ -51,6 +54,7 @@ void Rock::SubUpdate(void)
 
 void Rock::SubDraw(void)
 {
+    DrawSphere3D(VAdd(unit_.pos_,unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 }
 
 void Rock::SubRelease(void)
@@ -61,8 +65,10 @@ void Rock::SubRelease(void)
 void Rock::OnCollision(UnitBase* other)
 {
     if (dynamic_cast<PlayerPunch*>(other)) {
-        ApplyBrush(other->GetUnit(), 200);
-        Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+        if (ApplyBrush(other->GetUnit(), 200)) {
+            GameScene::Shake();
+            Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+        }
         return;
     }
 }
