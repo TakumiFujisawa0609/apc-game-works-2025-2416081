@@ -4,6 +4,8 @@
 
 #include"../../Manager/Sound/SoundManager.h"
 
+#include"../../Manager/Collision/CollisionUtility.h"
+
 #include"../Rock/Rock.h"
 
 Player::Player(const VECTOR& cameraPos):
@@ -177,10 +179,19 @@ void Player::OnCollision(UnitBase* other)
 	}
 }
 
+
 void Player::CollisionVoxel(VoxelBase* voxel)
 {
 	enum class DIRECTION { NON, FRONT, BACK };
 	struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
+
+#define vloop(v,i) ((i)==0 ? (v).x : ((i)==1 ? (v).y : (v).z))
+
+	VECTOR pPoss[3] = {
+		{unit_.pos_.x,prevPos_.y,prevPos_.z},
+		{prevPos_.x,unit_.pos_.y,prevPos_.z},
+		{prevPos_.x,prevPos_.y,unit_.pos_.z}
+	};
 	DIR_VEC dirVec =
 	{
 		(prevPos_.x < unit_.pos_.x) ? DIRECTION::FRONT : ((prevPos_.x > unit_.pos_.x) ? DIRECTION::BACK : DIRECTION::NON),
@@ -188,87 +199,52 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 		(prevPos_.z < unit_.pos_.z) ? DIRECTION::FRONT : ((prevPos_.z > unit_.pos_.z) ? DIRECTION::BACK : DIRECTION::NON)
 	};
 
-	// プレイヤーを押し戻したときの座標以外の処理をまとめたラムダ関数
-	auto pushChores = [&](int i)->void {
-		switch (i) {
-		case 0: { // X座標
-			if (dirVec.x == DIRECTION::FRONT) {
-			}
-			else {
-			}
+	auto pushChores = [&](int i) {
+		switch (i)
+		{
+		case 0:
 			break;
-		}
-		case 1: { // Y座標
-			if (dirVec.y == DIRECTION::FRONT) {
-				yAccelSum_ = 0.0f;
-			}
-			else {
+		case 1:
+			if(dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
+			else if (dirVec.y == DIRECTION::BACK) // 下方向に移動して衝突した場合
+			{
 				yAccelSum_ = 0.0f;
 				for (auto& jump : isJump_) { jump = false; }
 				for (auto& cou : jumpKeyCounter_) { cou = 0; }
 			}
 			break;
-		}
-		case 2: { // Z座標
-			if (dirVec.z == DIRECTION::FRONT) {
-			}
-			else {
-			}
+		case 2:
 			break;
-		}
+
 		}
 		};
 
+	for (int i = 0; i < 3; i++) {
+		// 移動していない軸は処理しない
+		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
+		// プレイヤーのAABBとボクセルのAABBの衝突判定
+		VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
+		VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
 
-#define vloop(v,i) ((i)==0 ? (v).x : ((i)==1 ? (v).y : (v).z))
-
-	// プレイヤーのAABBとボクセルのAABBの衝突判定
-	VECTOR playerMinX = VSub({ unit_.pos_.x,prevPos_.y,prevPos_.z }, VScale(unit_.para_.size, 0.5f));
-	VECTOR playerMaxX = VAdd({ unit_.pos_.x,prevPos_.y,prevPos_.z }, VScale(unit_.para_.size, 0.5f));
-
-	VECTOR playerMinY = VSub({ prevPos_.x,unit_.pos_.y,prevPos_.z }, VScale(unit_.para_.size, 0.5f));
-	VECTOR playerMaxY = VAdd({ prevPos_.x,unit_.pos_.y,prevPos_.z }, VScale(unit_.para_.size, 0.5f));
-
-	VECTOR playerMinZ = VSub({ prevPos_.x,prevPos_.y,unit_.pos_.z }, VScale(unit_.para_.size, 0.5f));
-	VECTOR playerMaxZ = VAdd({ prevPos_.x,prevPos_.y,unit_.pos_.z }, VScale(unit_.para_.size, 0.5f));
-
-	for (const auto& batch : voxel->GetVoxelAABBs())
-	{
-		VECTOR voxelMin = batch.min;
-		VECTOR voxelMax = batch.max;
-
-		if (playerMinX.x < voxelMax.x && playerMaxX.x > voxelMin.x &&
-			playerMinX.y < voxelMax.y && playerMaxX.y > voxelMin.y &&
-			playerMinX.z < voxelMax.z && playerMaxX.z > voxelMin.z)
+		for (const auto& batch : voxel->GetVoxelAABBs())
 		{
-			// X座標のみ最新の座標情報にて衝突したので、X座標だけボクセルの座標をもとに押し出す
-			if (dirVec.x == DIRECTION::FRONT) { unit_.pos_.x = voxelMin.x - (unit_.para_.size.x / 2.0f); }		// 右方向に移動して衝突した場合
-			else if (dirVec.x == DIRECTION::BACK) { unit_.pos_.x = voxelMax.x + (unit_.para_.size.x / 2.0f); }	// 左方向に移動して衝突した場合
-		}
-
-		if (playerMinY.x < voxelMax.x && playerMaxY.x > voxelMin.x &&
-			playerMinY.y < voxelMax.y && playerMaxY.y > voxelMin.y &&
-			playerMinY.z < voxelMax.z && playerMaxY.z > voxelMin.z)
-		{
-			// Y座標のみ最新の座標情報にて衝突したので、Y座標だけボクセルの座標をもとに押し出す
-			if (dirVec.y == DIRECTION::FRONT) { unit_.pos_.y = voxelMin.y - unit_.para_.size.y / 2; yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
-			else if (dirVec.y == DIRECTION::BACK) {
-				// 下方向に移動して衝突した場合
-				unit_.pos_.y = voxelMax.y + unit_.para_.size.y / 2;
-				yAccelSum_ = 0.0f;
-				for (auto& jump : isJump_) { jump = false; }
-				for (auto& cou : jumpKeyCounter_) { cou = 0; }
+			VECTOR voxelMin = batch.min;
+			VECTOR voxelMax = batch.max;
+			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
+				playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
+				playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
+			{
+				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
+				if (vloop(dirVec, i) == DIRECTION::FRONT) {
+					vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+				}		
+				else if (vloop(dirVec, i) == DIRECTION::BACK) {
+					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+				}
+				pushChores(i);
 			}
 		}
 
-		if (playerMinZ.x < voxelMax.x && playerMaxZ.x > voxelMin.x &&
-			playerMinZ.y < voxelMax.y && playerMaxZ.y > voxelMin.y &&
-			playerMinZ.z < voxelMax.z && playerMaxZ.z > voxelMin.z)
-		{
-			// Z座標のみ最新の座標情報にて衝突したので、Z座標だけボクセルの座標をもとに押し出す
-			if (dirVec.z == DIRECTION::FRONT) { unit_.pos_.z = voxelMin.z - (unit_.para_.size.z / 2.0f); } // 奥方向に移動して衝突した場合
-			else if (dirVec.z == DIRECTION::BACK) { unit_.pos_.z = voxelMax.z + (unit_.para_.size.z / 2.0f); } // 手前方向に移動して衝突した場合
-		}
 	}
 }
 
@@ -429,7 +405,6 @@ void Player::Damage(void)
 void Player::Death(void)
 {
 }
-
 
 void Player::Run(void)
 {

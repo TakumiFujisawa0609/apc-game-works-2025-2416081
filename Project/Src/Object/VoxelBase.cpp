@@ -623,3 +623,23 @@ std::vector<VoxelBase::AABB> VoxelBase::GetVoxelAABBs(void) const
 
     return ret;
 }
+
+std::vector<VECTOR> VoxelBase::GetVoxelCenters(void) const
+{
+    std::vector<VECTOR> ret;
+    if (density_.empty() || Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) { return ret; }
+    ret.reserve(1024);
+    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
+    for (int z = 0; z < Nz_; ++z)
+        for (int y = 0; y < Ny_; ++y)
+            for (int x = 0; x < Nx_; ++x) {
+                if (density_[Idx(x, y, z)] == 0) { continue; }
+                VECTOR p = {
+                    gridCenterW.x + (x - Nx_ / 2 + 0.5f) * cell_,
+                    gridCenterW.y + (y - Ny_ / 2 + 0.5f) * cell_,
+                    gridCenterW.z + (z - Nz_ / 2 + 0.5f) * cell_
+                };
+                ret.push_back(p);
+            }
+	return ret;
+}

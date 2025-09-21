@@ -40,6 +40,10 @@ public:
 
 	struct AABB { VECTOR min; VECTOR max; };
 	std::vector<AABB> GetVoxelAABBs(void) const;
+	std::vector<VECTOR> GetVoxelCenters(void) const;
+
+	float GetCellSize(void)const { return cell_; }
+	const VECTOR& GetCellSizeVECTOR(void)const { return { cell_,cell_,cell_ }; }
 
 protected:
 	virtual void SubLoad(void) = 0;

@@ -68,7 +68,6 @@ private:
 	// Œ»İ‚Ìó‘Ô
 	STATE state_;
 
-	void CollisionVoxel(VoxelBase* voxel);
 
 	/// <summary>
 	/// ó‘Ô‚²‚Æ‚É‘JˆÚ‰Â”\‚ÌSTATE‚ğU‚è•ª‚¯‚Ä“ü—Í‘€ì‚É‰‚¶‚Ä‚»‚ÌSTATE‚É‘JˆÚ‚³‚¹‚é
@@ -97,6 +96,9 @@ private:
 #pragma endregion
 
 	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
+
+
+	void CollisionVoxel(VoxelBase* voxel);
 
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
