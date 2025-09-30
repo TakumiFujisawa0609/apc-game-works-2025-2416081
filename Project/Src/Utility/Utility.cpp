@@ -511,9 +511,6 @@ void Utility::MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializ
 		m = MMult(m, MGetRotZ(a.z));
     }
 
-    m.m[3][0] = pos.x;
-    m.m[3][1] = pos.y;
-    m.m[3][2] = pos.z;
-
-    MV1SetMatrix(model, m);
+    MV1SetRotationMatrix(model, m);
+    MV1SetPosition(model, pos);
 }

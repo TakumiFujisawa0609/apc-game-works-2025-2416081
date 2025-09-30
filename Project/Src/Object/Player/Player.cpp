@@ -28,9 +28,10 @@ Player::Player(const VECTOR& cameraPos):
 void Player::Load(void)
 {
 	unit_.para_.colliType = CollisionType::ALLY;
-	unit_.para_.colliShape = CollisionShape::OBB;
+	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = SIZE;
-	//unit_.para_.center = CENTER_DIFF;
+	unit_.para_.radius = SIZE.z / 2;
+	unit_.para_.capsuleHalfLen = SIZE.y - SIZE.z;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
 	if (unit_.model_ != -1) {
@@ -228,6 +229,7 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 
 		for (const auto& batch : voxel->GetVoxelAABBs())
 		{
+
 			VECTOR voxelMin = batch.min;
 			VECTOR voxelMax = batch.max;
 			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
