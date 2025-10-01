@@ -2,6 +2,7 @@
 
 #include <DxLib.h>
 #include<vector>
+#include<map>
 
 #include"../Utility/Utility.h"
 

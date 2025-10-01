@@ -412,12 +412,15 @@ void Player::Run(void)
 {
 	auto& key = KEY::GetIns();
 
-	VECTOR vec = {};
+	VECTOR vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
-	if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
-	if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
-	if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
-	if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+	if (Utility::VZERO(vec)) {
+		if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
+		if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
+		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+	}
+
 
 	if (Utility::VZERO(vec)) {
 		if (!isJump_[0]) { anime_->Play((int)ANIME_TYPE::IDLE); }

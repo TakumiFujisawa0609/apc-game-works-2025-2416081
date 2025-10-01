@@ -113,30 +113,43 @@ void Camera::SetBeforeDrawFree(void)
 void Camera::SetBeforeDrawFollow(void)
 {
 	if (lookAt_ == nullptr) { return; }
+	auto& key = KEY::GetIns();
+	// ’Ç]‘ÎÛ‚ÌÀ•W: lookAt_ (VECTORŒ^)
+	// ƒJƒƒ‰‚ÌYŽ²‰ñ“]Šp“x: yAngle_ (floatŒ^)
+	VECTOR vec = {};
+	vec = { key.GetRightStickVec().y,key.GetRightStickVec().x,0.0f };
+	if (Utility::VZERO(vec)) {
+		vec = { key.GetMouceMove().y,key.GetMouceMove().x,0.0f };
+	}
+	if (Utility::VZERO(vec)) {
+		if (key.GetInfo(KEY_TYPE::CAMERA_UP).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::CAMERA_DOWN).now) { vec.x--; }
+		if (key.GetInfo(KEY_TYPE::CAMERA_RIGHT).now) { vec.y++; }
+		if (key.GetInfo(KEY_TYPE::CAMERA_LEFT).now) { vec.y--; }
+	}
 
-    // ’Ç]‘ÎÛ‚ÌÀ•W: lookAt_ (VECTORŒ^)
-    // ƒJƒƒ‰‚ÌYŽ²‰ñ“]Šp“x: yAngle_ (floatŒ^)
+	float rotPow = 3.5f * DX_PI_F / 180.0f;
 
-	float rotPow = 1.0f * DX_PI_F / 180.0f;
-	if (CheckHitKey(KEY_INPUT_LEFT)) { yAngle_ -= rotPow; }
-	if (CheckHitKey(KEY_INPUT_RIGHT)) { yAngle_ += rotPow; }
-	if (yAngle_ >= 360.0f) { yAngle_ -= 360.0f; }
-	
-	if (CheckHitKey(KEY_INPUT_DOWN)) { xAngle_ -= rotPow; }
-	if (CheckHitKey(KEY_INPUT_UP)) { xAngle_ += rotPow; }
-	if (xAngle_ < Utility::Deg2RadF(0.0f)) { xAngle_ = Utility::Deg2RadF(0.0f); }
-	if (xAngle_ > Utility::Deg2RadF(89.0f)) { xAngle_ = Utility::Deg2RadF(89.0f); }
+	if (!Utility::VZERO(vec)) {
+		vec = Utility::Normalize(vec);
+		vec = VScale(vec, rotPow);
+		angles_ = VAdd(angles_, vec);
+
+		if (angles_.y >= Utility::Deg2RadF(360.0f)) { angles_.y -= Utility::Deg2RadF(360.0f); }
+		if (angles_.y <= Utility::Deg2RadF(0.0f)) { angles_.y += Utility::Deg2RadF(360.0f); }
+		if (angles_.x < Utility::Deg2RadF(0.0f)) { angles_.x = Utility::Deg2RadF(0.0f); }
+		if (angles_.x > Utility::Deg2RadF(60.0f)) { angles_.x = Utility::Deg2RadF(60.0f); }
+	}
 
 	MATRIX mat = MGetIdent();
-	mat = MMult(mat, MGetRotX(xAngle_));
-	mat = MMult(mat, MGetRotY(yAngle_));
+	mat = MMult(mat, MGetRotX(angles_.x));
+	mat = MMult(mat, MGetRotY(angles_.y));
 
+	pos_ = VAdd(lookAtMultPos_, VTransform(LOOKAT_DIFF, mat));
 
-	pos_ = VAdd(*lookAt_, VTransform(LOOKAT_DIFF, mat));
-
-	VECTOR vec = VSub(*lookAt_, pos_);
-	angles_.x = -atan2f(vec.y, sqrtf(vec.x * vec.x + vec.z * vec.z));
-	angles_.y = atan2f(vec.x, vec.z);
+	mat = MGetIdent();
+	mat = MMult(mat, MGetRotY(angles_.y));
+	lookAtMultPos_ = VAdd(*lookAt_, VTransform(LOOKAT_DIFF, mat));
 }
 
 void Camera::DrawDebug(void)
