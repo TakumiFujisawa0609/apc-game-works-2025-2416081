@@ -70,6 +70,7 @@ public:
 	// ベクトル正規化
 	static VECTOR Normalize(const VECTOR& v);
 	static Vector2 Normalize(const Vector2& v);
+	static Vector2 Normalize(const Vector2I& v);
 
 	// クランプ代入
 	static float Clamp(float value, float min, float max) { return ((value <= min) ? min : ((value >= max) ? max : value)); }

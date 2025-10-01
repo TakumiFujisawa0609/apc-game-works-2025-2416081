@@ -1,5 +1,7 @@
 #pragma once
 
+class Vector2;
+
 class Vector2I
 {
 public:
@@ -49,6 +51,7 @@ public:
 	void operator/=(const Vector2I value);
 
 	Vector2I operator/(const int value)const;
+	Vector2 operator/(const float value)const;
 	void operator/=(const int value);
 	//--------------------------------------------
 };
@@ -106,4 +109,9 @@ public:
 	Vector2 operator/(const float value)const;
 	void operator/=(const float value);
 	//--------------------------------------------
+
+	bool operator==(const Vector2 value)const;
+	bool operator==(const float value)const;
+	bool operator!=(const Vector2 value)const;
+	bool operator!=(const float value)const;
 };

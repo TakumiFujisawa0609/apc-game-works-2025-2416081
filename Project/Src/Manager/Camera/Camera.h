@@ -73,7 +73,8 @@ private:
 	VECTOR angles_;
 
 	const VECTOR* lookAt_;
-	static constexpr VECTOR LOOKAT_DIFF = { 0.0f, 0.0f, -500.0f };
+	VECTOR lookAtMultPos_;
+	static constexpr VECTOR LOOKAT_DIFF = { 0.0f, 0.0f, -300.0f };
 
 	float xAngle_;
 	float yAngle_;

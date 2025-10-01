@@ -297,6 +297,13 @@ Vector2 Utility::Normalize(const Vector2& v)
     return v / Magnitude(v);
 }
 
+Vector2 Utility::Normalize(const Vector2I& v)
+{
+     if (v.x == 0 && v.y == 0) { return Vector2(0, 0); }
+
+    return Vector2(v / sqrtf(v.x * v.x + v.y * v.y));
+}
+
 VECTOR Utility::Clamp(const VECTOR& v, const VECTOR& minV, const VECTOR& maxV)
 {
     VECTOR r;
