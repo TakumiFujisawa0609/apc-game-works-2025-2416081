@@ -378,6 +378,14 @@ void Player::Attack(void)
 	if (anime_->GetAnimEnd()) { state_ = STATE::MOVE; }
 }
 
+void Player::HaveThrowingObj(void)
+{
+}
+
+void Player::Throwing(void)
+{
+}
+
 void Player::Evasion(void)
 {
 	// ˆÚ“®•ûŒüƒxƒNƒgƒ‹

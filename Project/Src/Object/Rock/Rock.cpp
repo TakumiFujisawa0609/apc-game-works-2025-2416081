@@ -34,6 +34,8 @@ void Rock::SubLoad(void)
     MV1SetPosition(unit_.model_, unit_.pos_);
     MV1SetRotationXYZ(unit_.model_, { 0.0f,0.0f,0.0f });
     MV1SetScale(unit_.model_, { scale,scale,scale });
+
+    aliveNeedRatio_ = 0.01f;
 }
 
 void Rock::SubInit(void)

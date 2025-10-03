@@ -1,6 +1,8 @@
 #include"ThrowingRock.h"
 
-ThrowingRock::ThrowingRock()
+ThrowingRock::ThrowingRock():
+	aliveCounter_(0),
+	moveVec_()
 {
 }
 
@@ -10,6 +12,7 @@ ThrowingRock::~ThrowingRock()
 
 void ThrowingRock::Load(void)
 {
+	unit_.model_ = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
 }
 
 void ThrowingRock::Init(void)

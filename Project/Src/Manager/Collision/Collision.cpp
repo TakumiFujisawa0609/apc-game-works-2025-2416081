@@ -5,7 +5,10 @@
 #include"../../Utility/Utility.h"
 #include"CollisionUtility.h"
 
-Collision::Collision() : objects_() {}
+std::vector<UnitBase*> Collision::objects_ = {};
+std::vector<UnitBase*> Collision::stageObject_ = {};
+
+Collision::Collision() {}
 Collision::~Collision() {}
 
 void Collision::Check()

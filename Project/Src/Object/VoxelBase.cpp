@@ -21,7 +21,9 @@ VoxelBase::VoxelBase() :
     cell_(0.0f),
     gridCenter_(0.0f, 0.0f, 0.0f),
     density_(),
-    regeneration_(false)
+    regeneration_(false),
+
+    aliveNeedRatio_(0.0f)
 {
 }
 
@@ -48,6 +50,7 @@ void VoxelBase::Init(void)
 {
     SubInit();
 
+    unit_.isAlive_ = true;
     regeneration_ = false;
 }
 
@@ -295,10 +298,15 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
 
     };
 
+    int aliveVoxel = 0;
+
     for (int z = 0; z < Nz; ++z) {
         for (int y = 0; y < Ny; ++y) {
             for (int x = 0; x < Nx; ++x) {
-                if (density[Idx(x, y, z)] == 0) continue;
+                if (density[Idx(x, y, z)] == 0) { continue; }
+                
+                aliveVoxel++;
+
                 for (int f = 0; f < 6; ++f) {
                     int nx = x + OFF[f][0], ny = y + OFF[f][1], nz = z + OFF[f][2];
                     bool solidN = Inb(nx, ny, nz) ? (density[Idx(nx, ny, nz)] > 0) : false;
@@ -308,8 +316,13 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
 
         }
     }
+
     // Žc‚è‚ð“Š“ü
     flush();
+
+    if (aliveNeedRatio_ >= (float)aliveVoxel / (float)density.size()) {
+        unit_.isAlive_ = false;
+    }
 }
 
 bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, std::vector<MeshBatch>& batches)

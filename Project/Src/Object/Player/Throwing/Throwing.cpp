@@ -43,6 +43,7 @@ void Throwing::Throw(THROW_TYPE type)
 
 	for (auto& obj : throwObj_) {
 		if (obj.type == type && obj.ins->GetUnit().isAlive_ == false) {
+			obj.ins->Throw(throwPos, throwVec);
 			return;
 		}
 	}
@@ -53,7 +54,8 @@ void Throwing::Throw(THROW_TYPE type)
 	case THROW_TYPE::ROCK:
 		throwObj_.emplace_back(new ThrowingRock(), type);
 		throwObj_.end()->ins->Load();
-
+		throwObj_.end()->ins->Init();
+		throwObj_.end()->ins->Throw(throwPos, throwVec);
 		break;
 	}
 }

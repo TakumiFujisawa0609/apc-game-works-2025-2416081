@@ -149,6 +149,7 @@
     <ClCompile Include="Src\Object\Player\Punch\PlayerPunch.cpp" />
     <ClCompile Include="Src\Object\Player\Throwing\Rock\ThrowingRock.cpp" />
     <ClCompile Include="Src\Object\Player\Throwing\Throwing.cpp" />
+    <ClCompile Include="Src\Object\Player\Throwing\ThrowingObjBase.cpp" />
     <ClCompile Include="Src\Object\Rock\Rock.cpp" />
     <ClCompile Include="Src\Object\UnitBase.cpp" />
     <ClCompile Include="Src\Object\VoxelBase.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Src\Object\Player\Punch\PlayerPunch.h" />
     <ClInclude Include="Src\Object\Player\Throwing\Rock\ThrowingRock.h" />
     <ClInclude Include="Src\Object\Player\Throwing\Throwing.h" />
+    <ClInclude Include="Src\Object\Player\Throwing\ThrowingObjBase.h" />
     <ClInclude Include="Src\Object\Rock\Rock.h" />
     <ClInclude Include="Src\Object\UnitBase.h" />
     <ClInclude Include="Src\Object\VoxelBase.h" />
