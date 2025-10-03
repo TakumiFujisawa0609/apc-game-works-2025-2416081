@@ -5,6 +5,8 @@
 
 #include"Punch/PlayerPunch.h"
 
+#include"Throwing/Throwing.h"
+
 class VoxelBase;
 
 class Player : public UnitBase
@@ -31,8 +33,9 @@ public:
 		NON,
 		MOVE,
 		ATTACK,
+		GOUGE,
 		HAVE_THROWING_OBJ,
-		THROWING,
+		THROWING_OBJ,
 		EVASION,
 		DAMAGE,
 		DEATH,
@@ -79,6 +82,8 @@ private:
 	// Šeó‘Ô‚Ì‘JˆÚ‚·‚éğŒ------------------------
 	void DoStateMove(void);		// ˆÚ“®ó‘Ô‚É‘JˆÚ‚·‚éğŒ
 	void DoStateAttack(void);	// UŒ‚ó‘Ô‚É‘JˆÚ‚·‚éğŒ
+	void DoStateGouge(void);	// P‚èó‘Ô‚É‘JˆÚ‚·‚éğŒ
+	void DoStateThrowing(void);	// “Š‚°ó‘Ô‚É‘JˆÚ‚·‚éğŒ
 	void DoStateEvasion(void);	// ‰ñ”ğó‘Ô‚É‘JˆÚ‚·‚éğŒ
 	//---------------------------------------------
 
@@ -90,8 +95,9 @@ private:
 	void Non(void) {};
 	void Move(void);
 	void Attack(void);
+	void Gouge(void);
 	void HaveThrowingObj(void);
-	void Throwing(void);
+	void ThrowingObj(void);
 	void Evasion(void);
 	void Damage(void);
 	void Death(void);
@@ -128,6 +134,12 @@ private:
 	bool isAttack_[(int)ATTACK_STAGE::MAX];
 	int attackStageCounter_;
 	//```````````````
+
+	// “Š‚°``````````````
+	Throwing* throwing_;
+
+
+	//````````````````
 #pragma endregion
 
 #pragma region ƒ‚[ƒVƒ‡ƒ“

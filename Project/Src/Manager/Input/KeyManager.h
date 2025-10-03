@@ -27,6 +27,7 @@ public:
 		MOVE_RIGHT,
 		MOVE_LEFT,
 		ATTACK,
+		GOUGE,
 		JUMP,
 		EVASION,
 

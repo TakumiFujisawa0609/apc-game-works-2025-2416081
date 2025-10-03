@@ -1,6 +1,10 @@
 #include"Throwing.h"
 
+#include"../../../Manager/Collision/Collision.h"
+
 Throwing::Throwing(const VECTOR& playerPos, const VECTOR& playerAngle) :
+	models_(),
+
 	playerPos_(playerPos),
 	playerAngle_(playerAngle)
 {
@@ -8,6 +12,12 @@ Throwing::Throwing(const VECTOR& playerPos, const VECTOR& playerAngle) :
 
 Throwing::~Throwing()
 {
+}
+
+void Throwing::Load(void)
+{
+	models_[(int)THROW_TYPE::ROCK] = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
+
 }
 
 void Throwing::Init(void)
@@ -27,7 +37,7 @@ void Throwing::Draw(void)
 
 void Throwing::Release(void)
 {
-
+	for (auto& id : models_) { MV1DeleteModel(id); }
 	for (auto& obj : throwObj_) {
 		if (!obj.ins) { continue; }
 		obj.ins->Release();
@@ -50,12 +60,18 @@ void Throwing::Throw(THROW_TYPE type)
 
 	switch (type)
 	{
-	case THROW_TYPE::NON:break;
+	case THROW_TYPE::NON: { break; }
 	case THROW_TYPE::ROCK:
-		throwObj_.emplace_back(new ThrowingRock(), type);
-		throwObj_.end()->ins->Load();
-		throwObj_.end()->ins->Init();
-		throwObj_.end()->ins->Throw(throwPos, throwVec);
+		throwObj_.emplace_back(new ThrowRock(), type);
+		throwObj_.back().ins->ModelLoad(models_[(int)THROW_TYPE::ROCK]);
+		throwObj_.back().ins->Load();
+		throwObj_.back().ins->Init();
+		throwObj_.back().ins->Throw(throwPos, throwVec);
+		Collision::AddObject(throwObj_.back().ins);
+		//throwObj_[throwObj_.size()-1].ins->ModelLoad(models_[(int)THROW_TYPE::ROCK]);
+		//throwObj_[throwObj_.size()-1].ins->Load();
+		//throwObj_[throwObj_.size()-1].ins->Init();
+		//throwObj_[throwObj_.size()-1].ins->Throw(throwPos, throwVec);
 		break;
 	}
 }

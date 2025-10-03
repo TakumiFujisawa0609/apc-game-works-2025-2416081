@@ -21,6 +21,8 @@ Player::Player(const VECTOR& cameraPos):
 	isAttack_(),
 	attackStageCounter_(0),
 
+	throwing_(nullptr),
+
 	anime_(nullptr)
 {
 }
@@ -47,6 +49,9 @@ void Player::Load(void)
 	SET_STATE(STATE::NON, &Player::Non);
 	SET_STATE(STATE::MOVE, &Player::Move);
 	SET_STATE(STATE::ATTACK, &Player::Attack);
+	SET_STATE(STATE::GOUGE, &Player::Gouge);
+	SET_STATE(STATE::HAVE_THROWING_OBJ, &Player::HaveThrowingObj);
+	SET_STATE(STATE::THROWING_OBJ, &Player::ThrowingObj);
 	SET_STATE(STATE::EVASION, &Player::Evasion);
 	SET_STATE(STATE::DAMAGE, &Player::Damage);
 	SET_STATE(STATE::DEATH, &Player::Death);
@@ -260,12 +265,20 @@ void Player::StateManager(void)
 	case STATE::MOVE:
 		DoStateAttack();
 		DoStateEvasion();
+		DoStateGouge();
 		if (state_ != STATE::MOVE) { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
 		break;
 	case STATE::ATTACK:
 		DoStateMove();
 		DoStateEvasion();
 		if (state_ != STATE::ATTACK) { punch_->Off(); }
+		break;
+	case STATE::GOUGE:
+		break;
+	case STATE::HAVE_THROWING_OBJ:
+		DoStateThrowing();
+		break;
+	case STATE::THROWING_OBJ:
 		break;
 	case STATE::EVASION:
 		break;
@@ -328,6 +341,18 @@ void Player::DoStateAttack(void)
 	// SE再生
 	Smng::GetIns().Play(SOUND::PLAYER_PUNCH, true, 150);
 }
+void Player::DoStateGouge(void)
+{
+	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).down) {
+		state_ = STATE::GOUGE;
+	}
+}
+void Player::DoStateThrowing(void)
+{
+	if (KEY::GetIns().GetInfo(KEY_TYPE::ATTACK).down) {
+		state_ = STATE::THROWING_OBJ;
+	}
+}
 void Player::DoStateEvasion(void)
 {
 	if (!KEY::GetIns().GetInfo(KEY_TYPE::EVASION).down) { return; }
@@ -378,12 +403,23 @@ void Player::Attack(void)
 	if (anime_->GetAnimEnd()) { state_ = STATE::MOVE; }
 }
 
-void Player::HaveThrowingObj(void)
+void Player::Gouge(void)
 {
+	unit_.para_.speed = RUN_SPEED / 2;
+	state_ = STATE::HAVE_THROWING_OBJ;
 }
 
-void Player::Throwing(void)
+void Player::HaveThrowingObj(void)
 {
+	Run();
+	Jump();
+}	
+
+void Player::ThrowingObj(void)
+{
+	unit_.para_.speed = RUN_SPEED;
+	throwing_->Throw(THROW_TYPE::ROCK);
+	state_ = STATE::MOVE;
 }
 
 void Player::Evasion(void)
@@ -510,6 +546,9 @@ void Player::SubLoad(void)
 	punch_ = new PlayerPunch(unit_.pos_, unit_.angle_);
 	punch_->Load();
 
+	// 特殊攻撃（投げ）
+	throwing_ = new Throwing(unit_.pos_, unit_.angle_);
+	throwing_->Load();
 
 }
 void Player::SubInit(void)
@@ -517,18 +556,24 @@ void Player::SubInit(void)
 	// 通常攻撃（パンチ）
 	punch_->Init();
 
+	// 特殊攻撃（投げ）
+	throwing_->Init();
 }
 void Player::SubUpdate(void)
 {
 	// 通常攻撃（パンチ）
 	punch_->Update();
 
+	// 特殊攻撃（投げ）
+	throwing_->Update();
 }
 void Player::SubDraw(void)
 {
 	// 通常攻撃（パンチ）
 	punch_->Draw();
 
+	// 特殊攻撃（投げ）
+	throwing_->Draw();
 }
 void Player::SubRelease(void)
 {
@@ -539,6 +584,12 @@ void Player::SubRelease(void)
 		punch_ = nullptr;
 	}
 
+	// 特殊攻撃（投げ）
+	if (throwing_) {
+		throwing_->Release();
+		delete throwing_;
+		throwing_ = nullptr;
+	}
 }
 
 

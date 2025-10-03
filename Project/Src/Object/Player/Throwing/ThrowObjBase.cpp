@@ -1,0 +1,64 @@
+#include"ThrowObjBase.h"
+
+ThrowObjBase::ThrowObjBase():
+	aliveTime(100),
+	aliveCounter_(0),
+	moveVec_()
+{
+}
+
+ThrowObjBase::~ThrowObjBase()
+{
+}
+
+void ThrowObjBase::ModelLoad(int model)
+{
+	unit_.model_ = MV1DuplicateModel(model);
+}
+
+void ThrowObjBase::Load(void)
+{
+}
+
+void ThrowObjBase::Init(void)
+{
+}
+
+void ThrowObjBase::Update(void)
+{
+	if (!unit_.isAlive_) { return; }
+
+	unit_.pos_ = VAdd(unit_.pos_, moveVec_);
+
+	if (--aliveCounter_ <= 0) {
+		aliveCounter_ = 0;
+		unit_.isAlive_ = false;
+	}
+}
+
+void ThrowObjBase::Draw(void)
+{
+	if (!unit_.isAlive_) { return; }
+
+	Utility::MV1ModelMatrix(unit_.model_, unit_.pos_, { unit_.angle_ });
+	MV1DrawModel(unit_.model_);
+}
+
+void ThrowObjBase::Release(void)
+{
+	MV1DeleteModel(unit_.model_);
+}
+
+void ThrowObjBase::OnCollision(UnitBase* other)
+{
+}
+
+void ThrowObjBase::Throw(const VECTOR& pos, const VECTOR& vec)
+{
+	unit_.pos_ = pos;
+	moveVec_ = VScale(vec, unit_.para_.speed);
+
+	aliveCounter_ = aliveTime;
+
+	unit_.isAlive_ = true;
+}

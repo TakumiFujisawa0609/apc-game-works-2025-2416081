@@ -2,12 +2,13 @@
 
 #include"../../UnitBase.h"
 
-class ThrowingObjBase : public UnitBase
+class ThrowObjBase : public UnitBase
 {
 public:
-	ThrowingObjBase();
-	virtual ~ThrowingObjBase() = 0;
+	ThrowObjBase();
+	virtual ~ThrowObjBase() = 0;
 
+	void ModelLoad(int model);
 	virtual void Load(void)override;
 	virtual void Init(void)override;
 	virtual void Update(void)override;
@@ -18,7 +19,8 @@ public:
 
 	virtual void Throw(const VECTOR& pos, const VECTOR& vec);
 
-private:
+protected:
 	VECTOR moveVec_;
+	int aliveTime;
 	int aliveCounter_;
 };

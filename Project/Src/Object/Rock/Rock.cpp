@@ -73,4 +73,12 @@ void Rock::OnCollision(UnitBase* other)
         }
         return;
     }
+
+    if (dynamic_cast<ThrowObjBase*>(other)) {
+        if (ApplyBrush(other->GetUnit(), 200)) {
+            GameScene::Shake();
+            Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+        }
+        return;
+    }
 }
