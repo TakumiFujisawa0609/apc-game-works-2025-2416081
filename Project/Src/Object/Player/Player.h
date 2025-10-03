@@ -31,6 +31,8 @@ public:
 		NON,
 		MOVE,
 		ATTACK,
+		HAVE_THROWING_OBJ,
+		THROWING,
 		EVASION,
 		DAMAGE,
 		DEATH,
@@ -88,6 +90,8 @@ private:
 	void Non(void) {};
 	void Move(void);
 	void Attack(void);
+	void HaveThrowingObj(void);
+	void Throwing(void);
 	void Evasion(void);
 	void Damage(void);
 	void Death(void);

@@ -67,6 +67,8 @@ protected:
 
 	bool regeneration_;
 
+	float aliveNeedRatio_;
+
 
 	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }
 	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx_, Ny_); }

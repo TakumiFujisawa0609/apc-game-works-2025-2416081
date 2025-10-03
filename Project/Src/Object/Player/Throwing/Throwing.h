@@ -2,6 +2,7 @@
 
 #include"Rock/ThrowingRock.h"
 
+
 enum class THROW_TYPE { NON = -1, ROCK, MAX };
 
 class Throwing
@@ -21,7 +22,7 @@ public:
 
 private:
 	struct THROW_OBJ_INFO {
-		UnitBase* ins = nullptr;
+		ThrowingObjBase* ins = nullptr;
 		THROW_TYPE type = THROW_TYPE::NON;
 	};
 	std::vector<THROW_OBJ_INFO> throwObj_;
@@ -29,5 +30,5 @@ private:
 	const VECTOR& playerPos_;
 	const VECTOR LOCAL_THROW_POS = { 0.0f,50.0f,100.0f };
 	const VECTOR& playerAngle_;
-	const VECTOR THROW_VEC = { 0.0f,0.0f,100.0f };
+	const VECTOR THROW_VEC = { 0.0f,0.0f,1.0f };
 };

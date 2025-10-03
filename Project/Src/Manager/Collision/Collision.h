@@ -10,7 +10,7 @@ public:
 	Collision();
 	~Collision();
 
-	void AddObject(UnitBase* obj) { objects_.push_back(obj); }
+	static void AddObject(UnitBase* obj) { objects_.push_back(obj); }
 	void AddObject(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddObject(o); } }
 	void AddStage(UnitBase* obj) { stageObject_.push_back(obj); }
 	void AddStage(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddStage(o); } }
@@ -18,8 +18,8 @@ public:
 	void Clear() { objects_.clear(); stageObject_.clear(); }
 
 private:
-	std::vector<UnitBase*> objects_;
-	std::vector<UnitBase*> stageObject_;
+	static std::vector<UnitBase*> objects_;
+	static std::vector<UnitBase*> stageObject_;
 
 	// è’ìÀä÷êîêUÇËï™ÇØ
 	bool IsHit(const Base& a, const Base& b);

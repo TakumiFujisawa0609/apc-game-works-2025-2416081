@@ -1,6 +1,8 @@
 #pragma once
-#include"../../../UnitBase.h"
-class ThrowingRock : public UnitBase
+
+#include"../ThrowingObjBase.h"
+
+class ThrowingRock : public ThrowingObjBase
 {
 public:
 	static constexpr int ALIVE_TIME = 300;
@@ -16,7 +18,7 @@ public:
 
 	void OnCollision(UnitBase* other)override;
 
-	void Throw(const VECTOR& pos, const VECTOR& vec);
+	void Throw(const VECTOR& pos, const VECTOR& vec)override;
 
 private:
 	VECTOR moveVec_;
