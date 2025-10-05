@@ -98,6 +98,7 @@ void Player::Update(void)
 	// 無敵カウンターの更新
 	Invi();
 
+	// 前フレームの座標をローカル変数に保持(押し戻し処理に使う)
 	prevPos_ = unit_.pos_;
 
 	// ステート遷移条件
@@ -137,21 +138,21 @@ void Player::Draw(void)
 	MV1DrawModel(unit_.model_);
 	
 
-	// デバッグ用に当たり判定の表示
-	VECTOR debugPos[8] =
-	{
-		VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-		VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
-	};
-	for (int i = 0; i < 8; i++) {
-		DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
-	}
+	//// デバッグ用に当たり判定の表示
+	//VECTOR debugPos[8] =
+	//{
+	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
+	//};
+	//for (int i = 0; i < 8; i++) {
+	//	DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
+	//}
 
 }
 
@@ -228,13 +229,13 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 	for (int i = 0; i < 3; i++) {
 		// 移動していない軸は処理しない
 		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
+
 		// プレイヤーのAABBとボクセルのAABBの衝突判定
 		VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
 		VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
 
 		for (const auto& batch : voxel->GetVoxelAABBs())
 		{
-
 			VECTOR voxelMin = batch.min;
 			VECTOR voxelMax = batch.max;
 			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
@@ -244,7 +245,7 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
 				if (vloop(dirVec, i) == DIRECTION::FRONT) {
 					vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
-				}		
+				}
 				else if (vloop(dirVec, i) == DIRECTION::BACK) {
 					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
 				}
@@ -351,6 +352,7 @@ void Player::DoStateThrowing(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ATTACK).down) {
 		state_ = STATE::THROWING_OBJ;
+		anime_->Play((int)ANIME_TYPE::PUNCH_FIRST, false);
 	}
 }
 void Player::DoStateEvasion(void)
@@ -377,7 +379,7 @@ void Player::Move(void)
 void Player::Attack(void)
 {	
 	// 攻撃の判定が発生する前の間、前方に移動させる
-	if (anime_->GetAnimeRatio() < 0.4f) {
+	if (anime_->GetAnimeRatio() < 0.6f) {
 		// 移動方向ベクトル
 		VECTOR vec = {};
 
@@ -387,7 +389,7 @@ void Player::Attack(void)
 
 		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 		vec = Utility::Normalize(vec);
-		unit_.pos_ = VAdd(unit_.pos_, VScale(vec, 2.0f));
+		unit_.pos_ = VAdd(unit_.pos_, VScale(vec, 5.0f));
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
@@ -417,9 +419,11 @@ void Player::HaveThrowingObj(void)
 
 void Player::ThrowingObj(void)
 {
-	unit_.para_.speed = RUN_SPEED;
-	throwing_->Throw(THROW_TYPE::ROCK);
-	state_ = STATE::MOVE;
+	if (anime_->GetAnimeRatio() > 0.5f) {
+		unit_.para_.speed = RUN_SPEED;
+		throwing_->Throw(THROW_TYPE::ROCK);
+		state_ = STATE::MOVE;
+	}
 }
 
 void Player::Evasion(void)

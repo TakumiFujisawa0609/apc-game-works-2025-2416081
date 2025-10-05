@@ -9,7 +9,8 @@ class Rock : public VoxelBase
 {
 public:
 	static constexpr VECTOR SIZE = { 236.0f, 293.0f, 325.0f };
-	static constexpr VECTOR CENTER_DIFF = { -24.0f, 136.0f, 10.0f };
+	//static constexpr VECTOR CENTER_DIFF = { -24.0f, 136.0f, 10.0f };
+	static constexpr VECTOR CENTER_DIFF = { -160.0f, 0.0f, -100.0f };
 
 	Rock();
 	~Rock()override {};

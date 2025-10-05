@@ -70,9 +70,11 @@ protected:
 	float aliveNeedRatio_;
 
 
+
 	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }
 	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx_, Ny_); }
 	bool Inb(int x, int y, int z, int Nx, int Ny, int Nz) { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; }
+	bool Inb(int x, int y, int z) { return Inb(x, y, z, Nx_, Ny_, Nz_); }
 
 	void SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz);
 	void MarkSurfaceByCollisionProbe(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt,

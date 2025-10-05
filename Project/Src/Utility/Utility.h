@@ -111,6 +111,8 @@ public:
 	static MATRIX MatrixAllMultZYX(const std::initializer_list<VECTOR>& vecs);
 
 
+	static VECTOR Minus(const VECTOR& v) { return { -v.x,-v.y,-v.z }; }
+
 	// 行列をつかったモデルの座標と向きのセット
 	static void MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializer_list<VECTOR>& angle);
 };

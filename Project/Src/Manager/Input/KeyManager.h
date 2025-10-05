@@ -40,6 +40,9 @@ public:
 		// システム操作
 		GAME_END,
 
+		// デバッグキー
+		DEBUG_VOXEl_CREATE,
+
 		MAX,
 	};
 

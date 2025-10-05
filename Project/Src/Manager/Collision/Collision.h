@@ -14,6 +14,7 @@ public:
 	void AddObject(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddObject(o); } }
 	void AddStage(UnitBase* obj) { stageObject_.push_back(obj); }
 	void AddStage(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddStage(o); } }
+
 	void Check();
 	void Clear() { objects_.clear(); stageObject_.clear(); }
 

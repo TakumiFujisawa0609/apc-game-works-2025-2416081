@@ -10,6 +10,7 @@
 
 class Camera;
 
+class BlockManager;
 class Rock;
 class Player;
 
@@ -55,6 +56,8 @@ public:
 private:
 	Camera* camera_;
 	Collision* collision_;
+
+	BlockManager* blocks_;
 
 	std::vector<Rock*> rock_;
 	Player* player_;

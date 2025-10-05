@@ -36,8 +36,8 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            20.0f,                          // セル(大きさ)
-            unit_.para_.center,             // グリッド中心（ワールド）
+            50.0f,                          // セル(大きさ)
+            VAdd(unit_.pos_,gridCenter_),   // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);
 
@@ -126,18 +126,24 @@ void VoxelBase::Release(void)
 void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
 {
     const int total = Nx * Ny * Nz;
-    std::vector<uint8_t> ext(total, 0);
+    std::vector<bool> ext(total, false);
     std::queue<int> q;
     auto pushIf = [&](int x, int y, int z) {
-        if (!Inb(x, y, z, Nx, Ny, Nz)) return; int i = Idx(x, y, z, Nx, Ny);
-        if (ext[i] || density[i] != 0) return; ext[i] = 1; q.push(i);
+        if (!Inb(x, y, z, Nx, Ny, Nz)) { return; }
+        int i = Idx(x, y, z, Nx, Ny);
+        if (ext[i] || density[i] != 0) { return; }
+        ext[i] = true;
+        q.push(i);
     };
+
     for (int x = 0; x < Nx; ++x) { for (int y = 0; y < Ny; ++y) { pushIf(x, y, 0); pushIf(x, y, Nz - 1); } }
     for (int x = 0; x < Nx; ++x) { for (int z = 0; z < Nz; ++z) { pushIf(x, 0, z); pushIf(x, Ny - 1, z); } }
     for (int y = 0; y < Ny; ++y) { for (int z = 0; z < Nz; ++z) { pushIf(0, y, z); pushIf(Nx - 1, y, z); } }
+
     const int off[6][3] = { {1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1} };
     while (!q.empty()) {
-        int i = q.front(); q.pop();
+        int i = q.front();
+        q.pop();
         int z = i / (Nx * Ny), y = (i - z * Nx * Ny) / Nx, x = i % Nx;
         for (int k = 0; k < 6; ++k) { pushIf(x + off[k][0], y + off[k][1], z + off[k][2]); }
     }
@@ -159,19 +165,18 @@ void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
 
 void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
 {
-    VECTOR minW = VGet(center.x - halfExt.x, center.y - halfExt.y, center.z - halfExt.z);
-    float r = cell * 0.55f;
+    VECTOR minW = VSub(center, halfExt);
+    float r = cell * 0.5f;
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)
             for (int x = 0; x < Nx; ++x) {
-                VECTOR pc = VGet(minW.x + (x + 0.5f) * cell,
-                    minW.y + (y + 0.5f) * cell,
-                    minW.z + (z + 0.5f) * cell);
-                bool hit = false;
+                VECTOR pc = VGet(
+                    minW.x + (x * cell) + (cell * 0.5f),
+                    minW.y + (y * cell) + (cell * 0.5f),
+                    minW.z + (z * cell) + (cell * 0.5f));
                 auto res = MV1CollCheck_Sphere(mv1, -1, pc, r);
-                hit = (res.HitNum > 0);
+                if ((res.HitNum > 0)) { density[Idx(x, y, z, Nx, Ny)] = 200; }
                 MV1CollResultPolyDimTerminate(res);
-                if (hit) { density[Idx(x, y, z, Nx, Ny)] = 200; }
             }
 }
 
@@ -194,17 +199,17 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
         float gz = float(S(x, y, z + 1) - S(x, y, z - 1));
 
         // ★外向き法線にしたいので符号を反転（密度は外0→中255なので勾配は内向き）
-        gx = -gx; gy = -gy; gz = -gz;
+        gx = -gx;
+        gy = -gy;
+        gz = -gz;
         float len2 = gx * gx + gy * gy + gz * gz;
-        if (len2 < 1e-6f) return VECTOR{ 0,0,0 };
+        if (len2 < 1e-6f) { return VECTOR{ 0,0,0 }; }
+
         float inv = 1.0f / std::sqrt(len2);
         return VECTOR{ gx * inv, gy * inv, gz * inv };
     };
 
     batches.clear();
-
-    auto Idx = [&](int x, int y, int z) { return (z * Ny + y) * Nx + x; };
-    auto Inb = [&](int x, int y, int z) { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; };
 
     MeshBatch cur;
     auto updAabb = [&](const VECTOR& p) {
@@ -238,9 +243,9 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
         VECTOR nrm = { (float)OFF[f][0], (float)OFF[f][1], (float)OFF[f][2] };
 
         // セル中心と面中心
-        VECTOR cellC = { (x - Nx / 2) * cell + center.x,
-                         (y - Ny / 2) * cell + center.y,
-                         (z - Nz / 2) * cell + center.z };
+        VECTOR cellC = { (x - Nx / 2) * cell /*+ center.x*/,
+                         (y - Ny / 2) * cell /*+ center.y*/,
+                         (z - Nz / 2) * cell /*+ center.z*/ };
 
         VECTOR faceC = { cellC.x + nrm.x * cell * 0.5f,
                          cellC.y + nrm.y * cell * 0.5f,
@@ -328,25 +333,28 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
 bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, std::vector<MeshBatch>& batches)
 {
     // 1) グリッド解像度
-    int Nx = std::clamp((int)std::ceil((halfExt.x * 2) / cell) + 2, 16, 256);
-    int Ny = std::clamp((int)std::ceil((halfExt.y * 2) / cell) + 2, 16, 256);
-    int Nz = std::clamp((int)std::ceil((halfExt.z * 2) / cell) + 2, 16, 256);
+    //Nx_ = std::clamp((int)std::ceil((halfExt.x * 2) / cell) + 2, 16, 256);
+    //Ny_ = std::clamp((int)std::ceil((halfExt.y * 2) / cell) + 2, 16, 256);
+    //Nz_ = std::clamp((int)std::ceil((halfExt.z * 2) / cell) + 2, 16, 256);
+
+    Nx_ = (int)std::ceil((halfExt.x * 2) / cell);
+    Ny_ = (int)std::ceil((halfExt.y * 2) / cell);
+    Nz_ = (int)std::ceil((halfExt.z * 2) / cell);
 
     // 2) 表面マーキング
-    std::vector<uint8_t> density(Nx * Ny * Nz, 0);
-    MarkSurfaceByCollisionProbe(mv1, cell, center, halfExt, Nx, Ny, Nz, density);
+    std::vector<uint8_t> density(Nx_ * Ny_ * Nz_, 0);
+    MarkSurfaceByCollisionProbe(mv1, cell, center, halfExt, Nx_, Ny_, Nz_, density);
 
     // 3) 内部充填
-    SolidFill(density, Nx, Ny, Nz);
+    SolidFill(density, Nx_, Ny_, Nz_);
 
     // 4) グリッドを保持
-    Nx_ = Nx; Ny_ = Ny; Nz_ = Nz;
     cell_ = cell;
     gridCenter_ = center;
     density_ = density;
 
     // 5) メッシュ化（Cubic）
-    BuildCubicMesh(density, Nx, Ny, Nz, cell, center, batches);
+    BuildCubicMesh(density_, Nx_, Ny_, Nz_, cell_, gridCenter_, batches);
     return !(batches.empty());
 }
 
@@ -367,7 +375,7 @@ bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
 bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
 {
     // ★ローカル→ワールド変換したグリッド中心
-    VECTOR centerW = VAdd(unit_.pos_, gridCenter_);
+    VECTOR centerW = VAdd(unit_.pos_, unit_.para_.center);
 
     VECTOR C = VAdd(other.pos_, other.para_.center); // 球の中心（ワールド）
     float  R = other.para_.radius;

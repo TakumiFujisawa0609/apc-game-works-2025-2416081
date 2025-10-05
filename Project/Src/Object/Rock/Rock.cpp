@@ -25,8 +25,10 @@ void Rock::SubLoad(void)
 
     float scale = 1.0f;
     unit_.para_.size = VScale(SIZE, scale);
-    unit_.para_.center = VScale(CENTER_DIFF, scale);
-    unit_.pos_ = {};
+    gridCenter_ = VScale(CENTER_DIFF, scale);
+    unit_.pos_ = { 0.0f,0.0f,0.0f };
+
+    unit_.angle_ = {};
 
     unit_.isAlive_ = true;
 
@@ -35,7 +37,7 @@ void Rock::SubLoad(void)
     MV1SetRotationXYZ(unit_.model_, { 0.0f,0.0f,0.0f });
     MV1SetScale(unit_.model_, { scale,scale,scale });
 
-    aliveNeedRatio_ = 0.01f;
+    aliveNeedRatio_ = 0.05f;
 }
 
 void Rock::SubInit(void)
@@ -48,6 +50,8 @@ void Rock::SubUpdate(void)
 
     if (CheckHitKey(KEY_INPUT_0)) { vec.x++; }
     if (CheckHitKey(KEY_INPUT_9)) { vec.x--; }
+    if (CheckHitKey(KEY_INPUT_6)) { vec.y++; }
+    if (CheckHitKey(KEY_INPUT_7)) { vec.y--; }
 
     vec = Utility::Normalize(vec);
 
@@ -56,7 +60,23 @@ void Rock::SubUpdate(void)
 
 void Rock::SubDraw(void)
 {
-    DrawSphere3D(VAdd(unit_.pos_,unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
+    DrawSphere3D(VAdd(unit_.pos_, unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
+
+    // デバッグ用に当たり判定の表示
+    VECTOR debugPos[8] =
+    {
+        VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
+        VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
+    };
+    for (int i = 0; i < 8; i++) {
+        DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
+    }
 }
 
 void Rock::SubRelease(void)

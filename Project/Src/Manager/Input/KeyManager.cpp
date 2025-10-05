@@ -80,6 +80,8 @@ void KeyManager::Init(void)
 
 
 	SET_KEYBOARD(KEY_TYPE::GAME_END, KEY_INPUT_ESCAPE);
+
+	SET_KEYBOARD(KEY_TYPE::DEBUG_VOXEl_CREATE, KEY_INPUT_8);
 }
 
 void KeyManager::Update(void)

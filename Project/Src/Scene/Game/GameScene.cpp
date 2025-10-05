@@ -12,6 +12,7 @@
 
 #include"../../Utility/Utility.h"
 
+#include"../../Object/Stage/Block/BlockManager.h"
 #include"../../Object/Rock/Rock.h"
 #include"../../Object/Player/Player.h"
 
@@ -31,6 +32,7 @@ GameScene::GameScene():
 	mainScreen_(-1),
 	camera_(nullptr),
 	collision_(nullptr),
+	blocks_(nullptr),
 	rock_(),
 	grid_(nullptr),
 	player_(nullptr)
@@ -51,12 +53,17 @@ void GameScene::Load(void)
 
 	collision_ = new Collision();
 
-	for (int i = 0; i < 10; i++) { rock_.emplace_back(new Rock()); }
-	for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }
-	for (int i = 0; i < rock_.size(); i++) {
-		rock_[i]->SetSpeed((float)i - (rock_.size() / 2));
-		for (int j = 0; j < 100; j++) { rock_[i]->InitMove(); }
-	}
+	blocks_ = new BlockManager();
+	blocks_->Load();
+	blocks_->SetCamera(camera_);
+	collision_->AddStage(blocks_->GetBlocks());
+
+	//for (int i = 0; i < 1; i++) { rock_.emplace_back(new Rock()); }
+	//for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }
+	//for (int i = 0; i < rock_.size(); i++) {
+	//	rock_[i]->SetSpeed((float)i - (rock_.size() / 2));
+	//	for (int j = 0; j < 100; j++) { rock_[i]->InitMove(); }
+	//}
 
 
 	player_ = new Player(camera_->GetAngles());
@@ -90,7 +97,7 @@ void GameScene::Init(void)
 	//--------------------------------------------------------------------------------
 
 
-	for (auto& r : rock_) { r->Init(); }
+	//for (auto& r : rock_) { r->Init(); }
 	player_->Init();
 }
 
@@ -103,8 +110,18 @@ void GameScene::Update(void)
 		if (slow_ % slowInter_ != 0) { return; }
 	}
 
-	for (auto& r : rock_) { r->Update(); }
+	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) {
+		rock_.emplace_back(new Rock());
+		rock_.back()->Load();
+		rock_.back()->SetCamera(camera_);
+		rock_.back()->Init();
+		rock_.back()->SetSpeed(10.0f);
+		collision_->AddStage(rock_.back());
+	}
+	//for (auto& r : rock_) { r->Update(); }
 	player_->Update();
+
+	blocks_->Update();
 
 	collision_->Check();
 
@@ -127,7 +144,9 @@ void GameScene::Draw(void)
 
 	grid_->Draw();
 
-	for (auto& r : rock_) { r->Draw(); }
+	blocks_->Draw();
+
+	//for (auto& r : rock_) { r->Draw(); }
 	player_->Draw();
 
 	DrawString(0, 0, "ƒQ[ƒ€", 0xffffff);
@@ -143,13 +162,17 @@ void GameScene::Release(void)
 {
 	Smng::GetIns().Delete(SOUND::OBJECT_BREAK);
 	
-
-	for (auto& r : rock_) {
-		if (!r) { continue; }
-		r->Release();
-		delete r;
-		r = nullptr;
+	if (blocks_) {
+		blocks_->Release();
+		delete blocks_;
+		blocks_ = nullptr;
 	}
+	//for (auto& r : rock_) {
+	//	if (!r) { continue; }
+	//	r->Release();
+	//	delete r;
+	//	r = nullptr;
+	//}
 	if (player_) {
 		player_->Release();
 		delete player_;
