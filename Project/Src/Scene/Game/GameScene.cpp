@@ -54,9 +54,9 @@ void GameScene::Load(void)
 	collision_ = new Collision();
 
 	blocks_ = new BlockManager();
-	//blocks_->Load();
-	//blocks_->SetCamera(camera_);
-	//collision_->AddStage(blocks_->GetBlocks());
+	blocks_->Load();
+	blocks_->SetCamera(camera_);
+	collision_->AddStage(blocks_->GetBlocks());
 
 	for (int i = 0; i < 10; i++) { rock_.emplace_back(new Rock()); }
 	for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }

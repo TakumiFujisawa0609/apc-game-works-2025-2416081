@@ -38,6 +38,9 @@ public:
     static bool CapsuleAabb_Y(const VECTOR& capsuleCenter, float capsuleHalfLen, float capsuleRadius,
         const VECTOR& boxCenter, const VECTOR& boxSize);
 
+    static bool SphereAabb(const VECTOR& sphereCenter, float sphereRadius,
+        const VECTOR& boxCenter, const VECTOR& boxSize);
+
 private:
     // ---- “à•”ƒwƒ‹ƒp ----
     static inline float comp(const VECTOR& v, int i) { return i == 0 ? v.x : (i == 1 ? v.y : v.z); }

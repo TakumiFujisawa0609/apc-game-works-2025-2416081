@@ -162,7 +162,6 @@ void Player::Draw(void)
 	//for (int i = 0; i < 8; i++) {
 	//	DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 	//}
-
 }
 
 void Player::Release(void)
@@ -196,74 +195,148 @@ void Player::OnCollision(UnitBase* other)
 }
 
 
+//void Player::CollisionVoxel(VoxelBase* voxel)
+//{
+//	enum class DIRECTION { NON, FRONT, BACK };
+//	struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
+//
+//#define vloop(v,i) ((i)==0 ? (v).x : ((i)==1 ? (v).y : (v).z))
+//
+//	VECTOR pPoss[3] = {
+//		{unit_.pos_.x,prevPos_.y,prevPos_.z},
+//		{prevPos_.x,unit_.pos_.y,prevPos_.z},
+//		{prevPos_.x,prevPos_.y,unit_.pos_.z}
+//	};
+//	DIR_VEC dirVec =
+//	{
+//		(prevPos_.x < unit_.pos_.x) ? DIRECTION::FRONT : ((prevPos_.x > unit_.pos_.x) ? DIRECTION::BACK : DIRECTION::NON),
+//		(prevPos_.y < unit_.pos_.y) ? DIRECTION::FRONT : ((prevPos_.y > unit_.pos_.y) ? DIRECTION::BACK : DIRECTION::NON),
+//		(prevPos_.z < unit_.pos_.z) ? DIRECTION::FRONT : ((prevPos_.z > unit_.pos_.z) ? DIRECTION::BACK : DIRECTION::NON)
+//	};
+//
+//	auto pushChores = [&](int i) {
+//		switch (i)
+//		{
+//		case 0:
+//			break;
+//		case 1:
+//			if(dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
+//			else if (dirVec.y == DIRECTION::BACK) // 下方向に移動して衝突した場合
+//			{
+//				yAccelSum_ = 0.0f;
+//				for (auto& jump : isJump_) { jump = false; }
+//				for (auto& cou : jumpKeyCounter_) { cou = 0; }
+//			}
+//			break;
+//		case 2:
+//			break;
+//		}
+//		};
+//
+//	for (int i = 0; i < 3; i++) {
+//		// 移動していない軸は処理しない
+//		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
+//
+//		for (const auto& vPos : voxel->GetVoxelCenters()) {
+//			if (Cfunc::CapsuleAabb_Y(pPoss[i], unit_.para_.capsuleHalfLen, unit_.para_.radius, vPos, voxel->GetCellSizeVECTOR())) {
+//				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
+//				if (vloop(dirVec, i) == DIRECTION::FRONT) {
+//					vloop(unit_.pos_, i) = (std::min)((vloop(vPos, i) - (voxel->GetCellSize() / 2)) - unit_.para_.radius, vloop(unit_.pos_, i));
+//				}
+//				else if (vloop(dirVec, i) == DIRECTION::BACK) {
+//					vloop(unit_.pos_, i) = (std::max)((vloop(vPos, i) + (voxel->GetCellSize() / 2)) + unit_.para_.radius, vloop(unit_.pos_, i));
+//				}
+//				else { continue; }
+//
+//				pushChores(i);
+//			}
+//		}
+//	}
+//}
+
 void Player::CollisionVoxel(VoxelBase* voxel)
 {
-	enum class DIRECTION { NON, FRONT, BACK };
-	struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
+	const float EPS = 1e-4f;
+	// 足元原点 → カプセル中心の補正（Y向きカプセル）
+	const float R = unit_.para_.radius;
+	const float H = unit_.para_.capsuleHalfLen;
+	const VECTOR centerOfs = VAdd(unit_.para_.center, VGet(0, R + H, 0));
 
-#define vloop(v,i) ((i)==0 ? (v).x : ((i)==1 ? (v).y : (v).z))
-
-	VECTOR pPoss[3] = {
-		{unit_.pos_.x,prevPos_.y,prevPos_.z},
-		{prevPos_.x,unit_.pos_.y,prevPos_.z},
-		{prevPos_.x,prevPos_.y,unit_.pos_.z}
-	};
-	DIR_VEC dirVec =
-	{
-		(prevPos_.x < unit_.pos_.x) ? DIRECTION::FRONT : ((prevPos_.x > unit_.pos_.x) ? DIRECTION::BACK : DIRECTION::NON),
-		(prevPos_.y < unit_.pos_.y) ? DIRECTION::FRONT : ((prevPos_.y > unit_.pos_.y) ? DIRECTION::BACK : DIRECTION::NON),
-		(prevPos_.z < unit_.pos_.z) ? DIRECTION::FRONT : ((prevPos_.z > unit_.pos_.z) ? DIRECTION::BACK : DIRECTION::NON)
+	auto axisRef = [](VECTOR& v, int i)->float& { return (i == 0) ? v.x : (i == 1) ? v.y : v.z; };
+	enum class DIR { NON, FRONT, BACK };
+	DIR dir[3] = {
+		(prevPos_.x < unit_.pos_.x) ? DIR::FRONT : ((prevPos_.x > unit_.pos_.x) ? DIR::BACK : DIR::NON),
+		(prevPos_.y < unit_.pos_.y) ? DIR::FRONT : ((prevPos_.y > unit_.pos_.y) ? DIR::BACK : DIR::NON),
+		(prevPos_.z < unit_.pos_.z) ? DIR::FRONT : ((prevPos_.z > unit_.pos_.z) ? DIR::BACK : DIR::NON),
 	};
 
-	auto pushChores = [&](int i) {
-		switch (i)
-		{
-		case 0:
-			break;
-		case 1:
-			if(dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
-			else if (dirVec.y == DIRECTION::BACK) // 下方向に移動して衝突した場合
-			{
+	auto clampAxis = [&](int i) {
+		if (dir[i] == DIR::NON) return;
+
+		// 判定用カプセル中心（他軸は最新版、当該軸は現pos）
+		VECTOR testCenter = VAdd(unit_.pos_, centerOfs);
+		axisRef(testCenter, i) = axisRef(centerOfs, i) + axisRef(unit_.pos_, i);
+
+		float best = axisRef(unit_.pos_, i); // 最終反映値
+
+		for (const auto& c : voxel->GetVoxelCenters()) {
+			// AABB は1セル
+			const VECTOR half = VScale(voxel->GetCellSizeVECTOR(), 0.5f);
+			const VECTOR bmin = { c.x - half.x, c.y - half.y, c.z - half.z };
+			const VECTOR bmax = { c.x + half.x, c.y + half.y, c.z + half.z };
+
+			// 簡易：カプセル（Y軸）vs AABB ヒット判定
+			if (!Cfunc::CapsuleAabb_Y(testCenter, H, R, c, voxel->GetCellSizeVECTOR()))
+				continue;
+
+			// 当たっているなら、当該軸の限界面までクランプ
+			float limitFront = (i == 0 ? bmin.x - R - EPS : i == 1 ? bmin.y - (R + H) - EPS : bmin.z - R - EPS);
+			float limitBack = (i == 0 ? bmax.x + R + EPS : i == 1 ? bmax.y + (R + H) + EPS : bmax.z + R + EPS);
+
+			if (dir[i] == DIR::FRONT) best = std::min(best, limitFront);
+			else                    best = std::max(best, limitBack);
+		}
+
+		// 反映＆Y軸の副処理
+		if (i == 1) {
+			if (best != unit_.pos_.y) {
+				unit_.pos_.y = best;
 				yAccelSum_ = 0.0f;
-				for (auto& jump : isJump_) { jump = false; }
-				for (auto& cou : jumpKeyCounter_) { cou = 0; }
+				if (dir[1] == DIR::BACK) { for (auto& j : isJump_)j = false; for (auto& k : jumpKeyCounter_)k = 0; }
 			}
-			break;
-		case 2:
-			break;
+		}
+		else {
+			axisRef(unit_.pos_, i) = best;
 		}
 		};
 
-	for (int i = 0; i < 3; i++) {
-		// 移動していない軸は処理しない
-		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
-
-		// プレイヤーのAABBとボクセルのAABBの衝突判定
-		VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
-		VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
-
-		for (const auto& batch : voxel->GetVoxelAABBs())
-		{
-			VECTOR voxelMin = batch.min;
-			VECTOR voxelMax = batch.max;
-			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
-				playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
-				playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
-			{
-				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
-				if (vloop(dirVec, i) == DIRECTION::FRONT) {
-					vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
-				}
-				else if (vloop(dirVec, i) == DIRECTION::BACK) {
-					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
-				}
-				else { continue; }
-				pushChores(i);
-			}
-		}
-
-	}
+	// 順序は Y → X → Z（安定しやすい）
+	clampAxis(1); clampAxis(0); clampAxis(2);
 }
+
+		//// プレイヤーのAABBとボクセルのAABBの衝突判定
+		//VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
+		//VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
+
+		//for (const auto& batch : voxel->GetVoxelAABBs())
+		//{
+		//	VECTOR voxelMin = batch.min;
+		//	VECTOR voxelMax = batch.max;
+		//	if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
+		//		playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
+		//		playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
+		//	{
+		//		// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
+		//		if (vloop(dirVec, i) == DIRECTION::FRONT) {
+		//			vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+		//		}
+		//		else if (vloop(dirVec, i) == DIRECTION::BACK) {
+		//			vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+		//		}
+		//		else { continue; }
+		//		pushChores(i);
+		//	}
+		//}
 
 void Player::StateManager(void)
 {

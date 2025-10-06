@@ -166,6 +166,22 @@ bool CollisionUtility::CapsuleAabb_Y(const VECTOR& capsuleCenter, float capsuleH
 	return distSq <= capsuleRadius * capsuleRadius;
 }
 
+bool CollisionUtility::SphereAabb(const VECTOR& sphereCenter, float sphereRadius, const VECTOR& boxCenter, const VECTOR& boxSize)
+{
+	// AABB の半サイズ
+	VECTOR half = { boxSize.x * 0.5f, boxSize.y * 0.5f, boxSize.z * 0.5f };
+
+	// 球中心を AABB ローカル（boxCenter 原点）で見て最も近い点を取る
+	VECTOR d = VSub(sphereCenter, boxCenter);
+	float qx = std::clamp(d.x, -half.x, half.x);
+	float qy = std::clamp(d.y, -half.y, half.y);
+	float qz = std::clamp(d.z, -half.z, half.z);
+
+	// 最近点をワールドに戻す必要はなく、差分で十分
+	VECTOR diff = { d.x - qx, d.y - qy, d.z - qz };
+	return VDot(diff, diff) <= sphereRadius * sphereRadius;
+}
+
 CollisionUtility::ObbInfo CollisionUtility::MakeObb(const VECTOR& pos, const VECTOR& size, const VECTOR& angle)
 {
 	ObbInfo r = {};

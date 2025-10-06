@@ -33,4 +33,5 @@ private:
 	bool SphereCapsule(const Base& sphere, const Base& capsule) const;
 	bool CapsuleObb(const Base& capsule, const Base& obb) const;
 	bool CapsuleAabb(const Base& capsule, const Base& obb) const;
+	bool SphereAabb(const Base& sphere, const Base& aabb)const;
 };

@@ -56,6 +56,9 @@ bool Collision::IsHit(const Base& a, const Base& b)
 	if (sA == CollisionShape::CAPSULE && sB == CollisionShape::AABB) return CapsuleAabb(A, B);
 	if (sA == CollisionShape::AABB && sB == CollisionShape::CAPSULE)   return CapsuleAabb(B, A);
 
+	if (sA == CollisionShape::SPHERE && sB == CollisionShape::AABB) return SphereAabb(A, B);
+	if (sA == CollisionShape::AABB && sB == CollisionShape::SPHERE)   return SphereAabb(B, A);
+
 	return false;
 }
 
@@ -103,4 +106,9 @@ bool Collision::CapsuleObb(const Base& capsule, const Base& obb) const
 bool Collision::CapsuleAabb(const Base& capsule, const Base& obb) const
 {
 	return Cfunc::CapsuleAabb_Y(capsule.pos_, capsule.para_.capsuleHalfLen, capsule.para_.radius, obb.pos_, obb.para_.size);
+}
+
+bool Collision::SphereAabb(const Base& sphere, const Base& aabb) const
+{
+	return Cfunc::SphereAabb(sphere.pos_, sphere.para_.radius, aabb.pos_, aabb.para_.size);
 }
