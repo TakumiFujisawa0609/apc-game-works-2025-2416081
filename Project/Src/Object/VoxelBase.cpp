@@ -36,7 +36,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            50.0f,                          // セル(大きさ)
+            20.0f,                          // セル(大きさ)
             VAdd(unit_.pos_,gridCenter_),   // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);
@@ -50,7 +50,6 @@ void VoxelBase::Init(void)
 {
     SubInit();
 
-    unit_.isAlive_ = true;
     regeneration_ = false;
 }
 
@@ -60,48 +59,49 @@ void VoxelBase::Update(void)
     SubUpdate();
 
     if (regeneration_) {
-
         BuildCubicMesh(density_, Nx_, Ny_, Nz_, cell_, gridCenter_, batches_);
 
-        regeneration_ = false; 
+        // ワールドキャッシュを無効化
+        for (auto& b : batches_) {
+            b.vWorld.clear();
+            b.lastOff = { 1e30f,1e30f,1e30f };
+        }
+
+        regeneration_ = false;
     }
 }
 
 
 void VoxelBase::Draw(void)
 {
-    if (!unit_.isAlive_) { return; }
+    if (!unit_.isAlive_) return;
 
     SubDraw();
 
-    const VECTOR camPos = camera_->GetPos();
+    const VECTOR worldOff = unit_.pos_; // このオブジェクトのワールド平行移動
 
-    for (auto& b : batches_) {
-        const VECTOR worldOff = unit_.pos_;
+    for (auto& b : batches_)
+    {
+        if (b.i.empty()) continue;
 
-        VECTOR toCam = Utility::Normalize(VSub(camPos, VAdd(b.centerLocal, worldOff)));
-
-        bool drawDir[6];
-        for (int f = 0; f < 6; f++) {
-            drawDir[f] = (VDot(kDirNrm[f], toCam) > 0.0f) && !b.iDir[f].empty();
-        }
-        if (!(drawDir[0] || drawDir[1] || drawDir[2] || drawDir[3] || drawDir[4] || drawDir[5])) { continue; }
-
-        std::vector<VERTEX3D> vtx;
-        vtx.resize(b.v.size());
-
-        for (size_t k = 0; k < b.v.size(); k++) {
-            vtx[k] = b.v[k];
-            vtx[k].pos = VAdd(vtx[k].pos, worldOff);
+        // ★unit_.pos_ が変わった時だけ vWorld を更新
+        if (b.vWorld.size() != b.v.size() ||
+            b.lastOff.x != worldOff.x || b.lastOff.y != worldOff.y || b.lastOff.z != worldOff.z)
+        {
+            b.vWorld.resize(b.v.size());
+            for (size_t k = 0; k < b.v.size(); ++k) {
+                b.vWorld[k] = b.v[k];
+                b.vWorld[k].pos = VAdd(b.v[k].pos, worldOff); // 平行移動だけ
+            }
+            b.lastOff = worldOff;
         }
 
-        for (int f = 0; f < 6; f++) {
-            if (!drawDir[f]) { continue; }
-            DrawPolygonIndexed3D(
-                vtx.data(), (int)vtx.size(),
-                b.iDir[f].data(), (int)(b.iDir[f].size() / 3),
-                textureId_, true);
-        }
+        // ★1コールだけ。不透明描画に（第6引数 FALSE）
+        DrawPolygonIndexed3D(
+            b.vWorld.data(), (int)b.vWorld.size(),
+            b.i.data(), (int)(b.i.size() / 3),
+            textureId_, FALSE
+        );
     }
 }
 
@@ -242,10 +242,14 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
 
         VECTOR nrm = { (float)OFF[f][0], (float)OFF[f][1], (float)OFF[f][2] };
 
+        float fx = (x + 0.5f) - Nx * 0.5f;   // [-N/2, N/2) の中心配置
+        float fy = (y + 0.5f) - Ny * 0.5f;
+        float fz = (z + 0.5f) - Nz * 0.5f;
+        VECTOR cellC = { fx * cell, fy * cell, fz * cell };
         // セル中心と面中心
-        VECTOR cellC = { (x - Nx / 2) * cell /*+ center.x*/,
-                         (y - Ny / 2) * cell /*+ center.y*/,
-                         (z - Nz / 2) * cell /*+ center.z*/ };
+        //VECTOR cellC = { (x - Nx / 2) * cell + center.x,
+        //                 (y - Ny / 2) * cell + center.y,
+        //                 (z - Nz / 2) * cell + center.z };
 
         VECTOR faceC = { cellC.x + nrm.x * cell * 0.5f,
                          cellC.y + nrm.y * cell * 0.5f,
@@ -639,7 +643,7 @@ std::vector<VoxelBase::AABB> VoxelBase::GetVoxelAABBs(void) const
                 };
                 VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
 
-                ret.push_back(AABB{ bmin, bmax });
+                ret.emplace_back(AABB{ bmin, bmax });
             }
 
     return ret;

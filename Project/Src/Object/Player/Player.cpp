@@ -32,7 +32,7 @@ void Player::Load(void)
 	unit_.para_.colliType = CollisionType::ALLY;
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = SIZE;
-	unit_.para_.radius = SIZE.z / 2;
+	unit_.para_.radius = SIZE.z;
 	unit_.para_.capsuleHalfLen = SIZE.y - SIZE.z;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
@@ -136,9 +136,18 @@ void Player::Draw(void)
 
 	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.pos_, CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
-	
 
-	//// デバッグ用に当たり判定の表示
+
+	// デバッグ用に当たり判定の表示
+
+	VECTOR localPos1 = { 0.0f,unit_.para_.capsuleHalfLen/2 ,0.0f };
+
+	DrawCapsule3D(
+		VSub(unit_.pos_, localPos1),
+		VAdd(unit_.pos_, localPos1),
+		unit_.para_.radius, 30, 0xffffff, 0xffffff, true);
+
+
 	//VECTOR debugPos[8] =
 	//{
 	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
@@ -222,7 +231,6 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 			break;
 		case 2:
 			break;
-
 		}
 		};
 
@@ -249,13 +257,13 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 				else if (vloop(dirVec, i) == DIRECTION::BACK) {
 					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
 				}
+				else { continue; }
 				pushChores(i);
 			}
 		}
 
 	}
 }
-
 
 void Player::StateManager(void)
 {

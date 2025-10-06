@@ -73,6 +73,7 @@ const std::vector<UnitBase*> BlockManager::GetBlocks(void) const
 	for (auto& by : blocks_) {
 		for (auto& bz : by) {
 			for (auto& bx : bz) {
+				if (!bx) { continue; }
 				ret.emplace_back(bx);
 			}
 		}
@@ -98,12 +99,6 @@ void BlockManager::LoadMapCsvData(void)
 
 	int lineCount = 0;
 
-	blocks_.resize(NUM_BLOCK_Y);
-	for (auto& b1 : blocks_) {
-		b1.resize(NUM_BLOCK_Z);
-		for (auto& b2 : b1) { b2.resize(NUM_BLOCK_X); }
-	}
-
 	for (auto& b1 : blocks_) { for (auto& b2 : b1) { for (auto& b3 : b2) { b3 = nullptr; } } }
 
 	while (getline(ifs, line))
@@ -117,6 +112,7 @@ void BlockManager::LoadMapCsvData(void)
 			Block* block = new Block();
 			block->Create((Block::TYPE)0, models_[std::stoi(strSplit[i])], i, 0, lineCount);
 			block->Load();
+			block->Init();
 
 			// 配列にブロッククラスのポインタを格納
 			blocks_[0][lineCount][i] = block;
@@ -124,6 +120,12 @@ void BlockManager::LoadMapCsvData(void)
 
 		lineCount++;
 	}
+	//Block* block = new Block();
+	//block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
+	//block->Load();
+	//block->Init();
+
+	//blocks_[0][0][0] = block;
 }
 
 void BlockManager::SetCamera(Camera* c)
@@ -131,6 +133,7 @@ void BlockManager::SetCamera(Camera* c)
 	for (auto& by : blocks_) {
 		for (auto& bz : by) {
 			for (auto& bx : bz) {
+				if (!bx) { continue; }
 				bx->SetCamera(c);
 			}
 		}

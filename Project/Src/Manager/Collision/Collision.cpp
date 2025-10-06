@@ -53,6 +53,9 @@ bool Collision::IsHit(const Base& a, const Base& b)
 	if (sA == CollisionShape::CAPSULE && sB == CollisionShape::OBB) return CapsuleObb(A, B);
 	if (sA == CollisionShape::OBB && sB == CollisionShape::CAPSULE)   return CapsuleObb(B, A);
 
+	if (sA == CollisionShape::CAPSULE && sB == CollisionShape::AABB) return CapsuleAabb(A, B);
+	if (sA == CollisionShape::AABB && sB == CollisionShape::CAPSULE)   return CapsuleAabb(B, A);
+
 	return false;
 }
 
@@ -95,4 +98,9 @@ bool Collision::CapsuleObb(const Base& capsule, const Base& obb) const
 		capsule.pos_, capsule.para_.radius, capsule.para_.capsuleHalfLen, capsule.angle_,
 		obb.pos_, obb.para_.size, obb.angle_
 	);
+}
+
+bool Collision::CapsuleAabb(const Base& capsule, const Base& obb) const
+{
+	return Cfunc::CapsuleAabb_Y(capsule.pos_, capsule.para_.capsuleHalfLen, capsule.para_.radius, obb.pos_, obb.para_.size);
 }

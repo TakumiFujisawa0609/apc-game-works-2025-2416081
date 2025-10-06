@@ -151,6 +151,21 @@ bool CollisionUtility::CapsuleObb(const VECTOR& capsulePos, float capsuleHalfLen
 	return distSq <= capsuleRadius * capsuleRadius;
 }
 
+bool CollisionUtility::CapsuleAabb_Y(const VECTOR& capsuleCenter, float capsuleHalfLen, float capsuleRadius,
+	const VECTOR& boxCenter, const VECTOR& boxSize) {
+	// カプセル中心線：Y軸方向（回転なし）
+	VECTOR p1 = { capsuleCenter.x, capsuleCenter.y + capsuleHalfLen, capsuleCenter.z };
+	VECTOR p2 = { capsuleCenter.x, capsuleCenter.y - capsuleHalfLen, capsuleCenter.z };
+
+	// AABB ローカル空間（原点=boxCenter）へ変換
+	VECTOR lp1 = VSub(p1, boxCenter);
+	VECTOR lp2 = VSub(p2, boxCenter);
+	VECTOR half = { boxSize.x * 0.5f, boxSize.y * 0.5f, boxSize.z * 0.5f };
+
+	float distSq = SegmentAabbDistSq_Local(lp1, lp2, half);
+	return distSq <= capsuleRadius * capsuleRadius;
+}
+
 CollisionUtility::ObbInfo CollisionUtility::MakeObb(const VECTOR& pos, const VECTOR& size, const VECTOR& angle)
 {
 	ObbInfo r = {};

@@ -6,8 +6,8 @@
 
 #include"../Utility/Utility.h"
 
-enum class CollisionShape { NON = -1, SPHERE, OBB, CAPSULE, MAX };
-enum class CollisionType { NON = -2, ALLY/*味方*/, ENEMY/*敵*/ };
+enum class CollisionShape { NON = -1, SPHERE, OBB, AABB, CAPSULE, MAX };
+enum class CollisionType { NON = -1, ALLY/*味方*/, ENEMY/*敵*/ };
 
 struct Base
 {
@@ -30,7 +30,7 @@ struct Base
 	bool   isAlive_ = false;				// 生存フラグ
 	bool   aliveCollision_ = true;			// 生存フラグによる当たり判定早期リターン
 	VECTOR pos_ = { -1.0f, -1.0f, -1.0f };	// ワールド座標（中心）
-	VECTOR angle_ = { -1.0f,-1.0f,-1.0f };	// 角度
+	VECTOR angle_ = { 0.0f,0.0f,0.0f };	// 角度
 
 	int    hp_ = -1;						// ヒットポイント
 

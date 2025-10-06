@@ -45,7 +45,7 @@ public:
 private:
 
 	// マップデータ
-	std::vector<std::vector<std::vector<Block*>>>blocks_;
+	Block* blocks_[NUM_BLOCK_Y][NUM_BLOCK_Z][NUM_BLOCK_X];
 
 	// ブロック用のモデルハンドルID
 	std::map<int, int>models_;

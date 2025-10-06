@@ -2,6 +2,12 @@
 #include"BlockManager.h"
 #include<DxLib.h>
 
+#include"../../../Manager/Sound/SoundManager.h"
+
+#include"../../../Scene/Game/GameScene.h"
+
+#include"../../Player/Player.h"
+
 
 Block::Block(void)
 {
@@ -28,16 +34,17 @@ void Block::Create(TYPE type, int baseModelId, int mapX, int mapY, int mapZ)
 	float y = static_cast<float>(mapY);
 	float z = static_cast<float>(mapZ);
 
+	// 大きさ設定
+	MV1SetScale(unit_.model_, SCALES);
+
 	// 座標設定
 	unit_.pos_ = VGet(
 		x * SIZE_BLOCK + SIZE_HALF_BLOCK,
-		y * SIZE_BLOCK - SIZE_HALF_BLOCK,
+		y * SIZE_BLOCK + SIZE_HALF_BLOCK,
 		z * SIZE_BLOCK + SIZE_HALF_BLOCK
 	);;
 	MV1SetPosition(unit_.model_, unit_.pos_);
 
-	// 大きさ設定
-	MV1SetScale(unit_.model_, SCALES);
 
 }
 
@@ -47,14 +54,16 @@ void Block::SubLoad(void)
 
 	unit_.para_.speed = 5.0f;
 
-	unit_.para_.colliShape = CollisionShape::OBB;
+	unit_.para_.colliShape = CollisionShape::AABB;
 	unit_.para_.size = { BlockManager::SIZE_BLOCK ,BlockManager::SIZE_BLOCK ,BlockManager::SIZE_BLOCK };
 	unit_.isAlive_ = true;
 }
 
 void Block::SubInit(void)
 {
+	unit_.isAlive_ = true;
 
+	unit_.para_.size = VScale(unit_.para_.size, 1.1f);
 }
 
 void Block::SubUpdate(void)
@@ -73,9 +82,9 @@ void Block::SubUpdate(void)
 
 void Block::SubDraw(void)
 {
-	DrawSphere3D(VAdd(unit_.pos_, unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
+	//DrawSphere3D(VAdd(unit_.pos_, unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 
-	//// デバッグ用に当たり判定の表示
+	// デバッグ用に当たり判定の表示
 	//VECTOR debugPos[8] =
 	//{
 	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
@@ -99,5 +108,19 @@ void Block::SubRelease(void)
 
 void Block::OnCollision(UnitBase* other)
 {
+	if (dynamic_cast<PlayerPunch*>(other)) {
+		if (ApplyBrush(other->GetUnit(), 200)) {
+			GameScene::Shake();
+			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+		}
+		return;
+	}
 
+	if (dynamic_cast<ThrowObjBase*>(other)) {
+		if (ApplyBrush(other->GetUnit(), 200)) {
+			GameScene::Shake();
+			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+		}
+		return;
+	}
 }
