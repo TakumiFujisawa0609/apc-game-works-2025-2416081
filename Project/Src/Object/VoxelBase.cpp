@@ -36,7 +36,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            20.0f,                          // セル(大きさ)
+            40.0f,                          // セル(大きさ)
             VAdd(unit_.pos_,gridCenter_),   // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);
@@ -96,13 +96,14 @@ void VoxelBase::Draw(void)
             b.lastOff = worldOff;
         }
 
-        // ★1コールだけ。不透明描画に（第6引数 FALSE）
         DrawPolygonIndexed3D(
             b.vWorld.data(), (int)b.vWorld.size(),
             b.i.data(), (int)(b.i.size() / 3),
-            textureId_, FALSE
+            textureId_, false
         );
     }
+
+
 }
 
 

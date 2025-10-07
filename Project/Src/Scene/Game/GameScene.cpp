@@ -58,12 +58,12 @@ void GameScene::Load(void)
 	blocks_->SetCamera(camera_);
 	collision_->AddStage(blocks_->GetBlocks());
 
-	for (int i = 0; i < 10; i++) { rock_.emplace_back(new Rock()); }
-	for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }
-	for (int i = 0; i < rock_.size(); i++) {
-		rock_[i]->SetSpeed((float)i - (rock_.size() / 2));
-		for (int j = 0; j < 100; j++) { rock_[i]->InitMove(); }
-	}
+	//for (int i = 0; i < 10; i++) { rock_.emplace_back(new Rock()); }
+	//for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }
+	//for (int i = 0; i < rock_.size(); i++) {
+	//	rock_[i]->SetSpeed((float)i - (rock_.size() / 2));
+	//	for (int j = 0; j < 100; j++) { rock_[i]->InitMove(); }
+	//}
 
 
 	player_ = new Player(camera_->GetAngles());

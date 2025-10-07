@@ -6,7 +6,8 @@ class Block : public VoxelBase
 {
 public:
 	// ブロックモデルの大きさ
-	static constexpr VECTOR SCALES = { 0.5f, 0.5f, 0.5f };
+	//static constexpr VECTOR SCALES = { 0.5f, 0.5f, 0.5f };
+	static constexpr VECTOR SCALES = { 1.0f, 1.0f, 1.0f };
 
 	// ブロック種別
 	enum class TYPE

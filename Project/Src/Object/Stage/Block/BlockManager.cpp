@@ -17,8 +17,10 @@ void BlockManager::Load(void)
 	// 各種ブロックモデルのロード
 	std::string PATH = "Data/Model/StageBlocks/";
 
-	models_[0] = MV1LoadModel((PATH + "Block_Grass.mv1").c_str());
-	models_[1] = MV1LoadModel((PATH + "Block_Metal.mv1").c_str());
+	//models_[0] = MV1LoadModel((PATH + "Block_Grass.mv1").c_str());
+	models_[0] = MV1LoadModel((PATH + "Block.mv1").c_str());
+	//models_[1] = MV1LoadModel((PATH + "Block_Metal.mv1").c_str());
+	models_[1] = MV1LoadModel((PATH + "Block.mv1").c_str());
 
 	LoadMapCsvData();
 }
