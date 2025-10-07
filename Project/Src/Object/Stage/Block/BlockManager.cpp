@@ -88,46 +88,46 @@ const std::vector<UnitBase*> BlockManager::GetBlocks(void) const
 
 void BlockManager::LoadMapCsvData(void)
 {
-	// ファイルの読込
-	std::ifstream ifs = std::ifstream("Data/MapData/MapData.csv");
-	if (!ifs) { return; }
+	//// ファイルの読込
+	//std::ifstream ifs = std::ifstream("Data/MapData/MapData.csv");
+	//if (!ifs) { return; }
 
-	// ファイルを１行ずつ読み込む
-	std::string line; // 1行の文字情報
+	//// ファイルを１行ずつ読み込む
+	//std::string line; // 1行の文字情報
 
-	std::vector<std::string> strSplit; // 1行を1文字の動的配列に分割
+	//std::vector<std::string> strSplit; // 1行を1文字の動的配列に分割
 
-	int chipNo = 0;
+	//int chipNo = 0;
 
-	int lineCount = 0;
+	//int lineCount = 0;
 
-	for (auto& b1 : blocks_) { for (auto& b2 : b1) { for (auto& b3 : b2) { b3 = nullptr; } } }
+	//for (auto& b1 : blocks_) { for (auto& b2 : b1) { for (auto& b3 : b2) { b3 = nullptr; } } }
 
-	while (getline(ifs, line))
-	{
-		// １行をカンマ区切りで分割
-		strSplit = Utility::Split(line, ',');
+	//while (getline(ifs, line))
+	//{
+	//	// １行をカンマ区切りで分割
+	//	strSplit = Utility::Split(line, ',');
 
-		for (int i = 0; i < strSplit.size(); i++) {
-			if (strSplit[i] == "- 1") { continue; }
+	//	for (int i = 0; i < strSplit.size(); i++) {
+	//		if (strSplit[i] == "- 1") { continue; }
 
-			Block* block = new Block();
-			block->Create((Block::TYPE)0, models_[std::stoi(strSplit[i])], i, 0, lineCount);
-			block->Load();
-			block->Init();
+	//		Block* block = new Block();
+	//		block->Create((Block::TYPE)0, models_[std::stoi(strSplit[i])], i, 0, lineCount);
+	//		block->Load();
+	//		block->Init();
 
-			// 配列にブロッククラスのポインタを格納
-			blocks_[0][lineCount][i] = block;
-		}
+	//		// 配列にブロッククラスのポインタを格納
+	//		blocks_[0][lineCount][i] = block;
+	//	}
 
-		lineCount++;
-	}
-	//Block* block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
-	//block->Load();
-	//block->Init();
+	//	lineCount++;
+	//}
+	Block* block = new Block();
+	block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
+	block->Load();
+	block->Init();
 
-	//blocks_[0][0][0] = block;
+	blocks_[0][0][0] = block;
 }
 
 void BlockManager::SetCamera(Camera* c)

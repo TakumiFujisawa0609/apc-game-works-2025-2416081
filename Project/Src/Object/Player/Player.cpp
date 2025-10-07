@@ -33,7 +33,7 @@ void Player::Load(void)
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = SIZE;
 	unit_.para_.radius = SIZE.z;
-	unit_.para_.capsuleHalfLen = SIZE.y - SIZE.z;
+	unit_.para_.capsuleHalfLen = (SIZE.y - (unit_.para_.radius * 2)) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
 	if (unit_.model_ != -1) {
@@ -122,6 +122,13 @@ void Player::Update(void)
 
 	if (unit_.pos_.y < -500.0f) {
 		unit_.pos_ = { 500.0f,500.0f,400.0f };
+		yAccelSum_ = 0.0f;
+		for (auto& jump : isJump_) { jump = false; }
+		for (auto& cou : jumpKeyCounter_) { cou = 0; }
+	}
+
+	if (unit_.pos_.y < unit_.para_.size.y/2) {
+		unit_.pos_.y = unit_.para_.size.y / 2;
 		yAccelSum_ = 0.0f;
 		for (auto& jump : isJump_) { jump = false; }
 		for (auto& cou : jumpKeyCounter_) { cou = 0; }
@@ -220,7 +227,7 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 		case 0:
 			break;
 		case 1:
-			if(dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
+			if (dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
 			else if (dirVec.y == DIRECTION::BACK) // 下方向に移動して衝突した場合
 			{
 				yAccelSum_ = 0.0f;
@@ -237,45 +244,45 @@ void Player::CollisionVoxel(VoxelBase* voxel)
 		// 移動していない軸は処理しない
 		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
 
-		//for (const auto& vPos : voxel->GetVoxelCenters()) {
-		//	if (Cfunc::CapsuleAabb_Y(pPoss[i], unit_.para_.capsuleHalfLen, unit_.para_.radius, vPos, voxel->GetCellSizeVECTOR())) {
-		//		// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
-		//		if (vloop(dirVec, i) == DIRECTION::FRONT) {
-		//			vloop(unit_.pos_, i) = (std::min)((vloop(vPos, i) - (voxel->GetCellSize() / 2)) - unit_.para_.radius, vloop(unit_.pos_, i));
-		//		}
-		//		else if (vloop(dirVec, i) == DIRECTION::BACK) {
-		//			vloop(unit_.pos_, i) = (std::max)((vloop(vPos, i) + (voxel->GetCellSize() / 2)) + unit_.para_.radius, vloop(unit_.pos_, i));
-		//		}
-		//		else { continue; }
-
-		//		pushChores(i);
-		//	}
-		//}
-
-		// プレイヤーのAABBとボクセルのAABBの衝突判定
-		VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
-		VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
-
-		for (const auto& batch : voxel->GetVoxelAABBs())
-		{
-			VECTOR voxelMin = batch.min;
-			VECTOR voxelMax = batch.max;
-
-			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
-				playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
-				playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
-			{
+		for (const auto& vPos : voxel->GetVoxelCenters()) {
+			if (Cfunc::CapsuleAabb_Y(pPoss[i], unit_.para_.capsuleHalfLen, unit_.para_.radius, vPos, voxel->GetCellSizeVECTOR())) {
 				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
 				if (vloop(dirVec, i) == DIRECTION::FRONT) {
-					vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+					vloop(unit_.pos_, i) = (std::min)((vloop(vPos, i) - (voxel->GetCellSize() / 2)) - unit_.para_.radius, vloop(unit_.pos_, i));
 				}
 				else if (vloop(dirVec, i) == DIRECTION::BACK) {
-					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+					vloop(unit_.pos_, i) = (std::max)((vloop(vPos, i) + (voxel->GetCellSize() / 2)) + unit_.para_.radius, vloop(unit_.pos_, i));
 				}
 				else { continue; }
+
 				pushChores(i);
 			}
+			//// プレイヤーのAABBとボクセルのAABBの衝突判定
+			//VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
+			//VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
+
+			//for (const auto& batch : voxel->GetVoxelAABBs())
+			//{
+			//	VECTOR voxelMin = batch.min;
+			//	VECTOR voxelMax = batch.max;
+
+			//	if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
+			//		playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
+			//		playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
+			//	{
+			//		// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
+			//		if (vloop(dirVec, i) == DIRECTION::FRONT) {
+			//			vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+			//		}
+			//		else if (vloop(dirVec, i) == DIRECTION::BACK) {
+			//			vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+			//		}
+			//		else { continue; }
+			//		pushChores(i);
+			//	}
+			//}
 		}
+
 	}
 }
 

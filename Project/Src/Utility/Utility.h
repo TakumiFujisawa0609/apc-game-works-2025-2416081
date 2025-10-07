@@ -78,6 +78,8 @@ public:
 
 	static VECTOR Clamp(const VECTOR& v, const VECTOR& minV, const VECTOR& maxV);
 
+	static float Sgn(float x) { return (x < 0) ? -1.0f : 1.0f; }
+
 	// ƒxƒNƒgƒ‹‚ª‚O‚©‚Ç‚¤‚©
 	static bool VZERO(const VECTOR& v);
 

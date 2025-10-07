@@ -182,6 +182,70 @@ bool CollisionUtility::SphereAabb(const VECTOR& sphereCenter, float sphereRadius
 	return VDot(diff, diff) <= sphereRadius * sphereRadius;
 }
 
+bool CollisionUtility::SegmentAabb_Slab_EnterT_Local(
+	const VECTOR& p0, const VECTOR& p1, const VECTOR& half,
+	float& tHit, VECTOR& nLocal)
+{
+	VECTOR d{ p1.x - p0.x, p1.y - p0.y, p1.z - p0.z };
+	float tmin = 0.0f, tmax = 1.0f;
+	int   axis = -1; float sign = 0.0f;
+
+	auto slab = [&](float p, float h, float dir, int a)->bool {
+		if (std::fabs(dir) < 1e-8f) {
+			if (p < -h || p > h) return false; // 平行で外
+			return true; // 平行で内
+		}
+		float inv = 1.0f / dir;
+		float t1 = (-h - p) * inv;
+		float t2 = (h - p) * inv;
+		float enter = t1, exit = t2, s = -1.0f;
+		if (enter > exit) { std::swap(enter, exit); s = +1.0f; } // 逆側から入る
+		if (enter > tmin) { tmin = enter; axis = a; sign = s; }
+		tmax = (std::min)(tmax, exit);
+		return tmin <= tmax;
+		};
+
+	if (!slab(p0.x, half.x, d.x, 0)) return false;
+	if (!slab(p0.y, half.y, d.y, 1)) return false;
+	if (!slab(p0.z, half.z, d.z, 2)) return false;
+	if (tmin < 0.0f || tmin > 1.0f)  return false;
+
+	tHit = tmin;
+	nLocal = { 0,0,0 };
+	if (axis == 0) nLocal.x = sign;
+	else if (axis == 1) nLocal.y = sign;
+	else if (axis == 2) nLocal.z = sign;
+	return true;
+}
+
+bool CollisionUtility::SweepCapsuleY_AgainstCell(
+	const VECTOR& p0, const VECTOR& p1,
+	float R, float H,
+	const VECTOR& cellCenter, const VECTOR& cellHalf,
+	float eps, SweepHit& out)
+{
+	// カプセルは AABB を膨張して判定：X/Z に R、Y に (H+R)
+	VECTOR half = { cellHalf.x + R, cellHalf.y + (H + R), cellHalf.z + R };
+
+	// ワールド→セルローカル
+	VECTOR lp0{ p0.x - cellCenter.x, p0.y - cellCenter.y, p0.z - cellCenter.z };
+	VECTOR lp1{ p1.x - cellCenter.x, p1.y - cellCenter.y, p1.z - cellCenter.z };
+
+	float t; VECTOR nL;
+	if (!SegmentAabb_Slab_EnterT_Local(lp0, lp1, half, t, nL)) return false;
+
+	out.t = (std::max)(0.0f, t - eps); // 少しだけ手前で止める
+	out.n = nL;                      // 軸揃いなのでそのままワールド法線
+	return true;
+}
+
+void CollisionUtility::SlideVelocity(VECTOR& v, const VECTOR& n) {
+	float vn = v.x * n.x + v.y * n.y + v.z * n.z;
+	if (vn < 0.0f) { v.x -= vn * n.x; v.y -= vn * n.y; v.z -= vn * n.z; }
+}
+
+
+
 CollisionUtility::ObbInfo CollisionUtility::MakeObb(const VECTOR& pos, const VECTOR& size, const VECTOR& angle)
 {
 	ObbInfo r = {};

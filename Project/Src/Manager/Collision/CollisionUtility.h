@@ -41,6 +41,24 @@ public:
     static bool SphereAabb(const VECTOR& sphereCenter, float sphereRadius,
         const VECTOR& boxCenter, const VECTOR& boxSize);
 
+    // 追加：CCD 用のヘルパ
+    struct SweepHit { float t = 1.0f; VECTOR n{ 0,0,0 }; };
+
+    // 線分 vs AABB（原点中心・half）: 最初の侵入時刻と法線（ローカル）を返す
+    static bool SegmentAabb_Slab_EnterT_Local(
+        const VECTOR& p0, const VECTOR& p1, const VECTOR& half,
+        float& tHit, VECTOR& nLocal);
+
+    // Y向きカプセル vs 1セルAABB のスウィープ（ワールド）
+    static bool SweepCapsuleY_AgainstCell(
+        const VECTOR& p0, const VECTOR& p1,  // カプセル中心（足元→中心補正後）の移動線分
+        float R, float H,                     // カプセル半径R, 半高H
+        const VECTOR& cellCenter, const VECTOR& cellHalf,
+        float eps, SweepHit& out);
+
+    // 速度から法線成分を除去（スライド）
+    static inline void SlideVelocity(VECTOR& v, const VECTOR& n);
+
 private:
     // ---- 内部ヘルパ ----
     static inline float comp(const VECTOR& v, int i) { return i == 0 ? v.x : (i == 1 ? v.y : v.z); }
