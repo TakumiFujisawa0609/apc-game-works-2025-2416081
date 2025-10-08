@@ -78,7 +78,9 @@ void VoxelBase::Draw(void)
 
     SubDraw();
 
-    const VECTOR worldOff = unit_.pos_; // このオブジェクトのワールド平行移動
+    const VECTOR worldOff = unit_.pos_;
+
+    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
 
     for (auto& b : batches_)
     {
@@ -91,7 +93,7 @@ void VoxelBase::Draw(void)
             b.vWorld.resize(b.v.size());
             for (size_t k = 0; k < b.v.size(); ++k) {
                 b.vWorld[k] = b.v[k];
-                b.vWorld[k].pos = VAdd(b.v[k].pos, worldOff); // 平行移動だけ
+                b.vWorld[k].pos = VAdd(b.v[k].pos, worldOff);
             }
             b.lastOff = worldOff;
         }
@@ -103,6 +105,7 @@ void VoxelBase::Draw(void)
         );
     }
 
+    //SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 }
 
@@ -375,6 +378,8 @@ bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
     case CollisionShape::OBB: { return ApplyBrushAABB(other, amount); }
     case CollisionShape::CAPSULE: { return ApplyBrushCapsule(other, amount); }
     }
+
+    return false;
 }
 
 bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
@@ -648,7 +653,26 @@ bool VoxelBase::ResolveCapsuleCenter(
     }
     return false;
 }
+std::vector<VECTOR> VoxelBase::GetVoxelCenters(void) const
+{
+    std::vector<VECTOR> ret;
+    if (density_.empty() || Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) { return ret; }
+    ret.reserve(1024);
 
+    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
+    for (int z = 0; z < Nz_; ++z)
+        for (int y = 0; y < Ny_; ++y)
+            for (int x = 0; x < Nx_; ++x) {
+                if (density_[Idx(x, y, z)] == 0) { continue; }
+                VECTOR p = {
+                    ((x - (Nx_ / 2)) * cell_),
+                    ((y - (Ny_ / 2)) * cell_),
+                    ((z - (Nz_ / 2)) * cell_)
+                };
+                ret.push_back(VAdd(gridCenterW, p));
+            }
+    return ret;
+}
 std::vector<VoxelBase::AABB> VoxelBase::GetVoxelAABBs(void) const
 {
     std::vector<AABB> ret;
@@ -657,40 +681,14 @@ std::vector<VoxelBase::AABB> VoxelBase::GetVoxelAABBs(void) const
 
     const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
 
-    for (int z = 0; z < Nz_; ++z)
-        for (int y = 0; y < Ny_; ++y)
-            for (int x = 0; x < Nx_; ++x) {
-                if (density_[Idx(x, y, z)] == 0) { continue; }
+    const VECTOR cellHalfSize = VScale(GetCellSizeVECTOR(), 0.5f);
+    for (auto& pos : GetVoxelCenters()) {
+        VECTOR min = VSub(pos, cellHalfSize);
+        VECTOR max = VAdd(pos, cellHalfSize);
 
-                VECTOR bmin = {
-                    gridCenterW.x + (x - Nx_ / 2) * cell_,
-                    gridCenterW.y + (y - Ny_ / 2) * cell_,
-                    gridCenterW.z + (z - Nz_ / 2) * cell_
-                };
-                VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
-
-                ret.emplace_back(AABB{ bmin, bmax });
-            }
+        ret.emplace_back(AABB{ min,max });
+    }
 
     return ret;
 }
 
-std::vector<VECTOR> VoxelBase::GetVoxelCenters(void) const
-{
-    std::vector<VECTOR> ret;
-    if (density_.empty() || Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) { return ret; }
-    ret.reserve(1024);
-    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
-    for (int z = 0; z < Nz_; ++z)
-        for (int y = 0; y < Ny_; ++y)
-            for (int x = 0; x < Nx_; ++x) {
-                if (density_[Idx(x, y, z)] == 0) { continue; }
-                VECTOR p = {
-                    gridCenterW.x + (x - Nx_ / 2 + 0.5f) * cell_,
-                    gridCenterW.y + (y - Ny_ / 2 + 0.5f) * cell_,
-                    gridCenterW.z + (z - Nz_ / 2 + 0.5f) * cell_
-                };
-                ret.push_back(p);
-            }
-	return ret;
-}

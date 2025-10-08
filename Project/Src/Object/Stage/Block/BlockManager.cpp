@@ -119,7 +119,6 @@ void BlockManager::LoadMapCsvData(void)
 			// 配列にブロッククラスのポインタを格納
 			blocks_[0][lineCount][i] = block;
 
-
 			Block* block1 = new Block();
 			block1->Create((Block::TYPE)0, models_[std::stoi(strSplit[i])], i, 1, lineCount);
 			block1->Load();
@@ -132,12 +131,6 @@ void BlockManager::LoadMapCsvData(void)
 		lineCount++;
 	}
 
-	//Block* block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
-	//block->Load();
-	//block->Init();
-
-	//blocks_[0][0][0] = block;
 }
 
 void BlockManager::SetCamera(Camera* c)

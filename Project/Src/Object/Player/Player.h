@@ -114,6 +114,9 @@ private:
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
 	// ˆÚ“®ˆ—ŠÖŒW--------------------------
 
+	//enum class DIRECTION { NON, FRONT, BACK };
+	//struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
+
 	// ŠÖ”
 	void Run(void);			//‰¡ˆÚ“®ŠÖ”
 	void Jump(void);		//ƒWƒƒƒ“ƒvŠÖ”
