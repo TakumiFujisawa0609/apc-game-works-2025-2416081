@@ -108,8 +108,6 @@ private:
 	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
 
-	void CollisionVoxel(VoxelBase* voxel);
-
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
 	// ˆÚ“®ˆ—ŠÖŒW--------------------------

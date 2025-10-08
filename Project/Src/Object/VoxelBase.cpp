@@ -36,7 +36,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            25.0f,                          // セル(大きさ)
+            30.0f,                          // セル(大きさ)
             VAdd(unit_.pos_,gridCenter_),   // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);
@@ -69,6 +69,9 @@ void VoxelBase::Update(void)
 
         regeneration_ = false;
     }
+
+    //int dirtyCount = 0; for (auto& p : pillars_) if (p.dirty) ++dirtyCount;
+    //if (dirtyCount) DrawFormatString(20, 80, GetColor(255, 255, 0), "dirty=%d", dirtyCount);
 }
 
 

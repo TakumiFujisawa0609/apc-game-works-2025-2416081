@@ -67,8 +67,7 @@ void Application::Run(void)
 	{
 		// フレームレート更新
 		// 1/60秒経過していないなら再ループさせる
-		if (!fps_->UpdateFrameRate()) continue;
-
+		if (!fps_->UpdateFrameRate()) { continue; }
 		KeyManager::GetIns().Update();
 		SceneManager::GetIns().Update();	// シーン管理更新
 		fps_->CalcFrameRate();					// フレームレート計算

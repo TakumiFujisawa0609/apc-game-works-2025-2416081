@@ -15,7 +15,7 @@ public:
 	// ブロックの数(マップのサイズ)
 	static constexpr int NUM_BLOCK_X = 20;
 	static constexpr int NUM_BLOCK_Z = 20;
-	static constexpr int NUM_BLOCK_Y = 2;
+	static constexpr int NUM_BLOCK_Y = 7;
 
 	// 1ブロックあたりのサイズ
 	static constexpr float SIZE_BLOCK = 100.0f;
@@ -45,7 +45,9 @@ public:
 private:
 
 	// マップデータ
-	Block* blocks_[NUM_BLOCK_Y][NUM_BLOCK_Z][NUM_BLOCK_X];
+	//Block* blocks_[NUM_BLOCK_Y][NUM_BLOCK_Z][NUM_BLOCK_X];
+
+	std::vector<Block*>blocks_;
 
 	// ブロック用のモデルハンドルID
 	std::map<int, int>models_;
