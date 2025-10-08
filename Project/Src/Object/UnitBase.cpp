@@ -4,7 +4,7 @@
 
 #include"../Scene/SceneManager/SceneManager.h"
 
-UnitBase::UnitBase() :yAccelSum_(0.0f), prevPos_() {}
+UnitBase::UnitBase() :yAccelSum_(0.0f) {}
 UnitBase::~UnitBase() {}
 
 void UnitBase::Invi(void)

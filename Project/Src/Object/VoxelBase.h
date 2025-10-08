@@ -40,6 +40,8 @@ public:
 
 	bool ResolveCapsule(VECTOR& footPos, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIters);
 
+	bool ResolveCapsuleCenter(VECTOR& center, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter);
+
 
 
 	struct AABB { VECTOR min; VECTOR max; };

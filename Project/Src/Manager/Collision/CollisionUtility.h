@@ -41,6 +41,19 @@ public:
     static bool SphereAabb(const VECTOR& sphereCenter, float sphereRadius,
         const VECTOR& boxCenter, const VECTOR& boxSize);
 
+
+    // 最小押し戻し（法線と深さ）
+    static bool SphereAabb_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
+        VECTOR& outN, float& outDepth);
+
+    static bool CircleXZ_RectXZ_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
+        VECTOR& outN, float& outDepth);
+
+    // カプセル(Y軸) vs AABB の MTV（合成：上球/下球/側面円）
+    static bool CapsuleAabbY_MTV(const VECTOR& center, float halfH, float R,
+        const VECTOR& bmin, const VECTOR& bmax,
+        VECTOR& outN, float& outDepth);
+
 private:
     // ---- 内部ヘルパ ----
     static inline float comp(const VECTOR& v, int i) { return i == 0 ? v.x : (i == 1 ? v.y : v.z); }

@@ -11,6 +11,85 @@ std::vector<UnitBase*> Collision::stageObject_ = {};
 Collision::Collision() {}
 Collision::~Collision() {}
 
+
+void Collision::ResolveDynamics(void)
+{
+    const float EPS = 1e-4f;
+    const float cosSlope = std::cos(slopeLimitDeg_ * (DX_PI_F / 180.0f));
+
+    for (auto* o : objects_) {
+        if (!o) continue;
+        const Base& du = o->GetUnit();
+
+        // カプセル前提（必要なら分岐追加）
+        if (du.para_.colliShape != CollisionShape::CAPSULE) continue;
+
+        // 中心と基本寸法
+        VECTOR pos = du.pos_;
+        VECTOR center = VAdd(du.pos_, du.para_.center);
+        VECTOR vel = du.vel_;             // 今フレーム分の移動“相当”
+        const float R = du.para_.radius;
+        const float H = du.para_.capsuleHalfLen;
+
+        bool grounded = false;
+
+        // 反復解決（複数ヒットの安定化）
+        for (int it = 0; it < resolveIters_; ++it) {
+            bool moved = false;
+
+            for (auto* s : stageObject_) {
+                if (!s) continue;
+                const Base& su = s->GetUnit();
+
+                // 1) VoxelBase：セルベースに丸投げ
+                if (auto* vox = dynamic_cast<VoxelBase*>(s)) {
+                    // 1回ずつ適用（反復外側で複数回）
+                    VECTOR center = VAdd(du.pos_, du.para_.center);
+                    VECTOR vtmp = vel; bool g = false;
+                    if (vox->ResolveCapsuleCenter(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
+                        VECTOR delta = VSub(center, VAdd(du.pos_, du.para_.center));
+                        pos = VAdd(pos, delta);
+                        VECTOR n = Utility::Normalize(delta);
+                        float vn = VDot(vel, n);
+                        if (vn < 0.0f) vel = VSub(vel, VScale(n, vn));
+                        grounded = grounded || g;
+                    }
+                    continue;
+                }
+
+                // 非Voxel（AABB）：MTV で最小押し戻し + スライド
+                if (su.para_.colliShape == CollisionShape::AABB) {
+                    VECTOR half = VScale(su.para_.size, 0.5f);
+                    VECTOR bmin = VSub(VAdd(su.pos_, su.para_.center), half);
+                    VECTOR bmax = VAdd(VAdd(su.pos_, su.para_.center), half);
+
+                    VECTOR n; float d;
+                    if (Cfunc::CapsuleAabbY_MTV(center, H, R, bmin, bmax, n, d)) {
+                        center = VAdd(center, VScale(n, d + EPS));
+                        pos = VAdd(pos, VScale(n, d + EPS));
+
+                        // スライド：法線成分を殺す
+                        float vn = VDot(vel, n);
+                        if (vn < 0.0f) vel = VSub(vel, VScale(n, vn));
+
+                        // 接地判定（床っぽい法線で下降中なら接地）
+                        if (n.y > cosSlope && vel.y <= 0.0f) grounded = true;
+
+                        moved = true;
+                    }
+                }
+            }
+
+            if (!moved) break;
+        }
+
+        // 反映
+        o->SetPos(pos);
+        o->SetVelocity(vel);
+        if (grounded) o->OnGrounded();
+    }
+}
+
 void Collision::Check()
 {
 	// ステージオブジェクトとオブジェクトの当たり判定

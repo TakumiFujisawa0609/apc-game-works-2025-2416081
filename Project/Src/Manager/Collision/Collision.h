@@ -3,6 +3,7 @@
 #include <vector>
 #include <DxLib.h>
 #include "../../Object/UnitBase.h"
+#include "../../Object/VoxelBase.h"
 
 class Collision
 {
@@ -15,12 +16,23 @@ public:
 	void AddStage(UnitBase* obj) { stageObject_.push_back(obj); }
 	void AddStage(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddStage(o); } }
 
+	void ResolveDynamics(void);      // ★追加：物理ステップ（vel修正＋必要最小押し戻し）
+	void SetSlopeLimitDeg(float deg) { slopeLimitDeg_ = deg; } // 接地角の許容
+
 	void Check();
 	void Clear() { objects_.clear(); stageObject_.clear(); }
+
+
+	void SetResolveIters(int n) { resolveIters_ = (n < 1 ? 1 : n); }
 
 private:
 	static std::vector<UnitBase*> objects_;
 	static std::vector<UnitBase*> stageObject_;
+
+
+	float slopeLimitDeg_ = 50.0f; // だいたいの床角
+
+	int resolveIters_ = 3;   // デフォ3回
 
 	// 衝突関数振り分け
 	bool IsHit(const Base& a, const Base& b);

@@ -29,7 +29,12 @@ struct Base
 
 	bool   isAlive_ = false;				// 生存フラグ
 	bool   aliveCollision_ = true;			// 生存フラグによる当たり判定早期リターン
+
 	VECTOR pos_ = { -1.0f, -1.0f, -1.0f };	// ワールド座標（中心）
+	VECTOR prevPos_ = { -1.0f,-1.0f,-1.0f };
+
+	VECTOR vel_ = { 0.0f,0.0f,0.0f };
+
 	VECTOR angle_ = { 0.0f,0.0f,0.0f };	// 角度
 
 	int    hp_ = -1;						// ヒットポイント
@@ -54,14 +59,20 @@ public:
 
 	const Base& GetUnit(void) const { return unit_; }
 	virtual int GetState(void)const { return -1; }
+
+	void SetPos(const VECTOR& p) { unit_.pos_ = p; }
+	void SetVelocity(const VECTOR& v) { unit_.vel_ = v; }
+
+	virtual void OnGrounded() {}
 	virtual void OnCollision(UnitBase* other) = 0;
+
+	void BeginFrame() { unit_.prevPos_ = unit_.pos_; }
+	void Integrate(void) { unit_.pos_ = VAdd(unit_.pos_, unit_.vel_); ZeroVelocityAxes(true, true, true); }
+	void ZeroVelocityAxes(bool x, bool y, bool z) { if (x) { unit_.vel_.x = 0; } if (y) { unit_.vel_.y = 0; } if (z) { unit_.vel_.z = 0; } }
 
 protected:
 	Base unit_;
 	void Invi(void);
-
-
-	VECTOR prevPos_;
 
 	float yAccelSum_;
 
@@ -72,6 +83,4 @@ protected:
 	static constexpr float GRAVITY_MAX = -60.0f;
 	void Gravity(void);
 #pragma endregion
-
-
 };

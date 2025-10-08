@@ -36,7 +36,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            40.0f,                          // セル(大きさ)
+            25.0f,                          // セル(大きさ)
             VAdd(unit_.pos_,gridCenter_),   // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);
@@ -622,6 +622,31 @@ bool VoxelBase::ResolveCapsule(
         any = true;
     }
     return any;
+}
+
+bool VoxelBase::ResolveCapsuleCenter(
+    VECTOR& center, float R, float halfH,
+    VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter)
+{
+    // 既存の foot 版に変換して委譲するだけ：
+    // foot は「カプセル最下点」= 中心 - (R + halfH) * +Y
+    const VECTOR off = VGet(0.0f, R + halfH, 0.0f);
+    VECTOR foot = VSub(center, off);
+
+    // 既存の足元版に丸投げ
+    const bool hit = ResolveCapsule(foot, R, halfH, vel, grounded, slopeLimitDeg, maxIter);
+
+    // foot が動いた（or ヒットした）なら center を戻す
+    const VECTOR newCenter = VAdd(foot, off);
+
+    // 微小誤差を避けるなら閾値で判定
+    const VECTOR d = VSub(newCenter, center);
+    const float  d2 = d.x * d.x + d.y * d.y + d.z * d.z;
+    if (hit || d2 > 1e-12f) {
+        center = newCenter;
+        return true;
+    }
+    return false;
 }
 
 std::vector<VoxelBase::AABB> VoxelBase::GetVoxelAABBs(void) const

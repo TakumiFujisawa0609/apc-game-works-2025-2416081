@@ -14,7 +14,6 @@ class Player : public UnitBase
 public:
 	static constexpr VECTOR SIZE = { 80.0f-20.0f,185.368f-40.0f,45.0f-15.0f };
 	static constexpr VECTOR CENTER_DIFF = { 0.0f,72.684f,0.0f };
-	//static constexpr VECTOR CENTER_DIFF = { 0.0f,92.684f,0.0f };
 
 
 	Player(const VECTOR& cameraAngle);
@@ -26,6 +25,7 @@ public:
 	void Draw(void)override;
 	void Release(void)override;
 
+	void OnGrounded()override;
 	void OnCollision(UnitBase* other)override;
 
 	enum class STATE

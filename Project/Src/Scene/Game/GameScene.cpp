@@ -120,13 +120,16 @@ void GameScene::Update(void)
 	}
 	for (auto& r : rock_) { r->Update(); }
 	player_->Update();
-
 	blocks_->Update();
+
+	collision_->ResolveDynamics();
+
+	player_->Integrate();
+	for (auto& r : rock_) { r->Integrate(); }
 
 	collision_->Check();
 
 	camera_->Update();
-	
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) { App::GetIns().GameEnd(); }
 }

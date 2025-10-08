@@ -137,7 +137,7 @@ void Camera::SetBeforeDrawFollow(void)
 
 		if (angles_.y >= Utility::Deg2RadF(360.0f)) { angles_.y -= Utility::Deg2RadF(360.0f); }
 		if (angles_.y <= Utility::Deg2RadF(0.0f)) { angles_.y += Utility::Deg2RadF(360.0f); }
-		if (angles_.x < Utility::Deg2RadF(0.0f)) { angles_.x = Utility::Deg2RadF(0.0f); }
+		if (angles_.x < Utility::Deg2RadF(-30.0f)) { angles_.x = Utility::Deg2RadF(-30.0f); }
 		if (angles_.x > Utility::Deg2RadF(60.0f)) { angles_.x = Utility::Deg2RadF(60.0f); }
 	}
 

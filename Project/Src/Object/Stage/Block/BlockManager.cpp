@@ -118,10 +118,20 @@ void BlockManager::LoadMapCsvData(void)
 
 			// 配列にブロッククラスのポインタを格納
 			blocks_[0][lineCount][i] = block;
+
+
+			Block* block1 = new Block();
+			block1->Create((Block::TYPE)0, models_[std::stoi(strSplit[i])], i, 1, lineCount);
+			block1->Load();
+			block1->Init();
+
+			// 配列にブロッククラスのポインタを格納
+			blocks_[1][lineCount][i] = block1;
 		}
 
 		lineCount++;
 	}
+
 	//Block* block = new Block();
 	//block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
 	//block->Load();

@@ -182,6 +182,84 @@ bool CollisionUtility::SphereAabb(const VECTOR& sphereCenter, float sphereRadius
 	return VDot(diff, diff) <= sphereRadius * sphereRadius;
 }
 
+
+
+
+
+
+bool CollisionUtility::SphereAabb_MTV(const VECTOR& C, float R,
+	const VECTOR& bmin, const VECTOR& bmax, VECTOR& outN, float& outDepth)
+{
+	// VoxelBase::SphereVsAABB_MTV 相当  :contentReference[oaicite:11]{index=11}
+	VECTOR cp = Utility::Clamp(C, bmin, bmax);
+	VECTOR d = VSub(C, cp);
+	float L2 = VDot(d, d);
+	if (L2 > R * R) return false;
+	if (L2 > 1e-12f) {
+		float L = std::sqrt(L2);
+		outN = VScale(d, 1.0f / L);
+		outDepth = R - L;
+		return true;
+	}
+	else {
+		float dx = (std::min)(C.x - bmin.x, bmax.x - C.x);
+		float dy = (std::min)(C.y - bmin.y, bmax.y - C.y);
+		float dz = (std::min)(C.z - bmin.z, bmax.z - C.z);
+		if (dx <= dy && dx <= dz) { outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }; outDepth = R + dx; }
+		else if (dy <= dz) { outN = { 0, (C.y < (bmin.y + bmax.y) * 0.5f) ? -1.f : +1.f, 0 }; outDepth = R + dy; }
+		else { outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }; outDepth = R + dz; }
+		return true;
+	}
+}
+
+bool CollisionUtility::CircleXZ_RectXZ_MTV(const VECTOR& C, float R,
+	const VECTOR& bmin, const VECTOR& bmax, VECTOR& outN, float& outDepth)
+{
+	// VoxelBase::CircleXZ_vs_RectXZ_MTV 相当  :contentReference[oaicite:12]{index=12}
+	float qx = Utility::Clamp(C.x, bmin.x, bmax.x);
+	float qz = Utility::Clamp(C.z, bmin.z, bmax.z);
+	float dx = C.x - qx, dz = C.z - qz;
+	float L2 = dx * dx + dz * dz;
+	if (L2 > R * R) return false;
+	if (L2 > 1e-12f) {
+		float L = std::sqrt(L2);
+		outN = { dx / L, 0.0f, dz / L };
+		outDepth = R - L;
+		return true;
+	}
+	else {
+		float rx = (std::min)(std::abs(C.x - bmin.x), std::abs(bmax.x - C.x));
+		float rz = (std::min)(std::abs(C.z - bmin.z), std::abs(bmax.z - C.z));
+		if (rx <= rz) { outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }; outDepth = R + rx; }
+		else { outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }; outDepth = R + rz; }
+		return true;
+	}
+}
+
+bool CollisionUtility::CapsuleAabbY_MTV(const VECTOR& center, float halfH, float R,
+	const VECTOR& bmin, const VECTOR& bmax, VECTOR& outN, float& outDepth)
+{
+	// 上球・下球
+	VECTOR N1; float D1;
+	if (SphereAabb_MTV(VAdd(center, VGet(0, +halfH, 0)), R, bmin, bmax, N1, D1)) { outN = N1; outDepth = D1; return true; }
+	VECTOR N2; float D2;
+	if (SphereAabb_MTV(VAdd(center, VGet(0, -halfH, 0)), R, bmin, bmax, N2, D2)) { outN = N2; outDepth = D2; return true; }
+
+	// 側面（Y が重なっている時のみ XZ 円で判定）
+	float yOverlap = (std::min)(bmax.y, center.y + halfH) - (std::max)(bmin.y, center.y - halfH);
+	if (yOverlap > 0.0f) {
+		VECTOR N3; float D3;
+		if (CircleXZ_RectXZ_MTV(center, R, bmin, bmax, N3, D3)) { outN = N3; outDepth = D3; return true; }
+	}
+	return false;
+}
+
+
+
+
+
+
+
 CollisionUtility::ObbInfo CollisionUtility::MakeObb(const VECTOR& pos, const VECTOR& size, const VECTOR& angle)
 {
 	ObbInfo r = {};

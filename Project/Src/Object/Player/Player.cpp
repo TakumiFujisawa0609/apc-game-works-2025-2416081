@@ -6,6 +6,8 @@
 
 #include"../../Manager/Collision/CollisionUtility.h"
 
+#include"../../scene/SceneManager/SceneManager.h"
+
 #include"../Rock/Rock.h"
 
 Player::Player(const VECTOR& cameraPos):
@@ -33,7 +35,7 @@ void Player::Load(void)
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = SIZE;
 	unit_.para_.radius = SIZE.z;
-	unit_.para_.capsuleHalfLen = SIZE.y - SIZE.z;
+	unit_.para_.capsuleHalfLen = (SIZE.y - unit_.para_.radius * 2) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
 	if (unit_.model_ != -1) {
@@ -99,7 +101,7 @@ void Player::Update(void)
 	Invi();
 
 	// 前フレームの座標をローカル変数に保持(押し戻し処理に使う)
-	prevPos_ = unit_.pos_;
+	BeginFrame();
 
 	// ステート遷移条件
 	StateManager();
@@ -140,12 +142,12 @@ void Player::Draw(void)
 
 	// デバッグ用に当たり判定の表示
 
-	//VECTOR localPos1 = { 0.0f,unit_.para_.capsuleHalfLen/2 ,0.0f };
+	VECTOR localPos1 = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
-	//DrawCapsule3D(
-	//	VSub(unit_.pos_, localPos1),
-	//	VAdd(unit_.pos_, localPos1),
-	//	unit_.para_.radius, 30, 0xffffff, 0xffffff, true);
+	DrawCapsule3D(
+		VSub(unit_.pos_, localPos1),
+		VAdd(unit_.pos_, localPos1),
+		unit_.para_.radius, 30, 0xffffff, 0xffffff, true);
 
 
 	//VECTOR debugPos[8] =
@@ -185,11 +187,18 @@ void Player::Release(void)
 	MV1DeleteModel(unit_.model_);
 }
 
+void Player::OnGrounded()
+{
+	yAccelSum_ = 0.0f;
+	for (auto& jump : isJump_) { jump = false; }
+	for (auto& cou : jumpKeyCounter_) { cou = 0; }
+}
+
 void Player::OnCollision(UnitBase* other)
 {
 	if (VoxelBase* voxel = dynamic_cast<VoxelBase*>(other)) {
 		// ボクセル形状に沿ってプレイヤーを押し戻す
-		CollisionVoxel(voxel);
+		//CollisionVoxel(voxel);
 		return;
 	}
 }
@@ -197,86 +206,86 @@ void Player::OnCollision(UnitBase* other)
 
 void Player::CollisionVoxel(VoxelBase* voxel)
 {
-	enum class DIRECTION { NON, FRONT, BACK };
-	struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
-
-#define vloop(v,i) ((i)==0 ? (v).x : ((i)==1 ? (v).y : (v).z))
-
-	VECTOR pPoss[3] = {
-		{unit_.pos_.x,prevPos_.y,prevPos_.z},
-		{prevPos_.x,unit_.pos_.y,prevPos_.z},
-		{prevPos_.x,prevPos_.y,unit_.pos_.z}
-	};
-	DIR_VEC dirVec =
-	{
-		(prevPos_.x < unit_.pos_.x) ? DIRECTION::FRONT : ((prevPos_.x > unit_.pos_.x) ? DIRECTION::BACK : DIRECTION::NON),
-		(prevPos_.y < unit_.pos_.y) ? DIRECTION::FRONT : ((prevPos_.y > unit_.pos_.y) ? DIRECTION::BACK : DIRECTION::NON),
-		(prevPos_.z < unit_.pos_.z) ? DIRECTION::FRONT : ((prevPos_.z > unit_.pos_.z) ? DIRECTION::BACK : DIRECTION::NON)
-	};
-
-	auto pushChores = [&](int i) {
-		switch (i)
-		{
-		case 0:
-			break;
-		case 1:
-			if(dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
-			else if (dirVec.y == DIRECTION::BACK) // 下方向に移動して衝突した場合
-			{
-				yAccelSum_ = 0.0f;
-				for (auto& jump : isJump_) { jump = false; }
-				for (auto& cou : jumpKeyCounter_) { cou = 0; }
-			}
-			break;
-		case 2:
-			break;
-		}
-		};
-
-	for (int i = 0; i < 3; i++) {
-		// 移動していない軸は処理しない
-		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
-
-		//for (const auto& vPos : voxel->GetVoxelCenters()) {
-		//	if (Cfunc::CapsuleAabb_Y(pPoss[i], unit_.para_.capsuleHalfLen, unit_.para_.radius, vPos, voxel->GetCellSizeVECTOR())) {
-		//		// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
-		//		if (vloop(dirVec, i) == DIRECTION::FRONT) {
-		//			vloop(unit_.pos_, i) = (std::min)((vloop(vPos, i) - (voxel->GetCellSize() / 2)) - unit_.para_.radius, vloop(unit_.pos_, i));
-		//		}
-		//		else if (vloop(dirVec, i) == DIRECTION::BACK) {
-		//			vloop(unit_.pos_, i) = (std::max)((vloop(vPos, i) + (voxel->GetCellSize() / 2)) + unit_.para_.radius, vloop(unit_.pos_, i));
-		//		}
-		//		else { continue; }
-
-		//		pushChores(i);
-		//	}
-		//}
-
-		// プレイヤーのAABBとボクセルのAABBの衝突判定
-		VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
-		VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
-
-		for (const auto& batch : voxel->GetVoxelAABBs())
-		{
-			VECTOR voxelMin = batch.min;
-			VECTOR voxelMax = batch.max;
-
-			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
-				playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
-				playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
-			{
-				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
-				if (vloop(dirVec, i) == DIRECTION::FRONT) {
-					vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
-				}
-				else if (vloop(dirVec, i) == DIRECTION::BACK) {
-					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
-				}
-				else { continue; }
-				pushChores(i);
-			}
-		}
-	}
+//	enum class DIRECTION { NON, FRONT, BACK };
+//	struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
+//
+//#define vloop(v,i) ((i)==0 ? (v).x : ((i)==1 ? (v).y : (v).z))
+//
+//	VECTOR pPoss[3] = {
+//		{unit_.pos_.x,prevPos_.y,prevPos_.z},
+//		{prevPos_.x,unit_.pos_.y,prevPos_.z},
+//		{prevPos_.x,prevPos_.y,unit_.pos_.z}
+//	};
+//	DIR_VEC dirVec =
+//	{
+//		(prevPos_.x < unit_.pos_.x) ? DIRECTION::FRONT : ((prevPos_.x > unit_.pos_.x) ? DIRECTION::BACK : DIRECTION::NON),
+//		(prevPos_.y < unit_.pos_.y) ? DIRECTION::FRONT : ((prevPos_.y > unit_.pos_.y) ? DIRECTION::BACK : DIRECTION::NON),
+//		(prevPos_.z < unit_.pos_.z) ? DIRECTION::FRONT : ((prevPos_.z > unit_.pos_.z) ? DIRECTION::BACK : DIRECTION::NON)
+//	};
+//
+//	auto pushChores = [&](int i) {
+//		switch (i)
+//		{
+//		case 0:
+//			break;
+//		case 1:
+//			if(dirVec.y == DIRECTION::FRONT) { yAccelSum_ = 0.0f; } // 上方向に移動して衝突した場合
+//			else if (dirVec.y == DIRECTION::BACK) // 下方向に移動して衝突した場合
+//			{
+//				yAccelSum_ = 0.0f;
+//				for (auto& jump : isJump_) { jump = false; }
+//				for (auto& cou : jumpKeyCounter_) { cou = 0; }
+//			}
+//			break;
+//		case 2:
+//			break;
+//		}
+//		};
+//
+//	for (int i = 0; i < 3; i++) {
+//		// 移動していない軸は処理しない
+//		if (vloop(dirVec, i) == DIRECTION::NON) { continue; }
+//
+//		//for (const auto& vPos : voxel->GetVoxelCenters()) {
+//		//	if (Cfunc::CapsuleAabb_Y(pPoss[i], unit_.para_.capsuleHalfLen, unit_.para_.radius, vPos, voxel->GetCellSizeVECTOR())) {
+//		//		// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
+//		//		if (vloop(dirVec, i) == DIRECTION::FRONT) {
+//		//			vloop(unit_.pos_, i) = (std::min)((vloop(vPos, i) - (voxel->GetCellSize() / 2)) - unit_.para_.radius, vloop(unit_.pos_, i));
+//		//		}
+//		//		else if (vloop(dirVec, i) == DIRECTION::BACK) {
+//		//			vloop(unit_.pos_, i) = (std::max)((vloop(vPos, i) + (voxel->GetCellSize() / 2)) + unit_.para_.radius, vloop(unit_.pos_, i));
+//		//		}
+//		//		else { continue; }
+//
+//		//		pushChores(i);
+//		//	}
+//		//}
+//
+//		// プレイヤーのAABBとボクセルのAABBの衝突判定
+//		VECTOR playerMin = VSub(pPoss[i], VScale(unit_.para_.size, 0.5f));
+//		VECTOR playerMax = VAdd(pPoss[i], VScale(unit_.para_.size, 0.5f));
+//
+//		for (const auto& batch : voxel->GetVoxelAABBs())
+//		{
+//			VECTOR voxelMin = batch.min;
+//			VECTOR voxelMax = batch.max;
+//
+//			if (playerMin.x < voxelMax.x && playerMax.x > voxelMin.x &&
+//				playerMin.y < voxelMax.y && playerMax.y > voxelMin.y &&
+//				playerMin.z < voxelMax.z && playerMax.z > voxelMin.z)
+//			{
+//				// 衝突したので、衝突した軸の座標をボクセルの座標をもとに押し出す
+//				if (vloop(dirVec, i) == DIRECTION::FRONT) {
+//					vloop(unit_.pos_, i) = (std::min)(vloop(voxelMin, i) - (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+//				}
+//				else if (vloop(dirVec, i) == DIRECTION::BACK) {
+//					vloop(unit_.pos_, i) = (std::max)(vloop(voxelMax, i) + (vloop(unit_.para_.size, i) / 2.0f), vloop(unit_.pos_, i));
+//				}
+//				else { continue; }
+//				pushChores(i);
+//			}
+//		}
+//	}
 }
 
 
@@ -413,7 +422,7 @@ void Player::Attack(void)
 
 		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 		vec = Utility::Normalize(vec);
-		unit_.pos_ = VAdd(unit_.pos_, VScale(vec, 5.0f));
+		unit_.vel_ = VScale(vec, 5.0f);
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
@@ -461,7 +470,7 @@ void Player::Evasion(void)
 
 	// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 	vec = Utility::Normalize(vec);
-	unit_.pos_ = VAdd(unit_.pos_, VScale(vec, unit_.para_.speed / 1.5f));
+	unit_.vel_ = VScale(vec, unit_.para_.speed / 1.5f);
 
 	// 無敵(無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように １ を代入し続けておく)
 	if (anime_->GetAnimeRatio() <= 0.7f) { unit_.inviciCounter_ = 1; }
@@ -504,7 +513,7 @@ void Player::Run(void)
 		vec = VTransform(vec, mat);
 
 		vec = Utility::Normalize(vec);
-		unit_.pos_ = VAdd(unit_.pos_, VScale(vec, unit_.para_.speed));
+		unit_.vel_ = VScale(vec, unit_.para_.speed);
 
 		if (!isJump_[0]) {
 			anime_->Play((int)ANIME_TYPE::RUN);
@@ -541,7 +550,7 @@ void Player::Jump(void)
 			jumpKeyCounter_[i]++;
 
 			//ジャンプ力を分配加算する
-			yAccelSum_ = MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME;
+			yAccelSum_ = (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
 
 			// その回のジャンプ処理をしたのでそれ以降のループに入らないようにする
 			break;
