@@ -36,7 +36,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,                   // モデル
-            30.0f,                          // セル(大きさ)
+            50.0f,                          // セル(大きさ)
             VAdd(unit_.pos_,gridCenter_),   // グリッド中心（ワールド）
             VScale(unit_.para_.size, 0.5f), // halfExt（おおよその半サイズ）
             batches_);

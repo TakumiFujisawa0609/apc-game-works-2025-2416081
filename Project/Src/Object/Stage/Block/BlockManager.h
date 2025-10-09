@@ -13,9 +13,9 @@ public:
 	static constexpr int NUM_BLOCK_MODELS = 14;
 
 	// ブロックの数(マップのサイズ)
-	static constexpr int NUM_BLOCK_X = 20;
-	static constexpr int NUM_BLOCK_Z = 20;
-	static constexpr int NUM_BLOCK_Y = 7;
+	static constexpr int NUM_BLOCK_X = 30;
+	static constexpr int NUM_BLOCK_Z = 30;
+	static constexpr int NUM_BLOCK_Y = 2;
 
 	// 1ブロックあたりのサイズ
 	static constexpr float SIZE_BLOCK = 100.0f;
