@@ -19,7 +19,7 @@ void UnitBase::AccelUpdate(void)
 
 void UnitBase::Gravity(void)
 {
-	yAccelSum_ += GRAVITY * SceneManager::GetIns().GetDeltaTime();
+	yAccelSum_ += GRAVITY;
 	if (yAccelSum_ < GRAVITY_MAX) {
 		yAccelSum_ = GRAVITY_MAX; 
 	}

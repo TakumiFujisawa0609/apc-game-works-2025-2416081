@@ -52,7 +52,7 @@ public:
 
 	static constexpr float MAX_JUMP_POWER = 100.0f;		//最大ジャンプ力
 	static constexpr int INPUT_JUMPKEY_FRAME = 6;		//ジャンプキーを受け付けるフレーム数
-	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
+	static constexpr int JUMP_NUM = 15;					//ジャンプ可能回数
 	//----------------------------------------------------------------------------------------------
 
 	// 攻撃状態で使用する～～-------------------------------------------------------------------

@@ -1,4 +1,4 @@
-#include "Collision.h"
+ï»¿#include "Collision.h"
 #include <algorithm>
 #include <cmath>
 
@@ -16,7 +16,7 @@ void Collision::ResolveDynamics(void)
 {
     const float EPS = 1e-4f;
     const float EPS2 = EPS * EPS;
-    const float POS_SLOP = 5e-4f;                 // ”÷¬ŠÑ’Ê‚Í–³‹
+    const float POS_SLOP = 5e-4f;                 // å¾®å°è²«é€šã¯ç„¡è¦–
     const float cosSlope = std::cos(slopeLimitDeg_ * (DX_PI_F / 180.0f));
 
     for (auto* o : objects_) {
@@ -31,24 +31,24 @@ void Collision::ResolveDynamics(void)
 
         bool grounded = false;
 
-        // ”½•œ‰ğŒˆ
-        VECTOR prevN = { 0,0,0 }; // ”½•œ“à‚Ì–@üƒXƒ€[ƒWƒ“ƒO—p
+        // åå¾©è§£æ±º
+        VECTOR prevN = { 0,0,0 }; // åå¾©å†…ã®æ³•ç·šã‚¹ãƒ ãƒ¼ã‚¸ãƒ³ã‚°ç”¨
         for (int it = 0; it < resolveIters_; ++it) {
 
             VECTOR center = VAdd(pos, du.para_.center);
 
-            // ‚»‚Ì”½•œ‚Å‚Ì gÅ—Çh ÚG‚ğˆê‚Â‘I‚Ô
+            // ãã®åå¾©ã§ã® â€œæœ€è‰¯â€ æ¥è§¦ã‚’ä¸€ã¤é¸ã¶
             bool   found = false;
-            float  bestW = 0.0f;       // d‚İiAABB=[‚³, Voxel=‰Ÿ‚µ–ß‚µ’·‚³j
-            VECTOR bestPush = { 0,0,0 }; // ÀÛ‚É‰Á‚¦‚é‰Ÿ‚µ–ß‚µ
-            VECTOR bestN = { 0,0,0 }; // ‘Î‰‚·‚é–@ü
+            float  bestW = 0.0f;       // é‡ã¿ï¼ˆAABB=æ·±ã•, Voxel=æŠ¼ã—æˆ»ã—é•·ã•ï¼‰
+            VECTOR bestPush = { 0,0,0 }; // å®Ÿéš›ã«åŠ ãˆã‚‹æŠ¼ã—æˆ»ã—
+            VECTOR bestN = { 0,0,0 }; // å¯¾å¿œã™ã‚‹æ³•ç·š
             bool   bestGnd = false;
 
             for (auto* s : stageObject_) {
                 if (!s) continue;
                 const Base& su = s->GetUnit();
 
-                // ---- VoxelF’†S”Å‚Å1‰ñ‚¾‚¯‰ğ‚­ ¨ delta ‚ğŒó•â‚É ----
+                // ---- Voxelï¼šä¸­å¿ƒç‰ˆã§1å›ã ã‘è§£ã â†’ delta ã‚’å€™è£œã« ----
                 if (auto* vox = dynamic_cast<VoxelBase*>(s)) {
                     VECTOR preC = center;
                     VECTOR vtmp = vel; bool g = false;
@@ -56,21 +56,21 @@ void Collision::ResolveDynamics(void)
                         VECTOR delta = VSub(center, preC);
                         float  d2 = VDot(delta, delta);
                         if (d2 > bestW && d2 > EPS2) {
-                            bestW = d2;                // Voxel ‚Í‰Ÿ‚µ–ß‚µ’·‚³‚Å”äŠr
+                            bestW = d2;                // Voxel ã¯æŠ¼ã—æˆ»ã—é•·ã•ã§æ¯”è¼ƒ
                             bestPush = delta;
-                            // –@ü‚Í‰Ÿ‚µ–ß‚µ•ûŒü
+                            // æ³•ç·šã¯æŠ¼ã—æˆ»ã—æ–¹å‘
                             float L = std::sqrt(d2);
                             bestN = { delta.x / L, delta.y / L, delta.z / L };
                             bestGnd = g;
                             found = true;
                         }
                     }
-                    // center ‚Í local ‚Ì‚İ‚Åg‚¤‚Ì‚Å–ß‚·
+                    // center ã¯ local ã®ã¿ã§ä½¿ã†ã®ã§æˆ»ã™
                     center = preC;
                     continue;
                 }
 
-                // ---- ”ñVoxeliAABBjFMTV‚ğŒó•â‚É ----
+                // ---- éVoxelï¼ˆAABBï¼‰ï¼šMTVã‚’å€™è£œã« ----
                 if (su.para_.colliShape == CollisionShape::AABB) {
                     const VECTOR half = VScale(su.para_.size, 0.5f);
                     const VECTOR bmin = VSub(VAdd(su.pos_, su.para_.center), half);
@@ -78,11 +78,11 @@ void Collision::ResolveDynamics(void)
 
                     VECTOR n; float d;
                     if (Cfunc::CapsuleAabbY_MTV(center, H, R, bmin, bmax, n, d)) {
-                        if (d > bestW && d > POS_SLOP) {   // AABB ‚Íg[‚³h‚Å”äŠr
+                        if (d > bestW && d > POS_SLOP) {   // AABB ã¯â€œæ·±ã•â€ã§æ¯”è¼ƒ
                             bestW = d;
                             bestPush = VScale(n, d + EPS);
                             bestN = n;
-                            // °‚Á‚Û‚¢•ûŒü‚È‚çÚ’nŒó•â
+                            // åºŠã£ã½ã„æ–¹å‘ãªã‚‰æ¥åœ°å€™è£œ
                             bestGnd = (n.y > cosSlope && vel.y <= 0.0f);
                             found = true;
                         }
@@ -90,13 +90,13 @@ void Collision::ResolveDynamics(void)
                 }
             } // for stage
 
-            if (!found) break; // ‚à‚¤‰Ÿ‚µ–ß‚·‚×‚«ÚG‚È‚µ
+            if (!found) break; // ã‚‚ã†æŠ¼ã—æˆ»ã™ã¹ãæ¥è§¦ãªã—
 
-            // –@üƒXƒ€[ƒWƒ“ƒOi”½•œ“àƒqƒXƒeƒŠƒVƒXj
+            // æ³•ç·šã‚¹ãƒ ãƒ¼ã‚¸ãƒ³ã‚°ï¼ˆåå¾©å†…ãƒ’ã‚¹ãƒ†ãƒªã‚·ã‚¹ï¼‰
             if (prevN.x != 0 || prevN.y != 0 || prevN.z != 0) {
                 float dp = prevN.x * bestN.x + prevN.y * bestN.y + prevN.z * bestN.z;
-                if (dp > 0.0f) { // ”½“]‚Í‚»‚Ì‚Ü‚Ü
-                    const float a = 0.6f; // ƒuƒŒƒ“ƒhŒW”iã‚°‚é‚Æ‚æ‚è”S‚éj
+                if (dp > 0.0f) { // åè»¢æ™‚ã¯ãã®ã¾ã¾
+                    const float a = 0.6f; // ãƒ–ãƒ¬ãƒ³ãƒ‰ä¿‚æ•°ï¼ˆä¸Šã’ã‚‹ã¨ã‚ˆã‚Šç²˜ã‚‹ï¼‰
                     VECTOR blended = { bestN.x * a + prevN.x * (1 - a),
                                        bestN.y * a + prevN.y * (1 - a),
                                        bestN.z * a + prevN.z * (1 - a) };
@@ -109,18 +109,18 @@ void Collision::ResolveDynamics(void)
             }
             prevN = bestN;
 
-            // ˆê‰ñ‚¾‚¯‰Ÿ‚µ–ß‚·
+            // ä¸€å›ã ã‘æŠ¼ã—æˆ»ã™
             pos = VAdd(pos, bestPush);
             center = VAdd(center, bestPush);
 
-            // ƒXƒ‰ƒCƒhi–@ü¬•ª‚ğƒJƒbƒgj
+            // ã‚¹ãƒ©ã‚¤ãƒ‰ï¼ˆæ³•ç·šæˆåˆ†ã‚’ã‚«ãƒƒãƒˆï¼‰
             float vn = VDot(vel, bestN);
             if (vn < 0.0f) vel = VSub(vel, VScale(bestN, vn));
 
             grounded = grounded || bestGnd;
-        } // for it
+        }
 
-        // ”÷¬‘¬“x‚ÌŠÛ‚ßiŠp‚Å‚Ì¬‚İ‚ÈU“®‘Îôj
+        // å¾®å°é€Ÿåº¦ã®ä¸¸ã‚ï¼ˆè§’ã§ã®å°åˆ»ã¿ãªæŒ¯å‹•å¯¾ç­–ï¼‰
         auto killTiny = [](float& c) { if (std::fabs(c) < 1e-6f) c = 0.0f; };
         killTiny(vel.x); killTiny(vel.y); killTiny(vel.z);
 
@@ -130,9 +130,60 @@ void Collision::ResolveDynamics(void)
     }
 }
 
+void Collision::ResolvePairs()
+{
+//    // åå¾©ï¼šè§’ã‚¬ã‚¯æŠ‘åˆ¶ã®ãŸã‚ã€Œ1åå¾©ï¼å„ mover ã«ã¤ãæœ€è‰¯1ä»¶ã ã‘é©ç”¨ã€
+//    for (int it = 0; it < resolveIters_; ++it) {
+//        bool anyMoved = false;
+//
+//        // --- é…åˆ—ãƒšã‚¢ã‚’ç·ãªã‚ ---
+//        for (const auto& pl : pairLists_) {
+//            if (!pl.movers || !pl.stages) continue;
+//
+//            for (auto* mover : *pl.movers) {
+//                if (!mover) continue;
+//                const Base& du = mover->GetUnit();
+//                VECTOR pos = du.pos_;
+//                VECTOR vel = du.vel_;
+//
+//                Collision::Contact best;
+//
+//                for (auto* stage : *pl.stages) {
+//                    if (!stage || stage == mover) continue;
+//
+//                    // è·é›¢ãƒ•ã‚£ãƒ«ã‚¿
+//                    if (!InRangeSq(du.pos_, stage->GetUnit().pos_, pl.range)) continue;
+//
+//                    Contact c;
+//                    if (!ComputeContactForPair(mover, stage, pos, vel, c) || !c.valid) continue;
+//                    if (!best.valid || c.weight > best.weight) best = c;
+//                }
+//
+//                if (!best.valid) continue;
+//
+//                // é©ç”¨ï¼ˆVoxel ã¯ velOut ã‚’å„ªå…ˆã€éVoxelã¯æ³•ç·šã‚¹ãƒ©ã‚¤ãƒ‰ï¼‰
+//                pos = VAdd(pos, best.push);
+//                if (best.velOut.x || best.velOut.y || best.velOut.z) {
+//                    vel = best.velOut;
+//                }
+//                else {
+//                    float vn = VDot(vel, best.n);
+//                    if (vn < 0.0f) vel = VSub(vel, VScale(best.n, vn));
+//                }
+//                mover->SetPos(pos);
+//                mover->SetVelocity(vel);
+//                if (best.grounded) mover->OnGrounded();
+//
+//                anyMoved = true;
+//            }
+//            if (!anyMoved) break;
+//        }
+//    }
+}
+
 void Collision::Check()
 {
-	// ƒXƒe[ƒWƒIƒuƒWƒFƒNƒg‚ÆƒIƒuƒWƒFƒNƒg‚Ì“–‚½‚è”»’è
+	// ã‚¹ãƒ†ãƒ¼ã‚¸ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å½“ãŸã‚Šåˆ¤å®š
 	for (auto& s : stageObject_) {
 		for (auto& o : objects_) {
 			const Base& us = s->GetUnit();
@@ -148,6 +199,123 @@ void Collision::Check()
 	}
 }
 
+bool Collision::ResolvePair(UnitBase* mover, UnitBase* stage)
+{
+    if (!mover || !stage) return false;
+    const Base& du = mover->GetUnit();
+
+    VECTOR pos = du.pos_;
+    VECTOR vel = du.vel_;
+
+    Contact c;
+    if (!ComputeContactForPair(mover, stage, pos, vel, c) || !c.valid) return false;
+
+    // é©ç”¨ï¼špos/velæ›´æ–°ï¼ˆéVoxelã¯ã“ã“ã§æ³•ç·šã‚¹ãƒ©ã‚¤ãƒ‰ï¼‰
+    pos = VAdd(pos, c.push);
+    if (dynamic_cast<VoxelBase*>(stage)) {
+        vel = c.velOut; // Voxelã¯ ResolveCapsuleCenter ã®å‡ºåŠ›ã‚’ä¿¡ç”¨
+    }
+    else {
+        float vn = VDot(vel, c.n);
+        if (vn < 0.0f) vel = VSub(vel, VScale(c.n, vn)); // æ³•ç·šæ–¹å‘ã‚’å‰Šã‚‹
+    }
+    mover->SetPos(pos);
+    mover->SetVelocity(vel);
+    if (c.grounded) mover->OnGrounded();
+    return true;
+}
+
+// ===== 1ãƒšã‚¢ã‚’ã€Œå½¢çŠ¶ã§æŒ¯ã‚Šåˆ†ã‘ã€â†’ Contact ã‚’è¿”ã™ =====
+bool Collision::ComputeContactForPair(
+    UnitBase* mover, UnitBase* stage,
+    const VECTOR& pos, const VECTOR& vel,
+    Contact& out) const
+{
+    if (!mover || !stage) return false;
+    const Base& du = mover->GetUnit();
+
+    // ã„ã¾ã¯ mover ã‚’ã‚«ãƒ—ã‚»ãƒ«å‰æï¼ˆå¿…è¦ãªã‚‰åˆ†å²è¿½åŠ ï¼‰
+    if (du.para_.colliShape != CollisionShape::CAPSULE) return false;
+
+    // Voxel å„ªå…ˆ
+    if (auto* vox = dynamic_cast<VoxelBase*>(stage)) {
+        return CapsuleVsVoxel_Contact(du, pos, vel, vox, out);
+    }
+
+    // AABB
+    const Base& su = stage->GetUnit();
+    if (su.para_.colliShape == CollisionShape::AABB) {
+        return CapsuleVsAabb_Contact(du, pos, vel, su, out);
+    }
+
+    return false;
+}
+
+// ===== å½¢çŠ¶ãƒšã‚¢åˆ¥ï¼šContact ã‚’1ã¤ä½œã‚‹ï¼ˆå€™è£œï¼‰ =====
+bool Collision::CapsuleVsVoxel_Contact(
+    const Base& du, const VECTOR& pos, const VECTOR& vel,
+    VoxelBase* vox, Contact& out) const
+{
+    // center ã¯ pos + center
+    VECTOR center = VAdd(pos, du.para_.center);
+    VECTOR preC = center;
+    VECTOR vtmp = vel;             // ã‚¹ãƒ©ã‚¤ãƒ‰çµæœã¯ vtmp ã«å…¥ã‚‹
+    bool grounded = false;
+
+    // 1ã‚¹ãƒ†ãƒƒãƒ—ã ã‘è§£ã„ã¦ã€ŒæŠ¼ã—æˆ»ã— deltaã€ã‚’å€™è£œã«
+    if (vox->ResolveCapsuleCenter(center, du.para_.radius, du.para_.capsuleHalfLen,
+        vtmp, grounded, slopeLimitDeg_, /*iters=*/1))
+    {
+        VECTOR delta = VSub(center, preC);
+        float  d2 = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        if (d2 > 1e-8f) {
+            out.valid = true;
+            out.push = delta;
+            out.n = Utility::Normalize(delta);
+            out.weight = d2;           // Voxelã¯æŠ¼ã—æˆ»ã—é•·ã•ã®2ä¹—ã§æ¯”è¼ƒ
+            out.grounded = grounded;
+            out.velOut = vtmp;         // Voxelã¯é€Ÿåº¦ã‚¹ãƒ©ã‚¤ãƒ‰ã‚‚ä¿¡é ¼
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Collision::CapsuleVsAabb_Contact(
+    const Base& du, const VECTOR& pos, const VECTOR& vel,
+    const Base& su, Contact& out) const
+{
+    if (su.para_.colliShape != CollisionShape::AABB) return false;
+
+    // ã‚¹ãƒ†ãƒ¼ã‚¸å´AABBã®ãƒ¯ãƒ¼ãƒ«ãƒ‰å¢ƒç•Œ
+    VECTOR half = VScale(su.para_.size, 0.5f);
+    VECTOR bmin = VSub(VAdd(su.pos_, su.para_.center), half);
+    VECTOR bmax = VAdd(VAdd(su.pos_, su.para_.center), half);
+
+    // mover ã®ä¸­å¿ƒï¼ˆã‚«ãƒ—ã‚»ãƒ«Yè»¸ï¼‰
+    VECTOR center = VAdd(pos, du.para_.center);
+
+    VECTOR n; float d;
+    if (Cfunc::CapsuleAabbY_MTV(center, du.para_.capsuleHalfLen, du.para_.radius,
+        bmin, bmax, n, d))
+    {
+        if (d > 5e-4f) { // POS_SLOP
+            out.valid = true;
+            out.push = VScale(n, d + 1e-4f);
+            out.n = n;
+            out.weight = d;  // AABBã¯â€œæ·±ã•â€ã§æ¯”è¼ƒ
+            out.grounded = (n.y > std::cos(slopeLimitDeg_ * (DX_PI_F / 180.0f)) && vel.y <= 0.0f);
+            out.velOut = vel; // éVoxelã¯ã“ã“ã§ã¯é€Ÿåº¦æœªå¤‰æ›´ï¼ˆé©ç”¨æ™‚ã«æ³•ç·šæˆåˆ†ã‚’å‰Šã‚‹ï¼‰
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+
+
 bool Collision::IsHit(const Base& a, const Base& b)
 {
 	Base A = a; A.pos_ = VAdd(A.pos_, A.para_.center);
@@ -157,12 +325,12 @@ bool Collision::IsHit(const Base& a, const Base& b)
 	auto sB = B.para_.colliShape;
 	if (sA == CollisionShape::NON || sB == CollisionShape::NON) return false;
 
-	// “¯í
+	// åŒç¨®
 	if (sA == CollisionShape::SPHERE && sB == CollisionShape::SPHERE)    return SphereSphere(A, B);
 	if (sA == CollisionShape::OBB && sB == CollisionShape::OBB) return ObbObb(A, B);
 	if (sA == CollisionShape::CAPSULE && sB == CollisionShape::CAPSULE)   return CapsuleCapsule(A, B);
 
-	// ¬‡
+	// æ··åˆ
 	if (sA == CollisionShape::SPHERE && sB == CollisionShape::OBB) return SphereObb(A, B);
 	if (sA == CollisionShape::OBB && sB == CollisionShape::SPHERE)    return SphereObb(B, A);
 

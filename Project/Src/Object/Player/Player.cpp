@@ -128,13 +128,6 @@ void Player::Update(void)
 		for (auto& jump : isJump_) { jump = false; }
 		for (auto& cou : jumpKeyCounter_) { cou = 0; }
 	}
-
-	//if (unit_.pos_.y < unit_.para_.size.y/2) {
-	//	unit_.pos_.y = unit_.para_.size.y / 2;
-	//	yAccelSum_ = 0.0f;
-	//	for (auto& jump : isJump_) { jump = false; }
-	//	for (auto& cou : jumpKeyCounter_) { cou = 0; }
-	//}
 }
 
 void Player::Draw(void)

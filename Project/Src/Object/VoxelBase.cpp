@@ -69,9 +69,6 @@ void VoxelBase::Update(void)
 
         regeneration_ = false;
     }
-
-    //int dirtyCount = 0; for (auto& p : pillars_) if (p.dirty) ++dirtyCount;
-    //if (dirtyCount) DrawFormatString(20, 80, GetColor(255, 255, 0), "dirty=%d", dirtyCount);
 }
 
 
@@ -543,6 +540,8 @@ bool VoxelBase::ResolveCapsule(
     VECTOR& vel, bool& grounded,
     float slopeLimitDeg, int maxIters)
 {
+    if (unit_.isAlive_ == false) { return false; }
+
     grounded = false;
     if (Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) return false;
 

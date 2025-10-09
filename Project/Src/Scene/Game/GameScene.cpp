@@ -71,7 +71,7 @@ void GameScene::Load(void)
 	collision_->AddObject(player_);
 	collision_->AddObject(player_->GetSubIns());
 
-	grid_ = new Grid();
+	//grid_ = new Grid();
 	
 
 	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
@@ -95,7 +95,6 @@ void GameScene::Init(void)
 	shakeKinds_ = ShakeKinds::DIAG;
 	shakeSize_ = ShakeSize::MEDIUM;
 	//--------------------------------------------------------------------------------
-
 
 	for (auto& r : rock_) { r->Init(); }
 	player_->Init();
@@ -145,7 +144,7 @@ void GameScene::Draw(void)
 	int x = app::SCREEN_SIZE_X / 2;
 	int y = app::SCREEN_SIZE_Y / 2;
 
-	grid_->Draw();
+	//grid_->Draw();
 
 	blocks_->Draw();
 

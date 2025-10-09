@@ -68,10 +68,6 @@ void Throwing::Throw(THROW_TYPE type)
 		throwObj_.back().ins->Init();
 		throwObj_.back().ins->Throw(throwPos, throwVec);
 		Collision::AddObject(throwObj_.back().ins);
-		//throwObj_[throwObj_.size()-1].ins->ModelLoad(models_[(int)THROW_TYPE::ROCK]);
-		//throwObj_[throwObj_.size()-1].ins->Load();
-		//throwObj_[throwObj_.size()-1].ins->Init();
-		//throwObj_[throwObj_.size()-1].ins->Throw(throwPos, throwVec);
 		break;
 	}
 }

@@ -58,7 +58,7 @@ void Block::SubLoad(void)
 	unit_.para_.size = { BlockManager::SIZE_BLOCK ,BlockManager::SIZE_BLOCK ,BlockManager::SIZE_BLOCK };
 	unit_.isAlive_ = true;
 
-	aliveNeedRatio_ = 0.01f;
+	aliveNeedRatio_ = 0.1f;
 }
 
 void Block::SubInit(void)
