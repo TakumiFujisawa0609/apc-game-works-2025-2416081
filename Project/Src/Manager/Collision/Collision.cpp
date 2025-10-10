@@ -88,7 +88,7 @@ void Collision::ResolveDynamics(void)
                         }
                     }
                 }
-            } // for stage
+            }
 
             if (!found) break; // もう押し戻すべき接触なし
 

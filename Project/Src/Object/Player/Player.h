@@ -12,8 +12,8 @@ class VoxelBase;
 class Player : public UnitBase
 {
 public:
-	static constexpr VECTOR SIZE = { 80.0f-20.0f,185.368f-40.0f,45.0f-15.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f,72.684f,0.0f };
+	static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
+	static constexpr VECTOR CENTER_DIFF = { 0.0f,SIZE.y / 2,0.0f };
 
 
 	Player(const VECTOR& cameraAngle);

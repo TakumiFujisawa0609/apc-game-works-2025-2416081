@@ -14,7 +14,7 @@ public:
 	};
 
 	// カメラのクリップ範囲
-	static constexpr float VIEW_NEAR = 1.0f;
+	static constexpr float VIEW_NEAR = 10.0f;
 	static constexpr float VIEW_FAR = 30000.0f;
 
 	// カメラモード

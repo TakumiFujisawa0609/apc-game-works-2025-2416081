@@ -102,9 +102,9 @@ void Block::SubDraw(void)
 //		DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 //	}
 //
-//	for (auto& vPos : GetVoxelCenters()) {
-//		DrawSphere3D(vPos, GetCellSize() / 2, 30, 0xffffff, 0xffffff, true);
-//	}
+	//for (auto& vPos : GetVoxelCenters()) {
+	//	DrawSphere3D(vPos, GetCellSize() / 2, 4, 0xffffff, 0xffffff, true);
+	//}
 }
 
 void Block::SubRelease(void)

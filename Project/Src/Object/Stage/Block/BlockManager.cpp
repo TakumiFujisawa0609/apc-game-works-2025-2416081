@@ -101,6 +101,12 @@ void BlockManager::LoadMapCsvData(void)
 
 		blocks_.emplace_back(block);
 	}
+	//Block* block = new Block();
+	//block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
+	//block->Load();
+	//block->Init();
+
+	//blocks_.emplace_back(block);
 
 }
 

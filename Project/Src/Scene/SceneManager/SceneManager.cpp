@@ -203,13 +203,13 @@ void SceneManager::Init3D(void)
 	SetWriteZBuffer3D(true);
 
 	// バックカリングを有効にする
-	SetUseBackCulling(true);
+	SetUseBackCulling(false);
 
 	// ライトを有効にする
 	SetUseLighting(true);
 	// ディレクショナルライト方向の設定(正規化されていなくても良い)
 	// 正面から斜め下に向かったライト
-	ChangeLightTypeDir({ 0.00f, -1.00f, 1.00f });
+	ChangeLightTypeDir({ 0.00f, -1.00f, 0.00f });
 
 	// フォグ設定
 	SetFogEnable(true);

@@ -61,12 +61,6 @@ void VoxelBase::Update(void)
     if (regeneration_) {
         BuildCubicMesh(density_, Nx_, Ny_, Nz_, cell_, gridCenter_, batches_);
 
-        // ワールドキャッシュを無効化
-        for (auto& b : batches_) {
-            b.vWorld.clear();
-            b.lastOff = { 1e30f,1e30f,1e30f };
-        }
-
         regeneration_ = false;
     }
 }
@@ -78,35 +72,24 @@ void VoxelBase::Draw(void)
 
     SubDraw();
 
-    const VECTOR worldOff = unit_.pos_;
+    // ① ワールド行列を組む
+    MATRIX M = MGetTranslate(unit_.pos_);
+    SetTransformToWorld(&M);
 
-    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-
-    for (auto& b : batches_)
-    {
+    // ② ローカル頂点のまま描画
+    for (auto& b : batches_) {
         if (b.i.empty()) continue;
-
-        // ★unit_.pos_ が変わった時だけ vWorld を更新
-        if (b.vWorld.size() != b.v.size() ||
-            b.lastOff.x != worldOff.x || b.lastOff.y != worldOff.y || b.lastOff.z != worldOff.z)
-        {
-            b.vWorld.resize(b.v.size());
-            for (size_t k = 0; k < b.v.size(); ++k) {
-                b.vWorld[k] = b.v[k];
-                b.vWorld[k].pos = VAdd(b.v[k].pos, worldOff);
-            }
-            b.lastOff = worldOff;
-        }
-
         DrawPolygonIndexed3D(
-            b.vWorld.data(), (int)b.vWorld.size(),
+            b.v.data(), (int)b.v.size(),
             b.i.data(), (int)(b.i.size() / 3),
-            textureId_, false
+            textureId_,
+            FALSE
         );
     }
 
-    //SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
+    // ③ 元に戻す
+    M = MGetIdent();
+    SetTransformToWorld(&M);
 }
 
 

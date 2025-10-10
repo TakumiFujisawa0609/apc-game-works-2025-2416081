@@ -30,10 +30,6 @@ public:
 		VECTOR bmin{ 1e9f, 1e9f, 1e9f };
 		VECTOR bmax{ -1e9f,-1e9f,-1e9f };
 		VECTOR centerLocal{ 0,0,0 };
-
-		// ワールド頂点キャッシュ
-		std::vector<VERTEX3D> vWorld;
-		VECTOR lastOff{ 1e30f,1e30f,1e30f };
 	};
 
 	std::vector<MeshBatch> GetBatches(void)const { return batches_; }
