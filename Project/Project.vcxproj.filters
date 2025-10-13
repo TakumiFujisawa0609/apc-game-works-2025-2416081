@@ -48,7 +48,7 @@
     <ClCompile Include="Src\Object\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Rock\Rock.cpp">
+    <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWall.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\UnitBase.cpp">
@@ -93,6 +93,15 @@
     <ClCompile Include="Src\Object\Stage\Block\Block.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Object\Boss\Boss.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Player\Gouge\Gouge.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">
@@ -128,7 +137,7 @@
     <ClInclude Include="Src\Object\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Rock\Rock.h">
+    <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWall.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\UnitBase.h">
@@ -171,6 +180,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Stage\Block\Block.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Boss\Boss.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Player\Gouge\Gouge.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

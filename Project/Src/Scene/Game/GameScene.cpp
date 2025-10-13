@@ -13,8 +13,8 @@
 #include"../../Utility/Utility.h"
 
 #include"../../Object/Stage/Block/BlockManager.h"
-#include"../../Object/Rock/Rock.h"
 #include"../../Object/Player/Player.h"
+#include"../../Object/Boss/Boss.h"
 
 #include"../../Object/Grid/Grid.h"
 
@@ -34,8 +34,8 @@ GameScene::GameScene():
 	collision_(nullptr),
 	blocks_(nullptr),
 	rock_(),
-	grid_(nullptr),
-	player_(nullptr)
+	player_(nullptr),
+	boss_(nullptr)
 {
 }
 
@@ -58,21 +58,14 @@ void GameScene::Load(void)
 	blocks_->SetCamera(camera_);
 	collision_->AddStage(blocks_->GetBlocks());
 
-	//for (int i = 0; i < 10; i++) { rock_.emplace_back(new Rock()); }
-	//for (auto& r : rock_) { r->Load(); r->SetCamera(camera_); collision_->AddStage(r); }
-	//for (int i = 0; i < rock_.size(); i++) {
-	//	rock_[i]->SetSpeed((float)i - (rock_.size() / 2));
-	//	for (int j = 0; j < 100; j++) { rock_[i]->InitMove(); }
-	//}
-
-
 	player_ = new Player(camera_->GetAngles());
 	player_->Load();
-	collision_->AddObject(player_);
-	collision_->AddObject(player_->GetSubIns());
+	collision_->AddDynamicPlayer(player_);
+	collision_->AddPlayer(player_->GetSubIns());
 
-	//grid_ = new Grid();
-	
+	boss_ = new Boss(player_->GetUnit().pos_);
+	boss_->Load();
+	collision_->AddEnemy(boss_);
 
 	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
 }
@@ -96,8 +89,8 @@ void GameScene::Init(void)
 	shakeSize_ = ShakeSize::MEDIUM;
 	//--------------------------------------------------------------------------------
 
-	for (auto& r : rock_) { r->Init(); }
 	player_->Init();
+	boss_->Init();
 }
 
 void GameScene::Update(void)
@@ -109,22 +102,14 @@ void GameScene::Update(void)
 		if (slow_ % slowInter_ != 0) { return; }
 	}
 
-	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) {
-		rock_.emplace_back(new Rock());
-		rock_.back()->Load();
-		rock_.back()->SetCamera(camera_);
-		rock_.back()->Init();
-		rock_.back()->SetSpeed(10.0f);
-		collision_->AddStage(rock_.back());
-	}
-	for (auto& r : rock_) { r->Update(); }
 	player_->Update();
+	boss_->Update();
 	blocks_->Update();
 
 	collision_->ResolveDynamics();
 
 	player_->Integrate();
-	for (auto& r : rock_) { r->Integrate(); }
+	boss_->Integrate();
 
 	collision_->Check();
 
@@ -144,11 +129,9 @@ void GameScene::Draw(void)
 	int x = app::SCREEN_SIZE_X / 2;
 	int y = app::SCREEN_SIZE_Y / 2;
 
-	//grid_->Draw();
-
 	blocks_->Draw();
+	boss_->Draw();
 
-	for (auto& r : rock_) { r->Draw(); }
 	player_->Draw();
 
 	DrawString(0, 0, "ƒQ[ƒ€", 0xffffff);
@@ -169,16 +152,15 @@ void GameScene::Release(void)
 		delete blocks_;
 		blocks_ = nullptr;
 	}
-	for (auto& r : rock_) {
-		if (!r) { continue; }
-		r->Release();
-		delete r;
-		r = nullptr;
-	}
 	if (player_) {
 		player_->Release();
 		delete player_;
 		player_ = nullptr;
+	}
+	if (boss_) {
+		boss_->Release();
+		delete boss_;
+		boss_ = nullptr;
 	}
 
 	if (collision_) {
@@ -199,7 +181,6 @@ void GameScene::Shake(ShakeKinds kinds, ShakeSize size, int time)
 	shakeKinds_ = kinds;
 	shakeSize_ = size;
 }
-
 Vector2I GameScene::ShakePoint(void)
 {
 	Vector2I ret = {};

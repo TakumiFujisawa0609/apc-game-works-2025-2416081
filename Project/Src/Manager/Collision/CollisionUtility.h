@@ -15,6 +15,11 @@ public:
         const VECTOR& pos2, const VECTOR& size2, const VECTOR& angle2
     );
 
+    static bool Aabb(
+        const VECTOR& pos1, const VECTOR& size1,
+        const VECTOR& pos2, const VECTOR& size2
+    );
+
     static bool Capsule(
         const VECTOR& pos1, float halfLen1, float r1, const VECTOR& ang1,
         const VECTOR& pos2, float halfLen2, float r2, const VECTOR& ang2

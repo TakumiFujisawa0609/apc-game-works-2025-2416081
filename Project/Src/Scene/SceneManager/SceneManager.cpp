@@ -1,4 +1,4 @@
-#include "SceneManager.h"
+ï»¿#include "SceneManager.h"
 
 #include <DxLib.h>
 
@@ -9,72 +9,72 @@
 
 SceneManager* SceneManager::ins_ = nullptr;
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 SceneManager::SceneManager(void):
 	sceneId_(SCENE_ID::NONE)
 {
 }
 
-// ƒfƒXƒgƒ‰ƒNƒ^
+// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 SceneManager::~SceneManager(void)
 {
 }
 
-// ‰Šú‰»
+// åˆæœŸåŒ–
 void SceneManager::Init(void)
 {
-	// ƒ[ƒh‰æ–Ê¶¬
+	// ãƒ­ãƒ¼ãƒ‰ç”»é¢ç”Ÿæˆ
 	Loading::GetInstance()->CreateInstance();
 	Loading::GetInstance()->Init();
 	Loading::GetInstance()->Load();
 
 	Init3D();
 
-	// Å‰‚Íƒ^ƒCƒgƒ‹‰æ–Ê‚©‚ç
+	// æœ€åˆã¯ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã‹ã‚‰
 	ChangeScene(SCENE_ID::GAME);
 }
 
 
-// XV
+// æ›´æ–°
 void SceneManager::Update(void)
 {
-	// ƒV[ƒ“‚ª‚È‚¯‚ê‚ÎI—¹
+	// ã‚·ãƒ¼ãƒ³ãŒãªã‘ã‚Œã°çµ‚äº†
 	if (scenes_.empty()) { return; }
 
-	// ƒ[ƒh’†
+	// ãƒ­ãƒ¼ãƒ‰ä¸­
 	if (Loading::GetInstance()->IsLoading())
 	{
-		// ƒ[ƒhXV
+		// ãƒ­ãƒ¼ãƒ‰æ›´æ–°
 		Loading::GetInstance()->Update();
 
-		// ƒ[ƒh‚ÌXV‚ªI—¹‚µ‚Ä‚¢‚½‚ç
+		// ãƒ­ãƒ¼ãƒ‰ã®æ›´æ–°ãŒçµ‚äº†ã—ã¦ã„ãŸã‚‰
 		if (Loading::GetInstance()->IsLoading() == false)
 		{
-			// ƒ[ƒhŒã‚Ì‰Šú‰»
+			// ãƒ­ãƒ¼ãƒ‰å¾Œã®åˆæœŸåŒ–
 			scenes_.back()->Init();
 		}
 	}		
-	// ’Êí‚ÌXVˆ—
+	// é€šå¸¸ã®æ›´æ–°å‡¦ç†
 	else
 	{
-		// Œ»İ‚ÌƒV[ƒ“‚ÌXV
+		// ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã®æ›´æ–°
 		scenes_.back()->Update();
 	}
 }
 
-// •`‰æ
+// æç”»
 void SceneManager::Draw(void)
 {
-	// ƒ[ƒh’†‚È‚çƒ[ƒh‰æ–Ê‚ğ•`‰æ
+	// ãƒ­ãƒ¼ãƒ‰ä¸­ãªã‚‰ãƒ­ãƒ¼ãƒ‰ç”»é¢ã‚’æç”»
 	if (Loading::GetInstance()->IsLoading())
 	{
-		// ƒ[ƒh‚Ì•`‰æ
+		// ãƒ­ãƒ¼ãƒ‰ã®æç”»
 		Loading::GetInstance()->Draw();
 	}
-	// ’Êí‚ÌXV
+	// é€šå¸¸ã®æ›´æ–°
 	else
 	{
-		// Ï‚Ü‚ê‚Ä‚¢‚é‚à‚Ì‘S‚Ä‚ğ•`‰æ‚·‚é
+		// ç©ã¾ã‚Œã¦ã„ã‚‹ã‚‚ã®å…¨ã¦ã‚’æç”»ã™ã‚‹
 		for (auto& scene : scenes_) 
 		{
 			scene->Draw();
@@ -82,38 +82,38 @@ void SceneManager::Draw(void)
 	}
 }
 
-// ‰ğ•ú
+// è§£æ”¾
 void SceneManager::Release(void)
 {
-	//‘S‚Ä‚ÌƒV[ƒ“‚Ì‰ğ•úEíœ
+	//å…¨ã¦ã®ã‚·ãƒ¼ãƒ³ã®è§£æ”¾ãƒ»å‰Šé™¤
 	for (auto& scene : scenes_)
 	{
 		scene->Release();
 	}
 	scenes_.clear();
 
-	// ƒ[ƒh‰æ–Ê‚Ìíœ
+	// ãƒ­ãƒ¼ãƒ‰ç”»é¢ã®å‰Šé™¤
 	Loading::GetInstance()->Release();
 	Loading::GetInstance()->DeleteInstance();
 }
 
-// ó‘Ô‘JˆÚŠÖ”
+// çŠ¶æ…‹é·ç§»é–¢æ•°
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase>scene)
 {	
-	// ƒV[ƒ“‚ª‹ó‚©H
+	// ã‚·ãƒ¼ãƒ³ãŒç©ºã‹ï¼Ÿ
 	if (scenes_.empty()) 
 	{
-		//‹ó‚È‚Ì‚ÅV‚µ‚­“ü‚ê‚é
+		//ç©ºãªã®ã§æ–°ã—ãå…¥ã‚Œã‚‹
 		scenes_.push_back(scene);
 	}
 	else 
 	{
-		//––”ö‚Ì‚à‚Ì‚ğV‚µ‚¢•¨‚É“ü‚ê‘Ö‚¦‚é
+		//æœ«å°¾ã®ã‚‚ã®ã‚’æ–°ã—ã„ç‰©ã«å…¥ã‚Œæ›¿ãˆã‚‹
 		scenes_.back()->Release();
 		scenes_.back() = scene;
 	}
 
-	// “Ç‚İ‚İ(”ñ“¯Šú)
+	// èª­ã¿è¾¼ã¿(éåŒæœŸ)
 	Loading::GetInstance()->StartAsyncLoad();
 	scenes_.back()->Load();
 	Loading::GetInstance()->EndAsyncLoad();
@@ -136,7 +136,7 @@ void SceneManager::ChangeScene(SCENE_ID scene)
 
 void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 {
-	//V‚µ‚­Ï‚Ş‚Ì‚Å‚à‚Æ‚à‚Æ“ü‚Á‚Ä‚¢‚é“z‚Í‚Ü‚¾íœ‚³‚ê‚È‚¢
+	//æ–°ã—ãç©ã‚€ã®ã§ã‚‚ã¨ã‚‚ã¨å…¥ã£ã¦ã„ã‚‹å¥´ã¯ã¾ã å‰Šé™¤ã•ã‚Œãªã„
 	scenes_.push_back(scene);
 	scenes_.back()->Load();
 	scenes_.back()->Init();
@@ -159,7 +159,7 @@ void SceneManager::PushScene(SCENE_ID scene)
 
 void SceneManager::PopScene(void)
 {
-	//Ï‚ñ‚Å‚ ‚é‚à‚Ì‚ğÁ‚µ‚ÄA‚à‚Æ‚à‚Æ‚ ‚Á‚½‚à‚Ì‚ğ––”ö‚É‚·‚é
+	//ç©ã‚“ã§ã‚ã‚‹ã‚‚ã®ã‚’æ¶ˆã—ã¦ã€ã‚‚ã¨ã‚‚ã¨ã‚ã£ãŸã‚‚ã®ã‚’æœ«å°¾ã«ã™ã‚‹
 	if (scenes_.size() > 1) 
 	{
 		scenes_.back()->Release();
@@ -169,11 +169,11 @@ void SceneManager::PopScene(void)
 
 void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
 {
-	// ‘S‚Ä‰ğ•ú
+	// å…¨ã¦è§£æ”¾
 	for (auto& s : scenes_) { s->Release(); }
 	scenes_.clear();
 
-	// V‚µ‚­Ï‚Ş
+	// æ–°ã—ãç©ã‚€
 	ChangeScene(scene);
 }
 
@@ -194,28 +194,27 @@ void SceneManager::JumpScene(SCENE_ID scene)
 
 void SceneManager::Init3D(void)
 {
-	// ”wŒiFİ’è
+	// èƒŒæ™¯è‰²è¨­å®š
 	SetBackgroundColor(0, 139, 139);
 
-	// Zƒoƒbƒtƒ@‚ğ—LŒø‚É‚·‚é
+	// Zãƒãƒƒãƒ•ã‚¡ã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	SetUseZBuffer3D(true);
-	// Zƒoƒbƒtƒ@‚Ö‚Ì‘‚«‚İ‚ğ—LŒø‚É‚·‚é
+	// Zãƒãƒƒãƒ•ã‚¡ã¸ã®æ›¸ãè¾¼ã¿ã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	SetWriteZBuffer3D(true);
 
-	// ƒoƒbƒNƒJƒŠƒ“ƒO‚ğ—LŒø‚É‚·‚é
+	// ãƒãƒƒã‚¯ã‚«ãƒªãƒ³ã‚°ã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	SetUseBackCulling(false);
 
-	// ƒ‰ƒCƒg‚ğ—LŒø‚É‚·‚é
+	// ãƒ©ã‚¤ãƒˆã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	SetUseLighting(true);
-	// ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒg•ûŒü‚Ìİ’è(³‹K‰»‚³‚ê‚Ä‚¢‚È‚­‚Ä‚à—Ç‚¢)
-	// ³–Ê‚©‚çÎ‚ß‰º‚ÉŒü‚©‚Á‚½ƒ‰ƒCƒg
 	ChangeLightTypeDir({ 0.00f, -1.00f, 0.00f });
+	SetLightDirection({ 0.00f, -1.00f, 0.00f });
 
-	// ƒtƒHƒOİ’è
+	// ãƒ•ã‚©ã‚°è¨­å®š
 	SetFogEnable(true);
-	// ƒtƒHƒO‚ÌF
+	// ãƒ•ã‚©ã‚°ã®è‰²
 	SetFogColor(100, 100, 100);
-	// ƒtƒHƒO‚ğ”­¶‚³‚¹‚é‰œs‚«‚ÌÅ¬AÅ‘å‹——£
+	// ãƒ•ã‚©ã‚°ã‚’ç™ºç”Ÿã•ã›ã‚‹å¥¥è¡Œãã®æœ€å°ã€æœ€å¤§è·é›¢
 	SetFogStartEnd(1000.0f, 15000.0f);
 
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);

@@ -5,7 +5,8 @@
 #include "Block.h"
 #include "BlockManager.h"
 
-BlockManager::BlockManager(void)
+BlockManager::BlockManager(void):
+	textureId_(-1)
 {
 }
 BlockManager::~BlockManager(void)
@@ -14,6 +15,8 @@ BlockManager::~BlockManager(void)
 
 void BlockManager::Load(void)
 {
+	Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
+
 	// 各種ブロックモデルのロード
 	std::string PATH = "Data/Model/StageBlocks/";
 
@@ -49,11 +52,15 @@ void BlockManager::Release(void)
 		if (b.second == -1)continue;
 		MV1DeleteModel(b.second);
 	}
+
+	DeleteGraph(textureId_);
 }
 
 const std::vector<UnitBase*> BlockManager::GetBlocks(void) const
 {
 	std::vector<UnitBase*> ret = {};
+
+	ret.reserve(blocks_.size());
 
 	for (auto& b : blocks_) { ret.emplace_back(b); }
 
@@ -95,17 +102,34 @@ void BlockManager::LoadMapCsvData(void)
 		int y = std::stoi(strSplit[2]);
 
 		Block* block = new Block();
-		block->Create((Block::TYPE)0, models_[0], x, y, z);
+		block->Create((Block::TYPE)0, models_[0], textureId_, x, y, z);
 		block->Load();
 		block->Init();
 
 		blocks_.emplace_back(block);
 	}
 	//Block* block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], 0, 0, 0);
+	//block->Create((Block::TYPE)0, models_[0], textureId_, 0, 0, 0);
 	//block->Load();
 	//block->Init();
+	//blocks_.emplace_back(block);
 
+	//block = new Block();
+	//block->Create((Block::TYPE)0, models_[0], textureId_, 1, 0, 0);
+	//block->Load();
+	//block->Init();
+	//blocks_.emplace_back(block);
+
+	//block = new Block();
+	//block->Create((Block::TYPE)0, models_[0], textureId_, 0, 0, 1);
+	//block->Load();
+	//block->Init();
+	//blocks_.emplace_back(block);
+
+	//block = new Block();
+	//block->Create((Block::TYPE)0, models_[0], textureId_, 1, 0, 1);
+	//block->Load();
+	//block->Init();
 	//blocks_.emplace_back(block);
 
 }

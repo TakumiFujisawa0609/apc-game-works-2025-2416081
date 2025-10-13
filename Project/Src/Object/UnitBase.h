@@ -32,6 +32,7 @@ struct Base
 
 	VECTOR pos_ = { -1.0f, -1.0f, -1.0f };	// ワールド座標（中心）
 	VECTOR prevPos_ = { -1.0f,-1.0f,-1.0f };
+	VECTOR WorldPos(void)const { return VAdd(pos_, para_.center); }
 
 	VECTOR vel_ = { 0.0f,0.0f,0.0f };
 

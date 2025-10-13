@@ -11,28 +11,48 @@ public:
 	Collision();
 	~Collision();
 
-	static void AddObject(UnitBase* obj) { objects_.push_back(obj); }
-	void AddObject(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddObject(o); } }
-	void AddStage(UnitBase* obj) { stageObject_.push_back(obj); }
-	void AddStage(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddStage(o); } }
+	static void AddDynamicPlayer(UnitBase* obj) { dynamicPlayerObjects_.push_back(obj); }
+	static void AddDynamicPlayer(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddDynamicPlayer(o); } }
 
-	void ResolveDynamics(void);      // Åöí«â¡ÅFï®óùÉXÉeÉbÉvÅivelèCê≥Å{ïKóvç≈è¨âüÇµñﬂÇµÅj
+	static void AddPlayer(UnitBase* obj) { playerObjects_.push_back(obj); }
+	static void AddPlayer(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddPlayer(o); } }
+
+	static void AddDynamicEnemy(UnitBase* obj) { dynamicEnemyObjects_.push_back(obj); }
+	static void AddDynamicEnemy(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddDynamicEnemy(o); } }
+
+	static void AddEnemy(UnitBase* obj) { enemyObjects_.push_back(obj); }
+	static void AddEnemy(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddEnemy(o); } }
+
+	static void AddStage(UnitBase* obj) { stageObject_.push_back(obj); }
+	static void AddStage(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddStage(o); } }
+
+	void ResolveDynamics(void);
 	void ResolvePairs();
-	void SetSlopeLimitDeg(float deg) { slopeLimitDeg_ = deg; } // ê⁄ínäpÇÃãñóe
+	void SetSlopeLimitDeg(float deg) { slopeLimitDeg_ = deg; }
 
 	void Check();
-	void Clear() { objects_.clear(); stageObject_.clear(); }
 
+	void Clear() {
+		dynamicPlayerObjects_.clear();
+		dynamicEnemyObjects_.clear();
+		playerObjects_.clear();
+		enemyObjects_.clear();
+		stageObject_.clear();
+	}
 
 	void SetResolveIters(int n) { resolveIters_ = (n < 1 ? 1 : n); }
 
 private:
+	// âüÇµñﬂÇµÇ™ïKóvÇ»Ç‡ÇÃÅ`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
+	static std::vector<UnitBase*> dynamicPlayerObjects_;
+	static std::vector<UnitBase*> dynamicEnemyObjects_;
+	//Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
-
-
-	static std::vector<UnitBase*> objects_;
+	// è’ìÀí ímÇæÇØÇ≈çœÇﬁÇ‡ÇÃÅ`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
+	static std::vector<UnitBase*> playerObjects_;
+	static std::vector<UnitBase*> enemyObjects_;
 	static std::vector<UnitBase*> stageObject_;
-
+	//Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
 	float slopeLimitDeg_ = 50.0f; // ÇæÇ¢ÇΩÇ¢ÇÃè∞äp
 
@@ -69,6 +89,7 @@ private:
 	// è’ìÀä÷êî
 	bool SphereSphere(const Base& a, const Base& b) const;
 	bool ObbObb(const Base& a, const Base& b) const;
+	bool AabbAabb(const Base& a, const Base& b) const;
 	bool CapsuleCapsule(const Base& a, const Base& b) const;
 	bool SphereObb(const Base& sphere, const Base& obb) const;
 	bool SphereCapsule(const Base& sphere, const Base& capsule) const;

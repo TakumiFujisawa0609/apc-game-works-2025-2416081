@@ -1,5 +1,7 @@
 #include"ThrowObjBase.h"
 
+#include"../../Boss/Boss.h"
+
 ThrowObjBase::ThrowObjBase():
 	aliveTime(100),
 	aliveCounter_(0),
@@ -51,6 +53,9 @@ void ThrowObjBase::Release(void)
 
 void ThrowObjBase::OnCollision(UnitBase* other)
 {
+	if (dynamic_cast<Boss*>(other)) {
+		unit_.isAlive_ = false;
+	}
 }
 
 void ThrowObjBase::Throw(const VECTOR& pos, const VECTOR& vec)

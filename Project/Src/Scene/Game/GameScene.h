@@ -11,10 +11,9 @@
 class Camera;
 
 class BlockManager;
-class Rock;
+class RockWall;
 class Player;
-
-class Grid;
+class Boss;
 
 class GameScene : public SceneBase
 {
@@ -59,10 +58,9 @@ private:
 
 	BlockManager* blocks_;
 
-	std::vector<Rock*> rock_;
+	std::vector<RockWall*> rock_;
 	Player* player_;
-
-	Grid* grid_;
+	Boss* boss_;
 
 	// ヒットストップカウンター
 	static int hitStop_;

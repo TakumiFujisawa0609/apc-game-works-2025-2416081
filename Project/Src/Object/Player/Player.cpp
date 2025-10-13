@@ -8,7 +8,6 @@
 
 #include"../../scene/SceneManager/SceneManager.h"
 
-#include"../Rock/Rock.h"
 
 Player::Player(const VECTOR& cameraPos):
 	cameraAngle_(cameraPos),
@@ -35,7 +34,7 @@ void Player::Load(void)
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = SIZE;
 	unit_.para_.radius = SIZE.z;
-	unit_.para_.capsuleHalfLen = (SIZE.y - unit_.para_.radius * 2) / 2;
+	unit_.para_.capsuleHalfLen = (SIZE.y - (unit_.para_.radius * 2)) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
 	if (unit_.model_ != -1) {
@@ -52,7 +51,7 @@ void Player::Load(void)
 	SET_STATE(STATE::MOVE, &Player::Move);
 	SET_STATE(STATE::ATTACK, &Player::Attack);
 	SET_STATE(STATE::GOUGE, &Player::Gouge);
-	SET_STATE(STATE::HAVE_THROWING_OBJ, &Player::HaveThrowingObj);
+	SET_STATE(STATE::CARRY_OBJ, &Player::CarryObj);
 	SET_STATE(STATE::THROWING_OBJ, &Player::ThrowingObj);
 	SET_STATE(STATE::EVASION, &Player::Evasion);
 	SET_STATE(STATE::DAMAGE, &Player::Damage);
@@ -128,13 +127,6 @@ void Player::Update(void)
 		for (auto& jump : isJump_) { jump = false; }
 		for (auto& cou : jumpKeyCounter_) { cou = 0; }
 	}
-
-	if (unit_.pos_.y < 0.0f) {
-		unit_.pos_.y = 0.0f;
-		yAccelSum_ = 0.0f;
-		for (auto& jump : isJump_) { jump = false; }
-		for (auto& cou : jumpKeyCounter_) { cou = 0; }
-	}
 }
 
 void Player::Draw(void)
@@ -143,19 +135,22 @@ void Player::Draw(void)
 
 	SubDraw();
 
-	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.pos_, CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
+	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
 
 
 	// デバッグ用に当たり判定の表示
 
-	//VECTOR localPos1 = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
+	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+
+	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
 	//DrawCapsule3D(
-	//	VSub(unit_.pos_, localPos1),
-	//	VAdd(unit_.pos_, localPos1),
-	//	unit_.para_.radius, 30, 0xffffff, 0xffffff, true);
+	//	VSub(unit_.WorldPos(), localPos),
+	//	VAdd(unit_.WorldPos(), localPos),
+	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
 
+	//DrawSphere3D(unit_.WorldPos(), 5.0f, 4, 0xffffff, 0xffffff, true);
 
 	//VECTOR debugPos[8] =
 	//{
@@ -169,8 +164,10 @@ void Player::Draw(void)
 	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
 	//};
 	//for (int i = 0; i < 8; i++) {
-	//	DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
+	//	DrawSphere3D(debugPos[i], 3.0f, 4, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 	//}
+
+	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void Player::Release(void)
@@ -225,7 +222,7 @@ void Player::StateManager(void)
 		break;
 	case STATE::GOUGE:
 		break;
-	case STATE::HAVE_THROWING_OBJ:
+	case STATE::CARRY_OBJ:
 		DoStateThrowing();
 		break;
 	case STATE::THROWING_OBJ:
@@ -238,6 +235,7 @@ void Player::StateManager(void)
 		break;
 	}
 }
+
 void Player::DoStateMove(void)
 {
 	auto& key = KEY::GetIns();
@@ -295,13 +293,14 @@ void Player::DoStateGouge(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).down) {
 		state_ = STATE::GOUGE;
+		anime_->Play((int)ANIME_TYPE::GOUPE, false);
 	}
 }
 void Player::DoStateThrowing(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ATTACK).down) {
 		state_ = STATE::THROWING_OBJ;
-		anime_->Play((int)ANIME_TYPE::PUNCH_FIRST, false);
+		anime_->Play((int)ANIME_TYPE::THROW, false);
 	}
 }
 void Player::DoStateEvasion(void)
@@ -322,9 +321,8 @@ void Player::Move(void)
 
 	Jump();
 
-	if (attackStageCounter_ <= INPUT_ATTACK_FRAME) attackStageCounter_++;
+	if (attackStageCounter_ <= INPUT_ATTACK_FRAME) { attackStageCounter_++; }
 }
-
 void Player::Attack(void)
 {	
 	// 攻撃の判定が発生する前の間、前方に移動させる
@@ -345,7 +343,9 @@ void Player::Attack(void)
 	punch_->Off();
 
 	// 大体攻撃判定を発生させる時間
-	if (anime_->GetAnimeRatio() >= 0.4f && anime_->GetAnimeRatio() <= 0.6f) { punch_->On(); }
+	if (anime_->GetAnimeRatio() >= 0.4f && anime_->GetAnimeRatio() <= 0.6f) {
+		punch_->On();
+	}
 
 	// 攻撃判定終わったらボタンで次段攻撃に遷移可能にしておく(操作性向上)
 	if (anime_->GetAnimeRatio() > 0.6f) { DoStateAttack(); }
@@ -353,28 +353,39 @@ void Player::Attack(void)
 	// 何も入力なく攻撃アニメーションが終了したら通常状態に自動で遷移
 	if (anime_->GetAnimEnd()) { state_ = STATE::MOVE; }
 }
-
 void Player::Gouge(void)
 {
-	unit_.para_.speed = RUN_SPEED / 2;
-	state_ = STATE::HAVE_THROWING_OBJ;
+	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
+		if (anime_->GetAnimeRatio() > 0.5f) {
+			state_ = STATE::CARRY_OBJ;
+		}
+	}
+	else {
+		state_ = STATE::MOVE;
+		anime_->Play((int)ANIME_TYPE::IDLE);
+	}
 }
-
-void Player::HaveThrowingObj(void)
+void Player::CarryObj(void)
 {
-	Run();
-	Jump();
-}	
-
+	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
+		CarryRun();
+		CarryJump();
+	}
+	else {
+		state_ = STATE::MOVE;
+		anime_->Play((int)ANIME_TYPE::IDLE);
+	}
+}
 void Player::ThrowingObj(void)
 {
-	if (anime_->GetAnimeRatio() > 0.5f) {
-		unit_.para_.speed = RUN_SPEED;
+	if (anime_->GetAnimeRatio() <= 0.1f) {
+
+	}
+	else {
 		throwing_->Throw(THROW_TYPE::ROCK);
 		state_ = STATE::MOVE;
 	}
 }
-
 void Player::Evasion(void)
 {
 	// 移動方向ベクトル
@@ -396,11 +407,9 @@ void Player::Evasion(void)
 	// 何も入力なく回避アニメーションが終了したら通常状態に自動で遷移
 	if (anime_->GetAnimEnd()) { state_ = STATE::MOVE; }
 }
-
 void Player::Damage(void)
 {
 }
-
 void Player::Death(void)
 {
 }
@@ -440,7 +449,6 @@ void Player::Run(void)
 		unit_.angle_.y = atan2(vec.x, vec.z);
 	}
 }
-
 void Player::Jump(void)
 {
 	auto& key = KEY::GetIns();
@@ -451,6 +459,77 @@ void Player::Jump(void)
 		// ダウントリガーでジャンプ開始
 		if (key.GetInfo(KEY_TYPE::JUMP).down) {
 			isJump_[i] = true; 
+			anime_->Play((int)ANIME_TYPE::JUMP_POST, false);
+		}
+
+		// ジャンプしていなかったらループから抜ける
+		if (!isJump_[i]) { break; }
+
+		//ジャンプキーを離したら、ジャンプキー入力判定を終了
+		if (key.GetInfo(KEY_TYPE::JUMP).up) { jumpKeyCounter_[i] = INPUT_JUMPKEY_FRAME; }
+
+		//入力時間に応じてジャンプ量を変更する
+		if (isJump_[i] && key.GetInfo(KEY_TYPE::JUMP).now && jumpKeyCounter_[i] < INPUT_JUMPKEY_FRAME) {
+			//ジャンプキーの入力カウンターを増やす
+			jumpKeyCounter_[i]++;
+
+			//ジャンプ力を分配加算する
+			yAccelSum_ = (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
+
+			// その回のジャンプ処理をしたのでそれ以降のループに入らないようにする
+			break;
+		}
+	}
+
+	// モーション更新
+	if (isJump_[0] && anime_->GetAnimEnd()) { anime_->Play((int)ANIME_TYPE::JUMP); }
+}
+
+void Player::CarryRun(void)
+{
+	auto& key = KEY::GetIns();
+
+	VECTOR vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
+
+	if (Utility::VZERO(vec)) {
+		if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
+		if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
+		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+	}
+
+
+	if (Utility::VZERO(vec)) {
+		if (!isJump_[0]) { anime_->Play((int)ANIME_TYPE::CARRY_IDLE); }
+		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
+	}
+	else {
+		MATRIX mat = MGetIdent();
+		mat = MMult(mat, MGetRotY(cameraAngle_.y));
+		vec = VTransform(vec, mat);
+
+		vec = Utility::Normalize(vec);
+		unit_.vel_ = VScale(vec, unit_.para_.speed * 0.5f);
+
+		if (!isJump_[0]) {
+			anime_->Play((int)ANIME_TYPE::CARRY_RUN);
+			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 150, true);
+		}
+		else { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
+
+		unit_.angle_.y = atan2(vec.x, vec.z);
+	}
+}
+void Player::CarryJump(void)
+{
+	auto& key = KEY::GetIns();
+
+	for (int i = 0; i < JUMP_NUM; i++) {
+		if (isJump_[i]) { continue; }
+
+		// ダウントリガーでジャンプ開始
+		if (key.GetInfo(KEY_TYPE::JUMP).down) {
+			isJump_[i] = true;
 			anime_->Play((int)ANIME_TYPE::JUMP_POST, false);
 		}
 
@@ -491,6 +570,9 @@ void Player::AnimeLoad(void)
 	anime_->Add((int)ANIME_TYPE::PUNCH_FIRST, 120.0f, (ANIME_PATH + "PunchFirst.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::PUNCH_SECOND, 120.0f, (ANIME_PATH + "PunchSecond.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::PUNCH_THIRD, 120.0f, (ANIME_PATH + "PunchThird.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::GOUPE, 40.0f, (ANIME_PATH + "Goupe.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::CARRY_RUN, 30.0f, (ANIME_PATH + "CarryRun.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::THROW, 30.0f, (ANIME_PATH + "Throw.mv1").c_str());
 }
 
 void Player::SubLoad(void)
@@ -544,8 +626,6 @@ void Player::SubRelease(void)
 		throwing_ = nullptr;
 	}
 }
-
-
 
 std::vector<UnitBase*> Player::GetSubIns(void)
 {

@@ -24,7 +24,7 @@ public:
 	~Block(void)override{}
 
 	// ƒuƒƒbƒN‚ğ¶¬‚·‚é
-	void Create(TYPE type, int baseModelId, int mapX, int mapY, int mapZ);
+	void Create(TYPE type, int baseModelId,int textureId, int mapX, int mapY, int mapZ);
 
 	void OnCollision(UnitBase* other)override;
 

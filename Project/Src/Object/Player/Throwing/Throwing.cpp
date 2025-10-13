@@ -67,7 +67,7 @@ void Throwing::Throw(THROW_TYPE type)
 		throwObj_.back().ins->Load();
 		throwObj_.back().ins->Init();
 		throwObj_.back().ins->Throw(throwPos, throwVec);
-		Collision::AddObject(throwObj_.back().ins);
+		Collision::AddPlayer(throwObj_.back().ins);
 		break;
 	}
 }

@@ -5,7 +5,10 @@
 #include"../../Utility/Utility.h"
 #include"CollisionUtility.h"
 
-std::vector<UnitBase*> Collision::objects_ = {};
+std::vector<UnitBase*> Collision::dynamicPlayerObjects_ = {};
+std::vector<UnitBase*> Collision::dynamicEnemyObjects_ = {};
+std::vector<UnitBase*> Collision::playerObjects_ = {};
+std::vector<UnitBase*> Collision::enemyObjects_ = {};
 std::vector<UnitBase*> Collision::stageObject_ = {};
 
 Collision::Collision() {}
@@ -19,7 +22,162 @@ void Collision::ResolveDynamics(void)
     const float POS_SLOP = 5e-4f;                 // 微小貫通は無視
     const float cosSlope = std::cos(slopeLimitDeg_ * (DX_PI_F / 180.0f));
 
-    for (auto* o : objects_) {
+    for (auto* o : dynamicPlayerObjects_) {
+        if (!o) continue;
+        const Base& du = o->GetUnit();
+        if (du.para_.colliShape != CollisionShape::CAPSULE) continue;
+
+        VECTOR pos = du.pos_;
+        VECTOR vel = du.vel_;
+        const float R = du.para_.radius;
+        const float H = du.para_.capsuleHalfLen;
+
+        bool grounded = false;
+
+        // 反復解決
+        VECTOR prevN = { 0,0,0 }; // 反復内の法線スムージング用
+        for (int it = 0; it < resolveIters_; ++it) {
+
+            VECTOR center = VAdd(pos, du.para_.center);
+
+            // その反復での “最良” 接触を一つ選ぶ
+            bool   found = false;
+            float  bestW = 0.0f;       // 重み（AABB=深さ, Voxel=押し戻し長さ）
+            VECTOR bestPush = { 0,0,0 }; // 実際に加える押し戻し
+            VECTOR bestN = { 0,0,0 }; // 対応する法線
+            bool   bestGnd = false;
+
+            for (auto* s : stageObject_) {
+                if (!s) continue;
+                const Base& su = s->GetUnit();
+                if (su.isAlive_ == false) { continue; }
+
+                // ---- Voxel：中心版で1回だけ解く → delta を候補に ----
+                if (auto* vox = dynamic_cast<VoxelBase*>(s)) {
+                    VECTOR preC = center;
+                    VECTOR vtmp = vel; bool g = false;
+                    if (vox->ResolveCapsuleCenter(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
+                        VECTOR delta = VSub(center, preC);
+                        float  d2 = VDot(delta, delta);
+                        if (d2 > bestW && d2 > EPS2) {
+                            bestW = d2;                // Voxel は押し戻し長さで比較
+                            bestPush = delta;
+                            // 法線は押し戻し方向
+                            float L = std::sqrt(d2);
+                            bestN = { delta.x / L, delta.y / L, delta.z / L };
+                            bestGnd = g;
+                            found = true;
+                        }
+                    }
+                    // center は local のみで使うので戻す
+                    center = preC;
+                    continue;
+                }
+
+                // ---- 非Voxel（AABB）：MTVを候補に ----
+                if (su.para_.colliShape == CollisionShape::AABB) {
+                    const VECTOR half = VScale(su.para_.size, 0.5f);
+                    const VECTOR bmin = VSub(VAdd(su.pos_, su.para_.center), half);
+                    const VECTOR bmax = VAdd(VAdd(su.pos_, su.para_.center), half);
+
+                    VECTOR n; float d;
+                    if (Cfunc::CapsuleAabbY_MTV(center, H, R, bmin, bmax, n, d)) {
+                        if (d > bestW && d > POS_SLOP) {   // AABB は“深さ”で比較
+                            bestW = d;
+                            bestPush = VScale(n, d + EPS);
+                            bestN = n;
+                            // 床っぽい方向なら接地候補
+                            bestGnd = (n.y > cosSlope && vel.y <= 0.0f);
+                            found = true;
+                        }
+                    }
+                }
+            }
+            for (auto* e : enemyObjects_) {
+                if (!e) { continue; }
+                const Base& eu = e->GetUnit();
+                if (eu.isAlive_ == false) { continue; }
+
+                // ---- Voxel ----
+                if (auto* vox = dynamic_cast<VoxelBase*>(e)) {
+                    VECTOR preC = center;
+                    VECTOR vtmp = vel; bool g = false;
+                    if (vox->ResolveCapsuleCenter(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
+                        VECTOR delta = VSub(center, preC);
+                        float  d2 = VDot(delta, delta);
+                        if (d2 > bestW && d2 > EPS2) {
+                            bestW = d2;                // Voxel は押し戻し長さで比較
+                            bestPush = delta;
+                            // 法線は押し戻し方向
+                            float L = std::sqrt(d2);
+                            bestN = { delta.x / L, delta.y / L, delta.z / L };
+                            bestGnd = g;
+                            found = true;
+                        }
+                    }
+                    // center は local のみで使うので戻す
+                    center = preC;
+                    continue;
+                }
+                // ---- 非Voxel ----
+                if (eu.para_.colliShape == CollisionShape::AABB) {
+                    const VECTOR half = VScale(eu.para_.size, 0.5f);
+                    const VECTOR bmin = VSub(VAdd(eu.pos_, eu.para_.center), half);
+                    const VECTOR bmax = VAdd(VAdd(eu.pos_, eu.para_.center), half);
+
+                    VECTOR n; float d;
+                    if (Cfunc::CapsuleAabbY_MTV(center, H, R, bmin, bmax, n, d)) {
+                        if (d > bestW && d > POS_SLOP) {
+                            bestW = d;
+                            bestPush = VScale(n, d + EPS);
+                            bestN = n;
+                            // 床っぽい方向なら接地候補
+                            bestGnd = (n.y > cosSlope && vel.y <= 0.0f);
+                            found = true;
+                        }
+                    }
+                }
+            }
+
+            if (!found) { break; } // もう押し戻すべき接触なし
+
+            // 法線スムージング（反復内ヒステリシス）
+            if (prevN.x != 0 || prevN.y != 0 || prevN.z != 0) {
+                float dp = prevN.x * bestN.x + prevN.y * bestN.y + prevN.z * bestN.z;
+                if (dp > 0.0f) { // 反転時はそのまま
+                    const float a = 0.6f; // ブレンド係数（上げるとより粘る）
+                    VECTOR blended = { bestN.x * a + prevN.x * (1 - a),
+                                       bestN.y * a + prevN.y * (1 - a),
+                                       bestN.z * a + prevN.z * (1 - a) };
+                    float L2 = blended.x * blended.x + blended.y * blended.y + blended.z * blended.z;
+                    if (L2 > 1e-12f) {
+                        float inv = 1.0f / std::sqrt(L2);
+                        bestN = { blended.x * inv, blended.y * inv, blended.z * inv };
+                    }
+                }
+            }
+            prevN = bestN;
+
+            // 一回だけ押し戻す
+            pos = VAdd(pos, bestPush);
+            center = VAdd(center, bestPush);
+
+            // スライド（法線成分をカット）
+            float vn = VDot(vel, bestN);
+            if (vn < 0.0f) vel = VSub(vel, VScale(bestN, vn));
+
+            grounded = grounded || bestGnd;
+        }
+
+        // 微小速度の丸め（角での小刻みな振動対策）
+        auto killTiny = [](float& c) { if (std::fabs(c) < 1e-6f) c = 0.0f; };
+        killTiny(vel.x); killTiny(vel.y); killTiny(vel.z);
+
+        o->SetPos(pos);
+        o->SetVelocity(vel);
+        if (grounded) o->OnGrounded();
+    }
+    for (auto* o : dynamicEnemyObjects_) {
         if (!o) continue;
         const Base& du = o->GetUnit();
         if (du.para_.colliShape != CollisionShape::CAPSULE) continue;
@@ -90,7 +248,7 @@ void Collision::ResolveDynamics(void)
                 }
             }
 
-            if (!found) break; // もう押し戻すべき接触なし
+            if (!found) { break; } // もう押し戻すべき接触なし
 
             // 法線スムージング（反復内ヒステリシス）
             if (prevN.x != 0 || prevN.y != 0 || prevN.z != 0) {
@@ -185,18 +343,109 @@ void Collision::Check()
 {
 	// ステージオブジェクトとオブジェクトの当たり判定
 	for (auto& s : stageObject_) {
-		for (auto& o : objects_) {
+        for (auto& p : dynamicPlayerObjects_) {
+            const Base& us = s->GetUnit();
+            const Base& up = p->GetUnit();
+
+            if ((us.aliveCollision_ && !us.isAlive_) || (up.aliveCollision_ && !up.isAlive_)) continue;
+
+            if (IsHit(us, up)) {
+                s->OnCollision(p);
+                p->OnCollision(s);
+            }
+        }
+        for (auto& p : playerObjects_) {
 			const Base& us = s->GetUnit();
-			const Base& uo = o->GetUnit();
+			const Base& up = p->GetUnit();
 
-			if ((us.aliveCollision_ && !us.isAlive_) || (uo.aliveCollision_ && !uo.isAlive_)) continue;
+			if ((us.aliveCollision_ && !us.isAlive_) || (up.aliveCollision_ && !up.isAlive_)) continue;
 
-			if (IsHit(us, uo)) {
-				s->OnCollision(o);
-				o->OnCollision(s);
+			if (IsHit(us, up)) {
+				s->OnCollision(p);
+				p->OnCollision(s);
 			}
-		}
+        }
+        for (auto& e : dynamicEnemyObjects_) {
+            const Base& us = s->GetUnit();
+            const Base& ue = e->GetUnit();
+
+            if ((us.aliveCollision_ && !us.isAlive_) || (ue.aliveCollision_ && !ue.isAlive_)) continue;
+
+            if (IsHit(us, ue)) {
+                s->OnCollision(e);
+                e->OnCollision(s);
+            }
+        }
+        for (auto& e : enemyObjects_) {
+            const Base& us = s->GetUnit();
+            const Base& ue = e->GetUnit();
+
+            if ((us.aliveCollision_ && !us.isAlive_) || (ue.aliveCollision_ && !ue.isAlive_)) continue;
+
+            if (IsHit(us, ue)) {
+                s->OnCollision(e);
+                e->OnCollision(s);
+            }
+        }
 	}
+
+    // オブジェクト同士の当たり判定
+    for (auto& p : dynamicPlayerObjects_) {
+        for (auto& e : dynamicEnemyObjects_) {
+            const Base& up = p->GetUnit();
+            const Base& ue = e->GetUnit();
+
+            if ((up.aliveCollision_ && !up.isAlive_) || (ue.aliveCollision_ && !ue.isAlive_)) { continue; }
+
+            if ((up.isInvici_ && up.inviciCounter_ > 0) || (ue.isInvici_ && ue.inviciCounter_ > 0)) { continue; }
+
+            if (IsHit(up, ue)) {
+                p->OnCollision(e);
+                e->OnCollision(p);
+            }
+        }
+        for (auto& e : enemyObjects_) {
+            const Base& up = p->GetUnit();
+            const Base& ue = e->GetUnit();
+
+            if ((up.aliveCollision_ && !up.isAlive_) || (ue.aliveCollision_ && !ue.isAlive_)) { continue; }
+
+            if ((up.isInvici_ && up.inviciCounter_ > 0) || (ue.isInvici_ && ue.inviciCounter_ > 0)) { continue; }
+
+            if (IsHit(up, ue)) {
+                p->OnCollision(e);
+                e->OnCollision(p);
+            }
+        }
+    }
+    for (auto& p : playerObjects_) {
+        for (auto& e : dynamicEnemyObjects_) {
+            const Base& up = p->GetUnit();
+            const Base& ue = e->GetUnit();
+
+            if ((up.aliveCollision_ && !up.isAlive_) || (ue.aliveCollision_ && !ue.isAlive_)) { continue; }
+
+            if ((up.isInvici_ && up.inviciCounter_ > 0) || (ue.isInvici_ && ue.inviciCounter_ > 0)) { continue; }
+
+            if (IsHit(up, ue)) {
+                p->OnCollision(e);
+                e->OnCollision(p);
+            }
+        }
+        for (auto& e : enemyObjects_) {
+            const Base& up = p->GetUnit();
+            const Base& ue = e->GetUnit();
+
+            if ((up.aliveCollision_ && !up.isAlive_) || (ue.aliveCollision_ && !ue.isAlive_)) { continue; }
+
+            if ((up.isInvici_ && up.inviciCounter_ > 0) || (ue.isInvici_ && ue.inviciCounter_ > 0)) { continue; }
+
+            if (IsHit(up, ue)) {
+                p->OnCollision(e);
+                e->OnCollision(p);
+            }
+        }
+    }
 }
 
 bool Collision::ResolvePair(UnitBase* mover, UnitBase* stage)
@@ -213,7 +462,7 @@ bool Collision::ResolvePair(UnitBase* mover, UnitBase* stage)
     // 適用：pos/vel更新（非Voxelはここで法線スライド）
     pos = VAdd(pos, c.push);
     if (dynamic_cast<VoxelBase*>(stage)) {
-        vel = c.velOut; // Voxelは ResolveCapsuleCenter の出力を信用
+        vel = c.velOut;
     }
     else {
         float vn = VDot(vel, c.n);
@@ -318,8 +567,8 @@ bool Collision::CapsuleVsAabb_Contact(
 
 bool Collision::IsHit(const Base& a, const Base& b)
 {
-	Base A = a; A.pos_ = VAdd(A.pos_, A.para_.center);
-	Base B = b; B.pos_ = VAdd(B.pos_, B.para_.center);
+	Base A = a; A.pos_ = A.WorldPos();
+	Base B = b; B.pos_ = B.WorldPos();
 
 	auto sA = A.para_.colliShape;
 	auto sB = B.para_.colliShape;
@@ -327,7 +576,8 @@ bool Collision::IsHit(const Base& a, const Base& b)
 
 	// 同種
 	if (sA == CollisionShape::SPHERE && sB == CollisionShape::SPHERE)    return SphereSphere(A, B);
-	if (sA == CollisionShape::OBB && sB == CollisionShape::OBB) return ObbObb(A, B);
+    if (sA == CollisionShape::OBB && sB == CollisionShape::OBB) return ObbObb(A, B);
+    if (sA == CollisionShape::AABB && sB == CollisionShape::AABB) return AabbAabb(A, B);
 	if (sA == CollisionShape::CAPSULE && sB == CollisionShape::CAPSULE)   return CapsuleCapsule(A, B);
 
 	// 混合
@@ -362,6 +612,14 @@ bool Collision::ObbObb(const Base& a, const Base& b) const
 	);
 }
 
+bool Collision::AabbAabb(const Base& a, const Base& b) const
+{
+    return Cfunc::Aabb(
+        a.pos_, a.para_.size,
+        b.pos_, b.para_.size
+    );
+}
+
 bool Collision::CapsuleCapsule(const Base& a, const Base& b) const 
 {
 	return Cfunc::Capsule(
@@ -379,7 +637,7 @@ bool Collision::SphereObb(const Base& sphere, const Base& obb) const
 bool Collision::SphereCapsule(const Base& sphere, const Base& capsule) const 
 {
 	return Cfunc::SphereCapsule(sphere.pos_, sphere.para_.radius,
-		capsule.pos_, capsule.para_.radius, capsule.para_.capsuleHalfLen, capsule.angle_);
+		capsule.pos_, capsule.para_.capsuleHalfLen, capsule.para_.radius, capsule.angle_);
 }
 
 bool Collision::CapsuleObb(const Base& capsule, const Base& obb) const 

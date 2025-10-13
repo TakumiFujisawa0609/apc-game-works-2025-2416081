@@ -13,7 +13,7 @@ class Player : public UnitBase
 {
 public:
 	static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f,SIZE.y / 2,0.0f };
+	static constexpr VECTOR CENTER_DIFF = { 0.0f,SIZE.y / 2 - 25.0f,0.0f };
 
 
 	Player(const VECTOR& cameraAngle);
@@ -34,7 +34,7 @@ public:
 		MOVE,
 		ATTACK,
 		GOUGE,
-		HAVE_THROWING_OBJ,
+		CARRY_OBJ,
 		THROWING_OBJ,
 		EVASION,
 		DAMAGE,
@@ -96,7 +96,7 @@ private:
 	void Move(void);
 	void Attack(void);
 	void Gouge(void);
-	void HaveThrowingObj(void);
+	void CarryObj(void);
 	void ThrowingObj(void);
 	void Evasion(void);
 	void Damage(void);
@@ -139,7 +139,9 @@ private:
 	// ìäÇ∞Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 	Throwing* throwing_;
 
-
+	// ä÷êî
+	void CarryRun(void);			//â°à⁄ìÆä÷êî
+	void CarryJump(void);		//ÉWÉÉÉìÉvä÷êî
 	//Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 #pragma endregion
 
@@ -158,6 +160,10 @@ private:
 		PUNCH_FIRST,
 		PUNCH_SECOND,
 		PUNCH_THIRD,
+		GOUPE,
+		CARRY_IDLE,
+		CARRY_RUN,
+		THROW
 	};
 
 	// ÉÇÅ[ÉVÉáÉìÇÃèâä˙ê›íË

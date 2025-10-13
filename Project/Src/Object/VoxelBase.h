@@ -39,13 +39,11 @@ public:
 	bool ResolveCapsuleCenter(VECTOR& center, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter);
 
 
-
-	struct AABB { VECTOR min; VECTOR max; };
-	std::vector<VECTOR> GetVoxelCenters(void) const;
-	std::vector<AABB> GetVoxelAABBs(void) const;
-
+	std::vector<VECTOR> GetCellCenterPoss(void) const { return cellCenterPoss_; };
 	float GetCellSize(void)const { return cell_; }
 	VECTOR GetCellSizeVECTOR(void) const { return VGet(cell_, cell_, cell_); }
+
+	void ReVival(void);
 
 protected:
 	virtual void SubLoad(void) = 0;
@@ -66,11 +64,11 @@ protected:
 	float cell_;
 	VECTOR gridCenter_;
 	std::vector<uint8_t> density_;
-
+	std::vector<uint8_t> densityInit_;
 	bool regeneration_;
 
 	float aliveNeedRatio_;
-
+	std::vector<VECTOR>cellCenterPoss_;
 
 
 	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }

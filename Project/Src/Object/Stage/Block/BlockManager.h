@@ -47,6 +47,8 @@ private:
 	// マップデータ
 	//Block* blocks_[NUM_BLOCK_Y][NUM_BLOCK_Z][NUM_BLOCK_X];
 
+	int textureId_;
+
 	std::vector<Block*>blocks_;
 
 	// ブロック用のモデルハンドルID

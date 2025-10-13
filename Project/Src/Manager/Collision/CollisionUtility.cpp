@@ -69,6 +69,21 @@ bool CollisionUtility::Obb(const VECTOR& pos1, const VECTOR& size1, const VECTOR
 	return true;
 }
 
+bool CollisionUtility::Aabb(const VECTOR& pos1, const VECTOR& size1, const VECTOR& pos2, const VECTOR& size2)
+{
+	VECTOR harlSize1 = VScale(size1, 0.5f);
+	VECTOR harlSize2 = VScale(size2, 0.5f);
+
+	if (pos1.x - harlSize1.x >= pos2.x + harlSize2.x) return false;
+	if (pos1.x + harlSize1.x <= pos2.x - harlSize2.x) return false;
+	if (pos1.y - harlSize1.y >= pos2.y + harlSize2.y) return false;
+	if (pos1.y + harlSize1.y <= pos2.y - harlSize2.y) return false;
+	if (pos1.z - harlSize1.z >= pos2.z + harlSize2.z) return false;
+	if (pos1.z + harlSize1.z <= pos2.z - harlSize2.z) return false;
+
+	return true;
+}
+
 bool CollisionUtility::Capsule(const VECTOR& pos1, float halfLen1, float r1, const VECTOR& ang1, const VECTOR& pos2, float halfLen2, float r2, const VECTOR& ang2)
 {
 	// ’†Sü•ûŒüiYŽ²‚ð‰ñ“]j
@@ -121,7 +136,7 @@ bool CollisionUtility::SphereCapsule(const VECTOR& spherePos, float sphereRadius
 	float dist2 = PointSegmentDistSq(spherePos, p1, p2);
 
 	// ”¼Œa‚Ì˜a‚Æ”äŠriƒJƒvƒZƒ‹”¼Œa{‹…”¼Œaj
-	float rr = sphereRadius + sphereRadius;
+	float rr = capsuleRadius + sphereRadius;
 	return dist2 <= rr * rr;
 }
 
