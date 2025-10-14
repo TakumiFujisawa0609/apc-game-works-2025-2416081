@@ -3,6 +3,7 @@
 #include"../../Manager/Input/KeyManager.h"
 #include"../../Manager/Sound/SoundManager.h"
 
+#include"../../Application/Application.h"
 #include"../../Scene/Game/GameScene.h"
 
 #include"../Player/Player.h"
@@ -74,7 +75,7 @@ void Boss::Init(void)
 
 	unit_.isAlive_ = true;
 
-	unit_.hp_ = 200;
+	unit_.hp_ = HP_MAX;
 
 	// Bossクラスが抱える子クラスの初期化処理
 	SubInit();
@@ -136,6 +137,29 @@ void Boss::Draw(void)
 	MV1DrawModel(unit_.model_);
 }
 
+void Boss::UiDraw(void)
+{
+	auto drawHpBar = [&](Vector2 sPos, Vector2 size, int color)->void {
+		DrawBoxAA(sPos.x, sPos.y, sPos.x + size.x, sPos.y + size.y, color, true);
+		};
+
+	float dif = 20.0f;
+
+	Vector2 size = { 1000.0f,60.0f };
+	Vector2 sPos = { Application::SCREEN_SIZE_X - dif - size.x,dif };
+
+	drawHpBar(sPos, size, 0xffffff);
+
+	dif = 3.0f;
+	sPos += dif;
+	size -= dif * 2;
+
+	drawHpBar(sPos, size, 0x000000);
+
+	size.x *= ((float)unit_.hp_ / (float)HP_MAX);
+	drawHpBar(sPos, size, 0xff0000);
+}
+
 void Boss::Release(void)
 {
 	// Bossクラスが抱える子クラスの解放処理
@@ -147,11 +171,17 @@ void Boss::Release(void)
 void Boss::OnCollision(UnitBase* other)
 {
 	if (state_ == STATE::STAN) {
-		if (dynamic_cast<PlayerPunch*>(other)) {
+		if (dynamic_cast<PlayerPunch*>(other) ||
+			dynamic_cast<ThrowObjBase*>(other)
+			) {
 			GameScene::Shake();
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 
+			HpSharpen(50);
+			VECTOR vec = VSub(playerPos, unit_.pos_);
+			unit_.angle_.y = atan2f(vec.x, vec.z);
 			state_ = STATE::BIG_DAMAGE;
+			anime_->Play((int)ANIME_TYPE::DEATH, false);
 			return;
 		}
 	}
@@ -159,7 +189,7 @@ void Boss::OnCollision(UnitBase* other)
 	if (dynamic_cast<ThrowObjBase*>(other)) {
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
-		HpSharpen(10);
+		HpSharpen(30);
 		return;
 	}
 }
@@ -191,11 +221,16 @@ void Boss::Stan(void)
 }
 void Boss::BigDamage(void)
 {
-
+	if (anime_->GetAnimeRatio() > 0.6f) {
+		state_ = STATE::IDLE;
+		anime_->Play((int)ANIME_TYPE::IDLE);
+	}
 }
 void Boss::Death(void)
 {
-	unit_.isAlive_ = false;
+	if (anime_->GetAnimEnd()) {
+		unit_.isAlive_ = false;
+	}
 }
 
 
@@ -244,15 +279,24 @@ void Boss::HpSharpen(int damage)
 {
 	if (unit_.hp_ <= 0) { return; }
 
+	bool halfOn = false;
+	if ((float)unit_.hp_ / (float)HP_MAX >= 0.5f) { halfOn = true; }
+
 	unit_.hp_ -= damage;
 
 	if (unit_.hp_ <= 0) {
+		unit_.hp_ = 0;
 		state_ = STATE::DEATH;
-
+		anime_->Play((int)ANIME_TYPE::DEATH, false);
 		return;
 	}
 
 	state_ = STATE::DAMAGE;
 	anime_->Play((int)ANIME_TYPE::DAMAGE, false);
 	unit_.inviciCounter_ = 60;
+
+	if (halfOn && (((float)unit_.hp_ / (float)HP_MAX) < 0.5f)) {
+		state_ = STATE::STAN;
+		anime_->Play((int)ANIME_TYPE::DEATH, false);
+	}
 }

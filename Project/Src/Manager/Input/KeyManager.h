@@ -40,6 +40,13 @@ public:
 		// システム操作
 		GAME_END,
 
+		ENTER,
+
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT,
+
 		// デバッグキー
 		DEBUG_VOXEl_CREATE,
 

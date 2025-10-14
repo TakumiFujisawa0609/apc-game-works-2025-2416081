@@ -4,6 +4,7 @@
 
 #include"../Manager/FPS/FPS.h"
 #include"../Manager/Input/KeyManager.h"
+#include"../Manager/Sound/SoundManager.h"
 #include"../Scene/SceneManager/SceneManager.h"
 
 Application* Application::ins_ = nullptr;
@@ -54,6 +55,10 @@ void Application::Init(void)
 	SceneManager::CreateIns();
 	SceneManager::GetIns().Init();
 
+	Smng::CreateIns();
+	Smng::GetIns().Load(SOUND::SE_SYSTEM_BUTTON);
+	Smng::GetIns().Load(SOUND::SE_SYSTEM_SELECT);
+
 	// FPS‰Šú‰»
 	fps_ = new FPS;
 	fps_->Init();
@@ -86,6 +91,8 @@ void Application::Release(void)
 {
 	// “ü—Í§Œäíœ
 	KeyManager::DeleteIns();
+
+	Smng::DeleteIns();
 
 	// ƒV[ƒ“ŠÇ—‰ğ•úEíœ	
 	SceneManager::GetIns().Release();

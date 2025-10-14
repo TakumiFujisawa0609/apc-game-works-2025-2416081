@@ -123,6 +123,13 @@ void Block::OnCollision(UnitBase* other)
 		return;
 	}
 
+	if (dynamic_cast<PlayerGouge*>(other)) {
+		if (ApplyBrush(other->GetUnit(), 255)) {
+			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+		}
+		return;
+	}
+
 	if (dynamic_cast<ThrowObjBase*>(other)) {
 		if (ApplyBrush(other->GetUnit(), 200)) {
 			GameScene::Shake();

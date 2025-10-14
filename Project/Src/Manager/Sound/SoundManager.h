@@ -25,6 +25,11 @@ public:
 		PLAYER_PUNCH,
 		PLAYER_EVASION,
 
+
+		// システム音声
+		SE_SYSTEM_BUTTON,
+		SE_SYSTEM_SELECT,
+
 		MAX,
 	};
 
@@ -59,6 +64,12 @@ public:
 	/// AllStop()で一時停止したサウンドをすべて再生再開
 	/// </summary>
 	void PausePlay(void);
+
+	/// <summary>
+	/// AllStop()で一時停止したサウンドのポーズ情報を破棄する
+	/// </summary>
+	/// <param name=""></param>
+	void PauseInfoDelete(void);
 
 	/// <summary>
 	/// 指定したサウンドを消去

@@ -6,6 +6,8 @@
 
 #include"../../Manager/Collision/CollisionUtility.h"
 
+#include"../../Application/Application.h"
+
 #include"../../scene/SceneManager/SceneManager.h"
 
 
@@ -42,6 +44,19 @@ void Player::Load(void)
 	}
 
 	unit_.para_.speed = 10.0f;
+	
+	carryModel_ = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
+
+	int mnum = MV1GetMaterialNum(unit_.model_);
+	for (int i = 0; i < mnum; ++i) {
+		COLOR_F emi = MV1GetMaterialEmiColor(unit_.model_, i);
+		DEFAULT_COLOR.emplace_back(emi);
+		emi.r = (std::min)(emi.r + 0.3f, 1.0f);
+		emi.g = (std::min)(emi.g + 0.3f, 1.0f);
+		emi.b = (std::min)(emi.b + 0.3f, 1.0f);
+		MV1SetMaterialEmiColor(unit_.model_, i, emi);
+	}
+
 
 #pragma region 関数ポインタ配列へ各関数を格納
 
@@ -91,6 +106,8 @@ void Player::Init(void)
 	for (auto& at : isAttack_) { at = false; }
 	attackStageCounter_ = 0;
 
+	unit_.hp_ = HP_MAX;
+
 	SubInit();
 }
 
@@ -120,12 +137,37 @@ void Player::Update(void)
 	anime_->Update();
 
 
-
 	if (unit_.pos_.y < -500.0f) {
 		unit_.pos_ = { 1000.0f,1000.0f,600.0f };
 		yAccelSum_ = 0.0f;
+		
+		unit_.inviciCounter_ = 200;
+		HpSharpen(30);
+
 		for (auto& jump : isJump_) { jump = false; }
 		for (auto& cou : jumpKeyCounter_) { cou = 0; }
+	}
+
+	// ダメージ演出
+	if (unit_.inviciCounter_ > 1) {
+		if (unit_.inviciCounter_ / 10 % 2 == 0) {
+			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
+				MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
+			}
+		}
+		else {
+			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
+				COLOR_F emi = DEFAULT_COLOR[i];
+				emi.r = (std::min)(DEFAULT_COLOR[i].r + 0.6f, 1.0f);
+				MV1SetMaterialEmiColor(unit_.model_, i, emi);
+			}
+		}
+
+	}
+	else if (unit_.inviciCounter_ == 1) {
+		for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
+			MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
+		}
 	}
 }
 
@@ -134,6 +176,11 @@ void Player::Draw(void)
 	if (!unit_.isAlive_) { return; }
 
 	SubDraw();
+
+	if (state_ == STATE::CARRY_OBJ) {
+		Utility::MV1ModelMatrix(carryModel_, VAdd(unit_.WorldPos(), VTransform(CARRY_OBJ_LOCAL_POS, Utility::MatrixAllMultY({ unit_.angle_ }))), { unit_.angle_ });
+		MV1DrawModel(carryModel_);
+	}
 
 	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
@@ -168,6 +215,29 @@ void Player::Draw(void)
 	//}
 
 	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
+void Player::UiDraw(void)
+{
+	auto drawHpBar = [&](Vector2 sPos, Vector2 size, int color)->void {
+		DrawBoxAA(sPos.x, sPos.y, sPos.x + size.x, sPos.y + size.y, color, true);
+		};
+
+	float dif = 20.0f;
+
+	Vector2 size = { 700.0f,60.0f };
+	Vector2 sPos = { dif,Application::SCREEN_SIZE_Y - dif - size.y };
+
+	drawHpBar(sPos, size, 0xffffff);
+
+	dif = 3.0f;
+	sPos += dif;
+	size -= dif * 2;
+
+	drawHpBar(sPos, size, 0x000000);
+
+	size.x *= ((float)unit_.hp_ / (float)HP_MAX);
+	drawHpBar(sPos, size, 0x00ff00);
 }
 
 void Player::Release(void)
@@ -291,8 +361,11 @@ void Player::DoStateAttack(void)
 }
 void Player::DoStateGouge(void)
 {
+	if (isJump_[0]) { return; }
+
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).down) {
 		state_ = STATE::GOUGE;
+		gouge_->On();
 		anime_->Play((int)ANIME_TYPE::GOUPE, false);
 	}
 }
@@ -356,11 +429,16 @@ void Player::Attack(void)
 void Player::Gouge(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
-		if (anime_->GetAnimeRatio() > 0.5f) {
+		if (gouge_->ObjectGouge()) {
 			state_ = STATE::CARRY_OBJ;
+		}
+		if (gouge_->GetUnit().isAlive_ == false) {
+			state_ = STATE::MOVE;
+			anime_->Play((int)ANIME_TYPE::IDLE);
 		}
 	}
 	else {
+		gouge_->Off();
 		state_ = STATE::MOVE;
 		anime_->Play((int)ANIME_TYPE::IDLE);
 	}
@@ -369,7 +447,7 @@ void Player::CarryObj(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
 		CarryRun();
-		CarryJump();
+		//CarryJump();
 	}
 	else {
 		state_ = STATE::MOVE;
@@ -409,9 +487,16 @@ void Player::Evasion(void)
 }
 void Player::Damage(void)
 {
+	if (anime_->GetAnimEnd()) {
+		state_ = STATE::MOVE;
+		anime_->Play((int)ANIME_TYPE::IDLE);
+	}
 }
 void Player::Death(void)
 {
+	if (anime_->GetAnimEnd()) {
+		unit_.isAlive_ = false;
+	}
 }
 
 void Player::Run(void)
@@ -426,7 +511,6 @@ void Player::Run(void)
 		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
 		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
 	}
-
 
 	if (Utility::VZERO(vec)) {
 		if (!isJump_[0]) { anime_->Play((int)ANIME_TYPE::IDLE); }
@@ -571,15 +655,41 @@ void Player::AnimeLoad(void)
 	anime_->Add((int)ANIME_TYPE::PUNCH_SECOND, 120.0f, (ANIME_PATH + "PunchSecond.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::PUNCH_THIRD, 120.0f, (ANIME_PATH + "PunchThird.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::GOUPE, 40.0f, (ANIME_PATH + "Goupe.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::CARRY_IDLE, 30.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::CARRY_RUN, 30.0f, (ANIME_PATH + "CarryRun.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::THROW, 30.0f, (ANIME_PATH + "Throw.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::DAMAGE, 30.0f, (ANIME_PATH + "Damage.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::DEATH, 30.0f, (ANIME_PATH + "Death.mv1").c_str());
 }
+
+void Player::HpSharpen(int damage)
+{
+	if (unit_.hp_ <= 0) { return; }
+
+	unit_.hp_ -= damage;
+
+	if (unit_.hp_ <= 0) {
+		unit_.hp_ = 0;
+		state_ = STATE::DEATH;
+		anime_->Play((int)ANIME_TYPE::DEATH, false);
+		return;
+	}
+
+	state_ = STATE::DAMAGE;
+	anime_->Play((int)ANIME_TYPE::DAMAGE, false);
+	unit_.inviciCounter_ = 60;
+}
+
 
 void Player::SubLoad(void)
 {
 	// 通常攻撃（パンチ）
 	punch_ = new PlayerPunch(unit_.pos_, unit_.angle_);
 	punch_->Load();
+
+	// 抉り
+	gouge_ = new PlayerGouge(unit_.pos_, unit_.angle_);
+	gouge_->Load();
 
 	// 特殊攻撃（投げ）
 	throwing_ = new Throwing(unit_.pos_, unit_.angle_);
@@ -591,6 +701,9 @@ void Player::SubInit(void)
 	// 通常攻撃（パンチ）
 	punch_->Init();
 
+	// 抉り
+	gouge_->Init();
+	
 	// 特殊攻撃（投げ）
 	throwing_->Init();
 }
@@ -599,6 +712,9 @@ void Player::SubUpdate(void)
 	// 通常攻撃（パンチ）
 	punch_->Update();
 
+	// 抉り
+	gouge_->Update();
+
 	// 特殊攻撃（投げ）
 	throwing_->Update();
 }
@@ -606,6 +722,9 @@ void Player::SubDraw(void)
 {
 	// 通常攻撃（パンチ）
 	punch_->Draw();
+
+	// 抉り
+	gouge_->Draw();
 
 	// 特殊攻撃（投げ）
 	throwing_->Draw();
@@ -617,6 +736,13 @@ void Player::SubRelease(void)
 		punch_->Release();
 		delete punch_;
 		punch_ = nullptr;
+	}
+
+	// 抉り
+	if (gouge_) {
+		gouge_->Release();
+		delete gouge_;
+		gouge_ = nullptr;
 	}
 
 	// 特殊攻撃（投げ）
@@ -632,6 +758,7 @@ std::vector<UnitBase*> Player::GetSubIns(void)
 	std::vector<UnitBase*> ret = {};
 
 	ret.emplace_back(punch_);
+	ret.emplace_back(gouge_);
 
 	return ret;
 }

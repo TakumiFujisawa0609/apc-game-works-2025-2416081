@@ -4,6 +4,7 @@
 #include"../../Manager/AnimationController/AnimationController.h"
 
 #include"Punch/PlayerPunch.h"
+#include"Gouge/PlayerGouge.h"
 
 #include"Throwing/Throwing.h"
 
@@ -23,6 +24,7 @@ public:
 	void Init(void)override;
 	void Update(void)override;
 	void Draw(void)override;
+	void UiDraw(void)override;
 	void Release(void)override;
 
 	void OnGrounded()override;
@@ -44,6 +46,8 @@ public:
 	};
 
 	int GetState(void)const override { return (int)state_; }
+
+	static constexpr int HP_MAX = 100;
 
 
 	// ˆÚ“®ó‘Ô‚Åg—p‚·‚é``-------------------------------------------------------------------
@@ -136,6 +140,11 @@ private:
 	int attackStageCounter_;
 	//```````````````
 
+	PlayerGouge* gouge_;
+
+	const VECTOR CARRY_OBJ_LOCAL_POS = { 0.0f,20.0f,70.0f };
+	int carryModel_;
+
 	// “Š‚°``````````````
 	Throwing* throwing_;
 
@@ -163,11 +172,18 @@ private:
 		GOUPE,
 		CARRY_IDLE,
 		CARRY_RUN,
-		THROW
+		THROW,
+		DAMAGE,
+		DEATH,
 	};
 
 	// ƒ‚[ƒVƒ‡ƒ“‚Ì‰Šúİ’è
 	void AnimeLoad(void);
+
+
+	void HpSharpen(int damage);
+
+
 #pragma endregion
 
 #pragma region ƒvƒŒƒCƒ„[‚ª•ø‚¦‚é‰ºˆÊƒNƒ‰ƒX‚ÌƒƒCƒ“ˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
@@ -177,5 +193,7 @@ private:
 	void SubDraw(void);
 	void SubRelease(void);
 #pragma endregion
+
+	std::vector<COLOR_F> DEFAULT_COLOR;
 };
 

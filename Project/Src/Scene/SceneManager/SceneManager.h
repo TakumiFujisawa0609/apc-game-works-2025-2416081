@@ -15,6 +15,8 @@ public:
 
 		TITLE,
 		GAME,
+		CLEAR,
+		OVER,
 
 		MAX
 	};

@@ -6,6 +6,8 @@
 
 #include"../Title/TitleScene.h"
 #include"../Game/GameScene.h"
+#include"../Clear/ClearScene.h"
+#include"../Over/OverScene.h"
 
 SceneManager* SceneManager::ins_ = nullptr;
 
@@ -31,7 +33,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	// 最初はタイトル画面から
-	ChangeScene(SCENE_ID::GAME);
+	ChangeScene(SCENE_ID::TITLE);
 }
 
 
@@ -129,6 +131,12 @@ void SceneManager::ChangeScene(SCENE_ID scene)
 	case SCENE_ID::GAME:
 		ChangeScene(std::make_shared<GameScene>());
 		break;
+	case SCENE_ID::CLEAR:
+		ChangeScene(std::make_shared<ClearScene>());
+		break;
+	case SCENE_ID::OVER:
+		ChangeScene(std::make_shared<OverScene>());
+		break;
 	default:
 		break;
 	}
@@ -151,6 +159,12 @@ void SceneManager::PushScene(SCENE_ID scene)
 		break;
 	case SCENE_ID::GAME:
 		PushScene(std::make_shared<GameScene>());
+		break;
+	case SCENE_ID::CLEAR:
+		PushScene(std::make_shared<ClearScene>());
+		break;
+	case SCENE_ID::OVER:
+		PushScene(std::make_shared<OverScene>());
 		break;
 	default:
 		break;
@@ -186,6 +200,12 @@ void SceneManager::JumpScene(SCENE_ID scene)
 		break;
 	case SCENE_ID::GAME:
 		JumpScene(std::make_shared<GameScene>());
+		break;
+	case SCENE_ID::CLEAR:
+		JumpScene(std::make_shared<ClearScene>());
+		break;
+	case SCENE_ID::OVER:
+		JumpScene(std::make_shared<OverScene>());
 		break;
 	default:
 		break;

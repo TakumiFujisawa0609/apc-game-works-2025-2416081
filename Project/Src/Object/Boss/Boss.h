@@ -20,6 +20,7 @@ public:
 	void Init(void)override;
 	void Update(void)override;
 	void Draw(void)override;
+	void UiDraw(void)override;
 	void Release(void)override;
 
 	void OnCollision(UnitBase* other)override;
@@ -38,6 +39,9 @@ public:
 		MAX
 	};
 	int GetState(void)const override { return (int)state_; }
+
+
+	static constexpr int HP_MAX = 300;
 
 
 private:

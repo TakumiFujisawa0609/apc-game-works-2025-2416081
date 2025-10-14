@@ -76,6 +76,12 @@ void SoundManager::PausePlay(void)
 	}
 }
 
+void SoundManager::PauseInfoDelete(void)
+{
+	for (auto& sound : sounds_) { sound.paused_ = false; }
+}
+
+
 void SoundManager::Delete(SOUND s)
 {
 	// ’†g‚ª‚È‚©‚Á‚½‚ç‘ŠúƒŠƒ^[ƒ“
@@ -104,6 +110,10 @@ void SoundManager::Init(void)
 	sounds_[SOUND::PLAYER_RUN].path_ = "Game/Player/Run.mp3";
 	sounds_[SOUND::PLAYER_PUNCH].path_ = "Game/Player/Punch.mp3";
 	sounds_[SOUND::PLAYER_EVASION].path_ = "Game/Player/Evasion.mp3";
+
+
+	sounds_[SOUND::SE_SYSTEM_BUTTON].path_ = "System/Button.mp3";
+	sounds_[SOUND::SE_SYSTEM_SELECT].path_ = "System/Select.mp3";
 }
 
 void SoundManager:: Release(void)

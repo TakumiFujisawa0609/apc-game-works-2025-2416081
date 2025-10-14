@@ -12,6 +12,8 @@
 
 #include"../../Utility/Utility.h"
 
+#include"Pause/GamePauseh.h"
+
 #include"../../Object/Stage/Block/BlockManager.h"
 #include"../../Object/Player/Player.h"
 #include"../../Object/Boss/Boss.h"
@@ -115,7 +117,19 @@ void GameScene::Update(void)
 
 	camera_->Update();
 
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) { App::GetIns().GameEnd(); }
+	if (boss_->GetUnit().isAlive_ == false) {
+		SceneManager::GetIns().ChangeScene(SCENE_ID::CLEAR);
+		return;
+	}
+	if (player_->GetUnit().isAlive_ == false) {
+		SceneManager::GetIns().ChangeScene(SCENE_ID::OVER);
+		return;
+	}
+
+	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+		SceneManager::GetIns().PushScene(std::make_shared<GamePause>());
+		return;
+	}
 }
 
 void GameScene::Draw(void)
@@ -134,13 +148,18 @@ void GameScene::Draw(void)
 
 	player_->Draw();
 
-	DrawString(0, 0, "ゲーム", 0xffffff);
 	//-------------------------------------------------
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
 	Vector2I s = ShakePoint();
 	DrawGraph(s.x, s.y, mainScreen_, true);
+
+
+	player_->UiDraw();
+	boss_->UiDraw();
+
+	DrawString(10, 0, "\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\nジャンプ：B\n\n回避：LT or B", 0xffffff);
 }
 
 void GameScene::Release(void)
