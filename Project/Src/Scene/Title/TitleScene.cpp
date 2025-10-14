@@ -42,7 +42,15 @@ void TitleScene::Draw(void)
 	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, img_, true);
 
 	SetFontSize(32);
-	DrawString(0, 0, "タイトル\n\nゲームスタート：キーボードSPACE or コントローラーB\n\nゲーム終了：キーボードESC or コントローラーSTART", 0xffffff);
+	if (KEY::GetIns().GetControllerConnect()) {
+		DrawString(10, 0,
+			"タイトル\n\nゲームスタート：B\n\nゲーム終了：START",
+			0xffffff);
+	} else {
+		DrawString(10, 0,
+			"タイトル\n\nゲームスタート：SPACE\n\nゲーム終了：ESC",
+			0xffffff);
+	}
 	SetFontSize(16);
 }
 void TitleScene::Release(void)

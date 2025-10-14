@@ -8,6 +8,8 @@
 
 #include"../../Player/Player.h"
 
+#include"../../Boss/Attack/Stone/Stone.h"
+#include"../../Boss/Attack/Fall/Fall.h"
 
 Block::Block(void)
 {
@@ -130,7 +132,24 @@ void Block::OnCollision(UnitBase* other)
 		return;
 	}
 
-	if (dynamic_cast<ThrowObjBase*>(other)) {
+	//if (dynamic_cast<ThrowObjBase*>(other)) {
+	//	if (ApplyBrush(other->GetUnit(), 200)) {
+	//		GameScene::Shake();
+	//		Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+	//	}
+	//	return;
+	//}
+
+
+	if (dynamic_cast<Stone*>(other)) {
+		if (ApplyBrush(other->GetUnit(), 200)) {
+			GameScene::Shake();
+			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+		}
+		return;
+	}
+
+	if (dynamic_cast<Fall*>(other)) {
 		if (ApplyBrush(other->GetUnit(), 200)) {
 			GameScene::Shake();
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);

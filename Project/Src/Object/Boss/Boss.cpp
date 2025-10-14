@@ -12,9 +12,15 @@ Boss::Boss(const VECTOR& playerPos):
 	state_(Boss::STATE::NON),
 	stateFuncPtr(),
 
-	anime_(nullptr),
-
 	rockWall_(nullptr),
+	stone_(nullptr),
+	fall_(nullptr),
+	attackInterval_(0),
+	attackInit_(false),
+	attackEnd_(false),
+	spAttackMeasu_(0),
+
+	anime_(nullptr),
 
 	playerPos(playerPos)
 {
@@ -30,7 +36,7 @@ void Boss::Load(void)
 	MV1SetScale(unit_.model_, SCALE);
 
 	unit_.para_.size = SIZE;
-	unit_.para_.radius = SIZE.y / 2;
+	unit_.para_.radius = SIZE.y / 3;
 	unit_.para_.colliShape = CollisionShape::SPHERE;
 
 	unit_.para_.speed = 10.0f;
@@ -76,6 +82,8 @@ void Boss::Init(void)
 	unit_.isAlive_ = true;
 
 	unit_.hp_ = HP_MAX;
+
+	attackInterval_ = ATTACK_INTERVAL;
 
 	// BossƒNƒ‰ƒX‚ª•ø‚¦‚éŽqƒNƒ‰ƒX‚Ì‰Šú‰»ˆ—
 	SubInit();
@@ -196,18 +204,66 @@ void Boss::OnCollision(UnitBase* other)
 
 void Boss::Idle(void)
 {
+	anime_->Play((int)ANIME_TYPE::IDLE);
+
 	VECTOR vec = VSub(playerPos, unit_.pos_);
 	unit_.angle_.y = atan2f(vec.x, vec.z);
 
-
-	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) {
+	if (--attackInterval_ <= 0) {
+		attackInterval_ = 0;
+		attackInit_ = false;
 		state_ = STATE::ATTACK;
+		anime_->Play((int)ANIME_TYPE::ATTACK, false);
 	}
 }
 void Boss::Attack(void)
 {
-	rockWall_->On();
-	state_ = STATE::IDLE;
+#pragma region UŒ‚ó‘Ô‚Ö‘JˆÚŒã ‚P‰ñ–Ú‚Ìˆ—
+	if (!attackInit_) {
+		attackInterval_ = ATTACK_INTERVAL;
+		attackInit_ = true;
+		attackEnd_ = false;
+
+		attackState_ = AttackLottery();
+		switch (attackState_)
+		{
+		case Boss::ATTACK_KINDS::NON:
+			attackEnd_ = true;
+			break;
+		case Boss::ATTACK_KINDS::FALL:
+			fall_->On();
+			break;
+		case Boss::ATTACK_KINDS::STONE:
+			stone_->On();
+			break;
+		case Boss::ATTACK_KINDS::WALL:
+			rockWall_->On();
+			break;
+		}
+	}
+#pragma endregion
+#pragma region UŒ‚ó‘Ô’†‚Ì‚Ýs‚¤XVˆ— ‚Ü‚½UŒ‚I—¹”»’f
+	switch (attackState_)
+	{
+	case Boss::ATTACK_KINDS::NON:
+		attackEnd_ = true;
+		break;
+	case Boss::ATTACK_KINDS::FALL:
+		break;
+	case Boss::ATTACK_KINDS::STONE:
+		break;
+	case Boss::ATTACK_KINDS::WALL:
+		break;
+	}
+	if (anime_->GetAnimEnd()) { attackEnd_ = true; }
+#pragma endregion
+#pragma region UŒ‚I—¹ ’Êíó‘Ô‚Ö‘JˆÚ
+	if (attackEnd_) {
+		attackInterval_ = ATTACK_INTERVAL;
+		state_ = STATE::IDLE;
+		anime_->Play((int)ANIME_TYPE::IDLE);
+	}
+#pragma endregion
 }
 void Boss::Damage(void)
 {
@@ -233,6 +289,23 @@ void Boss::Death(void)
 	}
 }
 
+Boss::ATTACK_KINDS Boss::AttackLottery(void)
+{
+	ATTACK_KINDS ret = ATTACK_KINDS::NON;
+
+	int rand = GetRand(10000);
+
+	if (rand <= 5000) {
+		ret = ATTACK_KINDS::FALL;
+	}
+	else {
+		ret = ATTACK_KINDS::STONE;
+	}
+
+	if (++spAttackMeasu_ > SP_ATTACK_MEASU) { spAttackMeasu_ = 0; ret = ATTACK_KINDS::WALL; }
+
+	return ret;
+}
 
 void Boss::AnimeLoad(void)
 {
@@ -251,20 +324,30 @@ void Boss::SubLoad(void)
 {
 	rockWall_ = new RockWallShooter(unit_.pos_, unit_.angle_);
 	rockWall_->Load();
+
+	stone_ = new StoneShooter(unit_.pos_, unit_.angle_);
+	stone_->Load();
+
+	fall_ = new FallManager(playerPos);
+	fall_->Load();
 }
 void Boss::SubInit(void)
 {
 	rockWall_->Init();
+	stone_->Init();
+	fall_->Init();
 }
 void Boss::SubUpdate(void)
 {
 	rockWall_->Update();
-
+	stone_->Update();
+	fall_->Update();
 }
 void Boss::SubDraw(void)
 {
 	rockWall_->Draw();
-
+	stone_->Draw();
+	fall_->Draw();
 }
 void Boss::SubRelease(void)
 {
@@ -272,6 +355,16 @@ void Boss::SubRelease(void)
 		rockWall_->Release();
 		delete rockWall_;
 		rockWall_ = nullptr;
+	}
+	if (stone_) {
+		stone_->Release();
+		delete stone_;
+		stone_ = nullptr;
+	}
+	if (fall_) {
+		fall_->Release();
+		delete fall_;
+		fall_ = nullptr;
 	}
 }
 

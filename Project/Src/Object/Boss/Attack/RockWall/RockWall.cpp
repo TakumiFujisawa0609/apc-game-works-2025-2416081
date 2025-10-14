@@ -10,7 +10,8 @@
 #include"../../../../Scene/Game/GameScene.h"
 
 #include"../../../Player/Player.h"
-#include"../../../Stage/Block/Block.h"
+#include"../Stone/Stone.h"
+#include"../Fall/Fall.h"
 
 RockWall::RockWall():
     state_(STATE::NON),
@@ -50,7 +51,7 @@ void RockWall::SubLoad(void)
     MV1SetRotationXYZ(unit_.model_, { 0.0f,0.0f,0.0f });
     MV1SetScale(unit_.model_, { scale,scale,scale });
     
-    aliveNeedRatio_ = 0.02f;
+    aliveNeedRatio_ = 0.15f;
 
 #pragma region 関数ポインタ配列へ各関数を格納
 #define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
@@ -84,12 +85,9 @@ void RockWall::SubRelease(void)
 
 void RockWall::Move(void)
 {
-    if (nowFrameMove_) { nowFrameMove_ = false; }
-    else { state_ = STATE::BE; }
-
     unit_.pos_.y += MOVE_SPEED;
 
-    if (unit_.pos_.y > 360.0f) { state_ = STATE::BE; }
+    if (unit_.pos_.y > 300.0f) { state_ = STATE::BE; }
 }
 
 void RockWall::Be(void)
@@ -98,18 +96,6 @@ void RockWall::Be(void)
 
 void RockWall::OnCollision(UnitBase* other)
 {
-    if (nowFrameMove_ == false) {
-        if (VoxelBase* voxel = dynamic_cast<Block*>(other)) {
-            for (const auto& v : voxel->GetCellCenterPoss()) {
-                if (Cfunc::Obb(unit_.WorldPos(), unit_.para_.size, unit_.angle_, v, voxel->GetCellSizeVECTOR(), voxel->GetUnit().angle_)) {
-                    state_ = STATE::MOVE;
-                    nowFrameMove_ = true;
-                    break;
-                }
-            }
-        }
-    }
-
     if (dynamic_cast<PlayerPunch*>(other)) {
         if (ApplyBrush(other->GetUnit(), 200)) {
             GameScene::Shake();
@@ -125,8 +111,22 @@ void RockWall::OnCollision(UnitBase* other)
         return;
     }
 
+    if (dynamic_cast<Stone*>(other)) {
+        if (ApplyBrush(other->GetUnit(), 255)) {
+            Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+        }
+        return;
+    }
+
+    if (dynamic_cast<Fall*>(other)) {
+        if (ApplyBrush(other->GetUnit(), 255)) {
+            Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+        }
+        return;
+    }
+
     if (dynamic_cast<ThrowObjBase*>(other)) {
-        if (ApplyBrush(other->GetUnit(), 200)) {
+        if (ApplyBrush(other->GetUnit(), 255)) {
             GameScene::Shake();
             Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
         }

@@ -1,15 +1,15 @@
 #include "Player.h"
 
 #include"../../Manager/Input/KeyManager.h"
-
 #include"../../Manager/Sound/SoundManager.h"
-
 #include"../../Manager/Collision/CollisionUtility.h"
 
 #include"../../Application/Application.h"
-
 #include"../../scene/SceneManager/SceneManager.h"
 
+#include"../../Scene/Game/GameScene.h"
+
+#include"../Boss/Boss.h"
 
 Player::Player(const VECTOR& cameraPos):
 	cameraAngle_(cameraPos),
@@ -23,6 +23,8 @@ Player::Player(const VECTOR& cameraPos):
 	attackStage_(ATTACK_STAGE::NON),
 	isAttack_(),
 	attackStageCounter_(0),
+
+	knockBackVec_(),
 
 	throwing_(nullptr),
 
@@ -84,6 +86,7 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_RUN);
 	Smng::GetIns().Load(SOUND::PLAYER_PUNCH);
 	Smng::GetIns().Load(SOUND::PLAYER_EVASION);
+	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
 
 	// プレイヤーが抱える下位クラスの読み込み処理
@@ -249,6 +252,7 @@ void Player::Release(void)
 	Smng::GetIns().Delete(SOUND::PLAYER_RUN);
 	Smng::GetIns().Delete(SOUND::PLAYER_PUNCH);
 	Smng::GetIns().Delete(SOUND::PLAYER_EVASION);
+	Smng::GetIns().Delete(SOUND::PLAYER_DAMAGE);
 
 	// アニメーション管理クラスの解放
 	if (anime_) {
@@ -270,6 +274,40 @@ void Player::OnGrounded()
 
 void Player::OnCollision(UnitBase* other)
 {
+	auto knockBack = [&](VECTOR pos)->void {
+		yAccelSum_ = 10.0f;
+
+		VECTOR vec = VSub(unit_.pos_, pos);
+		vec.y = 0.0f;
+		knockBackVec_ = VScale(Utility::Normalize(vec), 10.0f);
+
+		unit_.angle_.y = atan2f(-vec.x, -vec.z);
+		};
+
+	if (dynamic_cast<Boss*>(other)) {
+		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
+		GameScene::Slow(20);
+
+		knockBack(other->GetUnit().pos_);
+		HpSharpen(10);
+		return;
+	}
+	if (dynamic_cast<Stone*>(other)) {
+		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
+		GameScene::Slow(20);
+
+		knockBack(other->GetUnit().pos_);
+		HpSharpen(10);
+		return;
+	}
+	if (dynamic_cast<Fall*>(other)) {
+		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
+		GameScene::Slow(20);
+
+		knockBack(other->GetUnit().pos_);
+		HpSharpen(10);
+		return;
+	}
 }
 
 
@@ -447,7 +485,6 @@ void Player::CarryObj(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
 		CarryRun();
-		//CarryJump();
 	}
 	else {
 		state_ = STATE::MOVE;
@@ -487,6 +524,8 @@ void Player::Evasion(void)
 }
 void Player::Damage(void)
 {
+	unit_.vel_ = VAdd(unit_.vel_, knockBackVec_);
+
 	if (anime_->GetAnimEnd()) {
 		state_ = STATE::MOVE;
 		anime_->Play((int)ANIME_TYPE::IDLE);
@@ -674,6 +713,8 @@ void Player::HpSharpen(int damage)
 		anime_->Play((int)ANIME_TYPE::DEATH, false);
 		return;
 	}
+
+	Smng::GetIns().Play(SOUND::PLAYER_DAMAGE, true, 200);
 
 	state_ = STATE::DAMAGE;
 	anime_->Play((int)ANIME_TYPE::DAMAGE, false);

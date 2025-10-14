@@ -1,12 +1,11 @@
 #pragma once
-
 #include"../../../UnitBase.h"
 
-class Stone : public UnitBase
+class Fall : public UnitBase
 {
 public:
-	Stone();
-	~Stone();
+	Fall();
+	~Fall();
 
 	void ModelLoad(int model) { unit_.model_ = MV1DuplicateModel(model); }
 	void Load(void)override;
@@ -15,14 +14,21 @@ public:
 	void Draw(void)override;
 	void Release(void)override;
 
-	void On(const VECTOR& pos, const VECTOR& moveVec);
-
 	void OnCollision(UnitBase* other)override;
 
+	void On(const VECTOR& pos);
+
+	enum class STATE
+	{
+		IDLE,
+		FALL,
+
+		MAX
+	};
+
 private:
-
-	VECTOR moveVec_;
-
-	const int ALIVE_TIME = 200;
-	int aliveCounter_;
+	STATE state_;
+	
+	const int IDLE_TIME = 150;
+	int idleCounter_;
 };

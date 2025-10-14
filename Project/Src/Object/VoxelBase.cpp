@@ -36,7 +36,7 @@ void VoxelBase::Load(void)
 
     if (unit_.model_ != -1) {
         const VECTOR worldCenterForImport =
-            VAdd(unit_.WorldPos(), gridCenter_); // Å© 3Ç¬ë´Ç∑
+            VAdd(unit_.WorldPos(), gridCenter_);
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,
@@ -76,8 +76,6 @@ void VoxelBase::Draw(void)
 
     SubDraw();
 
-    SetUseLighting(true);
-
     MATRIX M = MGetTranslate(unit_.WorldPos());
     SetTransformToWorld(&M);
 
@@ -93,8 +91,6 @@ void VoxelBase::Draw(void)
 
     M = MGetIdent();
     SetTransformToWorld(&M);
-
-    SetUseLighting(true);
 }
 
 

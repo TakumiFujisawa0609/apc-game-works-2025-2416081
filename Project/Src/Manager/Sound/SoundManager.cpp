@@ -110,6 +110,7 @@ void SoundManager::Init(void)
 	sounds_[SOUND::PLAYER_RUN].path_ = "Game/Player/Run.mp3";
 	sounds_[SOUND::PLAYER_PUNCH].path_ = "Game/Player/Punch.mp3";
 	sounds_[SOUND::PLAYER_EVASION].path_ = "Game/Player/Evasion.mp3";
+	sounds_[SOUND::PLAYER_DAMAGE].path_ = "Game/Player/îÌÉ_ÉÅ.mp3";
 
 
 	sounds_[SOUND::SE_SYSTEM_BUTTON].path_ = "System/Button.mp3";

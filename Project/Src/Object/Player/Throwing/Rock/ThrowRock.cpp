@@ -19,6 +19,8 @@ void ThrowRock::Load(void)
 
 	aliveTime = ALIVE_TIME;
 
+	ALIVE_HIT_NUM = 100;
+
 	MV1SetScale(unit_.model_, { 2.0f,2.0f,2.0f });
 	//MV1SetScale(unit_.model_, { 10.0f,10.0f,10.0f });
 }

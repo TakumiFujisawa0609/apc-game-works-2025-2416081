@@ -24,7 +24,8 @@ void OverScene::Init(void)
 
 void OverScene::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
+		KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
 	}
 }
@@ -32,7 +33,16 @@ void OverScene::Update(void)
 void OverScene::Draw(void)
 {
 	SetFontSize(32);
-	DrawString(0, 0, "ゲームオーバー\n\nタイトルへ：キーボードSPACE or コントローラーB", 0xffffff);
+	if (KEY::GetIns().GetControllerConnect()) {
+		DrawString(10, 0,
+			"ゲームオーバー\\n\nタイトルへ：B",
+			0xffffff);
+	}
+	else {
+		DrawString(10, 0,
+			"ゲームオーバー\\n\nタイトルへ：SPACE",
+			0xffffff);
+	}
 	SetFontSize(16);
 }
 

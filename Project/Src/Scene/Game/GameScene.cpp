@@ -159,7 +159,16 @@ void GameScene::Draw(void)
 	player_->UiDraw();
 	boss_->UiDraw();
 
-	DrawString(10, 0, "\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\nジャンプ：B\n\n回避：LT or B", 0xffffff);
+	if (KEY::GetIns().GetControllerConnect()) {
+		DrawString(10, 0, 
+			"\nコントローラー操作方法\n\n移動：左スティック or 十字ボタン\n\nジャンプ：A\n\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\n回避：LT or B\n\nカメラ操作：右スティック\n\nポーズ：START",
+			0xffffff);
+	}
+	else {
+		DrawString(10, 0,
+			"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：J or 左クリック\n\nつかむ：K or 右クリック　長押し\n\n投げる：J or 左クリック\n\n回避：H or 左Shift\n\nカメラ操作：十字キー or マウス\n\nポーズ：ESC",
+			0xffffff);
+	}
 }
 
 void GameScene::Release(void)

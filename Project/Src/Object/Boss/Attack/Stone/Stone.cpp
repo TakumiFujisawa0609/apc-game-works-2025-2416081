@@ -1,7 +1,11 @@
 #include"Stone.h"
 
+#include"../../../Player/Player.h"
 
-Stone::Stone()
+
+Stone::Stone():
+	moveVec_(),
+	aliveCounter_()
 {
 }
 
@@ -11,19 +15,28 @@ Stone::~Stone()
 
 void Stone::Load(void)
 {
+	unit_.para_.colliShape = CollisionShape::SPHERE;
+	unit_.para_.radius = 70.0f;
+
+	unit_.para_.speed = 30.0f;
 }
 
 void Stone::Init(void)
 {
 	unit_.isAlive_ = false;
+	aliveCounter_ = 0;
 }
 
 void Stone::Update(void)
 {
 	if (unit_.isAlive_ == false) { return; }
 
-	unit_.pos_ = VAdd(unit_.pos_, moveVec_);
+	if (--aliveCounter_ <= 0) {
+		aliveCounter_ = 0;
+		unit_.isAlive_ = false;
+	}
 
+	unit_.pos_ = VAdd(unit_.pos_, moveVec_);
 }
 
 void Stone::Draw(void)
@@ -44,10 +57,19 @@ void Stone::On(const VECTOR& pos, const VECTOR& moveVec)
 	unit_.pos_ = pos;
 	moveVec_ = VScale(moveVec, unit_.para_.speed);
 
+	aliveCounter_ = ALIVE_TIME;
+
 	unit_.isAlive_ = true;
 }
 
 void Stone::OnCollision(UnitBase* other)
 {
+	if (
+		dynamic_cast<Player*>(other) ||
+		dynamic_cast<PlayerPunch*>(other) ||
+		dynamic_cast<ThrowObjBase*>(other)
+		) {
+		unit_.isAlive_ = false;
+	}
 }
 

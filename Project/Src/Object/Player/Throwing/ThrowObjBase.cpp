@@ -1,10 +1,16 @@
 #include"ThrowObjBase.h"
 
+#include"../../../Manager/Collision/CollisionUtility.h"
+
 #include"../../Boss/Boss.h"
 
-ThrowObjBase::ThrowObjBase():
+ThrowObjBase::ThrowObjBase() :
 	aliveTime(100),
 	aliveCounter_(0),
+
+	ALIVE_HIT_NUM(5),
+	aliveHitCou_(0),
+
 	moveVec_()
 {
 }
@@ -53,8 +59,22 @@ void ThrowObjBase::Release(void)
 
 void ThrowObjBase::OnCollision(UnitBase* other)
 {
-	if (dynamic_cast<Boss*>(other)) {
+	if (
+		dynamic_cast<Boss*>(other) ||
+		dynamic_cast<Stone*>(other) 
+		) {
 		unit_.isAlive_ = false;
+	}
+
+	if (VoxelBase* voxel = dynamic_cast<RockWall*>(other)) {
+		for (const auto& vox : voxel->GetCellCenterPoss()) {
+			if (Cfunc::SphereAabb(unit_.pos_, unit_.para_.radius, vox, voxel->GetCellSizeVECTOR())) {
+				aliveHitCou_++;
+				if (aliveHitCou_ > ALIVE_HIT_NUM) {
+					unit_.isAlive_ = false;
+				}
+			}
+		}
 	}
 }
 
@@ -64,6 +84,8 @@ void ThrowObjBase::Throw(const VECTOR& pos, const VECTOR& vec)
 	moveVec_ = VScale(vec, unit_.para_.speed);
 
 	aliveCounter_ = aliveTime;
+
+	aliveHitCou_ = 0;
 
 	unit_.isAlive_ = true;
 }

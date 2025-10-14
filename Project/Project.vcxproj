@@ -144,6 +144,8 @@
     <ClCompile Include="Src\Manager\Input\KeyManager.cpp" />
     <ClCompile Include="Src\Manager\Loading\Loading.cpp" />
     <ClCompile Include="Src\Manager\Sound\SoundManager.cpp" />
+    <ClCompile Include="Src\Object\Boss\Attack\Fall\Fall.cpp" />
+    <ClCompile Include="Src\Object\Boss\Attack\Fall\FallManager.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Stone\Stone.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Stone\StoneShooter.cpp" />
@@ -180,6 +182,8 @@
     <ClInclude Include="Src\Manager\Input\KeyManager.h" />
     <ClInclude Include="Src\Manager\Loading\Loading.h" />
     <ClInclude Include="Src\Manager\Sound\SoundManager.h" />
+    <ClInclude Include="Src\Object\Boss\Attack\Fall\Fall.h" />
+    <ClInclude Include="Src\Object\Boss\Attack\Fall\FallManager.h" />
     <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Stone\Stone.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Stone\StoneShooter.h" />

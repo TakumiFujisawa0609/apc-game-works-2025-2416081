@@ -5,6 +5,8 @@
 #include"../../Manager/AnimationController/AnimationController.h"
 
 #include"Attack/RockWall/RockWallShooter.h"
+#include"Attack/Stone/StoneShooter.h"
+#include"Attack/Fall/FallManager.h"
 
 class Boss : public UnitBase
 {
@@ -41,6 +43,8 @@ public:
 	int GetState(void)const override { return (int)state_; }
 
 
+
+
 	static constexpr int HP_MAX = 300;
 
 
@@ -74,6 +78,42 @@ private:
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
 
+
+	// UŒ‚ó‘Ô```````````````````
+	enum class ATTACK_KINDS
+	{
+		NON = -1,
+
+		FALL,
+		STONE,
+
+		WALL,
+
+		MAX,
+	};
+	ATTACK_KINDS attackState_;
+
+	// UŒ‚‚Ìí—Ş‚Ì’Š‘I‚ğs‚¤ŠÖ”
+	ATTACK_KINDS AttackLottery(void);
+
+	//ŠeUŒ‚‚ÌƒCƒ“ƒXƒ^ƒ“ƒX----
+	RockWallShooter* rockWall_;
+	StoneShooter* stone_;
+	FallManager* fall_;
+	//------------------------
+
+	// UŒ‚‚ÌŠÔŠu‚ğŠÇ—‚·‚éƒJƒEƒ“ƒ^[
+	int attackInterval_;
+	const int ATTACK_INTERVAL = 300;
+
+	// UŒ‚‘JˆÚŒã1‰ñ–Ú‚ğŒ©•ª‚¯‚é•Ï”
+	bool attackInit_;
+	// UŒ‚I—¹‚ğŒ©•ª‚¯‚é•Ï”
+	bool attackEnd_;
+
+	const int SP_ATTACK_MEASU = 5;
+	int spAttackMeasu_;
+	// `````````````````````````
 
 #pragma endregion
 
@@ -113,7 +153,6 @@ private:
 
 	std::vector<COLOR_F> DEFAULT_COLOR;
 
-	RockWallShooter* rockWall_;
 
 	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 

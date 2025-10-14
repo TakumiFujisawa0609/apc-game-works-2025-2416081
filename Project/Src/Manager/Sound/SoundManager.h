@@ -24,6 +24,7 @@ public:
 		PLAYER_RUN,
 		PLAYER_PUNCH,
 		PLAYER_EVASION,
+		PLAYER_DAMAGE,
 
 
 		// ÉVÉXÉeÉÄâπê∫

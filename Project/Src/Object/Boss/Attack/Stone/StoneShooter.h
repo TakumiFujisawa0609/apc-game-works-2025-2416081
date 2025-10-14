@@ -25,10 +25,11 @@ private:
 
 	std::vector<Stone*>stones_;
 
-	const VECTOR LOCAL_POS = { 0.0f,0.0f,100.0f };
+	const VECTOR LOCAL_POS = { 0.0f,-50.0f,100.0f };
 	const float ONE_DIFF = Utility::Deg2RadF(20.0f);
+
+
 
 	const VECTOR& bossPos;
 	const VECTOR& bossAngle;
-
 };

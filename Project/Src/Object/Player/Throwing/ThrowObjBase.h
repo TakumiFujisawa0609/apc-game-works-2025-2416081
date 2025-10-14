@@ -23,4 +23,7 @@ protected:
 	VECTOR moveVec_;
 	int aliveTime;
 	int aliveCounter_;
+
+	int ALIVE_HIT_NUM;
+	int aliveHitCou_;
 };
