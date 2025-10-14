@@ -166,7 +166,7 @@ void GameScene::Draw(void)
 	}
 	else {
 		DrawString(10, 0,
-			"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：J or 左クリック\n\nつかむ：K or 右クリック　長押し\n\n投げる：J or 左クリック\n\n回避：H or 左Shift\n\nカメラ操作：十字キー or マウス\n\nポーズ：ESC",
+			"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：左クリック or J\n\nつかむ：右クリック or K  長押し\n\n投げる：左クリック or J\n\n回避：左Shift or H\n\nカメラ操作：マウス or 十字キー\n\nポーズ：ESC",
 			0xffffff);
 	}
 }
