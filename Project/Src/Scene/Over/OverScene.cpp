@@ -16,7 +16,7 @@ OverScene::~OverScene()
 
 void OverScene::Load(void)
 {
-	KEY::GetIns().MouceSetUp(false);
+	KEY::GetIns().SetMouceFixed(false);
 }
 
 void OverScene::Init(void)

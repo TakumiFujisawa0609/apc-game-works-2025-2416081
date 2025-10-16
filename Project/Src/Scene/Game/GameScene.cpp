@@ -71,7 +71,7 @@ void GameScene::Load(void)
 
 	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
 
-	KEY::GetIns().MouceSetUp(true);
+	KEY::GetIns().SetMouceFixed(true);
 }
 
 void GameScene::Init(void)

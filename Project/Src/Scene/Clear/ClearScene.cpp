@@ -17,7 +17,7 @@ ClearScene::~ClearScene()
 
 void ClearScene::Load(void)
 {
-	KEY::GetIns().MouceSetUp(false);
+	KEY::GetIns().SetMouceFixed(false);
 }
 
 void ClearScene::Init(void)

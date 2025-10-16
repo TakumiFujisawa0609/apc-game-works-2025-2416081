@@ -225,7 +225,7 @@ void Player::UiDraw(void)
 
 	float dif = 20.0f;
 
-	Vector2 size = { 700.0f,60.0f };
+	Vector2 size = { Application::SCREEN_SIZE_X * 0.45,60.0f };
 	Vector2 sPos = { dif,Application::SCREEN_SIZE_Y - dif - size.y };
 
 	drawHpBar(sPos, size, 0xffffff);
@@ -711,6 +711,9 @@ void Player::HpSharpen(int damage)
 		unit_.hp_ = 0;
 		state_ = STATE::DEATH;
 		anime_->Play((int)ANIME_TYPE::DEATH, false);
+		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
+		Smng::GetIns().Stop(SOUND::PLAYER_EVASION);
+		Smng::GetIns().Stop(SOUND::PLAYER_PUNCH);
 		return;
 	}
 

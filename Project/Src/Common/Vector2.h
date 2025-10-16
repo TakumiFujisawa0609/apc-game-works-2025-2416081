@@ -54,6 +54,10 @@ public:
 	Vector2 operator/(const float value)const;
 	void operator/=(const int value);
 	//--------------------------------------------
+
+	Vector2 ToVector2(void)const;
+
+	float Length(void)const;
 };
 
 class Vector2
@@ -114,4 +118,8 @@ public:
 	bool operator==(const float value)const;
 	bool operator!=(const Vector2 value)const;
 	bool operator!=(const float value)const;
+
+	Vector2I ToVector2I(void)const;
+
+	float Length(void)const;
 };
