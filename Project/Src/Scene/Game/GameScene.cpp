@@ -47,7 +47,7 @@ GameScene::~GameScene()
 
 void GameScene::Load(void)
 {
-	this->Release();
+ 	this->Release();
 
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
@@ -70,6 +70,8 @@ void GameScene::Load(void)
 	collision_->AddEnemy(boss_);
 
 	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
+
+	KEY::GetIns().MouceSetUp(true);
 }
 
 void GameScene::Init(void)

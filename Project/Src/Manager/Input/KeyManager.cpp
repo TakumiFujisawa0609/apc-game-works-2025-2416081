@@ -11,7 +11,8 @@ KeyManager::KeyManager():
 	keyInfo(),
 	keyboardFormat(),
 	mouceButtonFormat(),
-	controllerButtonFormat()
+	controllerButtonFormat(),
+	mouceFixed_(false)
 {
 }
 
@@ -118,7 +119,7 @@ void KeyManager::Init(void)
 void KeyManager::Update(void)
 {
 	KeyUpdate();
-	MouceUpdate();
+	if (mouceFixed_) { MouceUpdate(); }
 }
 
 void KeyManager::Release(void)

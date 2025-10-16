@@ -16,6 +16,7 @@ OverScene::~OverScene()
 
 void OverScene::Load(void)
 {
+	KEY::GetIns().MouceSetUp(false);
 }
 
 void OverScene::Init(void)
@@ -35,12 +36,12 @@ void OverScene::Draw(void)
 	SetFontSize(32);
 	if (KEY::GetIns().GetControllerConnect()) {
 		DrawString(10, 0,
-			"ゲームオーバー\\n\nタイトルへ：B",
+			"ゲームオーバー\n\nタイトルへ：B",
 			0xffffff);
 	}
 	else {
 		DrawString(10, 0,
-			"ゲームオーバー\\n\nタイトルへ：SPACE",
+			"ゲームオーバー\n\nタイトルへ：SPACE",
 			0xffffff);
 	}
 	SetFontSize(16);

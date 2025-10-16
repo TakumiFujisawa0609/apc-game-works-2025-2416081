@@ -41,9 +41,6 @@ void Player::Load(void)
 	unit_.para_.capsuleHalfLen = (SIZE.y - (unit_.para_.radius * 2)) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
-	if (unit_.model_ != -1) {
-		MV1SetScale(unit_.model_, { 1.0f,1.0f,1.0f });
-	}
 
 	unit_.para_.speed = 10.0f;
 	
@@ -261,7 +258,10 @@ void Player::Release(void)
 		anime_ = nullptr;
 	}
 
+	DEFAULT_COLOR.clear();
+
 	// ƒ‚ƒfƒ‹‰ð•ú
+	MV1DeleteModel(carryModel_);
 	MV1DeleteModel(unit_.model_);
 }
 

@@ -132,6 +132,10 @@ void Boss::Update(void)
 			MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
 		}
 	}
+
+	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) {
+		HpSharpen(100);
+	}
 }
 
 void Boss::Draw(void)

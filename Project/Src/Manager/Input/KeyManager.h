@@ -72,6 +72,12 @@ public:
 	const MOUCE_INFO GetMouceInfo(void)const { return mouceInfo; }
 	const Vector2 GetMouceMove(void)const { return mouceInfo.move; }
 
+	/// <summary>
+	/// マウスの固定してベクトルを検出するか否かを設定する
+	/// </summary>
+	/// <param name="fixed">true=検出する、false=検出しない</param>
+	void MouceSetUp(bool fixed) { mouceFixed_ = fixed; }
+
 private:
 	void Init(void);
 	void Release(void);
@@ -104,6 +110,7 @@ private:
 
 	void MouceUpdate(void);
 	MOUCE_INFO mouceInfo;
+	bool mouceFixed_;
 };
 
 using KEY = KeyManager;
