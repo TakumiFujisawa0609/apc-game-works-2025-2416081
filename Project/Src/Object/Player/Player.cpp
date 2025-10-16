@@ -41,9 +41,6 @@ void Player::Load(void)
 	unit_.para_.capsuleHalfLen = (SIZE.y - (unit_.para_.radius * 2)) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
-	if (unit_.model_ != -1) {
-		MV1SetScale(unit_.model_, { 1.0f,1.0f,1.0f });
-	}
 
 	unit_.para_.speed = 10.0f;
 	
@@ -228,7 +225,7 @@ void Player::UiDraw(void)
 
 	float dif = 20.0f;
 
-	Vector2 size = { 700.0f,60.0f };
+	Vector2 size = { Application::SCREEN_SIZE_X * 0.45,60.0f };
 	Vector2 sPos = { dif,Application::SCREEN_SIZE_Y - dif - size.y };
 
 	drawHpBar(sPos, size, 0xffffff);
@@ -261,7 +258,10 @@ void Player::Release(void)
 		anime_ = nullptr;
 	}
 
+	DEFAULT_COLOR.clear();
+
 	// ƒ‚ƒfƒ‹‰ð•ú
+	MV1DeleteModel(carryModel_);
 	MV1DeleteModel(unit_.model_);
 }
 
@@ -711,6 +711,9 @@ void Player::HpSharpen(int damage)
 		unit_.hp_ = 0;
 		state_ = STATE::DEATH;
 		anime_->Play((int)ANIME_TYPE::DEATH, false);
+		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
+		Smng::GetIns().Stop(SOUND::PLAYER_EVASION);
+		Smng::GetIns().Stop(SOUND::PLAYER_PUNCH);
 		return;
 	}
 

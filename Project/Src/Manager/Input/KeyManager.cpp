@@ -11,7 +11,8 @@ KeyManager::KeyManager():
 	keyInfo(),
 	keyboardFormat(),
 	mouceButtonFormat(),
-	controllerButtonFormat()
+	controllerButtonFormat(),
+	mouceFixed_(false)
 {
 }
 
@@ -219,13 +220,29 @@ bool KeyManager::ControllerOthersInput(const CONTROLLER_OTHERS& input)
 
 void KeyManager::MouceUpdate(void)
 {
-	mouceInfo.prev = { Application::SCREEN_SIZE_X / 2,Application::SCREEN_SIZE_Y / 2 };
+	if (mouceFixed_) {
 
-	GetMousePoint(&mouceInfo.now.x, &mouceInfo.now.y);
+		mouceInfo.prev = { Application::SCREEN_SIZE_X / 2,Application::SCREEN_SIZE_Y / 2 };
 
-	mouceInfo.move = Utility::Normalize(mouceInfo.now - mouceInfo.prev);
+		GetMousePoint(&mouceInfo.now.x, &mouceInfo.now.y);
 
-	SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
+		Vector2 move = mouceInfo.now.ToVector2() - mouceInfo.prev.ToVector2();
+
+		mouceInfo.move = (move.Length() > MOUCE_THRESHOLD) ? Utility::Normalize(mouceInfo.now - mouceInfo.prev) : Vector2(0.0f, 0.0f);
+
+		SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
+
+	}
+	else {
+
+		mouceInfo.prev = mouceInfo.now;
+
+		GetMousePoint(&mouceInfo.now.x, &mouceInfo.now.y);
+
+		Vector2 move = mouceInfo.now.ToVector2() - mouceInfo.prev.ToVector2();
+
+		mouceInfo.move = (move.Length() > MOUCE_THRESHOLD) ? Utility::Normalize(mouceInfo.now - mouceInfo.prev) : Vector2(0.0f, 0.0f);
+	}
 }
 
 bool KeyManager::GetControllerConnect(void) const

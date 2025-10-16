@@ -1,5 +1,7 @@
 #include "Vector2.h"
 
+#include"../Utility/Utility.h"
+
 // コンストラクタ
 Vector2I::Vector2I(void)
 {
@@ -112,6 +114,15 @@ void Vector2I::operator/=(const int value)
 	y = y / value;
 }
 
+Vector2 Vector2I::ToVector2(void) const
+{
+	return Vector2((float)x, (float)y);
+}
+
+float Vector2I::Length(void)const
+{
+	return sqrtf((float)(x * x + y * y));
+}
 
 
 Vector2::Vector2(void)
@@ -241,4 +252,14 @@ bool Vector2::operator!=(const Vector2 value) const
 bool Vector2::operator!=(const float value) const
 {
 	return  (x != value || y != value);
+}
+
+Vector2I Vector2::ToVector2I(void) const
+{
+	return Vector2I(Utility::Round(x), Utility::Round(y));
+}
+
+float Vector2::Length(void) const
+{
+	return sqrtf(x * x + y * y);
 }

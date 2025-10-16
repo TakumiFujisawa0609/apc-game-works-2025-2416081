@@ -132,6 +132,10 @@ void Boss::Update(void)
 			MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
 		}
 	}
+
+	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) {
+		HpSharpen(100);
+	}
 }
 
 void Boss::Draw(void)
@@ -153,7 +157,8 @@ void Boss::UiDraw(void)
 
 	float dif = 20.0f;
 
-	Vector2 size = { 1000.0f,60.0f };
+
+	Vector2 size = { Application::SCREEN_SIZE_X * 0.65,60.0f };
 	Vector2 sPos = { Application::SCREEN_SIZE_X - dif - size.x,dif };
 
 	drawHpBar(sPos, size, 0xffffff);

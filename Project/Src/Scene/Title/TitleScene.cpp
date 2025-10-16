@@ -23,6 +23,7 @@ TitleScene::~TitleScene()
 void TitleScene::Load(void)
 {
 	//Utility::LoadImg(img_, "Data/Image/Title/Title.png");
+	KEY::GetIns().SetMouceFixed(false);
 }
 void TitleScene::Init(void)
 {

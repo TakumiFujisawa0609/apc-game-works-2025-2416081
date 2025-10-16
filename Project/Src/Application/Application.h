@@ -7,8 +7,8 @@ class Application
 {
 public:
 	// スクリーンサイズ
-	static constexpr int SCREEN_SIZE_X = 1500;	// スクリーン横幅;
-	static constexpr int SCREEN_SIZE_Y = 960;	// スクリーン縦幅;
+	static constexpr int SCREEN_SIZE_X = 1200;	// スクリーン横幅;
+	static constexpr int SCREEN_SIZE_Y = 750;	// スクリーン縦幅;
 
 public:
 	// シングルトン（生成・取得・削除）
