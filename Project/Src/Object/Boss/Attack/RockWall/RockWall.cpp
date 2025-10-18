@@ -53,6 +53,8 @@ void RockWall::SubLoad(void)
     
     aliveNeedRatio_ = 0.15f;
 
+    cell_ = 30.0f;
+
 #pragma region 関数ポインタ配列へ各関数を格納
 #define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
     SET_STATE(STATE::NON, &RockWall::Non);

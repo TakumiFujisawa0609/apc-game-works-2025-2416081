@@ -62,6 +62,8 @@ void Block::SubLoad(void)
 	unit_.isAlive_ = true;
 
 	aliveNeedRatio_ = 0.1f;
+
+	cell_ = 20.0f;
 }
 
 void Block::SubInit(void)

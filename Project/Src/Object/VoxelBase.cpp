@@ -40,7 +40,7 @@ void VoxelBase::Load(void)
 
         BuildVoxelMeshFromMV1Handle(
             unit_.model_,
-            50.0f,
+            cell_,
             worldCenterForImport,
             VScale(unit_.para_.size, 0.5f),
             batches_
