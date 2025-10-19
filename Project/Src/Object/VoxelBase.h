@@ -137,7 +137,7 @@ protected:
 	// ```````````````````````````````````
 
 	// density ‚©‚çƒOƒŠ[ƒfƒBƒƒbƒVƒ…‚ğ¶¬
-	void BuildGreedyMesh(const std::vector<uint8_t>& density, int Nx, int Ny, int Nz, float cell, const VECTOR& center, std::vector<MeshBatch>& batches);
+	void BuildGreedyMesh(const std::vector<uint8_t>& density, int Nx, int Ny, int Nz, float cell, std::vector<MeshBatch>& batches);
 #pragma endregion
 
 #pragma region í‚é

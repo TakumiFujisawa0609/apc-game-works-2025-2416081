@@ -63,7 +63,7 @@ void VoxelBase::Update(void)
     SubUpdate();
 
     if (regeneration_) {
-        BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, unit_.WorldPos(), batches_);
+        BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches_);
 
         regeneration_ = false;
     }
@@ -124,7 +124,7 @@ bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& c
     SolidFill(density_, Nx_, Ny_, Nz_);
 
     // 4) メッシュ化
-    BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, center, batches);
+    BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches);
     densityInit_ = density_;
     return !(batches.empty());
 }
@@ -190,25 +190,25 @@ void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
 }
 
 void VoxelBase::BuildGreedyMesh(
-    const std::vector<uint8_t>& density, int Nx, int Ny, int Nz,
-    float cell, const VECTOR& center,
+    const std::vector<uint8_t>& density,
+    int Nx, int Ny, int Nz, float cell,
     std::vector<MeshBatch>& batches)
 {
+    auto Idx = [&](int x, int y, int z) { return (z * Ny + y) * Nx + x; };
+    auto Inb = [&](int x, int y, int z) {
+        return (0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz);
+        };
     auto Solid = [&](int x, int y, int z)->int {
-        if (!Inb(x, y, z)) return 0;
-        return density[Idx(x, y, z)] > 0 ? 1 : 0;
+        return (Inb(x, y, z) && density[Idx(x, y, z)] > 0) ? 1 : 0;
         };
 
-    // 出力先クリア
     batches.clear();
 
-    // 現在のバッチ と AABB 初期化
     MeshBatch cur;
     const float INF = 1e30f;
-    cur.bmin = { +INF,+INF,+INF };
-    cur.bmax = { -INF,-INF,-INF };
+    cur.bmin = { +INF, +INF, +INF };
+    cur.bmax = { -INF, -INF, -INF };
 
-	// 最小座標・最大座標 更新ラムダ
     auto updAabb = [&](const VECTOR& p) {
         cur.bmin.x = (std::min)(cur.bmin.x, p.x);
         cur.bmin.y = (std::min)(cur.bmin.y, p.y);
@@ -218,7 +218,6 @@ void VoxelBase::BuildGreedyMesh(
         cur.bmax.z = (std::max)(cur.bmax.z, p.z);
         };
 
-    // 65k 頂点制限に合わせてフラッシュ
     static const size_t kMaxVerts = 65000;
     auto flush = [&]() {
         if (!cur.v.empty()) {
@@ -229,76 +228,97 @@ void VoxelBase::BuildGreedyMesh(
             };
             batches.push_back(std::move(cur));
             cur = MeshBatch{};
-            cur.bmin = { +INF,+INF,+INF };
-            cur.bmax = { -INF,-INF,-INF };
+            cur.bmin = { +INF, +INF, +INF };
+            cur.bmax = { -INF, -INF, -INF };
         }
         };
 
-    // ---- Greedy Meshing 本体 ----
-    for (int d = 0; d < 3; d++) {
+    // d: 法線軸(0:X, 1:Y, 2:Z)
+    for (int d = 0; d < 3; ++d) {
         const int u = (d + 1) % 3;
         const int v = (d + 2) % 3;
-        int dims[3] = { Nx,Ny,Nz };
+        int dims[3] = { Nx, Ny, Nz };
         const int Du = dims[u];
         const int Dv = dims[v];
         const int Dw = dims[d];
 
-        struct Mask { unsigned char on; unsigned char back; };
+        struct Mask { unsigned char on; unsigned char fromL; }; // fromL=1: (aL=1,aR=0)
         std::vector<Mask> mask(Du * Dv);
 
-        for (int w = 0; w <= Dw; w++) {
-            // 1) スライス差分 → “面が立つ”マスク
-            for (int j = 0; j < Dv; ++j)
+        for (int w = 0; w <= Dw; ++w) {
+            // 1) スライス差分で“面が立つ”所を作る
+            for (int j = 0; j < Dv; ++j) {
                 for (int i = 0; i < Du; ++i) {
                     int L[3] = { 0,0,0 }, R[3] = { 0,0,0 };
-                    L[d] = w - 1; R[d] = w; L[u] = R[u] = i; L[v] = R[v] = j;
+                    L[d] = w - 1; R[d] = w;
+                    L[u] = R[u] = i;
+                    L[v] = R[v] = j;
+
                     int aL = (w > 0) ? Solid(L[0], L[1], L[2]) : 0;
                     int aR = (w < Dw) ? Solid(R[0], R[1], R[2]) : 0;
+
                     Mask m{ 0,0 };
-                    if (aL != aR) { m.on = 1; m.back = (aL == 1); }
+                    if (aL != aR) {
+                        // 面は立つ。どちらがソリッド側かを記録
+                        // aL=1,aR=0 → ソリッドは“左(L側)”。法線は +d 方向へ向く
+                        // aL=0,aR=1 → ソリッドは“右(R側)”。法線は -d 方向へ向く
+                        m.on = 1;
+                        m.fromL = (aL == 1) ? 1 : 0;
+                    }
                     mask[j * Du + i] = m;
                 }
+            }
 
-            // 2) マスクを長方形にまとめて追加
+            // 2) Greedy で長方形にまとめる
             int i = 0, j = 0;
             while (j < Dv) {
                 while (i < Du) {
                     Mask m0 = mask[j * Du + i];
                     if (!m0.on) { ++i; continue; }
 
-                    // 横
+                    // 横へ拡張
                     int wlen = 1;
                     while (i + wlen < Du) {
                         Mask t = mask[j * Du + (i + wlen)];
-                        if (t.on != m0.on || t.back != m0.back) break;
+                        if (t.on != m0.on || t.fromL != m0.fromL) break;
                         ++wlen;
                     }
-                    // 縦
+                    // 縦へ拡張
                     int hlen = 1; bool grow = true;
                     while (j + hlen < Dv && grow) {
                         for (int k = 0; k < wlen; ++k) {
                             Mask t = mask[(j + hlen) * Du + (i + k)];
-                            if (t.on != m0.on || t.back != m0.back) { grow = false; break; }
+                            if (t.on != m0.on || t.fromL != m0.fromL) { grow = false; break; }
                         }
                         if (grow) ++hlen;
                     }
 
-                    // 頂点数が溢れそうなら一旦フラッシュ
                     if (cur.v.size() + 4 > kMaxVerts) flush();
 
-                    // 面の4頂点（ローカル原点=中心＋center）
+                    // 面の4頂点（ローカル空間）
+                    // nSign: 法線符号 (+1: +d 方向, -1: -d 方向)
+                    const int nSign = m0.fromL ? +1 : -1;
+                    const float half = cell * 0.5f;
+
+                    // ソリッド側のセルインデックス（面が属する“ソリッド”セル）
+                    // fromL(=aL=1) → ソリッドは w-1
+                    // それ以外(=aR=1) → ソリッドは w
+                    int solidW = m0.fromL ? (w - 1) : w;
+
                     auto facePos = [&](int I, int J)->VECTOR {
                         int XYZ[3] = { 0,0,0 };
-                        XYZ[d] = m0.back ? (w - 1) : w; // セル境界
                         XYZ[u] = I;
                         XYZ[v] = J;
-                        float xf = (XYZ[0] - Nx * 0.5f) * cell /*+ center.x*/;
-                        float yf = (XYZ[1] - Ny * 0.5f) * cell /*+ center.y*/;
-                        float zf = (XYZ[2] - Nz * 0.5f) * cell /*+ center.z*/;
-                        const float half = cell * 0.5f;
-                        if (d == 0) xf += (m0.back ? +half : -half);
-                        if (d == 1) yf += (m0.back ? +half : -half);
-                        if (d == 2) zf += (m0.back ? +half : -half);
+                        XYZ[d] = solidW;
+
+                        float xf = (XYZ[0] - Nx * 0.5f) * cell;
+                        float yf = (XYZ[1] - Ny * 0.5f) * cell;
+                        float zf = (XYZ[2] - Nz * 0.5f) * cell;
+
+                        // ソリッド側セルの中心から、法線方向へ half ずらした位置が面
+                        if (d == 0) xf += nSign * half;
+                        if (d == 1) yf += nSign * half;
+                        if (d == 2) zf += nSign * half;
                         return VGet(xf, yf, zf);
                         };
 
@@ -307,37 +327,49 @@ void VoxelBase::BuildGreedyMesh(
                     VECTOR p11 = facePos(i + wlen, j + hlen);
                     VECTOR p01 = facePos(i, j + hlen);
 
-                    VECTOR nrm{ 0,0,0 }; (&nrm.x)[d] = (m0.back ? -1.0f : +1.0f);
+                    // 法線ベクトル
+                    VECTOR nrm{ 0,0,0 };
+                    (&nrm.x)[d] = (float)nSign; // d軸に ±1
 
-                    // UV は “セル数ぶんタイル”
-                    float u0 = 0, v0 = 0, u1 = (float)wlen, v1 = (float)hlen;
+                    // BuildGreedyMesh の UV 決定付近
+                    float u0 = 0.0f, v0 = 0.0f;
+                    float u1 = (float)wlen;
+                    float v1 = (float)hlen;
+
+                    // 端のにじみ対策
+                    const float UV_EPS = 0.001f;
+                    u0 += UV_EPS; v0 += UV_EPS;
+                    u1 -= UV_EPS; v1 -= UV_EPS;
 
                     auto makeV = [&](const VECTOR& P, float uu, float vv)->VERTEX3D {
                         VERTEX3D v{};
-                        v.pos = P; v.norm = nrm;
-                        v.dif = GetColorU8(255, 255, 255, 255);
-                        v.spc = GetColorU8(0, 0, 0, 0);
-                        v.u = uu; v.v = vv;
+                        v.pos = P;
+                        v.norm = nrm;                              // ← 照明向け法線
+                        v.dif = GetColorU8(255, 255, 255, 255);     // ← 頂点拡散色
+                        v.spc = GetColorU8(0, 0, 0, 0);             // ← スペキュラ未使用
+                        v.u = uu; v.v = vv;                       // ← そのままタイル
                         return v;
                         };
 
+                    // 巻き順（法線から見て反時計回り）
+                    // nSign=+1（+d向き）→ p00,p10,p11,p01 を CCW
+                    // nSign=-1（-d向き）→ 裏返して CCW（p00,p01,p11,p10）
                     unsigned short base = (unsigned short)cur.v.size();
-                    if (!m0.back) {
+                    if (nSign > 0) {
                         cur.v.push_back(makeV(p00, u0, v0));
                         cur.v.push_back(makeV(p10, u1, v0));
                         cur.v.push_back(makeV(p11, u1, v1));
                         cur.v.push_back(makeV(p01, u0, v1));
-                        cur.i.push_back(base + 0); cur.i.push_back(base + 1); cur.i.push_back(base + 2);
-                        cur.i.push_back(base + 0); cur.i.push_back(base + 2); cur.i.push_back(base + 3);
                     }
                     else {
                         cur.v.push_back(makeV(p00, u0, v0));
                         cur.v.push_back(makeV(p01, u0, v1));
                         cur.v.push_back(makeV(p11, u1, v1));
                         cur.v.push_back(makeV(p10, u1, v0));
-                        cur.i.push_back(base + 0); cur.i.push_back(base + 1); cur.i.push_back(base + 2);
-                        cur.i.push_back(base + 0); cur.i.push_back(base + 2); cur.i.push_back(base + 3);
                     }
+
+                    cur.i.push_back(base + 0); cur.i.push_back(base + 1); cur.i.push_back(base + 2);
+                    cur.i.push_back(base + 0); cur.i.push_back(base + 2); cur.i.push_back(base + 3);
 
                     updAabb(cur.v[base + 0].pos);
                     updAabb(cur.v[base + 1].pos);

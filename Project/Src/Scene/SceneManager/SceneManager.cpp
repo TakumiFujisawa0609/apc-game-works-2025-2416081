@@ -234,7 +234,6 @@ void SceneManager::Init3D(void)
 
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 
-
 	// ---- ライティング全体設定 ----
 	SetUseLighting(TRUE);
 	ChangeLightTypeDir({ 0.00f, -1.00f, 0.00f });
