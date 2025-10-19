@@ -344,16 +344,14 @@ void VoxelBase::BuildGreedyMesh(
                     auto makeV = [&](const VECTOR& P, float uu, float vv)->VERTEX3D {
                         VERTEX3D v{};
                         v.pos = P;
-                        v.norm = nrm;                              // ← 照明向け法線
+                        v.norm = nrm;                               // ← 照明向け法線
                         v.dif = GetColorU8(255, 255, 255, 255);     // ← 頂点拡散色
                         v.spc = GetColorU8(0, 0, 0, 0);             // ← スペキュラ未使用
-                        v.u = uu; v.v = vv;                       // ← そのままタイル
+                        v.u = uu; v.v = vv;                         // ← そのままタイル
                         return v;
                         };
 
                     // 巻き順（法線から見て反時計回り）
-                    // nSign=+1（+d向き）→ p00,p10,p11,p01 を CCW
-                    // nSign=-1（-d向き）→ 裏返して CCW（p00,p01,p11,p10）
                     unsigned short base = (unsigned short)cur.v.size();
                     if (nSign > 0) {
                         cur.v.push_back(makeV(p00, u0, v0));
@@ -389,6 +387,24 @@ void VoxelBase::BuildGreedyMesh(
     }
 
     flush();
+
+	// 生存しているセル中心位置リストを作成
+    cellCenterPoss_.clear();
+    for (int z = 0; z < Nz; ++z)
+        for (int y = 0; y < Ny; ++y)
+            for (int x = 0; x < Nx; ++x) {
+                if (density[Idx(x, y, z)] == 0) continue;
+                VECTOR lp = {
+                    (x - Nx / 2) * cell,
+                    (y - Ny / 2) * cell,
+                    (z - Nz / 2) * cell
+                };
+                cellCenterPoss_.push_back(lp);
+			}
+
+	// 生存比率を計算して、一定以下なら死滅扱いにする
+	const int totalCells = Nx * Ny * Nz;
+	if (((float)cellCenterPoss_.size() / (float)totalCells) < aliveNeedRatio_) { unit_.isAlive_ = false; }
 }
 #pragma endregion
 

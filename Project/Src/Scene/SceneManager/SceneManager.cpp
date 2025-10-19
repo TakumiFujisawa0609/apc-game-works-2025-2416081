@@ -223,7 +223,7 @@ void SceneManager::Init3D(void)
 	SetWriteZBuffer3D(true);
 
 	// バックカリングを有効にする
-	SetUseBackCulling(false);
+	SetUseBackCulling(true);
 
 	// フォグ設定
 	SetFogEnable(true);
