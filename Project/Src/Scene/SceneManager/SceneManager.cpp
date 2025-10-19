@@ -225,11 +225,6 @@ void SceneManager::Init3D(void)
 	// バックカリングを有効にする
 	SetUseBackCulling(false);
 
-	// ライトを有効にする
-	SetUseLighting(true);
-	ChangeLightTypeDir({ 0.00f, -1.00f, 0.00f });
-	SetLightDirection({ 0.00f, -1.00f, 0.00f });
-
 	// フォグ設定
 	SetFogEnable(true);
 	// フォグの色
@@ -238,4 +233,24 @@ void SceneManager::Init3D(void)
 	SetFogStartEnd(1000.0f, 15000.0f);
 
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
+
+
+	// ---- ライティング全体設定 ----
+	SetUseLighting(TRUE);
+	ChangeLightTypeDir({ 0.00f, -1.00f, 0.00f });
+	SetLightDirection({ 0.00f, -1.00f, 0.00f });
+	SetUseSpecular(FALSE);
+
+	// ---- マテリアル（頂点カラー + 白拡散 + そこそこAmbient）----
+	MATERIALPARAM m{};
+	m.Diffuse = GetColorF(1.0f, 1.0f, 1.0f, 1.0f);
+	m.Ambient = GetColorF(0.6f, 0.6f, 0.6f, 1.0f);  // 真っ黒回避
+	m.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
+	m.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
+	m.Power = 0.0f;
+	SetMaterialParam(m);
+
+	// 影響しうる「真っ黒系」設定を念のためオフ
+	SetGlobalAmbientLight(GetColorF(0, 0, 0, 0));  // 使っていれば好みで
+	SetDrawBright(255, 255, 255);               // 明度補正が落ちていないか
 }

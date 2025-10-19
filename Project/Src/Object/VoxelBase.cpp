@@ -63,7 +63,7 @@ void VoxelBase::Update(void)
     SubUpdate();
 
     if (regeneration_) {
-        BuildCubicMesh(density_, Nx_, Ny_, Nz_, cell_, unit_.WorldPos(), batches_);
+        BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, unit_.WorldPos(), batches_);
 
         regeneration_ = false;
     }
@@ -80,12 +80,12 @@ void VoxelBase::Draw(void)
     SetTransformToWorld(&M);
 
     for (auto& b : batches_) {
-        if (b.i.empty()) continue;
+        if (b.i.empty()) { continue; }
         DrawPolygonIndexed3D(
             b.v.empty() ? b.v.data() : b.v.data(),
             (int)(b.v.empty() ? b.v.size() : b.v.size()),
             b.i.data(), (int)(b.i.size() / 3),
-            textureId_, FALSE
+            textureId_, true
         );
     }
 
@@ -108,51 +108,30 @@ void VoxelBase::Release(void)
 
 
 
-
-
-
-void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
+#pragma region メッシュ生成
+bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, std::vector<MeshBatch>& batches)
 {
-    const int total = Nx * Ny * Nz;
-    std::vector<bool> ext(total, false);
-    std::queue<int> q;
-    auto pushIf = [&](int x, int y, int z) {
-        if (!Inb(x, y, z, Nx, Ny, Nz)) { return; }
-        int i = Idx(x, y, z, Nx, Ny);
-        if (ext[i] || density[i] != 0) { return; }
-        ext[i] = true;
-        q.push(i);
-    };
+    // 1) グリッド解像度
+    Nx_ = (int)std::ceil((halfExt.x * 2) / cell);
+    Ny_ = (int)std::ceil((halfExt.y * 2) / cell);
+    Nz_ = (int)std::ceil((halfExt.z * 2) / cell);
 
-    for (int x = 0; x < Nx; ++x) { for (int y = 0; y < Ny; ++y) { pushIf(x, y, 0); pushIf(x, y, Nz - 1); } }
-    for (int x = 0; x < Nx; ++x) { for (int z = 0; z < Nz; ++z) { pushIf(x, 0, z); pushIf(x, Ny - 1, z); } }
-    for (int y = 0; y < Ny; ++y) { for (int z = 0; z < Nz; ++z) { pushIf(0, y, z); pushIf(Nx - 1, y, z); } }
+    // 2) 表面マーキング
+	density_.resize(Nx_ * Ny_ * Nz_, 0);
+    MarkSurfaceByCollisionProbe(mv1, cell, center, halfExt, Nx_, Ny_, Nz_, density_);
 
-    const int off[6][3] = { {1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1} };
-    while (!q.empty()) {
-        int i = q.front();
-        q.pop();
-        int z = i / (Nx * Ny), y = (i - z * Nx * Ny) / Nx, x = i % Nx;
-        for (int k = 0; k < 6; ++k) { pushIf(x + off[k][0], y + off[k][1], z + off[k][2]); }
-    }
+    // 3) 内部充填
+    SolidFill(density_, Nx_, Ny_, Nz_);
 
-    // まずカウント（上書き前に数える）
-    for (int i = 0; i < total; ++i) {
-        if (density[i] == 200) ++marked;     // 表面フラグ
-        if (!ext[i])           ++solid; // 内部領域
-    }
-
-    // 外は0のまま、内部と表面を255へ
-    for (int i = 0; i < total; ++i) {
-        if (!ext[i])                density[i] = 255;  // 内部
-        else if (density[i] == 200)   density[i] = 255;  // 外部側の表面
-        // それ以外（外部空気）は 0 のまま
-    }
+    // 4) メッシュ化
+    BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, center, batches);
+    densityInit_ = density_;
+    return !(batches.empty());
 }
-
 
 void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
 {
+    MV1SetupCollInfo(mv1, -1);
     VECTOR minW = VSub(center, halfExt);
     float r = cell * 0.5f;
     for (int z = 0; z < Nz; ++z)
@@ -168,38 +147,68 @@ void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const VECTOR& c
             }
 }
 
-
-void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int Ny, int Nz, float cell, const VECTOR& center, std::vector<MeshBatch>& batches)
+void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
 {
-    static const size_t kMaxVerts = 65000;
+    const int total = Nx * Ny * Nz;
+    std::vector<bool> ext(total, false);
+    std::queue<int> q;
 
-    // 近傍サンプル（境界は0でOK）
-    auto S = [&](int x, int y, int z)->int {
-        if (x < 0 || y < 0 || z < 0 || x >= Nx || y >= Ny || z >= Nz) return 0;
-        return density[(z * Ny + y) * Nx + x];
+    auto pushIf = [&](int x, int y, int z) {
+        if (!Inb(x, y, z, Nx, Ny, Nz)) { return; }
+        int i = Idx(x, y, z, Nx, Ny);
+        if (ext[i] || density[i] != 0) { return; }
+        ext[i] = true;
+        q.push(i);
+    };
+
+	// 外部空気領域を BFS でマーク
+    for (int x = 0; x < Nx; ++x) { for (int y = 0; y < Ny; ++y) { pushIf(x, y, 0); pushIf(x, y, Nz - 1); } }
+    for (int x = 0; x < Nx; ++x) { for (int z = 0; z < Nz; ++z) { pushIf(x, 0, z); pushIf(x, Ny - 1, z); } }
+    for (int y = 0; y < Ny; ++y) { for (int z = 0; z < Nz; ++z) { pushIf(0, y, z); pushIf(Nx - 1, y, z); } }
+
+	// 6方向へ展開
+    while (!q.empty()) {
+        int i = q.front(); q.pop();
+
+        int z = i / (Nx * Ny);
+        int y = (i - z * Nx * Ny) / Nx;
+        int x = i % Nx;
+        for (int k = 0; k < 6; ++k) { pushIf(x + kDirNrm[k].x, y + kDirNrm[k].y, z + kDirNrm[k].z); }
+    }
+
+    // まずカウント（上書き前に数える）
+    for (int i = 0; i < total; ++i) {
+        if (density[i] == 200) { ++marked; }    // 表面フラグ
+        if (!ext[i]) { ++solid; }               // 内部領域
+    }
+
+    // 外は0のまま、内部と表面を255へ
+    for (int i = 0; i < total; ++i) {
+        if (!ext[i]) { density[i] = 255; }                  // 内部
+        else if (density[i] == 200) { density[i] = 255; }   // 外部側の表面
+    }
+}
+
+void VoxelBase::BuildGreedyMesh(
+    const std::vector<uint8_t>& density, int Nx, int Ny, int Nz,
+    float cell, const VECTOR& center,
+    std::vector<MeshBatch>& batches)
+{
+    auto Solid = [&](int x, int y, int z)->int {
+        if (!Inb(x, y, z)) return 0;
+        return density[Idx(x, y, z)] > 0 ? 1 : 0;
         };
 
-    // 中心差分の勾配 → 正規化
-    auto Grad = [&](int x, int y, int z)->VECTOR {
-
-        float gx = float(S(x + 1, y, z) - S(x - 1, y, z));
-        float gy = float(S(x, y + 1, z) - S(x, y - 1, z));
-        float gz = float(S(x, y, z + 1) - S(x, y, z - 1));
-
-        // ★外向き法線にしたいので符号を反転（密度は外0→中255なので勾配は内向き）
-        gx = -gx;
-        gy = -gy;
-        gz = -gz;
-        float len2 = gx * gx + gy * gy + gz * gz;
-        if (len2 < 1e-6f) { return VECTOR{ 0,0,0 }; }
-
-        float inv = 1.0f / std::sqrt(len2);
-        return VECTOR{ gx * inv, gy * inv, gz * inv };
-        };
-
+    // 出力先クリア
     batches.clear();
 
+    // 現在のバッチ と AABB 初期化
     MeshBatch cur;
+    const float INF = 1e30f;
+    cur.bmin = { +INF,+INF,+INF };
+    cur.bmax = { -INF,-INF,-INF };
+
+	// 最小座標・最大座標 更新ラムダ
     auto updAabb = [&](const VECTOR& p) {
         cur.bmin.x = (std::min)(cur.bmin.x, p.x);
         cur.bmin.y = (std::min)(cur.bmin.y, p.y);
@@ -209,6 +218,8 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
         cur.bmax.z = (std::max)(cur.bmax.z, p.z);
         };
 
+    // 65k 頂点制限に合わせてフラッシュ
+    static const size_t kMaxVerts = 65000;
     auto flush = [&]() {
         if (!cur.v.empty()) {
             cur.centerLocal = {
@@ -218,148 +229,137 @@ void VoxelBase::BuildCubicMesh(const std::vector<uint8_t>& density, int Nx, int 
             };
             batches.push_back(std::move(cur));
             cur = MeshBatch{};
+            cur.bmin = { +INF,+INF,+INF };
+            cur.bmax = { -INF,-INF,-INF };
         }
         };
 
+    // ---- Greedy Meshing 本体 ----
+    for (int d = 0; d < 3; d++) {
+        const int u = (d + 1) % 3;
+        const int v = (d + 2) % 3;
+        int dims[3] = { Nx,Ny,Nz };
+        const int Du = dims[u];
+        const int Dv = dims[v];
+        const int Dw = dims[d];
 
-    // 6面(+X,-X,+Y,-Y,+Z,-Z)
-    const int OFF[6][3] = { {1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1} };
+        struct Mask { unsigned char on; unsigned char back; };
+        std::vector<Mask> mask(Du * Dv);
 
-    auto addFace = [&](int x, int y, int z, int f) {
-        if (cur.v.size() + 4 > kMaxVerts) flush();
-
-        VECTOR nrm = { (float)OFF[f][0], (float)OFF[f][1], (float)OFF[f][2] };
-
-        float fx = (x + 0.5f) - Nx * 0.5f;   // [-N/2, N/2) の中心配置
-        float fy = (y + 0.5f) - Ny * 0.5f;
-        float fz = (z + 0.5f) - Nz * 0.5f;
-        VECTOR cellC = { fx * cell, fy * cell, fz * cell };
-        // セル中心と面中心
-        //VECTOR cellC = { (x - Nx / 2) * cell + center.x,
-        //                 (y - Ny / 2) * cell + center.y,
-        //                 (z - Nz / 2) * cell + center.z };
-
-        VECTOR faceC = { cellC.x + nrm.x * cell * 0.5f,
-                         cellC.y + nrm.y * cell * 0.5f,
-                         cellC.z + nrm.z * cell * 0.5f };
-
-        // 面の2軸（UV用）
-        VECTOR t1, t2;
-        if (fabsf(nrm.x) > 0.5f) { t1 = { 0,1,0 }; t2 = { 0,0,1 }; }        // X面 → (Y,Z)
-        else if (fabsf(nrm.y) > 0.5f) { t1 = { 1,0,0 }; t2 = { 0,0,1 }; }   // Y面 → (X,Z)
-        else { t1 = { 1,0,0 }; t2 = { 0,1,0 }; }                            // Z面 → (X,Y)
-
-        float hs = cell * 0.5f;
-
-
-        auto makeV = [&](float a, float b)->VERTEX3D {
-            VERTEX3D v{};
-            v.pos = { faceC.x + t1.x * a + t2.x * b,
-                       faceC.y + t1.y * a + t2.y * b,
-                       faceC.z + t1.z * a + t2.z * b };
-            v.norm = nrm;
-            v.dif = GetColorU8(255, 255, 255, 255);
-            v.spc = GetColorU8(0, 0, 0, 0);
-            // 簡易ワールド座標タイルUV（1タイル≒セル2個）
-            float inv = 1.0f / (cell * 2.0f);
-            if (fabsf(nrm.x) > 0.5f) { v.u = (v.pos.z - center.z) * inv; v.v = (v.pos.y - center.y) * inv; }
-            else if (fabsf(nrm.y) > 0.5f) { v.u = (v.pos.x - center.x) * inv; v.v = (v.pos.z - center.z) * inv; }
-            else { v.u = (v.pos.x - center.x) * inv; v.v = (v.pos.y - center.y) * inv; }
-            return v;
-            };
-
-        // ここで勾配法線を取得（取れなければ面法線にフォールバック
-        VECTOR g = Grad(x, y, z);
-        if (g.x == 0 && g.y == 0 && g.z == 0) g = nrm;
-
-        VERTEX3D q0 = makeV(-hs, -hs);
-        VERTEX3D q1 = makeV(+hs, -hs);
-        VERTEX3D q2 = makeV(+hs, +hs);
-        VERTEX3D q3 = makeV(-hs, +hs);
-
-        // 法線だけ差し替え（まずは4頂点すべて同じ g でOK
-        q0.norm = g; q1.norm = g; q2.norm = g; q3.norm = g;
-
-        updAabb(q0.pos); updAabb(q1.pos); updAabb(q2.pos); updAabb(q3.pos);
-
-        unsigned short base = (unsigned short)cur.v.size();
-        cur.v.push_back(q0); cur.v.push_back(q1); cur.v.push_back(q2); cur.v.push_back(q3);
-
-        cur.i.push_back(base + 0); cur.i.push_back(base + 2); cur.i.push_back(base + 1);
-        cur.i.push_back(base + 0); cur.i.push_back(base + 3); cur.i.push_back(base + 2);
-
-        // ★ 方向別のインデックスへ追加（iDir[f] のみに入れる）
-        auto& I = cur.iDir[f];
-        I.push_back(base + 0); I.push_back(base + 1); I.push_back(base + 2);
-        I.push_back(base + 0); I.push_back(base + 2); I.push_back(base + 3);
-
-        };
-
-    int aliveVoxel = 0;
-
-    for (int z = 0; z < Nz; ++z) {
-        for (int y = 0; y < Ny; ++y) {
-            for (int x = 0; x < Nx; ++x) {
-                if (density[Idx(x, y, z)] == 0) { continue; }
-
-                aliveVoxel++;
-
-                for (int f = 0; f < 6; ++f) {
-                    int nx = x + OFF[f][0], ny = y + OFF[f][1], nz = z + OFF[f][2];
-                    bool solidN = Inb(nx, ny, nz) ? (density[Idx(nx, ny, nz)] > 0) : false;
-                    if (!solidN) addFace(x, y, z, f);
+        for (int w = 0; w <= Dw; w++) {
+            // 1) スライス差分 → “面が立つ”マスク
+            for (int j = 0; j < Dv; ++j)
+                for (int i = 0; i < Du; ++i) {
+                    int L[3] = { 0,0,0 }, R[3] = { 0,0,0 };
+                    L[d] = w - 1; R[d] = w; L[u] = R[u] = i; L[v] = R[v] = j;
+                    int aL = (w > 0) ? Solid(L[0], L[1], L[2]) : 0;
+                    int aR = (w < Dw) ? Solid(R[0], R[1], R[2]) : 0;
+                    Mask m{ 0,0 };
+                    if (aL != aR) { m.on = 1; m.back = (aL == 1); }
+                    mask[j * Du + i] = m;
                 }
+
+            // 2) マスクを長方形にまとめて追加
+            int i = 0, j = 0;
+            while (j < Dv) {
+                while (i < Du) {
+                    Mask m0 = mask[j * Du + i];
+                    if (!m0.on) { ++i; continue; }
+
+                    // 横
+                    int wlen = 1;
+                    while (i + wlen < Du) {
+                        Mask t = mask[j * Du + (i + wlen)];
+                        if (t.on != m0.on || t.back != m0.back) break;
+                        ++wlen;
+                    }
+                    // 縦
+                    int hlen = 1; bool grow = true;
+                    while (j + hlen < Dv && grow) {
+                        for (int k = 0; k < wlen; ++k) {
+                            Mask t = mask[(j + hlen) * Du + (i + k)];
+                            if (t.on != m0.on || t.back != m0.back) { grow = false; break; }
+                        }
+                        if (grow) ++hlen;
+                    }
+
+                    // 頂点数が溢れそうなら一旦フラッシュ
+                    if (cur.v.size() + 4 > kMaxVerts) flush();
+
+                    // 面の4頂点（ローカル原点=中心＋center）
+                    auto facePos = [&](int I, int J)->VECTOR {
+                        int XYZ[3] = { 0,0,0 };
+                        XYZ[d] = m0.back ? (w - 1) : w; // セル境界
+                        XYZ[u] = I;
+                        XYZ[v] = J;
+                        float xf = (XYZ[0] - Nx * 0.5f) * cell /*+ center.x*/;
+                        float yf = (XYZ[1] - Ny * 0.5f) * cell /*+ center.y*/;
+                        float zf = (XYZ[2] - Nz * 0.5f) * cell /*+ center.z*/;
+                        const float half = cell * 0.5f;
+                        if (d == 0) xf += (m0.back ? +half : -half);
+                        if (d == 1) yf += (m0.back ? +half : -half);
+                        if (d == 2) zf += (m0.back ? +half : -half);
+                        return VGet(xf, yf, zf);
+                        };
+
+                    VECTOR p00 = facePos(i, j);
+                    VECTOR p10 = facePos(i + wlen, j);
+                    VECTOR p11 = facePos(i + wlen, j + hlen);
+                    VECTOR p01 = facePos(i, j + hlen);
+
+                    VECTOR nrm{ 0,0,0 }; (&nrm.x)[d] = (m0.back ? -1.0f : +1.0f);
+
+                    // UV は “セル数ぶんタイル”
+                    float u0 = 0, v0 = 0, u1 = (float)wlen, v1 = (float)hlen;
+
+                    auto makeV = [&](const VECTOR& P, float uu, float vv)->VERTEX3D {
+                        VERTEX3D v{};
+                        v.pos = P; v.norm = nrm;
+                        v.dif = GetColorU8(255, 255, 255, 255);
+                        v.spc = GetColorU8(0, 0, 0, 0);
+                        v.u = uu; v.v = vv;
+                        return v;
+                        };
+
+                    unsigned short base = (unsigned short)cur.v.size();
+                    if (!m0.back) {
+                        cur.v.push_back(makeV(p00, u0, v0));
+                        cur.v.push_back(makeV(p10, u1, v0));
+                        cur.v.push_back(makeV(p11, u1, v1));
+                        cur.v.push_back(makeV(p01, u0, v1));
+                        cur.i.push_back(base + 0); cur.i.push_back(base + 1); cur.i.push_back(base + 2);
+                        cur.i.push_back(base + 0); cur.i.push_back(base + 2); cur.i.push_back(base + 3);
+                    }
+                    else {
+                        cur.v.push_back(makeV(p00, u0, v0));
+                        cur.v.push_back(makeV(p01, u0, v1));
+                        cur.v.push_back(makeV(p11, u1, v1));
+                        cur.v.push_back(makeV(p10, u1, v0));
+                        cur.i.push_back(base + 0); cur.i.push_back(base + 1); cur.i.push_back(base + 2);
+                        cur.i.push_back(base + 0); cur.i.push_back(base + 2); cur.i.push_back(base + 3);
+                    }
+
+                    updAabb(cur.v[base + 0].pos);
+                    updAabb(cur.v[base + 1].pos);
+                    updAabb(cur.v[base + 2].pos);
+                    updAabb(cur.v[base + 3].pos);
+
+                    // 使い切り
+                    for (int y = 0; y < hlen; ++y)
+                        for (int x = 0; x < wlen; ++x)
+                            mask[(j + y) * Du + (i + x)] = { 0,0 };
+
+                    i += wlen;
+                }
+                i = 0; ++j;
             }
-
         }
     }
 
-    // 残りを投入
     flush();
-
-    cellCenterPoss_.clear();
-    if (aliveNeedRatio_ >= (float)aliveVoxel / (float)density.size()) {
-        unit_.isAlive_ = false;
-    }
-    else {
-        cellCenterPoss_.reserve(aliveVoxel);
-        for (int z = 0; z < Nz_; ++z)
-            for (int y = 0; y < Ny_; ++y)
-                for (int x = 0; x < Nx_; ++x) {
-                    if (density_[Idx(x, y, z)] == 0) { continue; }
-                    VECTOR p = {
-                        ((x - (Nx_ / 2)) * cell_) + (cell_ * 0.5f),
-                        ((y - (Ny_ / 2)) * cell_) + (cell_ * 0.5f),
-                        ((z - (Nz_ / 2)) * cell_) + (cell_ * 0.5f)
-                    };
-                    cellCenterPoss_.emplace_back(VAdd(unit_.WorldPos(), p));
-                }
-    }
 }
+#pragma endregion
 
-bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, std::vector<MeshBatch>& batches)
-{
-    // 1) グリッド解像度
-    Nx_ = (int)std::ceil((halfExt.x * 2) / cell);
-    Ny_ = (int)std::ceil((halfExt.y * 2) / cell);
-    Nz_ = (int)std::ceil((halfExt.z * 2) / cell);
-
-    // 2) 表面マーキング
-    std::vector<uint8_t> density(Nx_ * Ny_ * Nz_, 0);
-    MarkSurfaceByCollisionProbe(mv1, cell, center, halfExt, Nx_, Ny_, Nz_, density);
-
-    // 3) 内部充填
-    SolidFill(density, Nx_, Ny_, Nz_);
-
-    // 4) グリッドを保持
-    cell_ = cell;
-    density_ = density;
-
-    // 5) メッシュ化（Cubic）
-    BuildCubicMesh(density_, Nx_, Ny_, Nz_, cell_, center, batches);
-    densityInit_ = density;
-    return !(batches.empty());
-}
 
 bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
 {
