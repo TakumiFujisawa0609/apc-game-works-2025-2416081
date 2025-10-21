@@ -76,6 +76,8 @@ void VoxelBase::Draw(void)
 
     SubDraw();
 
+    SetUseBackCulling(false);
+
     MATRIX M = MGetTranslate(unit_.WorldPos());
     SetTransformToWorld(&M);
 
@@ -91,6 +93,8 @@ void VoxelBase::Draw(void)
 
     M = MGetIdent();
     SetTransformToWorld(&M);
+
+    SetUseBackCulling(true);
 }
 
 
