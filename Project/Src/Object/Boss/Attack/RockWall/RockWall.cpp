@@ -51,9 +51,9 @@ void RockWall::SubLoad(void)
     MV1SetRotationXYZ(unit_.model_, { 0.0f,0.0f,0.0f });
     MV1SetScale(unit_.model_, { scale,scale,scale });
     
-    aliveNeedRatio_ = 0.15f;
+    aliveNeedRatio_ = 0.10f;
 
-    cell_ = 40.0f;
+    cell_ = 20.0f;
 
 #pragma region 関数ポインタ配列へ各関数を格納
 #define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
