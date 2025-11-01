@@ -320,9 +320,12 @@ void VoxelBase::BuildGreedyMesh(
                         float zf = (XYZ[2] - Nz * 0.5f) * cell;
 
                         // ソリッド側セルの中心から、法線方向へ half ずらした位置が面
-                        if (d == 0) xf += nSign * half;
-                        if (d == 1) yf += nSign * half;
-                        if (d == 2) zf += nSign * half;
+                        //if (d == 0) xf += nSign * half;
+                        //if (d == 1) yf += nSign * cell;
+                        //if (d == 2) zf += nSign * half;
+                        if (d == 0) xf += nSign * (nSign == 1) ? cell : 0;
+                        if (d == 1) yf += nSign * (nSign == 1) ? cell : half;
+                        if (d == 2) zf += nSign * (nSign == 1) ? cell : 0;
                         return VGet(xf, yf, zf);
                         };
 
