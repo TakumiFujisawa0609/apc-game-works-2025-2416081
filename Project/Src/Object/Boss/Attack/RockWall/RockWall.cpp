@@ -51,7 +51,7 @@ void RockWall::SubLoad(void)
     MV1SetRotationXYZ(unit_.model_, { 0.0f,0.0f,0.0f });
     MV1SetScale(unit_.model_, { scale,scale,scale });
     
-    aliveNeedRatio_ = 0.15f;
+    aliveNeedRatio_ = 0.10f;
 
     cell_ = 20.0f;
 

@@ -63,7 +63,7 @@ void Block::SubLoad(void)
 
 	aliveNeedRatio_ = 0.1f;
 
-	cell_ = 10.0f;
+	cell_ = 20.0f;
 }
 
 void Block::SubInit(void)
@@ -134,13 +134,13 @@ void Block::OnCollision(UnitBase* other)
 		return;
 	}
 
-	//if (dynamic_cast<ThrowObjBase*>(other)) {
-	//	if (ApplyBrush(other->GetUnit(), 200)) {
-	//		GameScene::Shake();
-	//		Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
-	//	}
-	//	return;
-	//}
+	if (dynamic_cast<ThrowObjBase*>(other)) {
+		if (ApplyBrush(other->GetUnit(), 200)) {
+			GameScene::Shake();
+			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+		}
+		return;
+	}
 
 
 	if (dynamic_cast<Stone*>(other)) {

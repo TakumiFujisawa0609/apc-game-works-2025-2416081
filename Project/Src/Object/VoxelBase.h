@@ -118,13 +118,13 @@ protected:
 	// ‰Šú‰»```````````````````````````````
 																			 
 	// MV1 ƒnƒ“ƒhƒ‹‚©‚çƒ{ƒNƒZƒ‹ƒƒbƒVƒ…‚ğ¶¬								 
-	bool BuildVoxelMeshFromMV1Handle(										 
-		int mv1,															 
-		float cell,															 
-		const VECTOR& center,												 
-		const VECTOR& halfExt,												 
-		std::vector<MeshBatch>& batches);									 
-																			 
+	bool BuildVoxelMeshFromMV1Handle(
+		int mv1,
+		float cell,
+		const VECTOR& center,
+		const VECTOR& halfExt,
+		std::vector<MeshBatch>& batches);
+
 	// Õ“Ëƒvƒ[ƒu‚Å•\–Ê‚ğƒ}[ƒLƒ“ƒO										 
 	void MarkSurfaceByCollisionProbe(										 
 		int mv1,															 

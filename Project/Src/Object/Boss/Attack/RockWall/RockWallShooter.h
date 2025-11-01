@@ -7,11 +7,11 @@
 class RockWallShooter
 {
 public:
-	static constexpr int CREATE_WALL_NUM = 5;
+	static constexpr int CREATE_WALL_NUM = 8;
 
 	static constexpr VECTOR CREATE_ST_LOCAL_POS = { 0.0f,0.0f,550.0f };
 
-	static constexpr float ONE_DISTANCE = 200.0f;
+	static constexpr float ONE_DISTANCE = 150.0f;
 
 	RockWallShooter(const VECTOR& bossPos, const VECTOR& bossAngle);
 	~RockWallShooter();

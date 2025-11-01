@@ -705,6 +705,8 @@ void Player::HpSharpen(int damage)
 {
 	if (unit_.hp_ <= 0) { return; }
 
+	punch_->Off();
+
 	unit_.hp_ -= damage;
 
 	if (unit_.hp_ <= 0) {
