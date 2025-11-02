@@ -1,7 +1,5 @@
 #include"KeyManager.h"
 
-#include<DxLib.h>
-
 #include"../../Application/Application.h"
 #include"../../Utility/Utility.h"
 
@@ -275,4 +273,10 @@ Vector2 KeyManager::GetLeftStickVec(void) const
 	if (vec == 0.0f) { return{ 0.0f,0.0f }; }
 
 	return vec / sqrtf(vec.x * vec.x + vec.y * vec.y);
+}
+
+void KeyManager::SetMouceFixed(bool fixed)
+{
+	mouceFixed_ = fixed;
+	SetMouseDispFlag(!fixed);
 }

@@ -32,7 +32,7 @@ Boss::~Boss()
 
 void Boss::Load(void)
 {
-	unit_.model_ = MV1LoadModel("Data/Model/Boss/Giant.mv1");
+	unit_.model_ = MV1LoadModel("Data/Model/Boss/Golem.mv1");
 	MV1SetScale(unit_.model_, SCALE);
 
 	unit_.para_.size = SIZE;

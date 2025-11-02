@@ -79,7 +79,7 @@ public:
 	/// (固定した場合GetMouceMove()にてマウスの単位ベクトルを受け取れる)
 	/// </summary>
 	/// <param name="fixed">true=固定する、false=固定しない</param>
-	void SetMouceFixed(bool fixed) { mouceFixed_ = fixed; }
+	void SetMouceFixed(bool fixed);
 
 private:
 	void Init(void);

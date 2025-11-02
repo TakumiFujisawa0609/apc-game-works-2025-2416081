@@ -25,6 +25,7 @@ void GamePause::Init(void)
 {
 	nowSelect_ = SELECT::YES;
 	SoundManager::GetIns().AllStop();
+	KEY::GetIns().SetMouceFixed(false);
 }
 
 void GamePause::Update(void)
@@ -46,6 +47,7 @@ void GamePause::Update(void)
 			Smng::GetIns().PausePlay();
 			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true);
 			SceneManager::GetIns().PopScene();
+			KEY::GetIns().SetMouceFixed(true);
 			return;
 		}
 		break;
