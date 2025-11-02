@@ -19,7 +19,9 @@ public:
 	void Draw(void);
 	void Release(void);
 
-	void Throw(THROW_TYPE type);
+	void Carry(THROW_TYPE type);
+	void Drop(void);
+	void Throw(void);
 
 private:
 	struct THROW_OBJ_INFO {
@@ -31,7 +33,5 @@ private:
 	int models_[(int)THROW_TYPE::MAX];
 
 	const VECTOR& playerPos_;
-	const VECTOR LOCAL_THROW_POS = { 0.0f,50.0f,100.0f };
 	const VECTOR& playerAngle_;
-	const VECTOR THROW_VEC = { 0.0f,0.0f,1.0f };
 };

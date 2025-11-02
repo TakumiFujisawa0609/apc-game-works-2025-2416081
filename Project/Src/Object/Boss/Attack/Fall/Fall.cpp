@@ -49,7 +49,7 @@ void Fall::Draw(void)
 
 	if (state_ == STATE::IDLE && idleCounter_ / 10 % 2 == 0) {
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-		DrawSphere3D({ unit_.pos_.x,200.0f,unit_.pos_.z }, unit_.para_.radius, 4, 0xff0000, 0xff0000, true);
+		DrawSphere3D({ unit_.pos_.x,500.0f,unit_.pos_.z }, unit_.para_.radius, 4, 0xff0000, 0xff0000, true);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
 

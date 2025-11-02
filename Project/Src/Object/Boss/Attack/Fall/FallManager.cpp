@@ -55,17 +55,13 @@ void FallManager::On(void)
 {
 	VECTOR pos = VAdd(playerPos, LOCAL_POS);
 
-	bool recycle = false;
 
 	for (auto& fall : falls_) {
 		if (fall->GetUnit().isAlive_ == false) {
 			fall->On(pos);
-			recycle = true;
-			break;
+			return;
 		}
 	}
-
-	if (recycle) { return; }
 
 	falls_.emplace_back(new Fall());
 	falls_.back()->ModelLoad(model);

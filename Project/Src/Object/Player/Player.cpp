@@ -24,9 +24,11 @@ Player::Player(const VECTOR& cameraPos):
 	isAttack_(),
 	attackStageCounter_(0),
 
-	knockBackVec_(),
+	//carry_(nullptr),
 
 	throwing_(nullptr),
+	
+	knockBackVec_(),
 
 	anime_(nullptr)
 {
@@ -44,8 +46,6 @@ void Player::Load(void)
 
 	unit_.para_.speed = 10.0f;
 	
-	carryModel_ = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
-
 	int mnum = MV1GetMaterialNum(unit_.model_);
 	for (int i = 0; i < mnum; ++i) {
 		COLOR_F emi = MV1GetMaterialEmiColor(unit_.model_, i);
@@ -177,10 +177,10 @@ void Player::Draw(void)
 
 	SubDraw();
 
-	if (state_ == STATE::CARRY_OBJ) {
-		Utility::MV1ModelMatrix(carryModel_, VAdd(unit_.WorldPos(), VTransform(CARRY_OBJ_LOCAL_POS, Utility::MatrixAllMultY({ unit_.angle_ }))), { unit_.angle_ });
-		MV1DrawModel(carryModel_);
-	}
+	//if (state_ == STATE::CARRY_OBJ) {
+	//	Utility::MV1ModelMatrix(carryModel_, VAdd(unit_.WorldPos(), VTransform(CARRY_OBJ_LOCAL_POS, Utility::MatrixAllMultY({ unit_.angle_ }))), { unit_.angle_ });
+	//	MV1DrawModel(carryModel_);
+	//}
 
 	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
@@ -261,7 +261,6 @@ void Player::Release(void)
 	DEFAULT_COLOR.clear();
 
 	// ƒ‚ƒfƒ‹‰ð•ú
-	MV1DeleteModel(carryModel_);
 	MV1DeleteModel(unit_.model_);
 }
 
@@ -468,6 +467,7 @@ void Player::Gouge(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
 		if (gouge_->ObjectGouge()) {
+			throwing_->Carry(THROW_TYPE::ROCK);
 			state_ = STATE::CARRY_OBJ;
 		}
 		if (gouge_->GetUnit().isAlive_ == false) {
@@ -487,6 +487,7 @@ void Player::CarryObj(void)
 		CarryRun();
 	}
 	else {
+		throwing_->Drop();
 		state_ = STATE::MOVE;
 		anime_->Play((int)ANIME_TYPE::IDLE);
 	}
@@ -497,7 +498,7 @@ void Player::ThrowingObj(void)
 
 	}
 	else {
-		throwing_->Throw(THROW_TYPE::ROCK);
+		throwing_->Throw();
 		state_ = STATE::MOVE;
 	}
 }
@@ -706,6 +707,8 @@ void Player::HpSharpen(int damage)
 	if (unit_.hp_ <= 0) { return; }
 
 	punch_->Off();
+	//carry_->DropObj();
+	throwing_->Drop();
 
 	unit_.hp_ -= damage;
 
@@ -749,7 +752,7 @@ void Player::SubInit(void)
 
 	// P‚è
 	gouge_->Init();
-	
+
 	// “ÁŽêUŒ‚i“Š‚°j
 	throwing_->Init();
 }

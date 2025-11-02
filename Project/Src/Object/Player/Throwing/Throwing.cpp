@@ -46,14 +46,11 @@ void Throwing::Release(void)
 	throwObj_.clear();
 }
 
-void Throwing::Throw(THROW_TYPE type)
+void Throwing::Carry(THROW_TYPE type)
 {
-	VECTOR throwPos = VAdd(playerPos_, VTransform(LOCAL_THROW_POS, MGetRotY(playerAngle_.y)));
-	VECTOR throwVec = VTransform(THROW_VEC, MGetRotY(playerAngle_.y));
-
 	for (auto& obj : throwObj_) {
-		if (obj.type == type && obj.ins->GetUnit().isAlive_ == false) {
-			obj.ins->Throw(throwPos, throwVec);
+		if (obj.ins->GetState() == (int)ThrowObjBase::STATE::NON) {
+			obj.ins->Carry();
 			return;
 		}
 	}
@@ -62,12 +59,30 @@ void Throwing::Throw(THROW_TYPE type)
 	{
 	case THROW_TYPE::NON: { break; }
 	case THROW_TYPE::ROCK:
-		throwObj_.emplace_back(new ThrowRock(), type);
-		throwObj_.back().ins->ModelLoad(models_[(int)THROW_TYPE::ROCK]);
-		throwObj_.back().ins->Load();
-		throwObj_.back().ins->Init();
-		throwObj_.back().ins->Throw(throwPos, throwVec);
-		Collision::AddPlayer(throwObj_.back().ins);
+		throwObj_.emplace_back(new ThrowRock(playerPos_, playerAngle_), type);
 		break;
+	}
+
+	throwObj_.back().ins->ModelLoad(models_[(int)type]);
+	throwObj_.back().ins->Load();
+	throwObj_.back().ins->Init();
+	throwObj_.back().ins->Carry();
+	Collision::AddPlayer(throwObj_.back().ins);
+}
+
+void Throwing::Drop()
+{
+	for (auto& obj : throwObj_) {
+		if (obj.ins->GetState() == (int)ThrowObjBase::STATE::CARRY) {
+			obj.ins->Drop();
+		}
+	}
+}
+void Throwing::Throw()
+{
+	for (auto& obj : throwObj_) {
+		if (obj.ins->GetState() == (int)ThrowObjBase::STATE::CARRY) {
+			obj.ins->Throw();
+		}
 	}
 }

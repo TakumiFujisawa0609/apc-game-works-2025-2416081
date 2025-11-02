@@ -5,7 +5,6 @@
 
 #include"Punch/PlayerPunch.h"
 #include"Gouge/PlayerGouge.h"
-
 #include"Throwing/Throwing.h"
 
 class VoxelBase;
@@ -141,9 +140,6 @@ private:
 	//Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
 	PlayerGouge* gouge_;
-
-	const VECTOR CARRY_OBJ_LOCAL_POS = { 0.0f,20.0f,70.0f };
-	int carryModel_;
 
 	// ìäÇ∞Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 	Throwing* throwing_;

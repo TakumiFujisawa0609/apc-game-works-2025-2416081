@@ -77,7 +77,7 @@ void Boss::Init(void)
 {
 	state_ = STATE::IDLE;
 
-	unit_.pos_ = { 1500.0f,400.0f,1500.0f };
+	unit_.pos_ = { 1000.0f,600.0f,1000.0f };
 
 	unit_.isAlive_ = true;
 
@@ -171,6 +171,7 @@ void Boss::UiDraw(void)
 
 	size.x *= ((float)unit_.hp_ / (float)HP_MAX);
 	drawHpBar(sPos, size, 0xff0000);
+
 }
 
 void Boss::Release(void)

@@ -12,20 +12,8 @@ public:
 	// ブロック用のモデル種類
 	static constexpr int NUM_BLOCK_MODELS = 14;
 
-	// ブロックの数(マップのサイズ)
-	static constexpr int NUM_BLOCK_X = 30;
-	static constexpr int NUM_BLOCK_Z = 30;
-	static constexpr int NUM_BLOCK_Y = 2;
-
-	// 1ブロックあたりのサイズ
+	//// 1ブロックあたりのサイズ
 	static constexpr float SIZE_BLOCK = 100.0f;
-
-	// マップ全体のサイズ
-	static constexpr float WORLD_SIZE_X =
-		SIZE_BLOCK * static_cast<float>(NUM_BLOCK_X);
-
-	static constexpr float WORLD_SIZE_Z =
-		SIZE_BLOCK * static_cast<float>(NUM_BLOCK_Z);
 
 	// コンストラクタ
 	BlockManager(void);
@@ -43,10 +31,6 @@ public:
 
 
 private:
-
-	// マップデータ
-	//Block* blocks_[NUM_BLOCK_Y][NUM_BLOCK_Z][NUM_BLOCK_X];
-
 	int textureId_;
 
 	std::vector<Block*>blocks_;

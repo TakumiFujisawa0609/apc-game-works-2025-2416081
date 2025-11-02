@@ -72,7 +72,7 @@ const std::vector<UnitBase*> BlockManager::GetBlocks(void) const
 void BlockManager::LoadMapCsvData(void)
 {
 	// ファイルの読込
-	std::ifstream ifs = std::ifstream("Data/MapData/MapData.ply");
+	std::ifstream ifs = std::ifstream("Data/MapData/MapData1.ply");
 	if (!ifs) { return; }
 
 	// ファイルを１行ずつ読み込む
@@ -88,14 +88,10 @@ void BlockManager::LoadMapCsvData(void)
 	while (getline(ifs, line))
 	{
 		lineCount++;
-		if (lineCount <= 11)continue;
+		if (lineCount <= 11) { continue; }
 
 		// １行をカンマ区切りで分割
 		strSplit = Utility::Split(line, ' ');
-
-		if (strSplit.size() < 4) {
-			int a = 0;
-		}
 
 		int x = std::stoi(strSplit[0]);
 		int z = std::stoi(strSplit[1]);
@@ -108,30 +104,6 @@ void BlockManager::LoadMapCsvData(void)
 
 		blocks_.emplace_back(block);
 	}
-	//Block* block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], textureId_, 0, 0, 0);
-	//block->Load();
-	//block->Init();
-	//blocks_.emplace_back(block);
-
-	//block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], textureId_, 1, 0, 0);
-	//block->Load();
-	//block->Init();
-	//blocks_.emplace_back(block);
-
-	//block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], textureId_, 0, 0, 1);
-	//block->Load();
-	//block->Init();
-	//blocks_.emplace_back(block);
-
-	//block = new Block();
-	//block->Create((Block::TYPE)0, models_[0], textureId_, 1, 0, 1);
-	//block->Load();
-	//block->Init();
-	//blocks_.emplace_back(block);
-
 }
 
 void BlockManager::SetCamera(Camera* c)
