@@ -117,5 +117,7 @@ public:
 
 	// 行列をつかったモデルの座標と向きのセット
 	static void MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializer_list<VECTOR>& angle);
+
+	static VECTOR FtoV(float f) { return { f,f,f }; }
 };
 

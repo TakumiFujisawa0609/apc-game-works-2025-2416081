@@ -43,6 +43,7 @@ void Player::Load(void)
 	unit_.para_.capsuleHalfLen = (SIZE.y - (unit_.para_.radius * 2)) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
+	MV1SetScale(unit_.model_, Utility::FtoV(SCALE));
 
 	unit_.para_.speed = 10.0f;
 	
@@ -686,18 +687,23 @@ void Player::AnimeLoad(void)
 
 	const std::string ANIME_PATH = "Data/Model/Player/Animation/";
 	anime_->Add((int)ANIME_TYPE::IDLE, 60.0f, (ANIME_PATH + "Idle.mv1").c_str());
-	anime_->Add((int)ANIME_TYPE::RUN, 90.0f, (ANIME_PATH + "Run.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::RUN, 60.0f, (ANIME_PATH + "Run.mv1").c_str());
+
 	anime_->Add((int)ANIME_TYPE::JUMP, 90.0f, (ANIME_PATH + "Jump.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::JUMP_POST, 90.0f, (ANIME_PATH + "JumpPost.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "Fall.mv1").c_str());
+
 	anime_->Add((int)ANIME_TYPE::EVASION, 150.0f, (ANIME_PATH + "Evasion.mv1").c_str());
-	anime_->Add((int)ANIME_TYPE::PUNCH_FIRST, 120.0f, (ANIME_PATH + "PunchFirst.mv1").c_str());
-	anime_->Add((int)ANIME_TYPE::PUNCH_SECOND, 120.0f, (ANIME_PATH + "PunchSecond.mv1").c_str());
+
+	anime_->Add((int)ANIME_TYPE::PUNCH_FIRST, 70.0f, (ANIME_PATH + "PunchFirst.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::PUNCH_SECOND, 70.0f, (ANIME_PATH + "PunchSecond.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::PUNCH_THIRD, 120.0f, (ANIME_PATH + "PunchThird.mv1").c_str());
+
 	anime_->Add((int)ANIME_TYPE::GOUPE, 40.0f, (ANIME_PATH + "Goupe.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::CARRY_IDLE, 30.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::CARRY_RUN, 30.0f, (ANIME_PATH + "CarryRun.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::THROW, 30.0f, (ANIME_PATH + "Throw.mv1").c_str());
+
 	anime_->Add((int)ANIME_TYPE::DAMAGE, 30.0f, (ANIME_PATH + "Damage.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::DEATH, 30.0f, (ANIME_PATH + "Death.mv1").c_str());
 }
