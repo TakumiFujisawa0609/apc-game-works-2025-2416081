@@ -32,7 +32,7 @@ Boss::~Boss()
 
 void Boss::Load(void)
 {
-	unit_.model_ = MV1LoadModel("Data/Model/Boss/Golem.mv1");
+	unit_.model_ = MV1LoadModel("Data/Model/Boss/Giant.mv1");
 	MV1SetScale(unit_.model_, SCALE);
 
 	unit_.para_.size = SIZE;
@@ -77,7 +77,7 @@ void Boss::Init(void)
 {
 	state_ = STATE::IDLE;
 
-	unit_.pos_ = { 1000.0f,600.0f,1000.0f };
+	unit_.pos_ = { 1000.0f,700.0f,1000.0f };
 
 	unit_.isAlive_ = true;
 

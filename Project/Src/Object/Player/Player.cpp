@@ -38,11 +38,13 @@ void Player::Load(void)
 {
 	unit_.para_.colliType = CollisionType::ALLY;
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
-	unit_.para_.size = SIZE;
-	unit_.para_.radius = SIZE.z;
-	unit_.para_.capsuleHalfLen = (SIZE.y - (unit_.para_.radius * 2)) / 2;
+	unit_.para_.size = VScale(SIZE,SCALE);
+	unit_.para_.radius = SIZE.z * SCALE;
+	unit_.para_.capsuleHalfLen = (unit_.para_.size.y - (unit_.para_.radius * 2)) / 2;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
+
+	MV1SetScale(unit_.model_, VGet(SCALE, SCALE, SCALE));
 
 	unit_.para_.speed = 10.0f;
 	

@@ -11,7 +11,7 @@
 class Boss : public UnitBase
 {
 public:
-	static constexpr VECTOR SCALE = { 10.0f,10.0f,10.0f };
+	static constexpr VECTOR SCALE = { 2.0f,2.0f,2.0f };
 	static constexpr VECTOR SIZE = { 500.0f,850.0f,350.0f };
 	static constexpr VECTOR CENTER_DIFF = { 0.0f,SIZE.y / 2,0.0f };
 
@@ -154,7 +154,7 @@ private:
 	std::vector<COLOR_F> DEFAULT_COLOR;
 
 
-	const VECTOR LOCAL_ROT = { 0.0f,-Utility::Deg2RadF(90.0f),0.0f };
+	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
 	const VECTOR& playerPos;
 };

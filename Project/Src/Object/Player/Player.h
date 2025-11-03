@@ -13,7 +13,10 @@ class Player : public UnitBase
 {
 public:
 	static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f,SIZE.y / 2 - 25.0f,0.0f };
+	static constexpr float SCALE = 1.0f;
+	//static constexpr VECTOR SIZE = { 25.0f,70.0f,35.0f };
+	static constexpr VECTOR CENTER_DIFF = { 0.0f, (SIZE.y / 2 - 25.0f) * SCALE, 0.0f };
+
 
 
 	Player(const VECTOR& cameraAngle);
