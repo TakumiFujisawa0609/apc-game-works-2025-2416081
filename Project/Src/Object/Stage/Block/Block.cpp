@@ -70,7 +70,7 @@ void Block::SubInit(void)
 {
 	unit_.isAlive_ = true;
 
-	//unit_.para_.size = VScale(unit_.para_.size, 1.3f);
+	unit_.para_.size = VScale(unit_.para_.size, 1.3f);
 }
 
 void Block::SubUpdate(void)
