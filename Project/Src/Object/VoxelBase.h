@@ -45,10 +45,8 @@ public:
 	// メッシュバッチ群を取得
 	std::vector<MeshBatch> GetBatches(void)const { return batches_; }
 
-	// 押し戻し処理 (カプセル足元版)
-	bool ResolveCapsule(VECTOR& footPos, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIters);
-	// 押し戻し処理（カプセル中心版）
-	bool ResolveCapsuleCenter(VECTOR& center, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter);
+	// 押し戻し処理（カプセル版）
+	bool ResolveCapsule(VECTOR& center, float R, float halfH, VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter);
 
 	// 生存しているセルの中心座標を配列で取得
 	std::vector<VECTOR> GetCellCenterPoss(void) const { return cellCenterPoss_; };

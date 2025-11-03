@@ -70,7 +70,7 @@ void Block::SubInit(void)
 {
 	unit_.isAlive_ = true;
 
-	unit_.para_.size = VScale(unit_.para_.size, 1.3f);
+	//unit_.para_.size = VScale(unit_.para_.size, 1.3f);
 }
 
 void Block::SubUpdate(void)
@@ -107,7 +107,7 @@ void Block::SubDraw(void)
 	//	DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 	//}
 
-	//for (auto& vPos : GetVoxelCenters()) {
+	//for (auto& vPos : GetCellCenterPoss()) {
 	//	DrawSphere3D(vPos, GetCellSize() / 2, 4, 0xffffff, 0xffffff, true);
 	//}
 }

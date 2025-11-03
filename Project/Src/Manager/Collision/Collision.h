@@ -56,7 +56,7 @@ private:
 
 	float slopeLimitDeg_ = 50.0f; // だいたいの床角
 
-	int resolveIters_ = 3;   // デフォ3回
+	int resolveIters_ = 5;   // デフォ3回
 
 
 

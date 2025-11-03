@@ -56,7 +56,7 @@ void Collision::ResolveDynamics(void)
                 if (auto* vox = dynamic_cast<VoxelBase*>(s)) {
                     VECTOR preC = center;
                     VECTOR vtmp = vel; bool g = false;
-                    if (vox->ResolveCapsuleCenter(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
+                    if (vox->ResolveCapsule(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
                         VECTOR delta = VSub(center, preC);
                         float  d2 = VDot(delta, delta);
                         if (d2 > bestW && d2 > EPS2) {
@@ -102,7 +102,7 @@ void Collision::ResolveDynamics(void)
                 if (auto* vox = dynamic_cast<VoxelBase*>(e)) {
                     VECTOR preC = center;
                     VECTOR vtmp = vel; bool g = false;
-                    if (vox->ResolveCapsuleCenter(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
+                    if (vox->ResolveCapsule(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
                         VECTOR delta = VSub(center, preC);
                         float  d2 = VDot(delta, delta);
                         if (d2 > bestW && d2 > EPS2) {
@@ -210,7 +210,7 @@ void Collision::ResolveDynamics(void)
                 if (auto* vox = dynamic_cast<VoxelBase*>(s)) {
                     VECTOR preC = center;
                     VECTOR vtmp = vel; bool g = false;
-                    if (vox->ResolveCapsuleCenter(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
+                    if (vox->ResolveCapsule(center, R, H, vtmp, g, slopeLimitDeg_, 1)) {
                         VECTOR delta = VSub(center, preC);
                         float  d2 = VDot(delta, delta);
                         if (d2 > bestW && d2 > EPS2) {
@@ -512,7 +512,7 @@ bool Collision::CapsuleVsVoxel_Contact(
     bool grounded = false;
 
     // 1ステップだけ解いて「押し戻し delta」を候補に
-    if (vox->ResolveCapsuleCenter(center, du.para_.radius, du.para_.capsuleHalfLen,
+    if (vox->ResolveCapsule(center, du.para_.radius, du.para_.capsuleHalfLen,
         vtmp, grounded, slopeLimitDeg_, /*iters=*/1))
     {
         VECTOR delta = VSub(center, preC);

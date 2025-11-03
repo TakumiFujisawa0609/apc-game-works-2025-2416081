@@ -36,7 +36,8 @@ void Boss::Load(void)
 	MV1SetScale(unit_.model_, SCALE);
 
 	unit_.para_.size = SIZE;
-	unit_.para_.radius = SIZE.y / 3;
+	unit_.para_.radius = SIZE.y / 4;
+	unit_.para_.capsuleHalfLen = unit_.para_.size.y / 2 - unit_.para_.radius;
 	unit_.para_.colliShape = CollisionShape::SPHERE;
 
 	unit_.para_.speed = 10.0f;
@@ -78,6 +79,8 @@ void Boss::Init(void)
 	state_ = STATE::IDLE;
 
 	unit_.pos_ = { 1000.0f,700.0f,1000.0f };
+
+	unit_.angle_ = {};
 
 	unit_.isAlive_ = true;
 
@@ -147,6 +150,20 @@ void Boss::Draw(void)
 
 	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.pos_, CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
+
+	// デバッグ用に当たり判定の表示
+
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+
+	VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
+
+	//DrawCapsule3D(
+	//	VSub(unit_.WorldPos(), localPos),
+	//	VAdd(unit_.WorldPos(), localPos),
+	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
+	DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
+
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void Boss::UiDraw(void)

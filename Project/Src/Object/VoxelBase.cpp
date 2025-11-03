@@ -582,43 +582,137 @@ static bool CircleXZ_vs_RectXZ_MTV(const VECTOR& C, float R, const VECTOR& bmin,
         return true;
     }
 }
+//
+//bool VoxelBase::ResolveCapsule(
+//    VECTOR& footPos, float R, float halfH,
+//    VECTOR& vel, bool& grounded,
+//    float slopeLimitDeg, int maxIters)
+//{
+//    if (unit_.isAlive_ == false) { return false; }
+//
+//    grounded = false;
+//    if (Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) return false;
+//
+//    const float EPS = 1e-4f;
+//    const float cosSlope = std::cos(slopeLimitDeg * (DX_PI_F / 180.0f));
+//
+//    // ★このボクセルの“世界中心”（描画と同じオフセット）
+//    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
+//
+//    auto cellMinX = [&](int ix) { return gridCenterW.x + (ix - Nx_ / 2) * cell_; };
+//    auto cellMinY = [&](int iy) { return gridCenterW.y + (iy - Ny_ / 2) * cell_; };
+//    auto cellMinZ = [&](int iz) { return gridCenterW.z + (iz - Nz_ / 2) * cell_; };
+//
+//    auto solidAt = [&](int x, int y, int z)->bool {
+//        if (x < 0 || y < 0 || z < 0 || x >= Nx_ || y >= Ny_ || z >= Nz_) return false;
+//        return density_[Idx(x, y, z, Nx_, Ny_)] > 0;
+//        };
+//
+//    bool any = false;
+//
+//    for (int it = 0; it < maxIters; ++it) {
+//        // 足元→カプセル中心
+//        VECTOR C = VAdd(footPos, VGet(0, R + halfH, 0));
+//        float halfY = halfH + R;
+//
+//        // カプセルの外接AABB → セル範囲
+//        VECTOR bbmin = { C.x - R, C.y - halfY, C.z - R };
+//        VECTOR bbmax = { C.x + R, C.y + halfY, C.z + R };
+//
+//        int ix0 = (int)std::floor((bbmin.x - gridCenterW.x) / cell_) + Nx_ / 2;
+//        int iy0 = (int)std::floor((bbmin.y - gridCenterW.y) / cell_) + Ny_ / 2;
+//        int iz0 = (int)std::floor((bbmin.z - gridCenterW.z) / cell_) + Nz_ / 2;
+//        int ix1 = (int)std::floor((bbmax.x - gridCenterW.x) / cell_) + Nx_ / 2;
+//        int iy1 = (int)std::floor((bbmax.y - gridCenterW.y) / cell_) + Ny_ / 2;
+//        int iz1 = (int)std::floor((bbmax.z - gridCenterW.z) / cell_) + Nz_ / 2;
+//
+//        ix0 = (std::max)(0, ix0); iy0 = (std::max)(0, iy0); iz0 = (std::max)(0, iz0);
+//        ix1 = (std::min)(Nx_ - 1, ix1); iy1 = (std::min)(Ny_ - 1, iy1); iz1 = (std::min)(Nz_ - 1, iz1);
+//
+//        VECTOR bestN{ 0,0,0 }; float bestDepth = 0.0f; bool hit = false;
+//
+//        for (int z = iz0; z <= iz1; ++z)
+//            for (int y = iy0; y <= iy1; ++y)
+//                for (int x = ix0; x <= ix1; ++x) {
+//                    if (!solidAt(x, y, z)) continue;
+//
+//                    VECTOR bmin = { cellMinX(x), cellMinY(y), cellMinZ(z) };
+//                    VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
+//
+//                    // 上球・下球
+//                    VECTOR N1; float D1;
+//                    if (SphereVsAABB_MTV(VAdd(C, VGet(0, +halfH, 0)), R, bmin, bmax, N1, D1) && D1 > bestDepth) {
+//                        bestDepth = D1; bestN = N1; hit = true;
+//                    }
+//                    VECTOR N2; float D2;
+//                    if (SphereVsAABB_MTV(VAdd(C, VGet(0, -halfH, 0)), R, bmin, bmax, N2, D2) && D2 > bestDepth) {
+//                        bestDepth = D2; bestN = N2; hit = true;
+//                    }
+//
+//                    // 側面（Yが重なっている時のみ XZの円で当てる）
+//                    float yOverlap = (std::min)(bmax.y, C.y + halfH) - (std::max)(bmin.y, C.y - halfH);
+//                    if (yOverlap > 0.0f) {
+//                        VECTOR N3; float D3;
+//                        if (CircleXZ_vs_RectXZ_MTV(C, R, bmin, bmax, N3, D3) && D3 > bestDepth) {
+//                            bestDepth = D3; bestN = N3; hit = true;
+//                        }
+//                    }
+//                }
+//
+//        if (!hit) break;
+//
+//        // 押し戻し（中心→足元へ戻す）
+//        C = VAdd(C, VScale(bestN, bestDepth + EPS));
+//        footPos = VAdd(C, VGet(0, -(R + halfH), 0));
+//
+//        // 速度の法線成分を殺す（スライド）
+//        float vn = VDot(vel, bestN);
+//        if (vn < 0.0f) vel = VSub(vel, VScale(bestN, vn));
+//
+//        // 接地判定
+//        if (bestN.y > cosSlope && vel.y <= 0.0f) {
+//            grounded = true;
+//            if (vel.y < 0) vel.y = 0;
+//        }
+//        any = true;
+//    }
+//    return any;
+//}
 
 bool VoxelBase::ResolveCapsule(
-    VECTOR& footPos, float R, float halfH,
+    VECTOR& center, float R, float halfH,
     VECTOR& vel, bool& grounded,
     float slopeLimitDeg, int maxIters)
 {
-    if (unit_.isAlive_ == false) { return false; }
-
-    grounded = false;
+    if (!unit_.isAlive_) return false;
     if (Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) return false;
 
-    const float EPS = 1e-4f;
-    const float cosSlope = std::cos(slopeLimitDeg * (DX_PI_F / 180.0f));
+    grounded = false;
 
-    // ★このボクセルの“世界中心”（描画と同じオフセット）
+    // 描画と同じ基準（常に加算：para.center は通常 0 だが例外にも対応）
     const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
-
-    auto cellMinX = [&](int ix) { return gridCenterW.x + (ix - Nx_ / 2) * cell_; };
-    auto cellMinY = [&](int iy) { return gridCenterW.y + (iy - Ny_ / 2) * cell_; };
-    auto cellMinZ = [&](int iz) { return gridCenterW.z + (iz - Nz_ / 2) * cell_; };
 
     auto solidAt = [&](int x, int y, int z)->bool {
         if (x < 0 || y < 0 || z < 0 || x >= Nx_ || y >= Ny_ || z >= Nz_) return false;
         return density_[Idx(x, y, z, Nx_, Ny_)] > 0;
         };
+    auto cellMinX = [&](int ix) { return gridCenterW.x + (ix - Nx_ / 2) * cell_; };
+    auto cellMinY = [&](int iy) { return gridCenterW.y + (iy - Ny_ / 2) * cell_; };
+    auto cellMinZ = [&](int iz) { return gridCenterW.z + (iz - Nz_ / 2) * cell_; };
+
+    const float EPS = 1e-4f;
+    const float cosSlope = std::cos(slopeLimitDeg * (DX_PI_F / 180.0f));
+    const float halfY = halfH + R;
 
     bool any = false;
 
-    for (int it = 0; it < maxIters; ++it) {
-        // 足元→カプセル中心
-        VECTOR C = VAdd(footPos, VGet(0, R + halfH, 0));
-        float halfY = halfH + R;
+    for (int it = 0; it < maxIters; ++it)
+    {
+        // カプセル外接AABB（中心基準）
+        VECTOR bbmin = { center.x - R,      center.y - halfY, center.z - R };
+        VECTOR bbmax = { center.x + R,      center.y + halfY, center.z + R };
 
-        // カプセルの外接AABB → セル範囲
-        VECTOR bbmin = { C.x - R, C.y - halfY, C.z - R };
-        VECTOR bbmax = { C.x + R, C.y + halfY, C.z + R };
-
+        // → セル範囲へマップ
         int ix0 = (int)std::floor((bbmin.x - gridCenterW.x) / cell_) + Nx_ / 2;
         int iy0 = (int)std::floor((bbmin.y - gridCenterW.y) / cell_) + Ny_ / 2;
         int iz0 = (int)std::floor((bbmin.z - gridCenterW.z) / cell_) + Nz_ / 2;
@@ -626,34 +720,39 @@ bool VoxelBase::ResolveCapsule(
         int iy1 = (int)std::floor((bbmax.y - gridCenterW.y) / cell_) + Ny_ / 2;
         int iz1 = (int)std::floor((bbmax.z - gridCenterW.z) / cell_) + Nz_ / 2;
 
-        ix0 = (std::max)(0, ix0); iy0 = (std::max)(0, iy0); iz0 = (std::max)(0, iz0);
+        ix0 = (std::max)(0, ix0);  iy0 = (std::max)(0, iy0);  iz0 = (std::max)(0, iz0);
         ix1 = (std::min)(Nx_ - 1, ix1); iy1 = (std::min)(Ny_ - 1, iy1); iz1 = (std::min)(Nz_ - 1, iz1);
 
-        VECTOR bestN{ 0,0,0 }; float bestDepth = 0.0f; bool hit = false;
+        VECTOR bestN = { 0,0,0 };
+        float  bestDepth = 0.0f;
+        bool   hit = false;
 
         for (int z = iz0; z <= iz1; ++z)
             for (int y = iy0; y <= iy1; ++y)
-                for (int x = ix0; x <= ix1; ++x) {
+                for (int x = ix0; x <= ix1; ++x)
+                {
                     if (!solidAt(x, y, z)) continue;
 
                     VECTOR bmin = { cellMinX(x), cellMinY(y), cellMinZ(z) };
                     VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
 
-                    // 上球・下球
-                    VECTOR N1; float D1;
-                    if (SphereVsAABB_MTV(VAdd(C, VGet(0, +halfH, 0)), R, bmin, bmax, N1, D1) && D1 > bestDepth) {
-                        bestDepth = D1; bestN = N1; hit = true;
-                    }
-                    VECTOR N2; float D2;
-                    if (SphereVsAABB_MTV(VAdd(C, VGet(0, -halfH, 0)), R, bmin, bmax, N2, D2) && D2 > bestDepth) {
-                        bestDepth = D2; bestN = N2; hit = true;
+                    // 上球・下球（中心 ± halfH）
+                    {
+                        VECTOR N; float D;
+                        if (SphereVsAABB_MTV(VAdd(center, VGet(0, +halfH, 0)), R, bmin, bmax, N, D) && D > bestDepth) {
+                            bestDepth = D; bestN = N; hit = true;
+                        }
+                        if (SphereVsAABB_MTV(VAdd(center, VGet(0, -halfH, 0)), R, bmin, bmax, N, D) && D > bestDepth) {
+                            bestDepth = D; bestN = N; hit = true;
+                        }
                     }
 
-                    // 側面（Yが重なっている時のみ XZの円で当てる）
-                    float yOverlap = (std::min)(bmax.y, C.y + halfH) - (std::max)(bmin.y, C.y - halfH);
+                    // 側面：Y が重なるときだけ XZ 円 vs 長方形
+                    const float yOverlap =
+                        (std::min)(bmax.y, center.y + halfH) - (std::max)(bmin.y, center.y - halfH);
                     if (yOverlap > 0.0f) {
                         VECTOR N3; float D3;
-                        if (CircleXZ_vs_RectXZ_MTV(C, R, bmin, bmax, N3, D3) && D3 > bestDepth) {
+                        if (CircleXZ_vs_RectXZ_MTV(center, R, bmin, bmax, N3, D3) && D3 > bestDepth) {
                             bestDepth = D3; bestN = N3; hit = true;
                         }
                     }
@@ -661,48 +760,52 @@ bool VoxelBase::ResolveCapsule(
 
         if (!hit) break;
 
-        // 押し戻し（中心→足元へ戻す）
-        C = VAdd(C, VScale(bestN, bestDepth + EPS));
-        footPos = VAdd(C, VGet(0, -(R + halfH), 0));
+        // 押し戻し
+        center = VAdd(center, VScale(bestN, bestDepth + EPS));
+        any = true;
 
-        // 速度の法線成分を殺す（スライド）
+        // スライド：速度の法線成分を殺す
         float vn = VDot(vel, bestN);
         if (vn < 0.0f) vel = VSub(vel, VScale(bestN, vn));
 
-        // 接地判定
+        // 接地判定（床っぽい法線で落下中）
         if (bestN.y > cosSlope && vel.y <= 0.0f) {
             grounded = true;
             if (vel.y < 0) vel.y = 0;
         }
-        any = true;
     }
+
+    // 微小速度丸め（角でのチラつき回避）
+    auto killTiny = [](float& a) { if (std::fabs(a) < 1e-6f) a = 0.0f; };
+    killTiny(vel.x); killTiny(vel.y); killTiny(vel.z);
+
     return any;
 }
 
-bool VoxelBase::ResolveCapsuleCenter(
-    VECTOR& center, float R, float halfH,
-    VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter)
-{
-    // 既存の foot 版に変換して委譲するだけ：
-    // foot は「カプセル最下点」= 中心 - (R + halfH) * +Y
-    const VECTOR off = VGet(0.0f, R + halfH, 0.0f);
-    VECTOR foot = VSub(center, off);
-
-    // 既存の足元版に丸投げ
-    const bool hit = ResolveCapsule(foot, R, halfH, vel, grounded, slopeLimitDeg, maxIter);
-
-    // foot が動いた（or ヒットした）なら center を戻す
-    const VECTOR newCenter = VAdd(foot, off);
-
-    // 微小誤差を避けるなら閾値で判定
-    const VECTOR d = VSub(newCenter, center);
-    const float  d2 = d.x * d.x + d.y * d.y + d.z * d.z;
-    if (hit || d2 > 1e-12f) {
-        center = newCenter;
-        return true;
-    }
-    return false;
-}
+//bool VoxelBase::ResolveCapsuleCenter(
+//    VECTOR& center, float R, float halfH,
+//    VECTOR& vel, bool& grounded, float slopeLimitDeg, int maxIter)
+//{
+//    // 既存の foot 版に変換して委譲するだけ：
+//    // foot は「カプセル最下点」= 中心 - (R + halfH) * +Y
+//    const VECTOR off = VGet(0.0f, R + halfH, 0.0f);
+//    VECTOR foot = VSub(center, off);
+//
+//    // 既存の足元版に丸投げ
+//    const bool hit = ResolveCapsule(foot, R, halfH, vel, grounded, slopeLimitDeg, maxIter);
+//
+//    // foot が動いた（or ヒットした）なら center を戻す
+//    const VECTOR newCenter = VAdd(foot, off);
+//
+//    // 微小誤差を避けるなら閾値で判定
+//    const VECTOR d = VSub(newCenter, center);
+//    const float  d2 = d.x * d.x + d.y * d.y + d.z * d.z;
+//    if (hit || d2 > 1e-12f) {
+//        center = newCenter;
+//        return true;
+//    }
+//    return false;
+//}
 
 void VoxelBase::ReVival(void)
 {

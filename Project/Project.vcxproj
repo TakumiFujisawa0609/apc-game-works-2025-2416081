@@ -151,8 +151,6 @@
     <ClCompile Include="Src\Object\Boss\Attack\Stone\StoneShooter.cpp" />
     <ClCompile Include="Src\Object\Boss\Boss.cpp" />
     <ClCompile Include="Src\Object\Grid\Grid.cpp" />
-    <ClCompile Include="Src\Object\Player\CarryObj\CarryObjBase.cpp" />
-    <ClCompile Include="Src\Object\Player\CarryObj\CarryObjManager.cpp" />
     <ClCompile Include="Src\Object\Player\Gouge\PlayerGouge.cpp" />
     <ClCompile Include="Src\Object\Player\Player.cpp" />
     <ClCompile Include="Src\Object\Player\Punch\PlayerPunch.cpp" />
@@ -191,8 +189,6 @@
     <ClInclude Include="Src\Object\Boss\Attack\Stone\StoneShooter.h" />
     <ClInclude Include="Src\Object\Boss\Boss.h" />
     <ClInclude Include="Src\Object\Grid\Grid.h" />
-    <ClInclude Include="Src\Object\Player\CarryObj\CarryObjBaseh.h" />
-    <ClInclude Include="Src\Object\Player\CarryObj\CarryObjManagerh.h" />
     <ClInclude Include="Src\Object\Player\Gouge\PlayerGouge.h" />
     <ClInclude Include="Src\Object\Player\Player.h" />
     <ClInclude Include="Src\Object\Player\Punch\PlayerPunch.h" />

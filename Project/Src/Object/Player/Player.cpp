@@ -39,8 +39,8 @@ void Player::Load(void)
 	unit_.para_.colliType = CollisionType::ALLY;
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = VScale(SIZE,SCALE);
-	unit_.para_.radius = SIZE.z * SCALE;
-	unit_.para_.capsuleHalfLen = (unit_.para_.size.y - (unit_.para_.radius * 2)) / 2;
+	unit_.para_.radius = (SIZE.z * SCALE) * 0.75f;
+	unit_.para_.capsuleHalfLen = (unit_.para_.size.y / 2) - unit_.para_.radius;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
 	MV1SetScale(unit_.model_, Utility::FtoV(SCALE));
@@ -52,10 +52,10 @@ void Player::Load(void)
 	int mnum = MV1GetMaterialNum(unit_.model_);
 	for (int i = 0; i < mnum; ++i) {
 		COLOR_F emi = MV1GetMaterialEmiColor(unit_.model_, i);
+		emi.r = (std::min)(emi.r + 0.4f, 1.0f);
+		emi.g = (std::min)(emi.g + 0.4f, 1.0f);
+		emi.b = (std::min)(emi.b + 0.4f, 1.0f);
 		DEFAULT_COLOR.emplace_back(emi);
-		emi.r = (std::min)(emi.r + 0.3f, 1.0f);
-		emi.g = (std::min)(emi.g + 0.3f, 1.0f);
-		emi.b = (std::min)(emi.b + 0.3f, 1.0f);
 		MV1SetMaterialEmiColor(unit_.model_, i, emi);
 	}
 
@@ -193,14 +193,14 @@ void Player::Draw(void)
 
 	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
 
-	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
+	VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
-	//DrawCapsule3D(
-	//	VSub(unit_.WorldPos(), localPos),
-	//	VAdd(unit_.WorldPos(), localPos),
-	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
+	DrawCapsule3D(
+		VSub(unit_.WorldPos(), localPos),
+		VAdd(unit_.WorldPos(), localPos),
+		unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
 
-	//DrawSphere3D(unit_.WorldPos(), 5.0f, 4, 0xffffff, 0xffffff, true);
+	//DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
 
 	//VECTOR debugPos[8] =
 	//{
@@ -391,9 +391,6 @@ void Player::DoStateAttack(void)
 	case Player::ATTACK_STAGE::SECOND:
 		anime_->Play((int)ANIME_TYPE::PUNCH_SECOND, false);
 		break;
-	case Player::ATTACK_STAGE::THIRD:
-		anime_->Play((int)ANIME_TYPE::PUNCH_THIRD, false);
-		break;
 	}
 
 	// SE再生
@@ -439,7 +436,7 @@ void Player::Move(void)
 void Player::Attack(void)
 {	
 	// 攻撃の判定が発生する前の間、前方に移動させる
-	if (anime_->GetAnimeRatio() < 0.6f) {
+	if (anime_->GetAnimeRatio() < 0.5f) {
 		// 移動方向ベクトル
 		VECTOR vec = {};
 
@@ -449,19 +446,19 @@ void Player::Attack(void)
 
 		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 		vec = Utility::Normalize(vec);
-		unit_.vel_ = VScale(vec, 5.0f);
+		unit_.vel_ = VScale(vec, 10.0f);
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
 	punch_->Off();
 
 	// 大体攻撃判定を発生させる時間
-	if (anime_->GetAnimeRatio() >= 0.4f && anime_->GetAnimeRatio() <= 0.6f) {
+	if (anime_->GetAnimeRatio() >= 0.2f && anime_->GetAnimeRatio() <= 0.5f) {
 		punch_->On();
 	}
 
 	// 攻撃判定終わったらボタンで次段攻撃に遷移可能にしておく(操作性向上)
-	if (anime_->GetAnimeRatio() > 0.6f) { DoStateAttack(); }
+	if (anime_->GetAnimeRatio() > 0.6f) { AttackMove(); DoStateAttack(); }
 
 	// 何も入力なく攻撃アニメーションが終了したら通常状態に自動で遷移
 	if (anime_->GetAnimEnd()) { state_ = STATE::MOVE; }
@@ -497,13 +494,9 @@ void Player::CarryObj(void)
 }
 void Player::ThrowingObj(void)
 {
-	if (anime_->GetAnimeRatio() <= 0.1f) {
-
-	}
-	else {
-		throwing_->Throw();
-		state_ = STATE::MOVE;
-	}
+	if (anime_->GetAnimeRatio() <= 0.05f) {}
+	else if (anime_->GetAnimeRatio() <= 0.3f) { throwing_->Throw(); }
+	else { state_ = STATE::MOVE; }
 }
 void Player::Evasion(void)
 {
@@ -531,8 +524,17 @@ void Player::Damage(void)
 	unit_.vel_ = VAdd(unit_.vel_, knockBackVec_);
 
 	if (anime_->GetAnimEnd()) {
+		if (unit_.hp_ > 0) {
+
 		state_ = STATE::MOVE;
 		anime_->Play((int)ANIME_TYPE::IDLE);
+		}
+		else {
+			unit_.hp_ = 0;
+			state_ = STATE::DEATH;
+			anime_->Play((int)ANIME_TYPE::DEATH, false);
+			return;
+		}
 	}
 }
 void Player::Death(void)
@@ -610,6 +612,27 @@ void Player::Jump(void)
 
 	// モーション更新
 	if (isJump_[0] && anime_->GetAnimEnd()) { anime_->Play((int)ANIME_TYPE::JUMP); }
+}
+
+void Player::AttackMove(void)
+{
+	auto& key = KEY::GetIns();
+
+	VECTOR vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
+
+	if (Utility::VZERO(vec)) {
+		if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
+		if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
+		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+	}
+
+	if (!Utility::VZERO(vec)) {
+		MATRIX mat = MGetIdent();
+		mat = MMult(mat, MGetRotY(cameraAngle_.y));
+		vec = VTransform(vec, mat);
+		unit_.angle_.y = atan2(vec.x, vec.z);
+	}
 }
 
 void Player::CarryRun(void)
@@ -695,7 +718,7 @@ void Player::AnimeLoad(void)
 	anime_->Add((int)ANIME_TYPE::JUMP_POST, 90.0f, (ANIME_PATH + "JumpPost.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "Fall.mv1").c_str());
 
-	anime_->Add((int)ANIME_TYPE::EVASION, 150.0f, (ANIME_PATH + "Evasion.mv1").c_str());
+	anime_->Add((int)ANIME_TYPE::EVASION, 90.0f, (ANIME_PATH + "Evasion.mv1").c_str());
 
 	anime_->Add((int)ANIME_TYPE::PUNCH_FIRST, 70.0f, (ANIME_PATH + "PunchFirst.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::PUNCH_SECOND, 70.0f, (ANIME_PATH + "PunchSecond.mv1").c_str());
@@ -715,21 +738,13 @@ void Player::HpSharpen(int damage)
 	if (unit_.hp_ <= 0) { return; }
 
 	punch_->Off();
-	//carry_->DropObj();
 	throwing_->Drop();
 
 	unit_.hp_ -= damage;
 
-	if (unit_.hp_ <= 0) {
-		unit_.hp_ = 0;
-		state_ = STATE::DEATH;
-		anime_->Play((int)ANIME_TYPE::DEATH, false);
-		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
-		Smng::GetIns().Stop(SOUND::PLAYER_EVASION);
-		Smng::GetIns().Stop(SOUND::PLAYER_PUNCH);
-		return;
-	}
-
+	Smng::GetIns().Stop(SOUND::PLAYER_RUN);
+	Smng::GetIns().Stop(SOUND::PLAYER_EVASION);
+	Smng::GetIns().Stop(SOUND::PLAYER_PUNCH);
 	Smng::GetIns().Play(SOUND::PLAYER_DAMAGE, true, 200);
 
 	state_ = STATE::DAMAGE;

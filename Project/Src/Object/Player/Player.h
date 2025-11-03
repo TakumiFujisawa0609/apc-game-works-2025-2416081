@@ -13,9 +13,9 @@ class Player : public UnitBase
 {
 public:
 	static constexpr float SCALE = 2.5f;
-	static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
-	//static constexpr VECTOR SIZE = { 25.0f,70.0f,35.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f, (SIZE.y / 2 - 25.0f) * SCALE, 0.0f };
+	//static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
+	static constexpr VECTOR SIZE = { 25.0f,70.0f,35.0f };
+	static constexpr VECTOR CENTER_DIFF = { 0.0f, ((SIZE.y / 2) * SCALE), 0.0f };
 
 
 
@@ -63,7 +63,7 @@ public:
 
 	// UŒ‚ó‘Ô‚Åg—p‚·‚é``-------------------------------------------------------------------
 	// ’è”
-	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, THIRD, MAX, };		//UŒ‚‚Ì’i”
+	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, MAX, };		//UŒ‚‚Ì’i”
 	static constexpr int INPUT_ATTACK_FRAME = 20;							//Ÿ‚Ì’i‚É‚Â‚È‚ª‚éŠÔ(ƒtƒŒ[ƒ€”)
 
 	// ŠÖ”
@@ -133,6 +133,9 @@ private:
 	//---------------------------------------
 
 	// UŒ‚ó‘ÔŠÖŒW``````````
+
+	// ŠÖ”
+	void AttackMove(void);
 
 	// ƒCƒ“ƒXƒ^ƒ“ƒX
 	PlayerPunch* punch_;

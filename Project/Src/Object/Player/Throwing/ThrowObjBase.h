@@ -63,7 +63,7 @@ protected:
 
 
 
-	const VECTOR CARRY_OBJ_LOCAL_POS = { 0.0f,20.0f,70.0f };
+	const VECTOR CARRY_OBJ_LOCAL_POS = { 100.0f,80.0f,0.0f };
 
 	const VECTOR LOCAL_THROW_POS = { 0.0f,50.0f,100.0f };
 	const VECTOR THROW_VEC = { 0.0f,0.0f,1.0f };
