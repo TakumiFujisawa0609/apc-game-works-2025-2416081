@@ -12,6 +12,7 @@ class VoxelBase;
 class Player : public UnitBase
 {
 public:
+	static constexpr float SCALE = 2.5f;
 	static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
 	static constexpr float SCALE = 1.0f;
 	//static constexpr VECTOR SIZE = { 25.0f,70.0f,35.0f };
