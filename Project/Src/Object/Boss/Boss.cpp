@@ -78,7 +78,7 @@ void Boss::Init(void)
 {
 	state_ = STATE::IDLE;
 
-	unit_.pos_ = { 1000.0f,700.0f,1000.0f };
+	unit_.pos_ = { 1000.0f,400.0f,1000.0f };
 
 	unit_.angle_ = {};
 
@@ -153,17 +153,17 @@ void Boss::Draw(void)
 
 	// デバッグ用に当たり判定の表示
 
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
 
-	VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
+	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
-	//DrawCapsule3D(
-	//	VSub(unit_.WorldPos(), localPos),
-	//	VAdd(unit_.WorldPos(), localPos),
-	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
-	DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
+	////DrawCapsule3D(
+	////	VSub(unit_.WorldPos(), localPos),
+	////	VAdd(unit_.WorldPos(), localPos),
+	////	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
+	//DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void Boss::UiDraw(void)
@@ -222,6 +222,9 @@ void Boss::OnCollision(UnitBase* other)
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(30);
 		return;
+	}
+
+	if (const auto& player = dynamic_cast<Player*>(other)) {
 	}
 }
 
@@ -314,6 +317,8 @@ void Boss::Death(void)
 
 Boss::ATTACK_KINDS Boss::AttackLottery(void)
 {
+	return ATTACK_KINDS::WALL;
+
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 
 	int rand = GetRand(10000);

@@ -7,7 +7,7 @@
 class RockWallShooter
 {
 public:
-	static constexpr int CREATE_WALL_NUM = 8;
+	static constexpr int CREATE_WALL_NUM = 4;
 
 	static constexpr VECTOR CREATE_ST_LOCAL_POS = { 0.0f,0.0f,550.0f };
 

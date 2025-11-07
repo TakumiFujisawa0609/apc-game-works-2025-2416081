@@ -193,12 +193,12 @@ void Player::Draw(void)
 
 	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
 
-	VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
+	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
-	DrawCapsule3D(
-		VSub(unit_.WorldPos(), localPos),
-		VAdd(unit_.WorldPos(), localPos),
-		unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
+	//DrawCapsule3D(
+	//	VSub(unit_.WorldPos(), localPos),
+	//	VAdd(unit_.WorldPos(), localPos),
+	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
 
 	//DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
 

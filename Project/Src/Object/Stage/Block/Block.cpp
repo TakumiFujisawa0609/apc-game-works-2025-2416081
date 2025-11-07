@@ -119,43 +119,16 @@ void Block::SubRelease(void)
 
 void Block::OnCollision(UnitBase* other)
 {
-	if (dynamic_cast<PlayerPunch*>(other)) {
-		if (ApplyBrush(other->GetUnit(), 200)) {
-			GameScene::Shake();
+	auto apply = [&](int amount, bool shake)->void {
+		if (ApplyBrush(other->GetUnit(), (uint8_t)amount)) {
+			if (shake) GameScene::Shake();
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		}
-		return;
-	}
+		};
 
-	if (dynamic_cast<PlayerGouge*>(other)) {
-		if (ApplyBrush(other->GetUnit(), 255)) {
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
-		}
-		return;
-	}
-
-	if (dynamic_cast<ThrowObjBase*>(other)) {
-		if (ApplyBrush(other->GetUnit(), 200)) {
-			GameScene::Shake();
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
-		}
-		return;
-	}
-
-
-	if (dynamic_cast<Stone*>(other)) {
-		if (ApplyBrush(other->GetUnit(), 200)) {
-			GameScene::Shake();
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
-		}
-		return;
-	}
-
-	if (dynamic_cast<Fall*>(other)) {
-		if (ApplyBrush(other->GetUnit(), 200)) {
-			GameScene::Shake();
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
-		}
-		return;
-	}
+	if (dynamic_cast<PlayerPunch*>(other)) { apply(200, true); return; }
+	if (dynamic_cast<PlayerGouge*>(other)) { apply(255, true); return; }
+	if (dynamic_cast<ThrowObjBase*>(other)) { apply(200, true); return; }
+	if (dynamic_cast<Stone*>(other)) { apply(200, true); return; }
+	if (dynamic_cast<Fall*>(other)) { apply(200, true); return; }
 }

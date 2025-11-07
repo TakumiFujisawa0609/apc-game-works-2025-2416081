@@ -148,6 +148,8 @@ protected:
 	bool ApplyBrushAABB(const Base& other, uint8_t amount);
 	// ƒJƒvƒZƒ‹
 	bool ApplyBrushCapsule(const Base& other, uint8_t amount);
+
+	bool nowFrameRemesh_;
 #pragma endregion
 };
 

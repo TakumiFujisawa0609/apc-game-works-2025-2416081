@@ -11,7 +11,14 @@ std::vector<UnitBase*> Collision::playerObjects_ = {};
 std::vector<UnitBase*> Collision::enemyObjects_ = {};
 std::vector<UnitBase*> Collision::stageObject_ = {};
 
-Collision::Collision() {}
+Collision::Collision()
+{
+    dynamicPlayerObjects_.reserve(5);
+    dynamicEnemyObjects_.reserve(5);
+    playerObjects_.reserve(10);
+    enemyObjects_.reserve(50);
+    stageObject_.reserve(2000);
+}
 Collision::~Collision() {}
 
 
@@ -25,7 +32,8 @@ void Collision::ResolveDynamics(void)
     for (auto* o : dynamicPlayerObjects_) {
         if (!o) continue;
         const Base& du = o->GetUnit();
-        if (du.para_.colliShape != CollisionShape::CAPSULE) continue;
+        if (du.para_.colliShape != CollisionShape::CAPSULE) { continue; }
+        if (du.isAlive_ == false) { continue; }
 
         VECTOR pos = du.pos_;
         VECTOR vel = du.vel_;
@@ -288,57 +296,6 @@ void Collision::ResolveDynamics(void)
     }
 }
 
-void Collision::ResolvePairs()
-{
-//    // 反復：角ガク抑制のため「1反復＝各 mover につき最良1件だけ適用」
-//    for (int it = 0; it < resolveIters_; ++it) {
-//        bool anyMoved = false;
-//
-//        // --- 配列ペアを総なめ ---
-//        for (const auto& pl : pairLists_) {
-//            if (!pl.movers || !pl.stages) continue;
-//
-//            for (auto* mover : *pl.movers) {
-//                if (!mover) continue;
-//                const Base& du = mover->GetUnit();
-//                VECTOR pos = du.pos_;
-//                VECTOR vel = du.vel_;
-//
-//                Collision::Contact best;
-//
-//                for (auto* stage : *pl.stages) {
-//                    if (!stage || stage == mover) continue;
-//
-//                    // 距離フィルタ
-//                    if (!InRangeSq(du.pos_, stage->GetUnit().pos_, pl.range)) continue;
-//
-//                    Contact c;
-//                    if (!ComputeContactForPair(mover, stage, pos, vel, c) || !c.valid) continue;
-//                    if (!best.valid || c.weight > best.weight) best = c;
-//                }
-//
-//                if (!best.valid) continue;
-//
-//                // 適用（Voxel は velOut を優先、非Voxelは法線スライド）
-//                pos = VAdd(pos, best.push);
-//                if (best.velOut.x || best.velOut.y || best.velOut.z) {
-//                    vel = best.velOut;
-//                }
-//                else {
-//                    float vn = VDot(vel, best.n);
-//                    if (vn < 0.0f) vel = VSub(vel, VScale(best.n, vn));
-//                }
-//                mover->SetPos(pos);
-//                mover->SetVelocity(vel);
-//                if (best.grounded) mover->OnGrounded();
-//
-//                anyMoved = true;
-//            }
-//            if (!anyMoved) break;
-//        }
-//    }
-}
-
 void Collision::Check()
 {
 	// ステージオブジェクトとオブジェクトの当たり判定
@@ -361,8 +318,8 @@ void Collision::Check()
 			if ((us.aliveCollision_ && !us.isAlive_) || (up.aliveCollision_ && !up.isAlive_)) continue;
 
 			if (IsHit(us, up)) {
-				s->OnCollision(p);
 				p->OnCollision(s);
+				s->OnCollision(p);
 			}
         }
         for (auto& e : dynamicEnemyObjects_) {

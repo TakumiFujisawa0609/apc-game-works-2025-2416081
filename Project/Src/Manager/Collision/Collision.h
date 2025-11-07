@@ -27,7 +27,6 @@ public:
 	static void AddStage(std::vector<UnitBase*>obj) { for (auto& o : obj) { AddStage(o); } }
 
 	void ResolveDynamics(void);
-	void ResolvePairs();
 	void SetSlopeLimitDeg(float deg) { slopeLimitDeg_ = deg; }
 
 	void Check();
@@ -56,7 +55,7 @@ private:
 
 	float slopeLimitDeg_ = 50.0f; // だいたいの床角
 
-	int resolveIters_ = 5;   // デフォ3回
+	int resolveIters_ = 3;   // デフォ3回
 
 
 

@@ -25,7 +25,9 @@ VoxelBase::VoxelBase() :
     regeneration_(false),
 
     aliveNeedRatio_(0.0f),
-    cellCenterPoss_()
+    cellCenterPoss_(),
+
+    nowFrameRemesh_(false)
 {
 }
 
@@ -55,12 +57,17 @@ void VoxelBase::Init(void)
     SubInit();
 
     regeneration_ = false;
+    nowFrameRemesh_ = false;
 }
 
 
 void VoxelBase::Update(void)
 {
     SubUpdate();
+
+    if (unit_.isAlive_ == false) { return; }
+
+    nowFrameRemesh_ = false;
 
     if (regeneration_) {
         BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches_);
@@ -76,7 +83,6 @@ void VoxelBase::Draw(void)
 
     SubDraw();
 
-    SetUseBackCulling(false);
 
     MATRIX M = MGetTranslate(unit_.WorldPos());
     SetTransformToWorld(&M);
@@ -94,7 +100,6 @@ void VoxelBase::Draw(void)
     M = MGetIdent();
     SetTransformToWorld(&M);
 
-    SetUseBackCulling(true);
 }
 
 
@@ -418,8 +423,10 @@ void VoxelBase::BuildGreedyMesh(
 
 bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
 {
+    if (nowFrameRemesh_) { return false; }
+    else { nowFrameRemesh_ = true; }
     if (amount == 0) { return false; }
-    if (density_.empty() || Nx_ == 0) { return false; }
+    if (density_.empty()) { return false; }
 
     switch (other.para_.colliShape)
     {
@@ -432,46 +439,100 @@ bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
     return false;
 }
 
+//bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
+//{
+//    // ★ローカル→ワールド変換したグリッド中心
+//    VECTOR centerW = VAdd(unit_.pos_, unit_.para_.center);
+//
+//    VECTOR C = VAdd(other.pos_, other.para_.center); // 球の中心（ワールド）
+//    float  R = other.para_.radius;
+//
+//    int cx = (int)std::round((C.x - centerW.x) / cell_) + Nx_ / 2;
+//    int cy = (int)std::round((C.y - centerW.y) / cell_) + Ny_ / 2;
+//    int cz = (int)std::round((C.z - centerW.z) / cell_) + Nz_ / 2;
+//    int rr = (int)std::ceil(R / cell_);
+//
+//    float RR = R * R;
+//
+//    for (int z = cz - rr; z <= cz + rr; ++z)
+//        for (int y = cy - rr; y <= cy + rr; ++y)
+//            for (int x = cx - rr; x <= cx + rr; ++x) {
+//                if (x < 0 || y < 0 || z < 0 || x >= Nx_ || y >= Ny_ || z >= Nz_) continue;
+//
+//                // セル中心（ワールド）
+//                VECTOR wp = {
+//                    (x - Nx_ / 2) * cell_ + centerW.x,
+//                    (y - Ny_ / 2) * cell_ + centerW.y,
+//                    (z - Nz_ / 2) * cell_ + centerW.z
+//                };
+//                float dx = wp.x - C.x, dy = wp.y - C.y, dz = wp.z - C.z;
+//                if (dx * dx + dy * dy + dz * dz > RR) continue;
+//
+//                if (density_[Idx(x, y, z)] > 0) {
+//                    density_[Idx(x, y, z)] = (std::max)(0, density_[Idx(x, y, z)] - amount);
+//                    regeneration_ = true; // Update() でリメッシュ
+//                }
+//            }
+//
+//	return regeneration_;
+//}
 bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
 {
-    // ★ローカル→ワールド変換したグリッド中心
-    VECTOR centerW = VAdd(unit_.pos_, unit_.para_.center);
+    if (amount == 0 || density_.empty()) return false;
 
-    VECTOR C = VAdd(other.pos_, other.para_.center); // 球の中心（ワールド）
-    float  R = other.para_.radius;
+    const VECTOR centerW = VAdd(unit_.pos_, unit_.para_.center);
+    const VECTOR C = VAdd(other.pos_, other.para_.center);
+    const float  R = other.para_.radius;
 
-    int cx = (int)std::round((C.x - centerW.x) / cell_) + Nx_ / 2;
-    int cy = (int)std::round((C.y - centerW.y) / cell_) + Ny_ / 2;
-    int cz = (int)std::round((C.z - centerW.z) / cell_) + Nz_ / 2;
-    int rr = (int)std::ceil(R / cell_);
+    const int cx = (int)std::round((C.x - centerW.x) / cell_) + Nx_ / 2;
+    const int cy = (int)std::round((C.y - centerW.y) / cell_) + Ny_ / 2;
+    const int cz = (int)std::round((C.z - centerW.z) / cell_) + Nz_ / 2;
+    const int rr = (int)std::ceil(R / cell_);
+    const float RR = R * R;
 
-    auto idx = [&](int x, int y, int z)->int { return (z * Ny_ + y) * Nx_ + x; };
-
-    float RR = R * R;
+    bool touched = false;
+    int  minx = Nx_, miny = Ny_, minz = Nz_;
+    int  maxx = -1, maxy = -1, maxz = -1;
 
     for (int z = cz - rr; z <= cz + rr; ++z)
         for (int y = cy - rr; y <= cy + rr; ++y)
             for (int x = cx - rr; x <= cx + rr; ++x) {
-                if (x < 0 || y < 0 || z < 0 || x >= Nx_ || y >= Ny_ || z >= Nz_) continue;
+                if ((unsigned)x >= (unsigned)Nx_ ||
+                    (unsigned)y >= (unsigned)Ny_ ||
+                    (unsigned)z >= (unsigned)Nz_) continue;
 
                 // セル中心（ワールド）
-                VECTOR wp = {
+                const VECTOR wp = {
                     (x - Nx_ / 2) * cell_ + centerW.x,
                     (y - Ny_ / 2) * cell_ + centerW.y,
                     (z - Nz_ / 2) * cell_ + centerW.z
                 };
-                float dx = wp.x - C.x, dy = wp.y - C.y, dz = wp.z - C.z;
+                const float dx = wp.x - C.x, dy = wp.y - C.y, dz = wp.z - C.z;
                 if (dx * dx + dy * dy + dz * dz > RR) continue;
 
-                if (density_[idx(x, y, z)] > 0) {
-                    density_[idx(x, y, z)] = (std::max)(0, density_[idx(x, y, z)] - amount);
-                    regeneration_ = true; // Update() でリメッシュ
+                auto& v = density_[Idx(x, y, z)];
+                if (v == 0) continue;
+
+                const uint8_t old = v;
+                v = (v > amount) ? (uint8_t)(v - amount) : 0;
+                if (v != old) {
+                    touched = true;
+                    // 局所AABBを記録（次の再メッシュ範囲最適化の足掛かり）
+                    if (x < minx) minx = x; if (x > maxx) maxx = x;
+                    if (y < miny) miny = y; if (y > maxy) maxy = y;
+                    if (z < minz) minz = z; if (z > maxz) maxz = z;
                 }
             }
 
-	return regeneration_;
-}
+    if (touched) {
+        regeneration_ = true;         // ← “変わったときだけ” 立てる
+        // もし範囲リメッシュを後で入れるなら、ここで dirtyAABB_ を更新
+        // dirtyMin_ = min(dirtyMin_, {minx,miny,minz});
+        // dirtyMax_ = max(dirtyMax_, {maxx,maxy,maxz});
+    }
 
+    return touched;                    // ← regeneration_ ではなく touched を返す
+}
 bool VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
 {
 
