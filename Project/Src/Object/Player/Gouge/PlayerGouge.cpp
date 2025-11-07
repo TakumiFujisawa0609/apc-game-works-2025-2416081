@@ -1,5 +1,7 @@
 #include"PlayerGouge.h"
 
+#include"../../../Manager/Collision/CollisionUtility.h"
+
 #include"../../Stage/Block/Block.h"
 #include"../../Boss/Attack/RockWall/RockWall.h"
 
@@ -8,7 +10,8 @@ PlayerGouge::PlayerGouge(const VECTOR& playerPos, const VECTOR& playerAngle):
 
 	xAngle_(0.0f),
 
-	objectGouge_(false),
+	searchHit_(false),
+	gougeHit_(false),
 
 	playerPos(playerPos),
 	playerAngle(playerAngle)
@@ -26,7 +29,6 @@ void PlayerGouge::Load(void)
 
 void PlayerGouge::Init(void)
 {
-	objectGouge_ = false;
 	searchHit_ = false;
 	gougeHit_ = false;
 }
@@ -40,26 +42,18 @@ void PlayerGouge::Update(void)
 	switch (state_)
 	{
 	case PlayerGouge::STATE::SEARCH:
+		if (searchHit_) { return; }
 		xAngle_ += Utility::Deg2RadF(5.0f);
-		if (xAngle_ > Utility::Deg2RadF(90.0f)) {
-			objectGouge_ = false;
-			unit_.isAlive_ = false;
-
-			state_ = STATE::NON;
-		}
-		unit_.pos_ = VAdd(VAdd(playerPos, FOOT_POS), VTransform(LOCAL_POS, Utility::MatrixAllMultXYZ({ {xAngle_,0.0f,0.0f},playerAngle })));
+		if (xAngle_ > Utility::Deg2RadF(100.0f)) { xAngle_ = Utility::Deg2RadF(100.0f); }
+		else { unit_.pos_ = VAdd(VAdd(playerPos, FOOT_POS), VTransform(LOCAL_POS, Utility::MatrixAllMultXYZ({ {xAngle_,0.0f,0.0f},playerAngle }))); }
 		break;
 	case PlayerGouge::STATE::GOUGE:
 		if(gougeHit_){
 			unit_.isAlive_ = false;
-
 			state_ = STATE::NON;
 		}
 		break;
 	}
-
-	searchHit_ = false;
-	gougeHit_ = false;
 }
 
 void PlayerGouge::Draw(void)
@@ -75,18 +69,20 @@ void PlayerGouge::Release(void)
 
 void PlayerGouge::OnCollision(UnitBase* other)
 {
-	if (searchHit_) { return; }
-
 	switch (state_)
 	{
 	case PlayerGouge::STATE::SEARCH:
-		if (dynamic_cast<Block*>(other)) {
-			state_ = STATE::GOUGE;
-			searchHit_ = true;
-		}
-		if (dynamic_cast<RockWall*>(other)) {
-			state_ = STATE::GOUGE;
-			searchHit_ = true;
+		if (searchHit_) { return; }
+		if (
+			dynamic_cast<Block*>(other) ||
+			dynamic_cast<RockWall*>(other)
+			) {
+			for (auto v : dynamic_cast<VoxelBase*>(other)->GetCellCenterWorldPoss()) {
+				if (Cfunc::Sphere(unit_.pos_, unit_.para_.radius, v, dynamic_cast<VoxelBase*>(other)->GetCellSize())) {
+					searchHit_ = true;
+					return;
+				}
+			}
 		}
 		break;
 	case PlayerGouge::STATE::GOUGE:
@@ -94,7 +90,6 @@ void PlayerGouge::OnCollision(UnitBase* other)
 			dynamic_cast<Block*>(other) ||
 			dynamic_cast<RockWall*>(other)
 			) {
-			objectGouge_ = true;
 			gougeHit_ = true;
 		}
 		break;
@@ -108,7 +103,8 @@ void PlayerGouge::On(void)
 	unit_.pos_ = VAdd(playerPos, FOOT_POS);
 
 	unit_.isAlive_ = true;
-	objectGouge_ = false;
+	searchHit_ = false;
+	gougeHit_ = false;
 	state_ = STATE::SEARCH;
 	xAngle_ = 0.0f;
 }
@@ -117,4 +113,16 @@ void PlayerGouge::Off(void)
 {
 	unit_.isAlive_ = false;
 	state_ = STATE::NON;
+}
+
+bool PlayerGouge::Gouge(void)
+{
+	if (searchHit_) {
+		state_ = STATE::GOUGE;
+		gougeHit_ = false;
+		return true;
+	}
+
+	Off();
+	return false;
 }

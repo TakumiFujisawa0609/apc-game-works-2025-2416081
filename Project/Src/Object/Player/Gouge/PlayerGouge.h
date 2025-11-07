@@ -30,17 +30,14 @@ public:
 
 	void On(void);
 	void Off(void);
-
-	bool ObjectGouge(void)const { return objectGouge_; }
+	bool Gouge(void);
 
 private:
 	STATE state_;
 
-	const float STATE_RADIUS[(int)STATE::MAX] = { 5.0f,150.0f };
+	const float STATE_RADIUS[(int)STATE::MAX] = { 10.0f,150.0f };
 
 	float xAngle_;
-
-	bool objectGouge_;
 
 	bool searchHit_;
 	bool gougeHit_;

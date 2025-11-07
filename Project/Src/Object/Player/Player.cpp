@@ -24,8 +24,6 @@ Player::Player(const VECTOR& cameraPos):
 	isAttack_(),
 	attackStageCounter_(0),
 
-	//carry_(nullptr),
-
 	throwing_(nullptr),
 	
 	knockBackVec_(),
@@ -466,14 +464,23 @@ void Player::Attack(void)
 void Player::Gouge(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
-		if (gouge_->ObjectGouge()) {
-			throwing_->Carry(THROW_TYPE::ROCK);
-			state_ = STATE::CARRY_OBJ;
+		if (anime_->GetAnimeRatio() > 0.25f) {
+			if (gouge_->Gouge()) {
+				throwing_->Carry(THROW_TYPE::ROCK);
+				state_ = STATE::CARRY_OBJ;
+
+			}
+			else {
+				state_ = STATE::MOVE;
+				anime_->Play((int)ANIME_TYPE::IDLE);
+
+			}
 		}
-		if (gouge_->GetUnit().isAlive_ == false) {
-			state_ = STATE::MOVE;
-			anime_->Play((int)ANIME_TYPE::IDLE);
-		}
+
+		//if (gouge_->ObjectGouge()) {
+		//}
+		//if (gouge_->GetUnit().isAlive_ == false) {
+		//}
 	}
 	else {
 		gouge_->Off();

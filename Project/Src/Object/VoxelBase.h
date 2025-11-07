@@ -50,6 +50,7 @@ public:
 
 	// 生存しているセルの中心座標を配列で取得
 	std::vector<VECTOR> GetCellCenterPoss(void) const { return cellCenterPoss_; };
+	std::vector<VECTOR> GetCellCenterWorldPoss(void) const { return cellCenterWorldPoss_; };
 
 	// セルサイズを取得(float版)
 	float GetCellSize(void)const { return cell_; }
@@ -86,6 +87,7 @@ protected:
 
 	// セル中心位置群
 	std::vector<VECTOR>cellCenterPoss_;
+	std::vector<VECTOR>cellCenterWorldPoss_;
 
 	// 再生成フラグ(壊されて形状が変化した時など)
 	bool regeneration_;

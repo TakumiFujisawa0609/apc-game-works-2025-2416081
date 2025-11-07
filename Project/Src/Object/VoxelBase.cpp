@@ -401,7 +401,8 @@ void VoxelBase::BuildGreedyMesh(
     flush();
 
 	// 生存しているセル中心位置リストを作成
-    cellCenterPoss_.clear();
+    cellCenterPoss_.clear(); cellCenterPoss_.reserve(500);
+    cellCenterWorldPoss_.clear(); cellCenterWorldPoss_.reserve(500);
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)
             for (int x = 0; x < Nx; ++x) {
@@ -412,6 +413,7 @@ void VoxelBase::BuildGreedyMesh(
                     (z - Nz / 2) * cell
                 };
                 cellCenterPoss_.push_back(lp);
+                cellCenterWorldPoss_.push_back(VAdd(lp, unit_.pos_));
 			}
 
 	// 生存比率を計算して、一定以下なら死滅扱いにする
