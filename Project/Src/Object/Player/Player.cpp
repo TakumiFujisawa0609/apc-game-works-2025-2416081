@@ -466,21 +466,14 @@ void Player::Gouge(void)
 	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
 		if (anime_->GetAnimeRatio() > 0.25f) {
 			if (gouge_->Gouge()) {
-				throwing_->Carry(THROW_TYPE::ROCK);
 				state_ = STATE::CARRY_OBJ;
-
+				throwing_->Carry(THROW_TYPE::ROCK);
 			}
 			else {
 				state_ = STATE::MOVE;
 				anime_->Play((int)ANIME_TYPE::IDLE);
-
 			}
 		}
-
-		//if (gouge_->ObjectGouge()) {
-		//}
-		//if (gouge_->GetUnit().isAlive_ == false) {
-		//}
 	}
 	else {
 		gouge_->Off();
