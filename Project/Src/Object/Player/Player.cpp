@@ -37,7 +37,7 @@ void Player::Load(void)
 	unit_.para_.colliType = CollisionType::ALLY;
 	unit_.para_.colliShape = CollisionShape::CAPSULE;
 	unit_.para_.size = VScale(SIZE,SCALE);
-	unit_.para_.radius = (SIZE.z * SCALE) * 0.75f;
+	unit_.para_.radius = (SIZE.z * SCALE) * 0.5f;
 	unit_.para_.capsuleHalfLen = (unit_.para_.size.y / 2) - unit_.para_.radius;
 
 	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
@@ -178,44 +178,16 @@ void Player::Draw(void)
 
 	SubDraw();
 
-	//if (state_ == STATE::CARRY_OBJ) {
-	//	Utility::MV1ModelMatrix(carryModel_, VAdd(unit_.WorldPos(), VTransform(CARRY_OBJ_LOCAL_POS, Utility::MatrixAllMultY({ unit_.angle_ }))), { unit_.angle_ });
-	//	MV1DrawModel(carryModel_);
-	//}
-
-	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
+	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), VTransform(CENTER_DIFF, MGetRotY(unit_.angle_.y))), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
 
-
 	// デバッグ用に当たり判定の表示
+	VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
-	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-
-	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
-
-	//DrawCapsule3D(
-	//	VSub(unit_.WorldPos(), localPos),
-	//	VAdd(unit_.WorldPos(), localPos),
-	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
-
-	//DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
-
-	//VECTOR debugPos[8] =
-	//{
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
-	//};
-	//for (int i = 0; i < 8; i++) {
-	//	DrawSphere3D(debugPos[i], 3.0f, 4, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
-	//}
-
-	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	DrawCapsule3D(
+		VSub(unit_.WorldPos(), localPos),
+		VAdd(unit_.WorldPos(), localPos),
+		unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
 }
 
 void Player::UiDraw(void)

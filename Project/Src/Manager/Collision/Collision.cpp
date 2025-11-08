@@ -5,6 +5,8 @@
 #include"../../Utility/Utility.h"
 #include"CollisionUtility.h"
 
+#include"../../Object/Stage/Block/Block.h"
+
 std::vector<UnitBase*> Collision::dynamicPlayerObjects_ = {};
 std::vector<UnitBase*> Collision::dynamicEnemyObjects_ = {};
 std::vector<UnitBase*> Collision::playerObjects_ = {};
@@ -403,6 +405,39 @@ void Collision::Check()
             }
         }
     }
+}
+
+bool Collision::IsStageCollision(const VECTOR& pos, float radius)
+{
+    for (const auto& sObj : stageObject_) {
+        if (sObj->GetUnit().isAlive_ == false) { continue; }
+        if (!dynamic_cast<Block*>(sObj)) { continue; }
+        Base s = sObj->GetUnit();
+        if (Cfunc::SphereAabb(pos, radius, s.WorldPos(), s.para_.size)) { return true; }
+    }
+    return false;
+}
+
+bool Collision::IsStageCollision(const VECTOR& pos, const VECTOR& size)
+{
+    for (const auto& sObj : stageObject_) {
+        if (sObj->GetUnit().isAlive_ == false) { continue; }
+        if (!dynamic_cast<Block*>(sObj)) { continue; }
+        Base s = sObj->GetUnit();
+        if (Cfunc::Aabb(pos, size, s.WorldPos(), s.para_.size)) { return true; }
+    }
+    return false;
+}
+
+bool Collision::IsStageCollision(const VECTOR& pos, float halfLen, float radius)
+{
+    for (const auto& sObj : stageObject_) {
+        if (sObj->GetUnit().isAlive_ == false) { continue; }
+        if (!dynamic_cast<Block*>(sObj)) { continue; }
+        Base s = sObj->GetUnit();
+        if (Cfunc::CapsuleAabb_Y(pos, halfLen, radius, s.WorldPos(), s.para_.size)) { return true; }
+    }
+    return false;
 }
 
 bool Collision::ResolvePair(UnitBase* mover, UnitBase* stage)

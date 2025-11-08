@@ -1,10 +1,15 @@
 #include"Fall.h"
 
 #include"../../../../Manager/Sound/SoundManager.h"
+#include"../../../../Manager/Collision/Collision.h"
 
 #include"../../../Player/Player.h"
 
-Fall::Fall()
+Fall::Fall():
+	state_(),
+
+	idleCounter_(),
+	groundHeight_()
 {
 }
 
@@ -15,7 +20,7 @@ Fall::~Fall()
 void Fall::Load(void)
 {
 	unit_.para_.colliShape = CollisionShape::SPHERE;
-	unit_.para_.radius = 150.0f;
+	unit_.para_.radius = 130.0f;
 
 	unit_.para_.speed = 30.0f;
 }
@@ -49,7 +54,7 @@ void Fall::Draw(void)
 
 	if (state_ == STATE::IDLE && idleCounter_ / 10 % 2 == 0) {
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-		DrawSphere3D({ unit_.pos_.x,500.0f,unit_.pos_.z }, unit_.para_.radius, 4, 0xff0000, 0xff0000, true);
+		DrawSphere3D({ unit_.pos_.x,groundHeight_,unit_.pos_.z }, unit_.para_.radius * 1.3f, 4, 0xff0000, 0xff0000, true);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
 
@@ -78,4 +83,18 @@ void Fall::On(const VECTOR& pos)
 	idleCounter_ = 0;
 	state_ = STATE::IDLE;
 	unit_.isAlive_ = true;
+	groundHeight_ = 0.0f;
+
+	for (int i = 0; i < 10000; i += 10) {
+
+		VECTOR work = unit_.pos_;
+		work.y -= (float)i;
+
+		if (Collision::IsStageCollision(work, unit_.para_.radius)) {
+
+			groundHeight_ = work.y - unit_.para_.radius * 1.75f;
+			break;
+		}
+	}
+
 }

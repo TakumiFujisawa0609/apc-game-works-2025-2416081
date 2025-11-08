@@ -16,7 +16,7 @@ public:
 
 	void OnCollision(UnitBase* other)override;
 
-	int GetState(void)const { return (int)state_; }
+	int GetState(void)const override { return (int)state_; }
 
 	enum class STATE
 	{
@@ -64,7 +64,4 @@ private:
 	
 	//Å`Å`Å`Å`Å`Å`Å`Å`Å`
 #pragma endregion
-
-
-	bool nowFrameMove_;
 };

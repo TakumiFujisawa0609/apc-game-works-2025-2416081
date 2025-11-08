@@ -31,4 +31,6 @@ private:
 	
 	const int IDLE_TIME = 150;
 	int idleCounter_;
+
+	float groundHeight_;
 };

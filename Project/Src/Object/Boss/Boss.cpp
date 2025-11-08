@@ -318,6 +318,7 @@ void Boss::Death(void)
 Boss::ATTACK_KINDS Boss::AttackLottery(void)
 {
 	return ATTACK_KINDS::WALL;
+	//return ATTACK_KINDS::FALL;
 
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 

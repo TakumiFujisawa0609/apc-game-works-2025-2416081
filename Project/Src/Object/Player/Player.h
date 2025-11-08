@@ -15,7 +15,7 @@ public:
 	static constexpr float SCALE = 2.5f;
 	//static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
 	static constexpr VECTOR SIZE = { 25.0f,70.0f,35.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f, ((SIZE.y / 2) * SCALE), 0.0f };
+	static constexpr VECTOR CENTER_DIFF = { 0.0f, ((SIZE.y / 2) * SCALE), 15.0f };
 
 
 

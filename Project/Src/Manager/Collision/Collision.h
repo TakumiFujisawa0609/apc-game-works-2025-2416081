@@ -41,6 +41,11 @@ public:
 
 	void SetResolveIters(int n) { resolveIters_ = (n < 1 ? 1 : n); }
 
+	
+	static bool IsStageCollision(const VECTOR& pos, float radius);
+	static bool IsStageCollision(const VECTOR& pos, const VECTOR& size);
+	static bool IsStageCollision(const VECTOR& pos, float harlLen, float radius);
+
 private:
 	// ‰Ÿ‚µ–ß‚µ‚ª•K—v‚È‚à‚Ì`````````````
 	static std::vector<UnitBase*> dynamicPlayerObjects_;

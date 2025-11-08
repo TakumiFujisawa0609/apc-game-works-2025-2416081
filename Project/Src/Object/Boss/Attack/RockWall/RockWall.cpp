@@ -6,6 +6,7 @@
 
 #include"../../../../Manager/Sound/SoundManager.h"
 #include"../../../../Manager/Collision/CollisionUtility.h"
+#include"../../../../Manager/Collision/Collision.h"
 
 #include"../../../../Scene/Game/GameScene.h"
 
@@ -17,7 +18,7 @@ RockWall::RockWall():
     state_(STATE::NON),
     stateFuncPtr(),
 
-    nowFrameMove_(true)
+    createIdleCounter_()
 {
 }
 
@@ -66,8 +67,6 @@ void RockWall::SubLoad(void)
 
 void RockWall::SubInit(void)
 {
-    nowFrameMove_ = true;
-
     unit_.isAlive_ = true;
 }
 
@@ -89,7 +88,7 @@ void RockWall::Move(void)
 {
     unit_.pos_.y += MOVE_SPEED;
 
-    if (unit_.pos_.y > 400.0f) { state_ = STATE::BE; }
+    if (Collision::IsStageCollision(unit_.pos_, unit_.para_.size.y / 4) == false) { state_ = STATE::BE; }
 }
 
 void RockWall::Be(void)
@@ -105,9 +104,9 @@ void RockWall::OnCollision(UnitBase* other)
         }
         };
 
-    if (dynamic_cast<PlayerPunch*>(other)) { apply(200, true); return; }
+    if (dynamic_cast<PlayerPunch*>(other)) { apply(255, true); return; }
     if (dynamic_cast<PlayerGouge*>(other)) { apply(255, true); return; }
-    if (dynamic_cast<ThrowObjBase*>(other)) { apply(200, true); return; }
+    if (dynamic_cast<ThrowObjBase*>(other)) { apply(255, true); return; }
     if (dynamic_cast<Stone*>(other)) { apply(200, true); return; }
     if (dynamic_cast<Fall*>(other)) { apply(200, true); return; }
 }
