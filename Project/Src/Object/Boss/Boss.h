@@ -45,7 +45,7 @@ public:
 
 
 
-	static constexpr int HP_MAX = 300;
+	static constexpr int HP_MAX = 100;
 
 
 private:
@@ -108,12 +108,20 @@ private:
 
 	// UŒ‚‘JˆÚŒã1‰ñ–Ú‚ğŒ©•ª‚¯‚é•Ï”
 	bool attackInit_;
+	// UŒ‚ŠJn‚ÌuŠÔ‚ğŒ©•ª‚¯‚é•Ï”
+	bool attackStart_;
 	// UŒ‚I—¹‚ğŒ©•ª‚¯‚é•Ï”
 	bool attackEnd_;
 
 	const int SP_ATTACK_MEASU = 5;
 	int spAttackMeasu_;
 	// `````````````````````````
+
+	// UŒ‚ó‘Ô`````````````````````
+	const int STAN_TIME = 500;
+	int stanTimer_;
+	// `````````````````````````
+
 
 #pragma endregion
 
@@ -124,11 +132,14 @@ private:
 	// ƒ‚[ƒVƒ‡ƒ“‚Ì‘S‚Ä
 	enum class ANIME_TYPE {
 		ATTACK,
-		DEATH,
 		DAMAGE,
+		DEATH,
 		IDLE,
 		JUMP,
+		PUNCH,
 		RUN,
+		SLAP,
+		STAN,
 		WALK,
 
 		MAX,
@@ -149,7 +160,11 @@ private:
 	void SubRelease(void);
 #pragma endregion
 
+	const int MASTER_LIFE = 3;
+	int masterLife_;
+
 	void HpSharpen(int damage);
+	void LifeSharpen(void);
 
 	std::vector<COLOR_F> DEFAULT_COLOR;
 

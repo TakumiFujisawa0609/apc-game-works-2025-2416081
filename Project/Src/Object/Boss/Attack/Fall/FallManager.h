@@ -15,6 +15,7 @@ public:
 	void Draw(void);
 	void Release(void);
 
+	void Set(void);
 	void On(void);
 
 private:

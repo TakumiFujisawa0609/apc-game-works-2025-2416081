@@ -14,12 +14,13 @@
 #include"../Stone/Stone.h"
 #include"../Fall/Fall.h"
 
-RockWall::RockWall():
+RockWall::RockWall(int textureId) :
     state_(STATE::NON),
     stateFuncPtr(),
 
     createIdleCounter_()
 {
+    textureId_ = textureId;
 }
 
 void RockWall::On(const VECTOR& pos)
@@ -36,7 +37,7 @@ void RockWall::On(const VECTOR& pos)
 
 void RockWall::SubLoad(void)
 {
-    Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
+    //Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
 
     unit_.para_.colliShape = CollisionShape::AABB;
 

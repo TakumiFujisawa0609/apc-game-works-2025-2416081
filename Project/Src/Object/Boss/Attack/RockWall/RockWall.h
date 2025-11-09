@@ -11,7 +11,7 @@ public:
 	static constexpr VECTOR SIZE = { 250.0f, 293.0f, 325.0f };
 	static constexpr VECTOR CENTER_DIFF = { -10.0f, SIZE.y / 2 - 10.0f, 0.0f };
 
-	RockWall();
+	RockWall(int textureId);
 	~RockWall()override {};
 
 	void OnCollision(UnitBase* other)override;

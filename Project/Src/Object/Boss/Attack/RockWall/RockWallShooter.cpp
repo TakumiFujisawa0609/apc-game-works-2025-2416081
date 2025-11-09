@@ -4,7 +4,9 @@
 
 RockWallShooter::RockWallShooter(const VECTOR& bossPos, const VECTOR& bossAngle) :
 	bossPos(bossPos),
-	bossAngle(bossAngle)
+	bossAngle(bossAngle),
+
+	textureId_(-1)
 {
 }
 
@@ -14,6 +16,8 @@ RockWallShooter::~RockWallShooter()
 
 void RockWallShooter::Load(void)
 {
+	Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
+
 	walls_.reserve(CREATE_WALL_NUM * 5);
 }
 
@@ -65,7 +69,7 @@ void RockWallShooter::On(void)
 
 		if (recycle) { continue; }
 
-		walls_.emplace_back(new RockWall());
+		walls_.emplace_back(new RockWall(textureId_));
 		walls_.back()->Load();
 		walls_.back()->Init();
 		walls_.back()->On(pos);

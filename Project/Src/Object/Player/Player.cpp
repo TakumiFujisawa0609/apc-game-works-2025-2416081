@@ -182,12 +182,12 @@ void Player::Draw(void)
 	MV1DrawModel(unit_.model_);
 
 	// デバッグ用に当たり判定の表示
-	VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
+	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
 
-	DrawCapsule3D(
-		VSub(unit_.WorldPos(), localPos),
-		VAdd(unit_.WorldPos(), localPos),
-		unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
+	//DrawCapsule3D(
+	//	VSub(unit_.WorldPos(), localPos),
+	//	VAdd(unit_.WorldPos(), localPos),
+	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
 }
 
 void Player::UiDraw(void)

@@ -77,7 +77,7 @@ void Fall::OnCollision(UnitBase* other)
 	}
 }
 
-void Fall::On(const VECTOR& pos)
+void Fall::Set(const VECTOR& pos)
 {
 	unit_.pos_ = pos;
 	idleCounter_ = 0;
@@ -96,5 +96,4 @@ void Fall::On(const VECTOR& pos)
 			break;
 		}
 	}
-
 }

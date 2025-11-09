@@ -16,8 +16,6 @@ public:
 
 	void OnCollision(UnitBase* other)override;
 
-	void On(const VECTOR& pos);
-
 	enum class STATE
 	{
 		IDLE,
@@ -26,10 +24,15 @@ public:
 		MAX
 	};
 
+	void Set(const VECTOR& pos);
+	void On(void) { state_ = STATE::FALL; }
+
+	int GetState(void)const override { return (int)state_; }
+
 private:
 	STATE state_;
 	
-	const int IDLE_TIME = 150;
+	const int IDLE_TIME = 1000;
 	int idleCounter_;
 
 	float groundHeight_;

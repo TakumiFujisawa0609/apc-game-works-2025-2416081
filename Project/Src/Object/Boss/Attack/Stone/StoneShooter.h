@@ -6,7 +6,7 @@
 class StoneShooter
 {
 public:
-	static constexpr int ONE_SHOT_NUM = 5;
+	static constexpr int ONE_SHOT_NUM = 3;
 
 	StoneShooter(const VECTOR& bossPos, const VECTOR& bossAngle);
 	~StoneShooter();

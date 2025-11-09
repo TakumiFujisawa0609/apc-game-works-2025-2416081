@@ -146,6 +146,8 @@
     <ClCompile Include="Src\Manager\Sound\SoundManager.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Fall\Fall.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Fall\FallManager.cpp" />
+    <ClCompile Include="Src\Object\Boss\Attack\PsychoRock\PsychoRock.cpp" />
+    <ClCompile Include="Src\Object\Boss\Attack\PsychoRock\PsychoRockShooter.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Stone\Stone.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Stone\StoneShooter.cpp" />
@@ -184,6 +186,8 @@
     <ClInclude Include="Src\Manager\Sound\SoundManager.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Fall\Fall.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Fall\FallManager.h" />
+    <ClInclude Include="Src\Object\Boss\Attack\PsychoRock\PsychoRock.h" />
+    <ClInclude Include="Src\Object\Boss\Attack\PsychoRock\PsychoRockShooter.h" />
     <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Stone\Stone.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Stone\StoneShooter.h" />

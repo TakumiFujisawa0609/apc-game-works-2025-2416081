@@ -51,14 +51,14 @@ void FallManager::Release(void)
 
 }
 
-void FallManager::On(void)
+void FallManager::Set(void)
 {
 	VECTOR pos = VAdd(playerPos, LOCAL_POS);
 
 
 	for (auto& fall : falls_) {
 		if (fall->GetUnit().isAlive_ == false) {
-			fall->On(pos);
+			fall->Set(pos);
 			return;
 		}
 	}
@@ -67,7 +67,16 @@ void FallManager::On(void)
 	falls_.back()->ModelLoad(model);
 	falls_.back()->Load();
 	falls_.back()->Init();
-	falls_.back()->On(pos);
+	falls_.back()->Set(pos);
 
 	Collision::AddEnemy(falls_.back());
+}
+
+void FallManager::On(void)
+{
+	for (auto& fall : falls_) {
+		if (fall->GetState() == (int)Fall::STATE::IDLE) {
+			fall->On();
+		}
+	}
 }

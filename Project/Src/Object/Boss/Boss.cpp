@@ -15,10 +15,16 @@ Boss::Boss(const VECTOR& playerPos):
 	rockWall_(nullptr),
 	stone_(nullptr),
 	fall_(nullptr),
+
 	attackInterval_(0),
 	attackInit_(false),
+	attackStart_(false),
 	attackEnd_(false),
 	spAttackMeasu_(0),
+
+	stanTimer_(0),
+
+	masterLife_(0),
 
 	anime_(nullptr),
 
@@ -84,9 +90,12 @@ void Boss::Init(void)
 
 	unit_.isAlive_ = true;
 
+	masterLife_ = MASTER_LIFE;
 	unit_.hp_ = HP_MAX;
 
 	attackInterval_ = ATTACK_INTERVAL;
+
+	stanTimer_ = 0;
 
 	// Bossクラスが抱える子クラスの初期化処理
 	SubInit();
@@ -202,17 +211,11 @@ void Boss::Release(void)
 void Boss::OnCollision(UnitBase* other)
 {
 	if (state_ == STATE::STAN) {
-		if (dynamic_cast<PlayerPunch*>(other) ||
-			dynamic_cast<ThrowObjBase*>(other)
-			) {
+		if (dynamic_cast<PlayerPunch*>(other)) {
 			GameScene::Shake();
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 
-			HpSharpen(50);
-			VECTOR vec = VSub(playerPos, unit_.pos_);
-			unit_.angle_.y = atan2f(vec.x, vec.z);
-			state_ = STATE::BIG_DAMAGE;
-			anime_->Play((int)ANIME_TYPE::DEATH, false);
+			LifeSharpen();
 			return;
 		}
 	}
@@ -237,17 +240,18 @@ void Boss::Idle(void)
 
 	if (--attackInterval_ <= 0) {
 		attackInterval_ = 0;
-		attackInit_ = false;
+		attackInit_ = true;
 		state_ = STATE::ATTACK;
-		anime_->Play((int)ANIME_TYPE::ATTACK, false);
+		//anime_->Play((int)ANIME_TYPE::PUNCH, false);
 	}
 }
 void Boss::Attack(void)
 {
 #pragma region 攻撃状態へ遷移後 １回目の処理
-	if (!attackInit_) {
+	if (attackInit_) {
 		attackInterval_ = ATTACK_INTERVAL;
-		attackInit_ = true;
+		attackInit_ = false;
+		attackStart_ = true;
 		attackEnd_ = false;
 
 		attackState_ = AttackLottery();
@@ -257,13 +261,45 @@ void Boss::Attack(void)
 			attackEnd_ = true;
 			break;
 		case Boss::ATTACK_KINDS::FALL:
-			fall_->On();
+			anime_->Play((int)ANIME_TYPE::SLAP, false);
+			fall_->Set();
 			break;
 		case Boss::ATTACK_KINDS::STONE:
-			stone_->On();
+			anime_->Play((int)ANIME_TYPE::PUNCH, false);
 			break;
 		case Boss::ATTACK_KINDS::WALL:
-			rockWall_->On();
+			anime_->Play((int)ANIME_TYPE::SLAP, false);
+			break;
+		}
+	}
+#pragma endregion
+#pragma region 攻撃開始の処理
+	if (attackStart_) {
+		switch (attackState_)
+		{
+		case Boss::ATTACK_KINDS::NON:
+			attackStart_ = false;
+			break;
+		case Boss::ATTACK_KINDS::FALL:
+			if (anime_->GetAnimEnd()) {
+				attackStart_ = false;
+				fall_->On();
+			}
+			else { return; }
+			break;
+		case Boss::ATTACK_KINDS::STONE:
+			if (anime_->GetAnimEnd()) {
+				attackStart_ = false;
+				stone_->On();
+			}
+			else { return; }
+			break;
+		case Boss::ATTACK_KINDS::WALL:
+			if (anime_->GetAnimEnd()) {
+				attackStart_ = false;
+				rockWall_->On();
+			}
+			else { return; }
 			break;
 		}
 	}
@@ -299,11 +335,15 @@ void Boss::Damage(void)
 }
 void Boss::Stan(void)
 {
-
+	if (--stanTimer_ <= 0) {
+		unit_.hp_ = (int)(HP_MAX * 0.1f);
+		state_ = STATE::IDLE;
+	}
 }
 void Boss::BigDamage(void)
 {
-	if (anime_->GetAnimeRatio() > 0.6f) {
+	if (anime_->GetAnimeRatio() > 0.4f) {
+		unit_.hp_ = HP_MAX;
 		state_ = STATE::IDLE;
 		anime_->Play((int)ANIME_TYPE::IDLE);
 	}
@@ -317,8 +357,9 @@ void Boss::Death(void)
 
 Boss::ATTACK_KINDS Boss::AttackLottery(void)
 {
-	return ATTACK_KINDS::WALL;
+	//return ATTACK_KINDS::WALL;
 	//return ATTACK_KINDS::FALL;
+	//return ATTACK_KINDS::STONE;
 
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 
@@ -344,8 +385,8 @@ void Boss::AnimeLoad(void)
 		anime_->AddInFbx(i, 30.0f, i);
 	}
 
-	const std::string ANIME_PATH = "Data/Model/Boss/Animation/";
-	//anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "Fall.mv1").c_str());
+	const std::string ANIME_PATH = "Data/Model/Player/Animation/";
+	anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
 }
 
 
@@ -401,24 +442,54 @@ void Boss::HpSharpen(int damage)
 {
 	if (unit_.hp_ <= 0) { return; }
 
-	bool halfOn = false;
-	if ((float)unit_.hp_ / (float)HP_MAX >= 0.5f) { halfOn = true; }
-
 	unit_.hp_ -= damage;
 
 	if (unit_.hp_ <= 0) {
 		unit_.hp_ = 0;
+
+		unit_.inviciCounter_ = 60;
+
+		stanTimer_ = STAN_TIME;
+
+		state_ = STATE::STAN;
+		anime_->Play((int)ANIME_TYPE::STAN);
+		return;
+	}
+
+	if (state_ != STATE::ATTACK) {
+		stanTimer_ = STAN_TIME;
+
+		state_ = STATE::DAMAGE;
+		anime_->Play((int)ANIME_TYPE::DAMAGE, false);
+	}
+	unit_.inviciCounter_ = 60;
+
+
+
+	//bool halfOn = false;
+	//if ((float)unit_.hp_ / (float)HP_MAX >= 0.5f) { halfOn = true; }
+
+	//if (halfOn && (((float)unit_.hp_ / (float)HP_MAX) < 0.5f)) {
+	//	state_ = STATE::STAN;
+	//	anime_->Play((int)ANIME_TYPE::STAN);
+	//	unit_.inviciCounter_ = 60;
+	//	return;
+	//}
+}
+void Boss::LifeSharpen(void)
+{
+	if (masterLife_ <= 0) { return; }
+
+	if (--masterLife_ <= 0) {
+		masterLife_ = 0;
 		state_ = STATE::DEATH;
 		anime_->Play((int)ANIME_TYPE::DEATH, false);
 		return;
 	}
 
-	state_ = STATE::DAMAGE;
-	anime_->Play((int)ANIME_TYPE::DAMAGE, false);
-	unit_.inviciCounter_ = 60;
+	VECTOR vec = VSub(playerPos, unit_.pos_);
+	unit_.angle_.y = atan2f(vec.x, vec.z);
 
-	if (halfOn && (((float)unit_.hp_ / (float)HP_MAX) < 0.5f)) {
-		state_ = STATE::STAN;
-		anime_->Play((int)ANIME_TYPE::DEATH, false);
-	}
+	state_ = STATE::BIG_DAMAGE;
+	anime_->Play((int)ANIME_TYPE::DEATH, false);
 }
