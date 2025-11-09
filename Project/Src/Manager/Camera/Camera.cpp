@@ -48,11 +48,15 @@ void Camera::Apply(void)
 {
 	// クリップ距離を設定する(SetDrawScreenでリセットされる)
 	SetCameraNearFar(VIEW_NEAR, VIEW_FAR);
+	static float x = 0.0f;
+	x += 0.005f;
 
 	// カメラの設定(位置と角度による制御)
 	switch (mode_)
 	{
 	case Camera::MODE::FIXED_POINT:
+		SetCameraPositionAndAngle({ 0.0f,0.0f,0.0f }, x, 0.0f, 0.0f);
+		break;
 	case Camera::MODE::FREE:
 		SetCameraPositionAndAngle(
 			pos_,

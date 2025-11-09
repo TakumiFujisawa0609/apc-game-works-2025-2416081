@@ -160,6 +160,7 @@
     <ClCompile Include="Src\Object\Player\Throwing\Throwing.cpp" />
     <ClCompile Include="Src\Object\Player\Throwing\ThrowObjBase.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWall.cpp" />
+    <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\Block.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\BlockManager.cpp" />
     <ClCompile Include="Src\Object\UnitBase.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="Src\Object\Player\Throwing\Throwing.h" />
     <ClInclude Include="Src\Object\Player\Throwing\ThrowObjBase.h" />
     <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWall.h" />
+    <ClInclude Include="Src\Object\SkyDome\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage\Block\Block.h" />
     <ClInclude Include="Src\Object\Stage\Block\BlockManager.h" />
     <ClInclude Include="Src\Object\UnitBase.h" />

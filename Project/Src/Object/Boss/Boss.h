@@ -108,10 +108,10 @@ private:
 	int attackInterval_;
 	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
 	{
-		300,//FALL
-		300,//STONE
-		300,//PSYCHO
-		300,//WALL
+		150,//FALL
+		150,//STONE
+		200,//PSYCHO
+		100,//WALL
 	};
 
 	// UŒ‚‘JˆÚŒã1‰ñ–Ú‚ğŒ©•ª‚¯‚é•Ï”
