@@ -10,6 +10,7 @@
 
 #include"../../Boss/Attack/Stone/Stone.h"
 #include"../../Boss/Attack/Fall/Fall.h"
+#include"../../Boss/Attack/PsychoRock/PsychoRock.h"
 
 Block::Block(void)
 {
@@ -131,4 +132,5 @@ void Block::OnCollision(UnitBase* other)
 	if (dynamic_cast<ThrowObjBase*>(other)) { apply(200, true); return; }
 	if (dynamic_cast<Stone*>(other)) { apply(200, true); return; }
 	if (dynamic_cast<Fall*>(other)) { apply(200, true); return; }
+	if (dynamic_cast<PsychoRock*>(other)) { apply(200, true); return; }
 }

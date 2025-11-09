@@ -11,8 +11,8 @@
 #include"../../../../Scene/Game/GameScene.h"
 
 #include"../../../Player/Player.h"
-#include"../Stone/Stone.h"
-#include"../Fall/Fall.h"
+
+#include"../../../Boss/Boss.h"
 
 RockWall::RockWall(int textureId) :
     state_(STATE::NON),
@@ -110,4 +110,5 @@ void RockWall::OnCollision(UnitBase* other)
     if (dynamic_cast<ThrowObjBase*>(other)) { apply(255, true); return; }
     if (dynamic_cast<Stone*>(other)) { apply(200, true); return; }
     if (dynamic_cast<Fall*>(other)) { apply(200, true); return; }
+    if (dynamic_cast<PsychoRock*>(other)) { apply(200, true); return; }
 }

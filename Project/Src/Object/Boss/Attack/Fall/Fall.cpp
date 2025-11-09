@@ -5,12 +5,13 @@
 
 #include"../../../Player/Player.h"
 
-Fall::Fall():
+Fall::Fall(int model):
 	state_(),
 
 	idleCounter_(),
 	groundHeight_()
 {
+	unit_.model_ = MV1DuplicateModel(model);
 }
 
 Fall::~Fall()
@@ -19,8 +20,10 @@ Fall::~Fall()
 
 void Fall::Load(void)
 {
+	MV1SetScale(unit_.model_, Utility::FtoV(2.0f));
+
 	unit_.para_.colliShape = CollisionShape::SPHERE;
-	unit_.para_.radius = 130.0f;
+	unit_.para_.radius = 190.0f;
 
 	unit_.para_.speed = 30.0f;
 }

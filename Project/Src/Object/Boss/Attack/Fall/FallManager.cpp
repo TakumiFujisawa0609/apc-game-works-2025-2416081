@@ -19,7 +19,6 @@ FallManager::~FallManager()
 void FallManager::Load(void)
 {
 	model = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
-	MV1SetScale(model, { 2.0f,2.0f,2.0f });
 
 	falls_.reserve(3);
 }
@@ -63,8 +62,7 @@ void FallManager::Set(void)
 		}
 	}
 
-	falls_.emplace_back(new Fall());
-	falls_.back()->ModelLoad(model);
+	falls_.emplace_back(new Fall(model));
 	falls_.back()->Load();
 	falls_.back()->Init();
 	falls_.back()->Set(pos);

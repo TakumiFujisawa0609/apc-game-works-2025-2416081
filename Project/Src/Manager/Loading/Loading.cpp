@@ -9,10 +9,7 @@ Loading* Loading::instance_ = nullptr;
 
 // コンストラクタ
 Loading::Loading()
-	: handle_()
-	, posX_(0)
-	, posY_(0)
-	, isLoading_(false)
+	: isLoading_(false)
 	, loadTimer_(0)
 	, animInterval_()
 	, animCounter_()
@@ -27,8 +24,6 @@ void Loading::Init(void)
 {
 	loadTimer_ = 0;
 	isLoading_ = false;
-	posX_ = Application::SCREEN_SIZE_X / 2;
-	posY_ = Application::SCREEN_SIZE_Y / 2;
 
 	animCounter_ = 0;
 	animInterval_ = 0;
@@ -55,9 +50,9 @@ void Loading::Update(void)
 	else
 	{
 		// ロード画面を動作させるならここに記述
-		if (++animInterval_ >= 5) {
+		if (++animInterval_ >= 10) {
 			animInterval_ = 0;
-			if (++animCounter_ >= 7) {
+			if (++animCounter_ >= 4) {
 				animCounter_ = 0;
 			}
 		}
@@ -67,19 +62,24 @@ void Loading::Update(void)
 // 描画
 void Loading::Draw(void)
 {
-	DrawRotaGraph(
-		posX_, posY_,				// 座標
-		1.0f,						// 拡大値
-		0.0f,						// 回転値
-		handle_[animCounter_],		// ハンドル
-		true						// 透過フラグ
-	);
+	using app = Application;
+	int xx = app::SCREEN_SIZE_X;
+	int yy = app::SCREEN_SIZE_Y;
+	int x = xx / 2;
+	int y = yy / 2;
+
+	DrawBox(0, 0, xx, yy, 0x000000, true);
+	std::string st = "Loading";
+	for (int i = 0; i < animCounter_; i++) { st += "."; }
+	int fontSize = 45;
+	SetFontSize(fontSize);
+	DrawString(xx - fontSize * 6, yy - fontSize, st.c_str(), 0xffffff);
+	SetFontSize(16);
 }
 
 // 解放
 void Loading::Release(void)
 {
-	for (auto& id : handle_) { DeleteGraph(id); }
 }
 
 // 非同期読み込みに切り替える

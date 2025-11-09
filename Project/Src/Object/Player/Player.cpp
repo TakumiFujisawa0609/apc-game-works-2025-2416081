@@ -257,6 +257,15 @@ void Player::OnCollision(UnitBase* other)
 		};
 
 	if (dynamic_cast<Boss*>(other)) {
+		if (
+			other->GetState() == (int)Boss::STATE::STAN ||
+			other->GetState() == (int)Boss::STATE::DAMAGE ||
+			other->GetState() == (int)Boss::STATE::BIG_DAMAGE ||
+			other->GetState() == (int)Boss::STATE::DEATH
+			) {
+			unit_.inviciCounter_ = 60;
+			return;
+		}
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
 		GameScene::Slow(20);
 
@@ -273,6 +282,14 @@ void Player::OnCollision(UnitBase* other)
 		return;
 	}
 	if (dynamic_cast<Fall*>(other)) {
+		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
+		GameScene::Slow(20);
+
+		knockBack(other->GetUnit().pos_);
+		HpSharpen(10);
+		return;
+	}
+	if (dynamic_cast<PsychoRock*>(other)) {
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
 		GameScene::Slow(20);
 

@@ -16,7 +16,8 @@ Stone::~Stone()
 void Stone::Load(void)
 {
 	unit_.para_.colliShape = CollisionShape::SPHERE;
-	unit_.para_.radius = 70.0f;
+	unit_.para_.radius = 100.0f;
+	MV1SetScale(unit_.model_, Utility::FtoV(1.3f));
 
 	unit_.para_.speed = 30.0f;
 }
@@ -66,8 +67,7 @@ void Stone::OnCollision(UnitBase* other)
 {
 	if (
 		dynamic_cast<Player*>(other) ||
-		dynamic_cast<PlayerPunch*>(other) ||
-		dynamic_cast<ThrowObjBase*>(other)
+		dynamic_cast<PlayerPunch*>(other)
 		) {
 		unit_.isAlive_ = false;
 	}

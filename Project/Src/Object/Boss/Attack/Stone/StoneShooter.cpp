@@ -19,7 +19,6 @@ void StoneShooter::Load(void)
 	stones_.reserve(ONE_SHOT_NUM * 2);
 
 	model_ = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
-	MV1SetScale(model_, { 0.3f,0.3f,0.3f });
 }
 
 void StoneShooter::Init(void)

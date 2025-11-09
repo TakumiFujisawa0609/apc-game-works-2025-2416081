@@ -4,9 +4,10 @@
 
 #include"../../Manager/AnimationController/AnimationController.h"
 
-#include"Attack/RockWall/RockWallShooter.h"
-#include"Attack/Stone/StoneShooter.h"
 #include"Attack/Fall/FallManager.h"
+#include"Attack/Stone/StoneShooter.h"
+#include"Attack/PsychoRock/PsychoRockShooter.h"
+#include"Attack/RockWall/RockWallShooter.h"
 
 class Boss : public UnitBase
 {
@@ -45,7 +46,7 @@ public:
 
 
 
-	static constexpr int HP_MAX = 100;
+	static constexpr int HP_MAX = 200;
 
 
 private:
@@ -86,7 +87,7 @@ private:
 
 		FALL,
 		STONE,
-
+		PSYCHO,
 		WALL,
 
 		MAX,
@@ -97,14 +98,21 @@ private:
 	ATTACK_KINDS AttackLottery(void);
 
 	//各攻撃のインスタンス----
-	RockWallShooter* rockWall_;
-	StoneShooter* stone_;
 	FallManager* fall_;
+	StoneShooter* stone_;
+	PsychoRockShooter* psycho_;
+	RockWallShooter* rockWall_;
 	//------------------------
 
 	// 攻撃の間隔を管理するカウンター
 	int attackInterval_;
-	const int ATTACK_INTERVAL = 300;
+	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
+	{
+		300,//FALL
+		300,//STONE
+		300,//PSYCHO
+		300,//WALL
+	};
 
 	// 攻撃遷移後1回目を見分ける変数
 	bool attackInit_;

@@ -93,7 +93,7 @@ void Boss::Init(void)
 	masterLife_ = MASTER_LIFE;
 	unit_.hp_ = HP_MAX;
 
-	attackInterval_ = ATTACK_INTERVAL;
+	attackInterval_ = ATTACK_INTERVAL[1];
 
 	stanTimer_ = 0;
 
@@ -144,10 +144,6 @@ void Boss::Update(void)
 			MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
 		}
 	}
-
-	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) {
-		HpSharpen(100);
-	}
 }
 
 void Boss::Draw(void)
@@ -183,7 +179,6 @@ void Boss::UiDraw(void)
 
 	float dif = 20.0f;
 
-
 	Vector2 size = { Application::SCREEN_SIZE_X * 0.65,60.0f };
 	Vector2 sPos = { Application::SCREEN_SIZE_X - dif - size.x,dif };
 
@@ -197,7 +192,6 @@ void Boss::UiDraw(void)
 
 	size.x *= ((float)unit_.hp_ / (float)HP_MAX);
 	drawHpBar(sPos, size, 0xff0000);
-
 }
 
 void Boss::Release(void)
@@ -212,12 +206,14 @@ void Boss::OnCollision(UnitBase* other)
 {
 	if (state_ == STATE::STAN) {
 		if (dynamic_cast<PlayerPunch*>(other)) {
+			GameScene::Slow(20);
 			GameScene::Shake();
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
-
 			LifeSharpen();
 			return;
 		}
+
+		return;
 	}
 
 	if (dynamic_cast<ThrowObjBase*>(other)) {
@@ -225,9 +221,6 @@ void Boss::OnCollision(UnitBase* other)
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(30);
 		return;
-	}
-
-	if (const auto& player = dynamic_cast<Player*>(other)) {
 	}
 }
 
@@ -242,19 +235,19 @@ void Boss::Idle(void)
 		attackInterval_ = 0;
 		attackInit_ = true;
 		state_ = STATE::ATTACK;
-		//anime_->Play((int)ANIME_TYPE::PUNCH, false);
 	}
 }
 void Boss::Attack(void)
 {
 #pragma region UŒ‚ó‘Ô‚Ö‘JˆÚŒã ‚P‰ñ–Ú‚Ìˆ—
 	if (attackInit_) {
-		attackInterval_ = ATTACK_INTERVAL;
 		attackInit_ = false;
 		attackStart_ = true;
 		attackEnd_ = false;
 
 		attackState_ = AttackLottery();
+		if (attackState_ != ATTACK_KINDS::NON) { attackInterval_ = ATTACK_INTERVAL[(int)attackState_]; }
+
 		switch (attackState_)
 		{
 		case Boss::ATTACK_KINDS::NON:
@@ -266,6 +259,10 @@ void Boss::Attack(void)
 			break;
 		case Boss::ATTACK_KINDS::STONE:
 			anime_->Play((int)ANIME_TYPE::PUNCH, false);
+			break;
+		case Boss::ATTACK_KINDS::PSYCHO:
+			anime_->Play((int)ANIME_TYPE::SLAP, false);
+			psycho_->Set();
 			break;
 		case Boss::ATTACK_KINDS::WALL:
 			anime_->Play((int)ANIME_TYPE::SLAP, false);
@@ -294,6 +291,13 @@ void Boss::Attack(void)
 			}
 			else { return; }
 			break;
+		case Boss::ATTACK_KINDS::PSYCHO:
+			if (anime_->GetAnimEnd()) {
+				attackStart_ = false;
+				psycho_->On();
+			}
+			else { return; }
+			break;
 		case Boss::ATTACK_KINDS::WALL:
 			if (anime_->GetAnimEnd()) {
 				attackStart_ = false;
@@ -314,6 +318,8 @@ void Boss::Attack(void)
 		break;
 	case Boss::ATTACK_KINDS::STONE:
 		break;
+	case Boss::ATTACK_KINDS::PSYCHO:
+		break;
 	case Boss::ATTACK_KINDS::WALL:
 		break;
 	}
@@ -321,7 +327,7 @@ void Boss::Attack(void)
 #pragma endregion
 #pragma region UŒ‚I—¹ ’Êíó‘Ô‚Ö‘JˆÚ
 	if (attackEnd_) {
-		attackInterval_ = ATTACK_INTERVAL;
+		if (attackState_ != ATTACK_KINDS::NON) { attackInterval_ = ATTACK_INTERVAL[(int)attackState_]; }
 		state_ = STATE::IDLE;
 		anime_->Play((int)ANIME_TYPE::IDLE);
 	}
@@ -357,19 +363,23 @@ void Boss::Death(void)
 
 Boss::ATTACK_KINDS Boss::AttackLottery(void)
 {
-	//return ATTACK_KINDS::WALL;
 	//return ATTACK_KINDS::FALL;
 	//return ATTACK_KINDS::STONE;
+	//return ATTACK_KINDS::PSYCHO;
+	//return ATTACK_KINDS::WALL;
 
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 
 	int rand = GetRand(10000);
 
-	if (rand <= 5000) {
+	if (rand <= 3000) {
 		ret = ATTACK_KINDS::FALL;
 	}
-	else {
+	else if (rand <= 6000) {
 		ret = ATTACK_KINDS::STONE;
+	}
+	else {
+		ret = ATTACK_KINDS::PSYCHO;
 	}
 
 	if (++spAttackMeasu_ > SP_ATTACK_MEASU) { spAttackMeasu_ = 0; ret = ATTACK_KINDS::WALL; }
@@ -385,56 +395,66 @@ void Boss::AnimeLoad(void)
 		anime_->AddInFbx(i, 30.0f, i);
 	}
 
-	const std::string ANIME_PATH = "Data/Model/Player/Animation/";
-	anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
+	const std::string ANIME_PATH = "Data/Model/Boss/Animation/";
+	//anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
 }
 
 
 void Boss::SubLoad(void)
 {
-	rockWall_ = new RockWallShooter(unit_.pos_, unit_.angle_);
-	rockWall_->Load();
+	fall_ = new FallManager(playerPos);
+	fall_->Load();
 
 	stone_ = new StoneShooter(unit_.pos_, unit_.angle_);
 	stone_->Load();
 
-	fall_ = new FallManager(playerPos);
-	fall_->Load();
+	psycho_ = new PsychoRockShooter(unit_.pos_, playerPos);
+	psycho_->Load();
+
+	rockWall_ = new RockWallShooter(unit_.pos_, unit_.angle_);
+	rockWall_->Load();
 }
 void Boss::SubInit(void)
 {
-	rockWall_->Init();
-	stone_->Init();
 	fall_->Init();
+	stone_->Init();
+	rockWall_->Init();
 }
 void Boss::SubUpdate(void)
 {
-	rockWall_->Update();
-	stone_->Update();
 	fall_->Update();
+	stone_->Update();
+	psycho_->Update();
+	rockWall_->Update();
 }
 void Boss::SubDraw(void)
 {
-	rockWall_->Draw();
-	stone_->Draw();
 	fall_->Draw();
+	stone_->Draw();
+	psycho_->Draw();
+	rockWall_->Draw();
 }
 void Boss::SubRelease(void)
 {
-	if (rockWall_) {
-		rockWall_->Release();
-		delete rockWall_;
-		rockWall_ = nullptr;
+	if (fall_) {
+		fall_->Release();
+		delete fall_;
+		fall_ = nullptr;
 	}
 	if (stone_) {
 		stone_->Release();
 		delete stone_;
 		stone_ = nullptr;
 	}
-	if (fall_) {
-		fall_->Release();
-		delete fall_;
-		fall_ = nullptr;
+	if (psycho_) {
+		psycho_->Release();
+		delete psycho_;
+		psycho_ = nullptr;
+	}
+	if (rockWall_) {
+		rockWall_->Release();
+		delete rockWall_;
+		rockWall_ = nullptr;
 	}
 }
 
@@ -463,18 +483,6 @@ void Boss::HpSharpen(int damage)
 		anime_->Play((int)ANIME_TYPE::DAMAGE, false);
 	}
 	unit_.inviciCounter_ = 60;
-
-
-
-	//bool halfOn = false;
-	//if ((float)unit_.hp_ / (float)HP_MAX >= 0.5f) { halfOn = true; }
-
-	//if (halfOn && (((float)unit_.hp_ / (float)HP_MAX) < 0.5f)) {
-	//	state_ = STATE::STAN;
-	//	anime_->Play((int)ANIME_TYPE::STAN);
-	//	unit_.inviciCounter_ = 60;
-	//	return;
-	//}
 }
 void Boss::LifeSharpen(void)
 {

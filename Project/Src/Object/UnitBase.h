@@ -80,6 +80,8 @@ protected:
 
 	void AccelUpdate(void);
 
+	void DrawDebug(void);
+
 #pragma region 重力処理（機能を置いとくだけ）
 	static constexpr float GRAVITY = -0.8;
 	static constexpr float GRAVITY_MAX = -40.0f;

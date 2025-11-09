@@ -4,10 +4,9 @@
 class Fall : public UnitBase
 {
 public:
-	Fall();
+	Fall(int model);
 	~Fall();
 
-	void ModelLoad(int model) { unit_.model_ = MV1DuplicateModel(model); }
 	void Load(void)override;
 	void Init(void)override;
 	void Update(void)override;
