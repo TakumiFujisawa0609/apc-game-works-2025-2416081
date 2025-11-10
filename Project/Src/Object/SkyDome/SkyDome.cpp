@@ -18,7 +18,7 @@ void SkyDome::Load(void)
 
 void SkyDome::Update(void)
 {
-	angle_.y += Utility::Deg2RadF(0.005f);
+	angle_.y += Utility::Deg2RadF(0.02f);
 	if (angle_.y >= Utility::Deg2RadF(360.0f)) { angle_.y = 0.0f; }
 }
 

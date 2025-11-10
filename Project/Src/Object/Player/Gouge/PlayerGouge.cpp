@@ -44,7 +44,7 @@ void PlayerGouge::Update(void)
 	case PlayerGouge::STATE::SEARCH:
 		if (searchHit_) { return; }
 		xAngle_ += Utility::Deg2RadF(5.0f);
-		if (xAngle_ > Utility::Deg2RadF(100.0f)) { xAngle_ = Utility::Deg2RadF(100.0f); }
+		if (xAngle_ > Utility::Deg2RadF(200.0f)) { xAngle_ = Utility::Deg2RadF(200.0f); }
 		else { unit_.pos_ = VAdd(VAdd(playerPos, FOOT_POS), VTransform(LOCAL_POS, Utility::MatrixAllMultXYZ({ {xAngle_,0.0f,0.0f},playerAngle }))); }
 		break;
 	case PlayerGouge::STATE::GOUGE:

@@ -14,6 +14,7 @@
 
 #include"Pause/GamePauseh.h"
 
+#include"../../Object/SkyDome/SkyDome.h"
 #include"../../Object/Stage/Block/BlockManager.h"
 #include"../../Object/Player/Player.h"
 #include"../../Object/Boss/Boss.h"
@@ -35,6 +36,7 @@ GameScene::GameScene():
 	camera_(nullptr),
 	collision_(nullptr),
 	blocks_(nullptr),
+	skyDome_(nullptr),
 	rock_(),
 	player_(nullptr),
 	boss_(nullptr)
@@ -59,6 +61,9 @@ void GameScene::Load(void)
 	blocks_->Load();
 	blocks_->SetCamera(camera_);
 	collision_->AddStage(blocks_->GetBlocks());
+
+	skyDome_ = new SkyDome();
+	skyDome_->Load();
 
 	player_ = new Player(camera_->GetAngles());
 	player_->Load();
@@ -109,6 +114,7 @@ void GameScene::Update(void)
 	player_->Update();
 	boss_->Update();
 	blocks_->Update();
+	skyDome_->Update();
 
 	collision_->ResolveDynamics();
 
@@ -145,6 +151,7 @@ void GameScene::Draw(void)
 	int x = app::SCREEN_SIZE_X / 2;
 	int y = app::SCREEN_SIZE_Y / 2;
 
+	skyDome_->Draw();
 	blocks_->Draw();
 	boss_->Draw();
 
@@ -181,6 +188,11 @@ void GameScene::Release(void)
 		blocks_->Release();
 		delete blocks_;
 		blocks_ = nullptr;
+	}
+	if (skyDome_) {
+		skyDome_->Release();
+		delete skyDome_;
+		skyDome_ = nullptr;
 	}
 	if (player_) {
 		player_->Release();

@@ -15,6 +15,8 @@ class RockWall;
 class Player;
 class Boss;
 
+class SkyDome;
+
 class GameScene : public SceneBase
 {
 public:
@@ -55,6 +57,8 @@ public:
 private:
 	Camera* camera_;
 	Collision* collision_;
+
+	SkyDome* skyDome_;
 
 	BlockManager* blocks_;
 
