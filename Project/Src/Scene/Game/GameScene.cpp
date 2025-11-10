@@ -60,6 +60,7 @@ void GameScene::Load(void)
 	blocks_ = new BlockManager();
 	blocks_->Load();
 	blocks_->SetCamera(camera_);
+
 	collision_->AddStage(blocks_->GetBlocks());
 
 	skyDome_ = new SkyDome();
@@ -84,20 +85,6 @@ void GameScene::Init(void)
 	camera_->Init();
 	camera_->ChangeMode(Camera::MODE::FOLLOW);
 	camera_->SetLookAtPos(&player_->GetUnit().pos_);
-
-	// ヒットストップカウンターの初期化
-	hitStop_ = 0;
-
-	// スローカウンターの初期化
-	slow_ = 0;
-	slowInter_ = 5;
-
-	// 画面揺れ関係の初期化-----------------------------------------------------------
-	shake_ = 0;
-	shakeKinds_ = ShakeKinds::DIAG;
-	shakeSize_ = ShakeSize::MEDIUM;
-	//--------------------------------------------------------------------------------
-
 	player_->Init();
 	boss_->Init();
 }

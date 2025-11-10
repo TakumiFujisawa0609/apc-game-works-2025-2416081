@@ -150,25 +150,11 @@ void Boss::Draw(void)
 {
 	if (!unit_.isAlive_) { return; }
 
-	// Bossクラスが抱える子クラスの描画処理
-	SubDraw();
-
 	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.pos_, CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
 
-	// デバッグ用に当たり判定の表示
-
-	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-
-	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
-
-	////DrawCapsule3D(
-	////	VSub(unit_.WorldPos(), localPos),
-	////	VAdd(unit_.WorldPos(), localPos),
-	////	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
-	//DrawSphere3D(unit_.WorldPos(), unit_.para_.radius, 4, 0xffffff, 0xffffff, true);
-
-	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	// Bossクラスが抱える子クラスの描画処理
+	SubDraw();
 }
 
 void Boss::UiDraw(void)
@@ -436,25 +422,25 @@ void Boss::SubDraw(void)
 }
 void Boss::SubRelease(void)
 {
-	if (fall_) {
-		fall_->Release();
-		delete fall_;
-		fall_ = nullptr;
+	if (rockWall_) {
+		rockWall_->Release();
+		delete rockWall_;
+		rockWall_ = nullptr;
 	}
 	if (stone_) {
 		stone_->Release();
 		delete stone_;
 		stone_ = nullptr;
 	}
+	if (fall_) {
+		fall_->Release();
+		delete fall_;
+		fall_ = nullptr;
+	}
 	if (psycho_) {
 		psycho_->Release();
 		delete psycho_;
 		psycho_ = nullptr;
-	}
-	if (rockWall_) {
-		rockWall_->Release();
-		delete rockWall_;
-		rockWall_ = nullptr;
 	}
 }
 
