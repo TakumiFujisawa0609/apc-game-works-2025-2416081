@@ -36,7 +36,13 @@ void Explanat::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().PopScene();
+		return;
 	}
+	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+		SceneManager::GetIns().JumpScene(SCENE_ID::TITLE);
+		return;
+	}
+
 
 	s_ += 0.1f;
 }

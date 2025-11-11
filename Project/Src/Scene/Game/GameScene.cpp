@@ -90,6 +90,8 @@ void GameScene::Init(void)
 	camera_->SetLookAtPos(&player_->GetUnit().pos_);
 	player_->Init();
 	boss_->Init();
+	camera_->Update();
+	camera_->Update();
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 }
 
