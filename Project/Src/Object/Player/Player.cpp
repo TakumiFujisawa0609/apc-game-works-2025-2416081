@@ -93,7 +93,7 @@ void Player::Load(void)
 
 void Player::Init(void)
 {
-	unit_.pos_ = { 1000.0f,1000.0f,600.0f };
+	unit_.pos_ = { 1000.0f,1000.0f,200.0f };
 	unit_.angle_ = {};
 
 	unit_.isAlive_ = true;
@@ -139,11 +139,13 @@ void Player::Update(void)
 
 
 	if (unit_.pos_.y < -500.0f) {
-		unit_.pos_ = { 1000.0f,1000.0f,600.0f };
+		unit_.pos_ = { 1000.0f,1000.0f,200.0f };
 		yAccelSum_ = 0.0f;
 		
 		unit_.inviciCounter_ = 200;
 		HpSharpen(30);
+		knockBackVec_ = {};
+		stageRevival_();
 
 		for (auto& jump : isJump_) { jump = false; }
 		for (auto& cou : jumpKeyCounter_) { cou = 0; }

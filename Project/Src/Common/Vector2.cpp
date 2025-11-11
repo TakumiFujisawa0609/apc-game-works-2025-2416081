@@ -124,6 +124,11 @@ float Vector2I::Length(void)const
 	return sqrtf((float)(x * x + y * y));
 }
 
+Vector2 Vector2I::Normalized(void) const
+{
+	return ToVector2() / Length();
+}
+
 
 Vector2::Vector2(void)
 {
@@ -262,4 +267,15 @@ Vector2I Vector2::ToVector2I(void) const
 float Vector2::Length(void) const
 {
 	return sqrtf(x * x + y * y);
+}
+
+Vector2 Vector2::Normalized(void) const
+{
+	return Vector2(x, y) / Length();
+}
+
+void Vector2::Normalize(void)
+{
+	float len = Length();
+	x /= len; y /= len;
 }

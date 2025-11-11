@@ -55,12 +55,6 @@ private:
 	// 現在の状態
 	STATE state_;
 
-
-	/// <summary>
-	/// 状態ごとに遷移可能のSTATEを振り分けて入力操作に応じてそのSTATEに遷移させる
-	/// </summary>
-	void StateManager(void);
-
 	// 関数ポインタ配列
 	using STATEFUNC = void (Boss::*)(void);
 	STATEFUNC stateFuncPtr[(int)STATE::MAX];
@@ -168,7 +162,7 @@ private:
 	void SubRelease(void);
 #pragma endregion
 
-	const int MASTER_LIFE = 3;
+	const int MASTER_LIFE = 2;
 	int masterLife_;
 
 	void HpSharpen(int damage);

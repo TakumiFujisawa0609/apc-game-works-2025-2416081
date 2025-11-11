@@ -58,6 +58,8 @@ public:
 	Vector2 ToVector2(void)const;
 
 	float Length(void)const;
+
+	Vector2 Normalized(void)const;
 };
 
 class Vector2
@@ -122,4 +124,7 @@ public:
 	Vector2I ToVector2I(void)const;
 
 	float Length(void)const;
+
+	Vector2 Normalized(void)const;
+	void Normalize(void);
 };

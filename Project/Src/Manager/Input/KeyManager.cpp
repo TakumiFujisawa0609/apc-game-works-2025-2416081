@@ -91,7 +91,7 @@ void KeyManager::Init(void)
 	SET_C_BUTTON(KEY_TYPE::UP, XINPUT_BUTTON_DPAD_UP);
 	SET_C_OTHERS(KEY_TYPE::UP, CONTROLLER_OTHERS::LEFTSTICK_UP);
 	SET_C_OTHERS(KEY_TYPE::UP, CONTROLLER_OTHERS::RIGHTSTICK_UP);
-
+	
 	SET_KEYBOARD(KEY_TYPE::DOWN, KEY_INPUT_S);
 	SET_KEYBOARD(KEY_TYPE::DOWN, KEY_INPUT_DOWN);
 	SET_C_BUTTON(KEY_TYPE::DOWN, XINPUT_BUTTON_DPAD_DOWN);
@@ -226,7 +226,7 @@ void KeyManager::MouceUpdate(void)
 
 		Vector2 move = mouceInfo.now.ToVector2() - mouceInfo.prev.ToVector2();
 
-		mouceInfo.move = (move.Length() > MOUCE_THRESHOLD) ? Utility::Normalize(mouceInfo.now - mouceInfo.prev) : Vector2(0.0f, 0.0f);
+		mouceInfo.move = (move.Length() > MOUCE_THRESHOLD) ? (mouceInfo.now - mouceInfo.prev).Normalized() : Vector2(0.0f, 0.0f);
 
 		SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
 
@@ -239,7 +239,7 @@ void KeyManager::MouceUpdate(void)
 
 		Vector2 move = mouceInfo.now.ToVector2() - mouceInfo.prev.ToVector2();
 
-		mouceInfo.move = (move.Length() > MOUCE_THRESHOLD) ? Utility::Normalize(mouceInfo.now - mouceInfo.prev) : Vector2(0.0f, 0.0f);
+		mouceInfo.move = (move.Length() > MOUCE_THRESHOLD) ? (mouceInfo.now - mouceInfo.prev).Normalized() : Vector2(0.0f, 0.0f);
 	}
 }
 

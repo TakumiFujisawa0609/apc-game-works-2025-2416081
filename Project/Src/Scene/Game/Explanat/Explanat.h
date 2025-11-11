@@ -1,14 +1,12 @@
 #pragma once
 
-#include"../SceneBase.h"
+#include"../../SceneBase.h"
 
-class SkyDome;
-
-class ClearScene : public SceneBase
+class Explanat : public SceneBase
 {
 public:
-	ClearScene();
-	~ClearScene()override;
+	Explanat();
+	~Explanat()override;
 
 	void Load(void)override;
 	void Init(void)override;
@@ -18,5 +16,7 @@ public:
 
 private:
 	int img_;
-	SkyDome* skyDome_;
+	int bottonImg_[2];
+	float s_;
 };
+

@@ -66,11 +66,11 @@ void TitleScene::Draw(void)
 	SetFontSize(32);
 	if (KEY::GetIns().GetControllerConnect()) {
 		DrawString(10, 0, 
-			"タイトル\n\nゲームスタート：B\n\nゲーム終了：START",
+			"ゲームスタート：B\n\nゲーム終了：START",
 			0xffffff);
 	} else {
 		DrawString(10, 0,
-			"タイトル\n\nゲームスタート：SPACE\n\nゲーム終了：ESC",
+			"ゲームスタート：SPACE\n\nゲーム終了：ESC",
 			0xffffff);
 	}
 	SetFontSize(16);

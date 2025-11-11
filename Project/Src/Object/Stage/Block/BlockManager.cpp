@@ -110,3 +110,23 @@ void BlockManager::SetCamera(Camera* c)
 {
 	for (auto& b : blocks_) { b->SetCamera(c); }
 }
+
+void BlockManager::StageRevival(void)
+{
+	blocks_.at(382)->ReVival();
+	blocks_.at(383)->ReVival();
+	blocks_.at(384)->ReVival();
+	blocks_.at(385)->ReVival();
+	blocks_.at(399)->ReVival();
+	blocks_.at(400)->ReVival();
+	blocks_.at(401)->ReVival();
+	blocks_.at(402)->ReVival();
+	blocks_.at(418)->ReVival();
+	blocks_.at(419)->ReVival();
+	blocks_.at(420)->ReVival();
+	blocks_.at(421)->ReVival();
+	blocks_.at(438)->ReVival();
+	blocks_.at(439)->ReVival();
+	blocks_.at(440)->ReVival();
+	blocks_.at(441)->ReVival();
+}

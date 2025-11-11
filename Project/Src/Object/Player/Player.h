@@ -1,4 +1,7 @@
 #pragma once
+
+#include <functional>
+
 #include"../UnitBase.h"
 
 #include"../../Manager/AnimationController/AnimationController.h"
@@ -71,6 +74,8 @@ public:
 
 	// プレイヤーが抱える下位クラスのインスタンスを配列に格納して返す
 	std::vector<UnitBase*>GetSubIns(void);
+
+	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival_ = std::move(ptr); }
 
 private:
 
@@ -201,5 +206,7 @@ private:
 #pragma endregion
 
 	std::vector<COLOR_F> DEFAULT_COLOR;
+
+	std::function<void(void)>stageRevival_;
 };
 

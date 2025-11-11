@@ -29,6 +29,8 @@ public:
 
 	void SetCamera(Camera* c);
 
+	void StageRevival(void);
+
 
 private:
 	int textureId_;

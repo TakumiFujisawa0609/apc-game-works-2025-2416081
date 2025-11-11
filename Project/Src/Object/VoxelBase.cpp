@@ -713,4 +713,5 @@ void VoxelBase::ReVival(void)
 {
     density_ = densityInit_;
     regeneration_ = true;
+    unit_.isAlive_ = true;
 }

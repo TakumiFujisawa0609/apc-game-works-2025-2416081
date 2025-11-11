@@ -84,7 +84,7 @@ void Boss::Init(void)
 {
 	state_ = STATE::IDLE;
 
-	unit_.pos_ = { 1000.0f,400.0f,1000.0f };
+	unit_.pos_ = { 1000.0f,300.0f,1000.0f };
 
 	unit_.angle_ = {};
 
@@ -93,7 +93,7 @@ void Boss::Init(void)
 	masterLife_ = MASTER_LIFE;
 	unit_.hp_ = HP_MAX;
 
-	attackInterval_ = ATTACK_INTERVAL[1];
+	attackInterval_ = ATTACK_INTERVAL[0];
 
 	stanTimer_ = 0;
 
@@ -192,8 +192,6 @@ void Boss::OnCollision(UnitBase* other)
 {
 	if (state_ == STATE::STAN) {
 		if (dynamic_cast<PlayerPunch*>(other)) {
-			GameScene::Slow(20);
-			GameScene::Shake();
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 			LifeSharpen();
 			return;
@@ -416,9 +414,9 @@ void Boss::SubUpdate(void)
 void Boss::SubDraw(void)
 {
 	fall_->Draw();
+	rockWall_->Draw();
 	stone_->Draw();
 	psycho_->Draw();
-	rockWall_->Draw();
 }
 void Boss::SubRelease(void)
 {
@@ -478,8 +476,14 @@ void Boss::LifeSharpen(void)
 		masterLife_ = 0;
 		state_ = STATE::DEATH;
 		anime_->Play((int)ANIME_TYPE::DEATH, false);
+
+		GameScene::Slow(100, 10);
+		GameScene::Shake(ShakeKinds::WID, ShakeSize::BIG, 100);
 		return;
 	}
+
+	GameScene::Slow(20);
+	GameScene::Shake();
 
 	VECTOR vec = VSub(playerPos, unit_.pos_);
 	unit_.angle_.y = atan2f(vec.x, vec.z);

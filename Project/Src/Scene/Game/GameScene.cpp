@@ -12,6 +12,8 @@
 
 #include"../../Utility/Utility.h"
 
+#include"Explanat/Explanat.h"
+
 #include"Pause/GamePauseh.h"
 
 #include"../../Object/SkyDome/SkyDome.h"
@@ -68,6 +70,7 @@ void GameScene::Load(void)
 
 	player_ = new Player(camera_->GetAngles());
 	player_->Load();
+	player_->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, blocks_));
 	collision_->AddDynamicPlayer(player_);
 	collision_->AddPlayer(player_->GetSubIns());
 
@@ -87,6 +90,7 @@ void GameScene::Init(void)
 	camera_->SetLookAtPos(&player_->GetUnit().pos_);
 	player_->Init();
 	boss_->Init();
+	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 }
 
 void GameScene::Update(void)
@@ -140,9 +144,9 @@ void GameScene::Draw(void)
 
 	skyDome_->Draw();
 	blocks_->Draw();
+	player_->Draw();
 	boss_->Draw();
 
-	player_->Draw();
 
 	//-------------------------------------------------
 
