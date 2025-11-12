@@ -178,6 +178,12 @@ void Boss::UiDraw(void)
 
 	size.x *= ((float)unit_.hp_ / (float)HP_MAX);
 	drawHpBar(sPos, size, 0xff0000);
+
+	if (state_ == STATE::STAN && stanTimer_ / 15 % 2 == 0) {
+		SetFontSize(45);
+		DrawString(App::SCREEN_SIZE_X/2, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
+		SetFontSize(16);
+	}
 }
 
 void Boss::Release(void)
