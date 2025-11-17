@@ -154,6 +154,7 @@
     <ClCompile Include="Src\Object\Boss\Attack\Stone\Stone.cpp" />
     <ClCompile Include="Src\Object\Boss\Attack\Stone\StoneShooter.cpp" />
     <ClCompile Include="Src\Object\Boss\Boss.cpp" />
+    <ClCompile Include="Src\Object\Charactor\CharactorBase.cpp" />
     <ClCompile Include="Src\Object\Common\Collider\ColliderBase.cpp" />
     <ClCompile Include="Src\Object\Grid\Grid.cpp" />
     <ClCompile Include="Src\Object\Player\Gouge\PlayerGouge.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="Src\Object\Boss\Attack\Stone\Stone.h" />
     <ClInclude Include="Src\Object\Boss\Attack\Stone\StoneShooter.h" />
     <ClInclude Include="Src\Object\Boss\Boss.h" />
+    <ClInclude Include="Src\Object\Charactor\CharactorBase.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderAabb.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderBase.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderCapsule.h" />

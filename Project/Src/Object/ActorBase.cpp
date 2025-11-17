@@ -4,12 +4,16 @@
 
 ActorBase::ActorBase() :
 	trans_(prevPos_),
-
 	collider_(),
 
 	dynamicFlg_(1),
+	isGravity(1),
 
-	prevPos_(trans_.pos)
+	prevPos_(trans_.pos),
+
+	AccelSum(0.0f, 0.0f, 0.0f),
+
+	isGroundMaster(false)
 {
 }
 
@@ -25,6 +29,12 @@ void ActorBase::Update(void)
 
 	// 派生先追加更新
 	SubUpdate();
+
+	// 重力処理
+	if (dynamicFlg_ == 1 && isGravity == 1) { Gravity(); }
+
+	// 加速度更新
+	if (dynamicFlg_ == 1) { AccelUpdate(); }
 }
 
 void ActorBase::Draw(void)
@@ -56,4 +66,37 @@ void ActorBase::Release(void)
 
 	// モデル制御情報の解放
 	trans_.Release();
+}
+
+void ActorBase::AccelUpdate(void)
+{
+	// 引数の数値の符号を絶対値１で返すラムダ関数
+	auto Sign = [&](float value)->float {
+		if (value > 0.0f) { return +1.0f; }
+		else if (value < 0.0f) { return -1.0f; }
+		else { return 0.0f; }
+		};
+
+	// 横軸(横軸は減衰もする)
+	if (AccelSum.x != 0.0f) {
+		if (abs(AccelSum.x) > ACCEL_MAX) { AccelSum.x = ACCEL_MAX * Sign(AccelSum.x); }
+		trans_.pos.x += AccelSum.x;
+		AccelSum.x -= ATTENUATION * Sign(AccelSum.x);
+		if (abs(AccelSum.x) <= ATTENUATION / 2) { AccelSum.x = 0.0f; }
+	}
+	if (AccelSum.z != 0.0f) {
+		if (abs(AccelSum.z) > ACCEL_MAX) { AccelSum.z = ACCEL_MAX * Sign(AccelSum.z); }
+		trans_.pos.z += AccelSum.z;
+		AccelSum.z -= ATTENUATION * Sign(AccelSum.z);
+		if (abs(AccelSum.z) <= ATTENUATION / 2) { AccelSum.z = 0.0f; }
+	}
+
+	// 縦軸
+	if (AccelSum.y != 0.0f) { trans_.pos.y += AccelSum.y; }
+}
+
+void ActorBase::Gravity(void)
+{
+	AccelSum.y += GRAVITY;
+	if (AccelSum.y < GRAVITY_MAX) { AccelSum.y = GRAVITY_MAX; }
 }
