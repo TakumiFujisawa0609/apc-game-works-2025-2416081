@@ -31,6 +31,11 @@ public:
 	// ゲーム終了
 	void GameEnd(void) { gameEnd_ = true; }
 
+	// デバッグ描画
+	bool IsDrawDebug(void)const { return drawDebug_ == 1; }
+	void DrawDebugSwitch(void) { drawDebug_ = 1 - drawDebug_; }
+
+
 private:
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする
@@ -65,6 +70,9 @@ private:
 
 	// FPS
 	FPS* fps_;
+
+	// デバッグ表示
+	char drawDebug_;
 };
 
 // Applicationの省略形

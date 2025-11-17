@@ -3,10 +3,10 @@
 #include <vector>
 #include <DxLib.h>
 #include "../Common/Vector2.h"
+#include "../Common/Vector3.h"
 
 class Utility
 {
-
 public:
 
 	// ラジアン(rad)・度(deg)変換用
@@ -30,6 +30,9 @@ public:
 	static double Deg2RadD(double deg);
 	static float Deg2RadF(float deg);
 	static int Deg2RadI(int deg);
+
+	static VECTOR Deg2RadF(const VECTOR& deg) { return { Deg2RadF(deg.x),Deg2RadF(deg.y),Deg2RadF(deg.z) }; }
+	static Vector3 Deg2RadF(const Vector3& deg) { return { Deg2RadF(deg.x),Deg2RadF(deg.y),Deg2RadF(deg.z) }; }
 
 	// 0～360度の範囲に収める
 	static double DegIn360(double deg);
@@ -94,29 +97,48 @@ public:
 	
 	// 
 	static MATRIX MatrixAllMultX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultX(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultY(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZ(const std::initializer_list<Vector3>& vecs);
 
 	static MATRIX MatrixAllMultXY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXY(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultXZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXZ(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultXYZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXYZ(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultXZY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultXZY(const std::initializer_list<Vector3>& vecs);
 
 	static MATRIX MatrixAllMultYX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYX(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultYZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYZ(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultYXZ(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYXZ(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultYZX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultYZX(const std::initializer_list<Vector3>& vecs);
 
 	static MATRIX MatrixAllMultZX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZX(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultZY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZY(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultZXY(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZXY(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultZYX(const std::initializer_list<VECTOR>& vecs);
+	static MATRIX MatrixAllMultZYX(const std::initializer_list<Vector3>& vecs);
 
 
 	static VECTOR Minus(const VECTOR& v) { return { -v.x,-v.y,-v.z }; }
 
 	// 行列をつかったモデルの座標と向きのセット
 	static void MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializer_list<VECTOR>& angle);
+	static void MV1ModelMatrix(int& model, const Vector3& pos, const std::initializer_list<Vector3>& angle);
+
+	static void MV1ModelMatrix(int& model, const VECTOR& scale, const VECTOR& pos, const std::initializer_list<VECTOR>& angle);
+	static void MV1ModelMatrix(int& model, const Vector3& scale, const Vector3& pos, const std::initializer_list<Vector3>& angle);
 
 	static VECTOR FtoV(float f) { return { f,f,f }; }
 };

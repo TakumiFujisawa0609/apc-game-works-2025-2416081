@@ -368,6 +368,13 @@ MATRIX Utility::MatrixAllMultX(const std::initializer_list<VECTOR>& vecs)
     return m;
 }
 
+MATRIX Utility::MatrixAllMultX(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) { m = MMult(m, MGetRotX(vec.x)); }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultY(const std::initializer_list<VECTOR>& vecs)
 {
     MATRIX m = MGetIdent();
@@ -375,7 +382,21 @@ MATRIX Utility::MatrixAllMultY(const std::initializer_list<VECTOR>& vecs)
     return m;
 }
 
+MATRIX Utility::MatrixAllMultY(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) { m = MMult(m, MGetRotY(vec.y)); }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultZ(const std::initializer_list<VECTOR>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) { m = MMult(m, MGetRotZ(vec.z)); }
+    return m;
+}
+
+MATRIX Utility::MatrixAllMultZ(const std::initializer_list<Vector3>& vecs)
 {
     MATRIX m = MGetIdent();
     for (const auto& vec : vecs) { m = MMult(m, MGetRotZ(vec.z)); }
@@ -392,6 +413,16 @@ MATRIX Utility::MatrixAllMultXY(const std::initializer_list<VECTOR>& vecs)
 	return m;
 }
 
+MATRIX Utility::MatrixAllMultXY(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotX(vec.x));
+        m = MMult(m, MGetRotY(vec.y));
+    }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultXZ(const std::initializer_list<VECTOR>& vecs)
 {
 	MATRIX m = MGetIdent();
@@ -400,6 +431,16 @@ MATRIX Utility::MatrixAllMultXZ(const std::initializer_list<VECTOR>& vecs)
         m = MMult(m, MGetRotZ(vec.z));
     }
 	return m;
+}
+
+MATRIX Utility::MatrixAllMultXZ(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotX(vec.x));
+        m = MMult(m, MGetRotZ(vec.z));
+    }
+    return m;
 }
 
 MATRIX Utility::MatrixAllMultXYZ(const std::initializer_list<VECTOR>& vecs)
@@ -413,6 +454,17 @@ MATRIX Utility::MatrixAllMultXYZ(const std::initializer_list<VECTOR>& vecs)
 	return m;
 }
 
+MATRIX Utility::MatrixAllMultXYZ(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotX(vec.x));
+        m = MMult(m, MGetRotY(vec.y));
+        m = MMult(m, MGetRotZ(vec.z));
+    }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultXZY(const std::initializer_list<VECTOR>& vecs)
 {
     MATRIX m = MGetIdent();
@@ -422,6 +474,17 @@ MATRIX Utility::MatrixAllMultXZY(const std::initializer_list<VECTOR>& vecs)
         m = MMult(m, MGetRotY(vec.y));
     }
 	return m;
+}
+
+MATRIX Utility::MatrixAllMultXZY(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotX(vec.x));
+        m = MMult(m, MGetRotZ(vec.z));
+        m = MMult(m, MGetRotY(vec.y));
+    }
+    return m;
 }
 
 MATRIX Utility::MatrixAllMultYX(const std::initializer_list<VECTOR>& vecs)
@@ -434,6 +497,16 @@ MATRIX Utility::MatrixAllMultYX(const std::initializer_list<VECTOR>& vecs)
 	return m;
 }
 
+MATRIX Utility::MatrixAllMultYX(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotY(vec.y));
+        m = MMult(m, MGetRotX(vec.x));
+    }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultYZ(const std::initializer_list<VECTOR>& vecs)
 {
     MATRIX m = MGetIdent();
@@ -442,6 +515,16 @@ MATRIX Utility::MatrixAllMultYZ(const std::initializer_list<VECTOR>& vecs)
         m = MMult(m, MGetRotZ(vec.z));
     }
 	return m;
+}
+
+MATRIX Utility::MatrixAllMultYZ(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotY(vec.y));
+        m = MMult(m, MGetRotZ(vec.z));
+    }
+    return m;
 }
 
 MATRIX Utility::MatrixAllMultYXZ(const std::initializer_list<VECTOR>& vecs)
@@ -455,6 +538,17 @@ MATRIX Utility::MatrixAllMultYXZ(const std::initializer_list<VECTOR>& vecs)
 	return m;
 }
 
+MATRIX Utility::MatrixAllMultYXZ(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotY(vec.y));
+        m = MMult(m, MGetRotX(vec.x));
+        m = MMult(m, MGetRotZ(vec.z));
+    }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultYZX(const std::initializer_list<VECTOR>& vecs)
 {
     MATRIX m = MGetIdent();
@@ -464,6 +558,17 @@ MATRIX Utility::MatrixAllMultYZX(const std::initializer_list<VECTOR>& vecs)
         m = MMult(m, MGetRotX(vec.x));
     }
 	return m;
+}
+
+MATRIX Utility::MatrixAllMultYZX(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotY(vec.y));
+        m = MMult(m, MGetRotZ(vec.z));
+        m = MMult(m, MGetRotX(vec.x));
+    }
+    return m;
 }
 
 MATRIX Utility::MatrixAllMultZX(const std::initializer_list<VECTOR>& vecs)
@@ -476,6 +581,16 @@ MATRIX Utility::MatrixAllMultZX(const std::initializer_list<VECTOR>& vecs)
 	return m;
 }
 
+MATRIX Utility::MatrixAllMultZX(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotZ(vec.z));
+        m = MMult(m, MGetRotX(vec.x));
+    }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultZY(const std::initializer_list<VECTOR>& vecs)
 {
     MATRIX m = MGetIdent();
@@ -484,6 +599,16 @@ MATRIX Utility::MatrixAllMultZY(const std::initializer_list<VECTOR>& vecs)
         m = MMult(m, MGetRotY(vec.y));
     }
 	return m;
+}
+
+MATRIX Utility::MatrixAllMultZY(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotZ(vec.z));
+        m = MMult(m, MGetRotY(vec.y));
+    }
+    return m;
 }
 
 MATRIX Utility::MatrixAllMultZXY(const std::initializer_list<VECTOR>& vecs)
@@ -497,6 +622,17 @@ MATRIX Utility::MatrixAllMultZXY(const std::initializer_list<VECTOR>& vecs)
 	return m;
 }
 
+MATRIX Utility::MatrixAllMultZXY(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotZ(vec.z));
+        m = MMult(m, MGetRotX(vec.x));
+        m = MMult(m, MGetRotY(vec.y));
+    }
+    return m;
+}
+
 MATRIX Utility::MatrixAllMultZYX(const std::initializer_list<VECTOR>& vecs)
 {
     MATRIX m = MGetIdent();
@@ -506,6 +642,17 @@ MATRIX Utility::MatrixAllMultZYX(const std::initializer_list<VECTOR>& vecs)
         m = MMult(m, MGetRotX(vec.x));
     }
 	return m;
+}
+
+MATRIX Utility::MatrixAllMultZYX(const std::initializer_list<Vector3>& vecs)
+{
+    MATRIX m = MGetIdent();
+    for (const auto& vec : vecs) {
+        m = MMult(m, MGetRotZ(vec.z));
+        m = MMult(m, MGetRotY(vec.y));
+        m = MMult(m, MGetRotX(vec.x));
+    }
+    return m;
 }
 
 void Utility::MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializer_list<VECTOR>& angle)
@@ -520,4 +667,62 @@ void Utility::MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializ
 
     MV1SetRotationMatrix(model, m);
     MV1SetPosition(model, pos);
+}
+
+void Utility::MV1ModelMatrix(int& model, const Vector3& pos, const std::initializer_list<Vector3>& angle)
+{
+    MATRIX m = MGetIdent();
+    // 角度セットを順に合成
+    for (const auto& a : angle) {
+        m = MMult(m, MGetRotX(a.x));
+        m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotZ(a.z));
+    }
+
+    MV1SetRotationMatrix(model, m);
+    MV1SetPosition(model, pos.ToVECTOR());
+}
+
+void Utility::MV1ModelMatrix(int& model, const VECTOR& scale, const VECTOR& pos, const std::initializer_list<VECTOR>& angle)
+{
+    MATRIX m = MGetIdent();
+
+    m.m[0][0] = scale.x;
+    m.m[1][1] = scale.y;
+    m.m[2][2] = scale.z;
+
+    // 角度セットを順に合成
+    for (const auto& a : angle) {
+        m = MMult(m, MGetRotX(a.x));
+        m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotZ(a.z));
+    }
+
+    m.m[3][0] = pos.x;
+    m.m[3][1] = pos.y;
+    m.m[3][2] = pos.z;
+
+    MV1SetMatrix(model, m);
+}
+
+void Utility::MV1ModelMatrix(int& model, const Vector3& scale, const Vector3& pos, const std::initializer_list<Vector3>& angle)
+{
+    MATRIX m = MGetIdent();
+
+    m.m[0][0] = scale.x;
+    m.m[1][1] = scale.y;
+    m.m[2][2] = scale.z;
+
+    // 角度セットを順に合成
+    for (const auto& a : angle) {
+        m = MMult(m, MGetRotX(a.x));
+        m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotZ(a.z));
+    }
+
+    m.m[3][0] = pos.x;
+    m.m[3][1] = pos.y;
+    m.m[3][2] = pos.z;
+
+    MV1SetMatrix(model, m);
 }
