@@ -5,8 +5,8 @@
 class ColliderSphere : public ColliderBase
 {
 public:
-	ColliderSphere(TAG type, float radius, Vector3 pos = { 0.0f, 0.0f, 0.0f }, float enoughDistance = -1.0f) :
-		ColliderBase(type,pos,enoughDistance),
+	ColliderSphere(TAG type, float radius, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+		ColliderBase(type, enoughDistance, pos),
 		radius_(radius)
 	{
 	}

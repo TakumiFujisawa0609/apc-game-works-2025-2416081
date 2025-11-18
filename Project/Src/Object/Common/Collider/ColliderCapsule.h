@@ -5,8 +5,8 @@
 class ColliderCapsule : public ColliderBase
 {
 public:
-	ColliderCapsule(TAG type,float halfLen,float radius, Vector3 pos = { 0.0f, 0.0f, 0.0f }, float enoughDistance = -1.0f):
-		ColliderBase(type,pos,enoughDistance),
+	ColliderCapsule(TAG type,float halfLen,float radius, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }):
+		ColliderBase(type, enoughDistance, pos),
 		halfLen_(halfLen),
 		radius_(radius)
 	{

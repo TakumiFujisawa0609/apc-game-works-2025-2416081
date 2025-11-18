@@ -5,10 +5,10 @@
 #include"ColliderCapsule.h"
 #include"ColliderAabb.h"
 
-ColliderBase::ColliderBase(TAG type, Vector3 pos, float enoughDistance) :
+ColliderBase::ColliderBase(TAG type, float enoughDistance, Vector3 pos) :
 	trans_(nullptr),
-	pos_(pos),
 	enoughDistance_(enoughDistance),
+	pos_(pos),
 	type_(type),
 	shape_(SHAPE::NON),
 	OnCollision(nullptr)

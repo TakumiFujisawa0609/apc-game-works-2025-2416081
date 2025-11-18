@@ -5,8 +5,8 @@
 class ColliderAabb : public ColliderBase
 {
 public:
-	ColliderAabb(TAG type, Vector3 size, Vector3 pos = { 0.0f, 0.0f, 0.0f }, float enoughDistance = -1.0f) :
-		ColliderBase(type, pos, enoughDistance),
+	ColliderAabb(TAG type, Vector3 size, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+		ColliderBase(type, enoughDistance, pos),
 		size_(size)
 	{
 	}
