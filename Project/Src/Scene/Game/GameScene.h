@@ -7,6 +7,8 @@
 
 #include<vector>
 
+#include"../../Object/ActorBase.h"
+
 
 class Camera;
 

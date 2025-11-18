@@ -2,23 +2,21 @@
 
 #include <functional>
 
-#include"../UnitBase.h"
-
-#include"../../Manager/AnimationController/AnimationController.h"
+#include"../CharactorBase.h"
 
 #include"Punch/PlayerPunch.h"
 #include"Gouge/PlayerGouge.h"
 #include"Throwing/Throwing.h"
 
-class VoxelBase;
-
-class Player : public UnitBase
+class Player : public CharactorBase
 {
 public:
 	static constexpr float SCALE = 2.5f;
 	//static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
-	static constexpr VECTOR SIZE = { 25.0f,70.0f,35.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f, ((SIZE.y / 2) * SCALE), 15.0f };
+	const Vector3 SIZE = Vector3(25.0f, 70.0f, 35.0f) * SCALE;
+	const Vector3 CENTER_DIFF = Vector3(0.0f, ((SIZE.y / 2) * SCALE), 15.0f) * SCALE;
+	const float HALF_LEN = SIZE.y / 2 - SIZE.z;
+	const float RADIUS = SIZE.z;
 
 
 
@@ -26,14 +24,15 @@ public:
 	~Player()override {};
 
 	void Load(void)override;
-	void Init(void)override;
-	void Update(void)override;
-	void Draw(void)override;
-	void UiDraw(void)override;
-	void Release(void)override;
+	virtual void CharactorInit(void) = 0;
+	virtual void CharactorUpdate(void) = 0;
+	virtual void CharactorDraw(void) = 0;
+	void UiDraw(void);
+	virtual void CharactorRelease(void) = 0;
 
+	void OnCollision(TAG type)override;
 	void OnGrounded()override;
-	void OnCollision(UnitBase* other)override;
+
 
 	enum class STATE
 	{
@@ -49,8 +48,6 @@ public:
 
 		MAX
 	};
-
-	int GetState(void)const override { return (int)state_; }
 
 	static constexpr int HP_MAX = 100;
 
@@ -81,10 +78,6 @@ private:
 
 #pragma region 状態管理
 
-	// 現在の状態
-	STATE state_;
-
-
 	/// <summary>
 	/// 状態ごとに遷移可能のSTATEを振り分けて入力操作に応じてそのSTATEに遷移させる
 	/// </summary>
@@ -97,10 +90,6 @@ private:
 	void DoStateThrowing(void);	// 投げ状態に遷移する条件
 	void DoStateEvasion(void);	// 回避状態に遷移する条件
 	//---------------------------------------------
-
-	// 関数ポインタ配列
-	using STATEFUNC = void (Player::*)(void);
-	STATEFUNC stateFuncPtr[(int)STATE::MAX];
 
 	// 状態別関数～～～～
 	void Non(void) {};
@@ -198,14 +187,13 @@ private:
 #pragma endregion
 
 #pragma region プレイヤーが抱える下位クラスのメイン処理をまとめて呼び出す
-	void SubLoad(void);
-	void SubInit(void);
-	void SubUpdate(void);
-	void SubDraw(void);
-	void SubRelease(void);
+	void LowerLoad(void);
+	void LowerInit(void);
+	void LowerUpdate(void);
+	void LowerDraw(void);
+	void LowerRelease(void);
 #pragma endregion
 
-	std::vector<COLOR_F> DEFAULT_COLOR;
 
 	std::function<void(void)>stageRevival_;
 };

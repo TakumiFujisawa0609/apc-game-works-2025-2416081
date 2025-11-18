@@ -22,6 +22,9 @@ public:
 	// “–‚½‚è”»’è‚Ì’Ê’m
 	virtual void OnCollision(TAG type) {}
 
+	// Ú’n”»’è‚Ì’Ê’m
+	virtual void OnGrounded() {}
+
 private:
 	// “–‚½‚è”»’èî•ñ
 	std::vector<ColliderBase*> collider_;
@@ -83,11 +86,11 @@ protected:
 	void SetGravityFlg(unsigned char flg) { isGravity = (flg == 0 || flg == 1) ? flg : isGravity; }
 
 	// ”h¶æ’Ç‰Á‰Šú‰»
-	virtual void SubInit(void) = 0;
+	virtual void LowerInit(void) = 0;
 	// ”h¶æ’Ç‰ÁXV
-	virtual void SubUpdate(void) = 0;
+	virtual void LowerUpdate(void) = 0;
 	// ”h¶æ’Ç‰Á•`‰æ
-	virtual void SubDraw(void) = 0;
+	virtual void LowerDraw(void) = 0;
 	// ”h¶æ’Ç‰Á‰ğ•ú
-	virtual void SubRelease(void) = 0;
+	virtual void LowerRelease(void) = 0;
 };

@@ -1,5 +1,4 @@
 #include "AnimationController.h"
-#include"../../Scene/SceneManager/SceneManager.h"
 #include <DxLib.h>
 
 AnimationController::AnimationController(int modelId)
@@ -68,11 +67,8 @@ void AnimationController::Play(int type,bool loop)
 
 void AnimationController::Update(void)
 {
-	// Œo‰ßŽžŠÔ‚ÌŽæ“¾
-	float deltaTime = SceneManager::GetIns().GetDeltaTime();
-
 	// Ä¶
-	playAnim_.step += (deltaTime * playAnim_.speed);
+	playAnim_.step += playAnim_.speed;
 
 	if (loopflg_) {
 		if (playAnim_.step > playAnim_.totalTime)playAnim_.step = 0.0f;

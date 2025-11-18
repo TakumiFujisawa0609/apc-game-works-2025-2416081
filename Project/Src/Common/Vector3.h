@@ -80,6 +80,8 @@ struct Vector3
 	bool operator>=(float value)const { return (x >= value && y >= value && z >= value); }
 
 
+	void operator=(float value) { x = value; y = value; z = value; }
+
 
 	// ƒxƒNƒgƒ‹‚Ì‘å‚«‚³(ã‚È‚µ)
 	float LengthSq(void)const { return (x * x + y * y + z * z); }

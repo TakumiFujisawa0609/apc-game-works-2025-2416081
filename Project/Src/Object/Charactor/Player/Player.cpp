@@ -1,20 +1,21 @@
 #include "Player.h"
 
-#include"../../Manager/Input/KeyManager.h"
-#include"../../Manager/Sound/SoundManager.h"
-#include"../../Manager/Collision/CollisionUtility.h"
+#include"../../../Manager/Input/KeyManager.h"
+#include"../../../Manager/Sound/SoundManager.h"
+#include"../../../Manager/Collision/CollisionUtility.h"
 
-#include"../../Application/Application.h"
-#include"../../scene/SceneManager/SceneManager.h"
+#include"../../../Application/Application.h"
+#include"../../../scene/SceneManager/SceneManager.h"
 
-#include"../../Scene/Game/GameScene.h"
+#include"../../../Scene/Game/GameScene.h"
 
-#include"../Boss/Boss.h"
+#include"../../Common/Collider/ColliderCapsule.h"
+#include"../../Common/Collider/ColliderLine.h"
+
+#include"../../Boss/Boss.h"
 
 Player::Player(const VECTOR& cameraPos):
 	cameraAngle_(cameraPos),
-	state_(STATE::NON),
-	stateFuncPtr(),
 
 	isJump_(),
 	jumpKeyCounter_(),
@@ -34,34 +35,11 @@ Player::Player(const VECTOR& cameraPos):
 
 void Player::Load(void)
 {
-	unit_.para_.colliType = CollisionType::ALLY;
-	unit_.para_.colliShape = CollisionShape::CAPSULE;
-	unit_.para_.size = VScale(SIZE,SCALE);
-	unit_.para_.radius = (SIZE.z * SCALE) * 0.5f;
-	unit_.para_.capsuleHalfLen = (unit_.para_.size.y / 2) - unit_.para_.radius;
 
-	unit_.model_ = MV1LoadModel("Data/Model/Player/Player.mv1");
-	MV1SetScale(unit_.model_, Utility::FtoV(SCALE));
-
-	MV1SetScale(unit_.model_, VGet(SCALE, SCALE, SCALE));
-
-	unit_.para_.speed = 10.0f;
-	
-	int mnum = MV1GetMaterialNum(unit_.model_);
-	for (int i = 0; i < mnum; ++i) {
-		COLOR_F emi = MV1GetMaterialEmiColor(unit_.model_, i);
-		emi.r = (std::min)(emi.r + 0.4f, 1.0f);
-		emi.g = (std::min)(emi.g + 0.4f, 1.0f);
-		emi.b = (std::min)(emi.b + 0.4f, 1.0f);
-		DEFAULT_COLOR.emplace_back(emi);
-		MV1SetMaterialEmiColor(unit_.model_, i, emi);
-	}
-
+	trans_.Load("Player / Player");
+	trans_.scale = SCALE;
 
 #pragma region 関数ポインタ配列へ各関数を格納
-
-#define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
-
 	SET_STATE(STATE::NON, &Player::Non);
 	SET_STATE(STATE::MOVE, &Player::Move);
 	SET_STATE(STATE::ATTACK, &Player::Attack);
@@ -71,14 +49,13 @@ void Player::Load(void)
 	SET_STATE(STATE::EVASION, &Player::Evasion);
 	SET_STATE(STATE::DAMAGE, &Player::Damage);
 	SET_STATE(STATE::DEATH, &Player::Death);
-
 #pragma endregion
 
 
 	// モーションの初期設定と初期モーション再生
+	CreateAnimationController();
 	AnimeLoad();
-	anime_->Play((int)ANIME_TYPE::IDLE);
-
+	AnimePlay((int)ANIME_TYPE::IDLE, true);
 
 	// 音声読み込み
 	Smng::GetIns().Load(SOUND::PLAYER_RUN);
@@ -86,17 +63,16 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_EVASION);
 	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
+	// コライダー生成
+	ColliderCreate(new ColliderCapsule(TAG::PLAYER, HALF_LEN, RADIUS));
 
 	// プレイヤーが抱える下位クラスの読み込み処理
-	SubLoad();
+	LowerLoad();
 }
 
-void Player::Init(void)
+void Player::CharactorInit(void)
 {
-	unit_.pos_ = { 1000.0f,1000.0f,200.0f };
-	unit_.angle_ = {};
-
-	unit_.isAlive_ = true;
+	trans_.pos = { 1000.0f,1000.0f,200.0f };
 
 	state_ = STATE::MOVE;
 
@@ -109,16 +85,13 @@ void Player::Init(void)
 
 	unit_.hp_ = HP_MAX;
 
-	SubInit();
+	LowerInit();
 }
 
-void Player::Update(void)
+void Player::CharactorUpdate(void)
 {
 	// 無敵カウンターの更新
 	Invi();
-
-	// 前フレームの座標をローカル変数に保持(押し戻し処理に使う)
-	BeginFrame();
 
 	// ステート遷移条件
 	StateManager();
@@ -126,7 +99,7 @@ void Player::Update(void)
 	// 現在のステートに対応する関数を実行
 	(this->*stateFuncPtr[(int)state_])();
 
-	SubUpdate();
+	LowerUpdate();
 
 	// 重力
 	Gravity();
@@ -174,11 +147,11 @@ void Player::Update(void)
 	}
 }
 
-void Player::Draw(void)
+void Player::CharactorDraw(void)
 {
 	if (!unit_.isAlive_) { return; }
 
-	SubDraw();
+	LowerDraw();
 
 	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), VTransform(CENTER_DIFF, MGetRotY(unit_.angle_.y))), { LOCAL_ROT,unit_.angle_ });
 	MV1DrawModel(unit_.model_);
@@ -215,10 +188,10 @@ void Player::UiDraw(void)
 	drawHpBar(sPos, size, 0x00ff00);
 }
 
-void Player::Release(void)
+void Player::CharactorRelease(void)
 {
 	// プレイヤーが抱えている下位クラスのゲーム終了時処理
-	SubRelease();
+	LowerRelease();
 
 	// 音声解放
 	Smng::GetIns().Delete(SOUND::PLAYER_RUN);
@@ -244,6 +217,10 @@ void Player::OnGrounded()
 	yAccelSum_ = 0.0f;
 	for (auto& jump : isJump_) { jump = false; }
 	for (auto& cou : jumpKeyCounter_) { cou = 0; }
+}
+
+void Player::OnCollision(TAG type)
+{
 }
 
 void Player::OnCollision(UnitBase* other)
@@ -699,8 +676,6 @@ void Player::CarryJump(void)
 
 void Player::AnimeLoad(void)
 {
-	anime_ = new AnimationController(unit_.model_);
-
 	const std::string ANIME_PATH = "Data/Model/Player/Animation/";
 	anime_->Add((int)ANIME_TYPE::IDLE, 60.0f, (ANIME_PATH + "Idle.mv1").c_str());
 	anime_->Add((int)ANIME_TYPE::RUN, 60.0f, (ANIME_PATH + "Run.mv1").c_str());
@@ -744,7 +719,7 @@ void Player::HpSharpen(int damage)
 }
 
 
-void Player::SubLoad(void)
+void Player::LowerLoad(void)
 {
 	// 通常攻撃（パンチ）
 	punch_ = new PlayerPunch(unit_.pos_, unit_.angle_);
@@ -759,7 +734,7 @@ void Player::SubLoad(void)
 	throwing_->Load();
 
 }
-void Player::SubInit(void)
+void Player::LowerInit(void)
 {
 	// 通常攻撃（パンチ）
 	punch_->Init();
@@ -770,7 +745,7 @@ void Player::SubInit(void)
 	// 特殊攻撃（投げ）
 	throwing_->Init();
 }
-void Player::SubUpdate(void)
+void Player::LowerUpdate(void)
 {
 	// 通常攻撃（パンチ）
 	punch_->Update();
@@ -781,7 +756,7 @@ void Player::SubUpdate(void)
 	// 特殊攻撃（投げ）
 	throwing_->Update();
 }
-void Player::SubDraw(void)
+void Player::LowerDraw(void)
 {
 	// 通常攻撃（パンチ）
 	punch_->Draw();
@@ -792,7 +767,7 @@ void Player::SubDraw(void)
 	// 特殊攻撃（投げ）
 	throwing_->Draw();
 }
-void Player::SubRelease(void)
+void Player::LowerRelease(void)
 {
 	// 通常攻撃（パンチ）
 	if (punch_) {

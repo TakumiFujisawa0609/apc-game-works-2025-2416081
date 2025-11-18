@@ -49,6 +49,24 @@ GameScene::~GameScene()
 {
 }
 
+// 配列の中から特定のオブジェクトを探す
+template<typename T>
+std::vector<T*> ObjSerch(const std::vector<ActorBase*>& objects)
+{
+	std::vector<T*> out;
+	out.reserve(objects.size());
+
+	for (auto* obj : objects)
+	{
+		if (!obj) continue;
+		if (auto* ptr = dynamic_cast<T*>(obj)) {
+			out.push_back(ptr);
+		}
+	}
+
+	return out;
+}
+
 void GameScene::Load(void)
 {
  	this->Release();
