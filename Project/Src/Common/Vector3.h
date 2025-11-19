@@ -1,6 +1,6 @@
 #pragma once
 
-#include<DxLib.h>
+#include"../Utility/Utility.h"
 
 struct Vector3
 {
@@ -90,13 +90,24 @@ struct Vector3
 	float Length(void)const { return sqrtf(LengthSq()); }
 
 	// 正規化された値を返す
-	Vector3 Normalized(void)const { return (Vector3(x, y, z) / Length()); }
+	Vector3 Normalized(void)const { return (*this / Length()); }
 
 	// 正規化する
-	Vector3 Normalize(void) {
+	void Normalize(void) {
 		float len = Length();
 		x /= len; y /= len; z /= len;
 	}
 
+	// 行列で変換
+	Vector3 TransMat(const MATRIX& mat)const {
+		if (*this == 0.0f) { return Vector3(); }
+		return VTransform(*this, mat);
+	}
+
+	// 行列で変換(自身を変換)
+	void TransMatOwn(const MATRIX& mat) {
+		if (*this == 0.0f) { return; }
+		*this = VTransform(*this, mat);
+	}
 
 };

@@ -13,13 +13,15 @@ ActorBase::ActorBase() :
 
 	AccelSum(0.0f, 0.0f, 0.0f),
 
-	isGroundMaster(false)
+	isGroundMaster(false),
+
+	isDraw(1)
 {
 }
 
 void ActorBase::Init(void)
 {
-	LowerInit();
+	SubInit();
 }
 
 void ActorBase::Update(void)
@@ -28,7 +30,7 @@ void ActorBase::Update(void)
 	if (dynamicFlg_ == 1) { prevPos_ = trans_.pos; }
 
 	// ”h¶æ’Ç‰ÁXV
-	LowerUpdate();
+	SubUpdate();
 
 	// d—Íˆ—
 	if (dynamicFlg_ == 1 && isGravity == 1) { Gravity(); }
@@ -40,7 +42,7 @@ void ActorBase::Update(void)
 void ActorBase::Draw(void)
 {
 	// ”h¶æ’Ç‰Á•`‰æ
-	LowerDraw();
+	SubDraw();
 
 	// ƒ‚ƒfƒ‹‚Ì•`‰æ
 	trans_.Draw();
@@ -54,7 +56,7 @@ void ActorBase::Draw(void)
 void ActorBase::Release(void)
 {
 	// ”h¶æ’Ç‰Á‰ğ•ú
-	LowerRelease();
+	SubRelease();
 
 	// “–‚½‚è”»’èî•ñ‚ğ‰ğ•ú
 	for (ColliderBase*& c : collider_) {

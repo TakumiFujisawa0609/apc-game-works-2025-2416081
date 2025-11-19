@@ -6,7 +6,12 @@ CharactorBase::CharactorBase():
 	state_(0),
 	stateFuncPtr(),
 
-	anime_(nullptr)
+	DEFAULT_COLOR(),
+
+	anime_(nullptr),
+
+	inviCounter_(0),
+	isInviEffect_(1)
 {
 }
 
@@ -14,25 +19,20 @@ CharactorBase::~CharactorBase()
 {
 }
 
-void CharactorBase::LowerInit(void)
+void CharactorBase::SubInit(void)
 {
-	// モデルデフォルトカラーの保存
-	int mnum = MV1GetMaterialNum(trans_.model);
-	for (int i = 0; i < mnum; ++i) {
-		COLOR_F emi = MV1GetMaterialEmiColor(trans_.model, i);
-		emi.r = (std::min)(emi.r + 0.4f, 1.0f);
-		emi.g = (std::min)(emi.g + 0.4f, 1.0f);
-		emi.b = (std::min)(emi.b + 0.4f, 1.0f);
-		DEFAULT_COLOR.emplace_back(emi);
-		MV1SetMaterialEmiColor(trans_.model, i, emi);
-	}
+	// モデルのカラーの初期化
+	SetInviEffectFlg();
 
 	// キャラクター固有の初期化
 	CharactorInit();
 }
 
-void CharactorBase::LowerUpdate(void)
+void CharactorBase::SubUpdate(void)
 {
+	// 無敵カウンターの更新
+	Invi();
+
 	// キャラクター固有の更新
 	CharactorUpdate();
 
@@ -41,22 +41,57 @@ void CharactorBase::LowerUpdate(void)
 
 }
 
-void CharactorBase::LowerDraw(void)
+void CharactorBase::SubDraw(void)
 {
 	// キャラクター固有の描画
 	CharactorDraw();
 }
 
-void CharactorBase::LowerRelease(void)
+void CharactorBase::SubRelease(void)
 {
 	// キャラクター固有の解放
 	CharactorRelease();
+
+	// デフォルトカラー情報の解放
+	if (!DEFAULT_COLOR.empty()) {
+		DEFAULT_COLOR.clear();
+	}
 
 	// アニメーションコントローラーの解放（使われていたら）
 	if (anime_) {
 		anime_->Release();
 		delete anime_;
 		anime_ = nullptr;
+	}
+}
+
+void CharactorBase::Invi(void)
+{
+	if (inviCounter_ > 0) { inviCounter_--; }
+	else { inviCounter_ = 0; }
+
+	// ダメージ演出
+	if (isInviEffect_ == 0) { return; }
+
+	if (inviCounter_ > 1) {
+		if (inviCounter_ / 10 % 2 == 0) {
+			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
+				MV1SetMaterialEmiColor(trans_.model, i, DEFAULT_COLOR[i]);
+			}
+		}
+		else {
+			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
+				COLOR_F emi = DEFAULT_COLOR[i];
+				emi.r = (std::min)(DEFAULT_COLOR[i].r + 0.6f, 1.0f);
+				MV1SetMaterialEmiColor(trans_.model, i, emi);
+			}
+		}
+
+	}
+	else if (inviCounter_ == 1) {
+		for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
+			MV1SetMaterialEmiColor(trans_.model, i, DEFAULT_COLOR[i]);
+		}
 	}
 }
 

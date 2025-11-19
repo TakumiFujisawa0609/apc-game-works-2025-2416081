@@ -16,11 +16,14 @@ public:
 	void Draw(void);
 	void Release(void);
 
+	// モデルを複製する
+	void ModelLoad(int model) { trans_.model = MV1DeleteModel(model); }
+
 	// モデル制御情報構造体のゲット関数
 	Transform GetTrans(void)const { return trans_; }
 
 	// 当たり判定の通知
-	virtual void OnCollision(TAG type) {}
+	virtual void OnCollision(const ColliderBase& collider) {}
 
 	// 接地判定の通知
 	virtual void OnGrounded() {}
@@ -51,6 +54,9 @@ private:
 	// 接地判定 管理用(派生先で変更不可で参照渡し)
 	bool isGroundMaster;
 
+	// 描画判定 （1 = 「描画する」、0 = 「描画しない」）
+	unsigned char isDraw;
+
 protected:
 	// モデル制御情報構造体
 	Transform trans_;
@@ -70,14 +76,34 @@ protected:
 	void ColliderCreate(ColliderBase* newClass) {
 		collider_.emplace_back(newClass);
 		collider_.back()->SetTransformPtr(&trans_);
-		collider_.back()->SetOnCollisionFun([this](TAG type) { this->OnCollision(type); });
+		collider_.back()->SetOnCollisionFun([this](const ColliderBase& collider) { this->OnCollision(collider); });
 	}
 
 	/// <summary>
-	/// 移動量加算を行うかを切り替える
+	/// 特定のコライダーを探す
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="tag"></param>
+	/// <returns></returns>
+	template<typename T>
+	std::vector<T*> ColliderSerch(TAG tag = TAG::NON) {
+		std::vector<T*> out;
+		out.reserve(collider_.size());
+
+		for (auto c : collider_) {
+			if (!obj) continue;
+			if (auto* ptr = dynamic_cast<T*>(c)) {
+				if (c->GetTag() == tag || tag == TAG::NON) { out.push_back(ptr); }
+			}
+		}
+		return out;
+	}
+
+	/// <summary>
+	/// 移動するかを切り替える
 	/// </summary>
 	/// <param name="flg">1 = 「移動する」に切り替える、0 = 「移動しない」に切り替える</param>
-	void SetDynamicFlg(unsigned char flg) { dynamicFlg_ = (flg == 0 || flg == 1) ? flg : dynamicFlg_; }
+	void SetDynamicFlg(bool flg) { dynamicFlg_ = (flg) ? 1 : 0; }
 
 	/// <summary>
 	/// 重力を適用するかを切り替える
@@ -85,12 +111,35 @@ protected:
 	/// <param name="flg">1 = 「する」に切り替える、0 = 「しない」に切り替える</param>
 	void SetGravityFlg(unsigned char flg) { isGravity = (flg == 0 || flg == 1) ? flg : isGravity; }
 
+	/// <summary>
+	/// 当たり判定フラグの取得
+	/// </summary>
+	/// <returns>どれか一つでも「判定する」状態ならtrue</returns>
+	bool GetJudgeFlg(void) {
+		for (const ColliderBase*& c : collider_) {
+			if (!c) { continue; }
+			if (c->GetJudge() == 1) { return true; }
+		}
+		return false;
+	}
+
+	// 当たり判定スキップの設定（true = 「判定する」、false = 「判定しない」、指定なし = 現在と逆にスイッチ）
+	void SetJudge(bool flg) {
+		for (ColliderBase*& c : collider_) {
+			if (!c) { continue; }
+			c->SetJudgeFlg((flg) ? 1 : 0);
+		}
+	}
+
+	// 描画判定の設定（true = 「描画する」、false = 「描画しない」）
+	void SetIsDraw(bool flg) { isDraw = (flg) ? 1 : 0; }
+
 	// 派生先追加初期化
-	virtual void LowerInit(void) = 0;
+	virtual void SubInit(void) = 0;
 	// 派生先追加更新
-	virtual void LowerUpdate(void) = 0;
+	virtual void SubUpdate(void) = 0;
 	// 派生先追加描画
-	virtual void LowerDraw(void) = 0;
+	virtual void SubDraw(void) = 0;
 	// 派生先追加解放
-	virtual void LowerRelease(void) = 0;
+	virtual void SubRelease(void) = 0;
 };

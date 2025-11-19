@@ -17,17 +17,28 @@ public:
 
 private:
 	// 初期化
-	void LowerInit(void)override;
+	void SubInit(void)override;
 	// 更新
-	void LowerUpdate(void)override;
+	void SubUpdate(void)override;
 	// 描画
-	void LowerDraw(void)override;
+	void SubDraw(void)override;
 	// 解放
-	void LowerRelease(void)override;
+	void SubRelease(void)override;
 
+	// モデルデフォルトカラー保存用配列
 	std::vector<COLOR_F> DEFAULT_COLOR;
 
+	// アニメーションコントローラーのインスタンス
 	AnimationController* anime_;
+
+	// 無敵カウンター
+	unsigned char inviCounter_;
+	
+	// 無敵カウンターの更新
+	void Invi(void);
+
+	// 無敵カウンターによるダメージ演出を行うかどうか（1 = 「する」、0 = 「しない」）← デフォルトは「する」
+	unsigned char isInviEffect_;
 
 protected:
 	// ステート管理用変数
@@ -71,6 +82,36 @@ protected:
 	
 #pragma endregion オーバーライド不可(使用のみ)
 
+	// 無敵カウンターのゲット関数
+	unsigned char GetInviCounter(void)const { return inviCounter_; }
+	// 無敵カウンターのセット関数
+	void SetInviCounter(unsigned char counter) { inviCounter_ = (counter < 0) ? 0 : (counter > 255) ? 255 : counter; }
 
+	// 無敵演出フラグのセット関数（true = 「する」、false = 「しない」）← デフォルトは「する」
+	void SetInviEffectFlg(bool flg = true) {
+		if (isInviEffect_ == (flg) ? 1 : 0) { return; }
+
+		isInviEffect_ = (flg) ? 1 : 0;
+
+		// 無敵演出フラグが変わったとき色をデフォルトに戻す
+
+		// 無敵演出フラグが「する」に変わったときはモデルデフォルトカラーを保存しておく
+		int mnum = MV1GetMaterialNum(trans_.model);
+		for (int i = 0; i < mnum; ++i) {
+			COLOR_F emi = MV1GetMaterialEmiColor(trans_.model, i);
+
+			emi.r = (std::min)(emi.r + 0.4f, 1.0f);
+			emi.g = (std::min)(emi.g + 0.4f, 1.0f);
+			emi.b = (std::min)(emi.b + 0.4f, 1.0f);
+
+			// モデルデフォルトカラーの保存
+			if (isInviEffect_) { DEFAULT_COLOR.emplace_back(emi); }
+
+			MV1SetMaterialEmiColor(trans_.model, i, emi);
+		}
+
+		// 「しない」に変わったときは必要ないので情報を破棄する
+		if (isInviEffect_ == 0) { DEFAULT_COLOR.clear(); }
+	}
 
 };

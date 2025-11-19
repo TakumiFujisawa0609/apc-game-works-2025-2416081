@@ -1,6 +1,9 @@
 #include"PlayerPunch.h"
 
-PlayerPunch::PlayerPunch(const VECTOR& playerPos, const VECTOR& playerAngle):
+#include"../../../Common/Collider/ColliderSphere.h"
+
+PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
+	ActorBase(),
 	playerPos(playerPos),
 	playerAngle(playerAngle)
 {
@@ -8,39 +11,16 @@ PlayerPunch::PlayerPunch(const VECTOR& playerPos, const VECTOR& playerAngle):
 
 void PlayerPunch::Load(void)
 {
-	unit_.para_.colliType = CollisionType::ALLY;
-	unit_.para_.colliShape = CollisionShape::SPHERE;
-
-	unit_.para_.radius = RADIUS;
+	ColliderCreate(new ColliderSphere(TAG::PLAYER_PUNCH, RADIUS));
 }
 
-void PlayerPunch::Init(void)
+void PlayerPunch::SubUpdate(void)
 {
-	unit_.isAlive_ = false;
+	if (GetJudgeFlg() == false) { return; }
+	trans_.pos = playerPos + LOCAL_POS.TransMat(MGetRotY(playerAngle.y));
 }
 
-void PlayerPunch::Update(void)
-{
-	if (!unit_.isAlive_) { return; }
-	
-	MATRIX matRot = MGetIdent();
-	matRot = MMult(matRot, MGetRotY(playerAngle.y));
-	unit_.pos_ = VAdd(playerPos, VTransform(LOCAL_POS, matRot));
-}
-
-void PlayerPunch::Draw(void)
-{
-	if (!unit_.isAlive_) { return; }
-
-	//DrawSphere3D(unit_.pos_, unit_.para_.radius, 4, 0x000000, 0x000000, true);
-}
-
-void PlayerPunch::Release(void)
-{
-
-}
-
-void PlayerPunch::OnCollision(UnitBase* other)
+void PlayerPunch::OnCollision(const ColliderBase& collider)
 {
 
 }

@@ -1,21 +1,20 @@
 #pragma once
 
-#include"../../UnitBase.h"
+#include"../../../ActorBase.h"
 
-class ThrowObjBase : public UnitBase
+class ThrowObjBase : public ActorBase
 {
 public:
-	ThrowObjBase(const VECTOR& playerPos_, const VECTOR& playerAngle_);
+	ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_);
 	virtual ~ThrowObjBase() = 0;
 
-	void ModelLoad(int model);
-	virtual void Load(void)override;
-	virtual void Init(void)override;
-	virtual void Update(void)override;
-	virtual void Draw(void)override;
-	virtual void Release(void)override;
+	void Load(void)override;
+	void SubInit(void)override;
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubRelease(void)override {}
 
-	virtual void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
 	enum class STATE
 	{
@@ -63,11 +62,11 @@ protected:
 
 
 
-	const VECTOR CARRY_OBJ_LOCAL_POS = { 100.0f,80.0f,0.0f };
+	const Vector3 CARRY_OBJ_LOCAL_POS = { 100.0f,80.0f,0.0f };
 
-	const VECTOR LOCAL_THROW_POS = { 0.0f,50.0f,100.0f };
-	const VECTOR THROW_VEC = { 0.0f,0.0f,1.0f };
+	const Vector3 LOCAL_THROW_POS = { 0.0f,50.0f,100.0f };
+	const Vector3 THROW_VEC = { 0.0f,0.0f,1.0f };
 
-	const VECTOR& playerPos_;
-	const VECTOR& playerAngle_;
+	const Vector3& playerPos_;
+	const Vector3& playerAngle_;
 };

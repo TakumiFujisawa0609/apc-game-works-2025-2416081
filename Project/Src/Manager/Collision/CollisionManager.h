@@ -21,7 +21,7 @@ public:
 	// オブジェクト追加
 	void Add(ColliderBase*& collider);
 	// オブジェクト追加
-	void Add(std::vector<ColliderBase*>& collider) { for (ColliderBase*& c : collider) { if (c) { playerColliders_.emplace_back(c); } } }
+	void Add(std::vector<ColliderBase*>& collider) { for (ColliderBase*& c : collider) { Add(c); } }
 
 	// 判定実行
 	void Check(void);

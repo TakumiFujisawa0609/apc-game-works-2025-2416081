@@ -1,10 +1,12 @@
 #include"ThrowObjBase.h"
 
-#include"../../../Manager/Collision/CollisionUtility.h"
+#include"../../../../Manager/Collision/CollisionUtility.h"
 
-#include"../../Boss/Boss.h"
+#include"../../../Boss/Boss.h"
 
-ThrowObjBase::ThrowObjBase(const VECTOR& playerPos_, const VECTOR& playerAngle_) :
+ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_) :
+	ActorBase(),
+
 	playerPos_(playerPos_),
 	playerAngle_(playerAngle_),
 
@@ -27,16 +29,11 @@ ThrowObjBase::~ThrowObjBase()
 {
 }
 
-void ThrowObjBase::ModelLoad(int model)
-{
-	unit_.model_ = MV1DuplicateModel(model);
-}
-
 void ThrowObjBase::Load(void)
 {
 }
 
-void ThrowObjBase::Init(void)
+void ThrowObjBase::SubInit(void)
 {
 #pragma region 関数ポインタ配列へ各関数を格納
 #define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
@@ -47,21 +44,42 @@ void ThrowObjBase::Init(void)
 #pragma endregion
 }
 
-void ThrowObjBase::Update(void)
+void ThrowObjBase::SubUpdate(void)
 {
 	(this->*stateFuncPtr[(int)state_])();
+
+	switch (state_)
+	{
+	case ThrowObjBase::STATE::NON:
+		SetIsDraw(false);
+		SetJudge(false);
+		break;
+	case ThrowObjBase::STATE::CARRY:
+	case ThrowObjBase::STATE::DROP:
+		SetIsDraw(true);
+		SetJudge(false);
+		break;
+	case ThrowObjBase::STATE::THROW:
+		SetIsDraw(true);
+		SetJudge(true);
+	}
 }
 
-void ThrowObjBase::Draw(void)
+void ThrowObjBase::OnCollision(const ColliderBase& collider)
 {
-	if (state_ == STATE::NON) { return; }
-	Utility::MV1ModelMatrix(unit_.model_, unit_.pos_, { unit_.angle_ });
-	MV1DrawModel(unit_.model_);
-}
+	TAG tag = collider.GetTag();
+	if (tag == TAG::BOSS || tag == TAG::GOLEM_ATTACK_STONE) { state_ == STATE::DROP; }
 
-void ThrowObjBase::Release(void)
-{
-	MV1DeleteModel(unit_.model_);
+	switch (state_)
+	{
+	case ThrowObjBase::STATE::NON:
+	case ThrowObjBase::STATE::CARRY:
+	case ThrowObjBase::STATE::DROP:
+		return;
+	case ThrowObjBase::STATE::THROW:
+		// 何回か当たったら消える処理をあとで書きます
+		return;
+	}
 }
 
 void ThrowObjBase::OnCollision(UnitBase* other)
@@ -99,7 +117,7 @@ void ThrowObjBase::OnCollision(UnitBase* other)
 
 void ThrowObjBase::Throw(void)
 {
-	unit_.pos_ = VAdd(playerPos_, VTransform(LOCAL_THROW_POS, MGetRotY(playerAngle_.y)));
+	trans_.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
 
 	moveVec_ = VScale(VTransform(THROW_VEC, MGetRotY(playerAngle_.y)), unit_.para_.speed);
 

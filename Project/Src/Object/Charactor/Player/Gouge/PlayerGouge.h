@@ -1,13 +1,13 @@
 #pragma once
 
-#include"../../UnitBase.h"
+#include"../../../ActorBase.h"
 
-class PlayerGouge :public UnitBase
+class PlayerGouge : public ActorBase
 {
 public:
 	enum class STATE
 	{
-		NON=-1,
+		NON = -1,
 
 		SEARCH,
 		GOUGE,
@@ -15,16 +15,16 @@ public:
 		MAX
 	};
 
-	PlayerGouge(const VECTOR& playerPos, const VECTOR& playerAngle);
-	~PlayerGouge();
+	PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle);
+	~PlayerGouge()override {}
 
 	void Load(void)override;
-	void Init(void)override;
-	void Update(void)override;
-	void Draw(void)override;
-	void Release(void)override;
+	void SubInit(void)override;
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubRelease(void)override {}
 
-	void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
 	int GetState(void)const { return (int)state_; }
 
@@ -42,8 +42,8 @@ private:
 	bool searchHit_;
 	bool gougeHit_;
 
-	const VECTOR LOCAL_POS = { 0.0f,150.0f,0.0f };
-	const VECTOR FOOT_POS = { 0.0f,-90.0f,0.0f };
-	const VECTOR& playerPos;
-	const VECTOR& playerAngle;
+	const Vector3 LOCAL_POS = { 0.0f,150.0f,0.0f };
+	const Vector3 FOOT_POS = { 0.0f,-90.0f,0.0f };
+	const Vector3& playerPos;
+	const Vector3& playerAngle;
 };

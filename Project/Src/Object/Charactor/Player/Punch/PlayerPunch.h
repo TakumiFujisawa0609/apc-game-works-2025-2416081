@@ -1,31 +1,29 @@
 #pragma once
 
-#include"../../UnitBase.h"
+#include"../../../ActorBase.h"
 
-class PlayerPunch : public UnitBase
+class PlayerPunch : public ActorBase
 {
 public:
-	static constexpr float RADIUS = 120.0f;
-	static constexpr VECTOR LOCAL_POS = { 0.0f,0.0f,70.0f };
+	const float RADIUS = 120.0f;
+	const Vector3 LOCAL_POS = { 0.0f,0.0f,70.0f };
 
-
-	PlayerPunch(const VECTOR& playerPos, const VECTOR& playerAngle);
+	PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle);
 	~PlayerPunch()override {};
 
 	void Load(void)override;
-	void Init(void)override;
-	void Update(void)override;
-	void Draw(void)override;
-	void Release(void)override;
+	void SubInit(void)override {}
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubRelease(void)override {}
 
-	void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
-	void On(void) { unit_.isAlive_ = true; }
-	void Off(void) { unit_.isAlive_ = false; }
+	void On(void) { SetJudge(true); }
+	void Off(void) { SetJudge(false); }
 
 private:
-	const VECTOR& playerPos;
-	const VECTOR& playerAngle;
-
+	const Vector3& playerPos;
+	const Vector3& playerAngle;
 };
 

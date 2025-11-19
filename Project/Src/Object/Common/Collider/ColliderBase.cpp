@@ -8,6 +8,7 @@
 ColliderBase::ColliderBase(TAG type, float enoughDistance, Vector3 pos) :
 	trans_(nullptr),
 	enoughDistance_(enoughDistance),
+	judgeFlg_(0),
 	pos_(pos),
 	type_(type),
 	shape_(SHAPE::NON),

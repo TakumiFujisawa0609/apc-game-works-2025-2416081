@@ -6,14 +6,24 @@
 
 void CollisionManager::Add(ColliderBase*& collider)
 {
+	if (!collider) { return; }
+
 	// タイプを見分けて適した配列に格納
-	switch (collider->GetType())
+	switch (collider->GetTag())
 	{
 		case TAG::NON:break;
+
 		case TAG::PLAYER:
+		case TAG::PLAYER_PUNCH:
+		case TAG::PLAYER_GOUGE:
+		case TAG::PLAYER_THROWING:
 			playerColliders_.emplace_back(collider);
 			break;
 		case TAG::ENEMY:
+		case TAG::BOSS:
+		case TAG::GOLEM_ATTACK_FALL:
+		case TAG::GOLEM_ATTACK_PSYCHOROCK:
+		case TAG::GOLEM_ATTACK_STONE:
 			enemyColliders_.emplace_back(collider);
 			break;
 		case TAG::STAGE:
@@ -38,13 +48,15 @@ void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<Coll
 {
 	for (ColliderBase*& a : as) {
 		if (!a) { continue; }
+		if (a->GetJudge() == 0) { continue; }
 
 		for (ColliderBase*& b : bs) {
 			if (!b) { continue; }
+			if (b->GetJudge() == 1) { continue; }
 
 			if (IsHit(a, b)) {
-				a->CallOnCollision(b->GetType());
-				b->CallOnCollision(a->GetType());
+				a->CallOnCollision(b->GetTag());
+				b->CallOnCollision(a->GetTag());
 			}
 		}
 	}

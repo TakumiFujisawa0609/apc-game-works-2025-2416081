@@ -143,3 +143,7 @@ public:
 	static VECTOR FtoV(float f) { return { f,f,f }; }
 };
 
+static Vector3 VTransform(const Vector3& v, const MATRIX& m) {
+	if (v == 0.0f) { return Vector3(); }
+	return Vector3(VTransform(v.ToVECTOR(), m));
+}

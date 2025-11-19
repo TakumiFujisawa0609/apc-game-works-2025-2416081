@@ -30,7 +30,7 @@ public:
 	void UiDraw(void);
 	virtual void CharactorRelease(void) = 0;
 
-	void OnCollision(TAG type)override;
+	void OnCollision(const ColliderBase& collider)override;
 	void OnGrounded()override;
 
 
@@ -51,7 +51,6 @@ public:
 
 	static constexpr int HP_MAX = 100;
 
-
 	// 移動状態で使用する～～-------------------------------------------------------------------
 	// 定数
 	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
@@ -70,7 +69,7 @@ public:
 	//----------------------------------------------------------------------------------------------
 
 	// プレイヤーが抱える下位クラスのインスタンスを配列に格納して返す
-	std::vector<UnitBase*>GetSubIns(void);
+	std::vector<ActorBase*>GetSubIns(void);
 
 	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival_ = std::move(ptr); }
 
@@ -107,7 +106,7 @@ private:
 
 	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
-
+	int hp_;
 
 #pragma region 状態別関数の中身
 	// 移動処理関係--------------------------
@@ -150,14 +149,11 @@ private:
 	//～～～～～～～～～～～～～～～～
 
 
-	VECTOR knockBackVec_;
+	Vector3 knockBackVec_;
 
 #pragma endregion
 
 #pragma region モーション
-	// モーション管理クラスのインスタンス
-	AnimationController* anime_;
-
 	// モーションの全て
 	enum class ANIME_TYPE {
 		IDLE,
@@ -180,10 +176,7 @@ private:
 	// モーションの初期設定
 	void AnimeLoad(void);
 
-
 	void HpSharpen(int damage);
-
-
 #pragma endregion
 
 #pragma region プレイヤーが抱える下位クラスのメイン処理をまとめて呼び出す
@@ -194,7 +187,7 @@ private:
 	void LowerRelease(void);
 #pragma endregion
 
-
+	// ステージ復活時に呼び出す関数ポインタ
 	std::function<void(void)>stageRevival_;
 };
 

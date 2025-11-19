@@ -13,6 +13,7 @@ public:
 	~ColliderSphere()override {}
 
 	float GetRadius(void)const { return radius_; }
+	void SetRadius(float radius) { radius_ = radius; }
 
 private:
 	float radius_;
