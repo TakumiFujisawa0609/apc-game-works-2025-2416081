@@ -30,7 +30,7 @@ public:
 	void Drop(void) { state_ = STATE::DROP; }
 	virtual void Throw(void);
 
-	int GetState(void)const override { return (int)state_; }
+	STATE GetState(void)const { return state_; }
 
 protected:
 	int model_;
@@ -49,9 +49,10 @@ protected:
 	//Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
 
-
 	// ìäÇ∞ÇΩå„ÇÃèàóùÇ…égÇ§Å`Å`Å`Å`Å`Å`
-	VECTOR moveVec_;
+	Vector3 moveVec_;
+
+	float speed_;
 
 	int aliveTime;
 	int aliveCounter_;
@@ -59,8 +60,6 @@ protected:
 	int ALIVE_HIT_NUM;
 	int aliveHitCou_;
 	//Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
-
-
 
 	const Vector3 CARRY_OBJ_LOCAL_POS = { 100.0f,80.0f,0.0f };
 

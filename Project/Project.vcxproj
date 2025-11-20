@@ -156,7 +156,6 @@
     <ClCompile Include="Src\Object\Boss\Boss.cpp" />
     <ClCompile Include="Src\Object\Charactor\CharactorBase.cpp" />
     <ClCompile Include="Src\Object\Common\Collider\ColliderBase.cpp" />
-    <ClCompile Include="Src\Object\Grid\Grid.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Player.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Punch\PlayerPunch.cpp" />
@@ -207,8 +206,8 @@
     <ClInclude Include="Src\Object\Common\Collider\ColliderCapsule.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderLine.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderSphere.h" />
+    <ClInclude Include="Src\Object\Common\Collider\ColliderVoxel.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
-    <ClInclude Include="Src\Object\Grid\Grid.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Player.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Punch\PlayerPunch.h" />

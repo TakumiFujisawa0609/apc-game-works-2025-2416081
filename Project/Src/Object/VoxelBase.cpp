@@ -8,8 +8,6 @@
 
 #include"../Application/Application.h"
 
-#include"Player/Player.h"
-
 VoxelBase::VoxelBase() :
 
     camera_(nullptr),
@@ -36,18 +34,16 @@ void VoxelBase::Load(void)
 {
     SubLoad();
 
-    if (unit_.model_ != -1) {
-        const VECTOR worldCenterForImport =
-            VAdd(unit_.WorldPos(), gridCenter_);
+    if (trans_.model != -1) {
 
         BuildVoxelMeshFromMV1Handle(
-            unit_.model_,
+            trans_.model,
             cell_,
-            worldCenterForImport,
-            VScale(unit_.para_.size, 0.5f),
+            trans_.WorldPos() + gridCenter_,
+            ,
             batches_
         );
-        MV1DeleteModel(unit_.model_);
+        trans_.Release();
     }
 }
 
@@ -79,10 +75,7 @@ void VoxelBase::Update(void)
 
 void VoxelBase::Draw(void)
 {
-    if (!unit_.isAlive_) return;
-
     SubDraw();
-
 
     MATRIX M = MGetTranslate(unit_.WorldPos());
     SetTransformToWorld(&M);
@@ -118,7 +111,7 @@ void VoxelBase::Release(void)
 
 
 #pragma region メッシュ生成
-bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, std::vector<MeshBatch>& batches)
+bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& halfExt, std::vector<MeshBatch>& batches)
 {
     // 1) グリッド解像度
     Nx_ = (int)std::ceil((halfExt.x * 2) / cell);
@@ -138,19 +131,19 @@ bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const VECTOR& c
     return !(batches.empty());
 }
 
-void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const VECTOR& center, const VECTOR& halfExt, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
+void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const Vector3& center, const Vector3& halfExt, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
 {
     MV1SetupCollInfo(mv1, -1);
-    VECTOR minW = VSub(center, halfExt);
+    Vector3 minW = center - halfExt;
     float r = cell * 0.5f;
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)
             for (int x = 0; x < Nx; ++x) {
-                VECTOR pc = VGet(
+                Vector3 pc = Vector3(
                     minW.x + (x * cell) + (cell * 0.5f),
                     minW.y + (y * cell) + (cell * 0.5f),
                     minW.z + (z * cell) + (cell * 0.5f));
-                auto res = MV1CollCheck_Sphere(mv1, -1, pc, r);
+                auto res = MV1CollCheck_Sphere(mv1, -1, pc.ToVECTOR(), r);
                 if ((res.HitNum > 0)) { density[Idx(x, y, z, Nx, Ny)] = 200; }
                 MV1CollResultPolyDimTerminate(res);
             }
@@ -218,7 +211,7 @@ void VoxelBase::BuildGreedyMesh(
     cur.bmin = { +INF, +INF, +INF };
     cur.bmax = { -INF, -INF, -INF };
 
-    auto updAabb = [&](const VECTOR& p) {
+    auto updAabb = [&](const Vector3& p) {
         cur.bmin.x = (std::min)(cur.bmin.x, p.x);
         cur.bmin.y = (std::min)(cur.bmin.y, p.y);
         cur.bmin.z = (std::min)(cur.bmin.z, p.z);
@@ -334,13 +327,13 @@ void VoxelBase::BuildGreedyMesh(
                         return VGet(xf, yf, zf);
                         };
 
-                    VECTOR p00 = facePos(i, j);
-                    VECTOR p10 = facePos(i + wlen, j);
-                    VECTOR p11 = facePos(i + wlen, j + hlen);
-                    VECTOR p01 = facePos(i, j + hlen);
+                    Vector3 p00 = facePos(i, j);
+                    Vector3 p10 = facePos(i + wlen, j);
+                    Vector3 p11 = facePos(i + wlen, j + hlen);
+                    Vector3 p01 = facePos(i, j + hlen);
 
                     // 法線ベクトル
-                    VECTOR nrm{ 0,0,0 };
+                    Vector3 nrm{ 0,0,0 };
                     (&nrm.x)[d] = (float)nSign; // d軸に ±1
 
                     // BuildGreedyMesh の UV 決定付近
@@ -353,10 +346,10 @@ void VoxelBase::BuildGreedyMesh(
                     u0 += UV_EPS; v0 += UV_EPS;
                     u1 -= UV_EPS; v1 -= UV_EPS;
 
-                    auto makeV = [&](const VECTOR& P, float uu, float vv)->VERTEX3D {
+                    auto makeV = [&](const Vector3& P, float uu, float vv)->VERTEX3D {
                         VERTEX3D v{};
-                        v.pos = P;
-                        v.norm = nrm;                               // ← 照明向け法線
+                        v.pos = P.ToVECTOR();
+                        v.norm = nrm.ToVECTOR();                    // ← 照明向け法線
                         v.dif = GetColorU8(255, 255, 255, 255);     // ← 頂点拡散色
                         v.spc = GetColorU8(0, 0, 0, 0);             // ← スペキュラ未使用
                         v.u = uu; v.v = vv;                         // ← そのままタイル
@@ -401,20 +394,20 @@ void VoxelBase::BuildGreedyMesh(
     flush();
 
 	// 生存しているセル中心位置リストを作成
-    cellCenterPoss_.clear(); cellCenterPoss_.reserve(500);
-    cellCenterWorldPoss_.clear(); cellCenterWorldPoss_.reserve(500);
+    cellCenterPoss_.clear();
+    cellCenterWorldPoss_.clear();
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)
             for (int x = 0; x < Nx; ++x) {
                 if (density[Idx(x, y, z)] == 0) continue;
-                VECTOR lp = {
+                Vector3 lp = {
                     (x - Nx / 2) * cell,
                     (y - Ny / 2) * cell,
                     (z - Nz / 2) * cell
                 };
-                cellCenterPoss_.push_back(lp);
-                cellCenterWorldPoss_.push_back(VAdd(lp, unit_.pos_));
-			}
+                cellCenterPoss_[Idx(x, y, z)] = lp;
+                cellCenterWorldPoss_[Idx(x, y, z)] = trans_.pos + lp;
+            }
 
 	// 生存比率を計算して、一定以下なら死滅扱いにする
 	const int totalCells = Nx * Ny * Nz;
@@ -445,8 +438,8 @@ bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
 {
     if (amount == 0 || density_.empty()) return false;
 
-    const VECTOR centerW = VAdd(unit_.pos_, unit_.para_.center);
-    const VECTOR C = VAdd(other.pos_, other.para_.center);
+    const Vector3 centerW = trans_.WorldPos();
+    const Vector3 C = other.WorldPos();
     const float  R = other.para_.radius;
 
     const int cx = (int)std::round((C.x - centerW.x) / cell_) + Nx_ / 2;
@@ -713,5 +706,6 @@ void VoxelBase::ReVival(void)
 {
     density_ = densityInit_;
     regeneration_ = true;
+
     unit_.isAlive_ = true;
 }

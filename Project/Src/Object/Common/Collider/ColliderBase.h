@@ -102,6 +102,9 @@ private:
 	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
 	unsigned char judgeFlg_;
 
+	// 押し出しを行うかどうかのフラグ（1 = 「行う」、0 = 「行わない」）
+	unsigned char pushFlg_;
+
 	// 当たり判定タイプ（何と当たったかを見分ける用）
 	TAG type_;
 

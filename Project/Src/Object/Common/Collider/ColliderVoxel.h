@@ -1,0 +1,44 @@
+#pragma once
+
+#include<map>
+
+#include"ColliderBase.h"
+
+class ColliderVoxel : public ColliderBase
+{
+public:
+	ColliderVoxel(TAG type, const float& cellSize, const std::map<int, Vector3>& cellLocalPoss, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+		ColliderBase(type, enoughDistance, pos),
+		cellSize_(cellSize),
+		cellLocalPoss_(cellLocalPoss)
+	{
+	}
+	~ColliderVoxel()override {}
+
+#pragma region 各ゲット関数
+	
+	// セルサイズを取得(float版)
+	const float& GetCellSize(void)const { return cellSize_; }
+	// セルサイズを取得(Vector3版)
+	const Vector3 GetCellSizeVECTOR(void) const { return Vector3(cellSize_, cellSize_, cellSize_); }
+
+	// 生存しているセルのローカル中心座標群を取得
+	const std::map<int, Vector3>& GetCellLocalPoss(void) const { return cellLocalPoss_; }
+	// 生存しているセルのワールド中心座標群を取得
+	std::map<int, Vector3> GetCellWorldPoss(void)const {
+		std::map<int, Vector3> ret;
+		for (const std::pair<int,Vector3>& localPos : cellLocalPoss_) {
+			ret[localPos.first] = GetPos() + localPos.second;
+		}
+		return ret;
+	}
+
+#pragma endregion
+
+private:
+	// セルサイズ
+	const float& cellSize_;
+
+	// 生存しているセルのローカル中心座標群
+	const std::map<int, Vector3>& cellLocalPoss_;
+};

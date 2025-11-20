@@ -11,10 +11,10 @@ public:
 	virtual ~ActorBase() = 0;
 
 	virtual void Load(void) = 0;
-	void Init(void);
-	void Update(void);
-	void Draw(void);
-	void Release(void);
+	virtual void Init(void);
+	virtual void Update(void);
+	virtual void Draw(void);
+	virtual void Release(void);
 
 	// モデルを複製する
 	void ModelLoad(int model) { trans_.model = MV1DeleteModel(model); }
@@ -72,12 +72,17 @@ protected:
 	// 接地判定(派生先で参照用)
 	const bool& isGround = isGroundMaster;
 
-	// 当たり判定情報を設定
+	// 当たり判定情報を生成
 	void ColliderCreate(ColliderBase* newClass) {
 		collider_.emplace_back(newClass);
 		collider_.back()->SetTransformPtr(&trans_);
 		collider_.back()->SetOnCollisionFun([this](const ColliderBase& collider) { this->OnCollision(collider); });
 	}
+
+	/// <summary>
+	/// コライダーすべてを取得
+	/// </summary>
+	std::vector<ColliderBase*> GetCollider(void)const { return collider_; }
 
 	/// <summary>
 	/// 特定のコライダーを探す
@@ -123,7 +128,7 @@ protected:
 		return false;
 	}
 
-	// 当たり判定スキップの設定（true = 「判定する」、false = 「判定しない」、指定なし = 現在と逆にスイッチ）
+	// 当たり判定の設定（true = 「判定する」、false = 「判定しない」）
 	void SetJudge(bool flg) {
 		for (ColliderBase*& c : collider_) {
 			if (!c) { continue; }

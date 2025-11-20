@@ -5,11 +5,13 @@
 #include"ColliderCapsule.h"
 #include"ColliderAabb.h"
 
+
 ColliderBase::ColliderBase(TAG type, float enoughDistance, Vector3 pos) :
 	trans_(nullptr),
-	enoughDistance_(enoughDistance),
-	judgeFlg_(0),
 	pos_(pos),
+	enoughDistance_(enoughDistance),
+	judgeFlg_(1),
+	pushFlg_(1),
 	type_(type),
 	shape_(SHAPE::NON),
 	OnCollision(nullptr)

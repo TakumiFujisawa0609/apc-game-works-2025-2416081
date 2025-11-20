@@ -10,7 +10,7 @@ class Throwing
 public:
 	static constexpr int MAX_OBJ_NUM = 20;
 
-	Throwing(const VECTOR& playerPos, const VECTOR& playerAngle);
+	Throwing(const Vector3& playerPos, const Vector3& playerAngle);
 	~Throwing();
 
 	void Load(void);
@@ -32,6 +32,6 @@ private:
 
 	int models_[(int)THROW_TYPE::MAX];
 
-	const VECTOR& playerPos_;
-	const VECTOR& playerAngle_;
+	const Vector3& playerPos_;
+	const Vector3& playerAngle_;
 };

@@ -21,6 +21,8 @@ ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle
 	ALIVE_HIT_NUM(5),
 	aliveHitCou_(0),
 
+	speed_(10.0f),
+
 	moveVec_()
 {
 }
@@ -82,44 +84,44 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 	}
 }
 
-void ThrowObjBase::OnCollision(UnitBase* other)
-{
-	if (
-		dynamic_cast<Boss*>(other) ||
-		dynamic_cast<Stone*>(other) 
-		) {
-		unit_.isAlive_ = false;
-	}
-
-	switch (state_)
-	{
-	case ThrowObjBase::STATE::NON:
-		break;
-	case ThrowObjBase::STATE::CARRY:
-		break;
-	case ThrowObjBase::STATE::DROP:
-		break;
-	case ThrowObjBase::STATE::THROW:
-		if (VoxelBase* voxel = dynamic_cast<RockWall*>(other)) {
-			for (const auto& vox : voxel->GetCellCenterPoss()) {
-				if (Cfunc::SphereAabb(unit_.pos_, unit_.para_.radius, vox, voxel->GetCellSizeVECTOR())) {
-					aliveHitCou_++;
-					if (aliveHitCou_ > ALIVE_HIT_NUM) {
-						unit_.isAlive_ = false;
-					}
-				}
-			}
-		}
-		break;
-	}
-
-}
+//void ThrowObjBase::OnCollision(UnitBase* other)
+//{
+//	if (
+//		dynamic_cast<Boss*>(other) ||
+//		dynamic_cast<Stone*>(other) 
+//		) {
+//		unit_.isAlive_ = false;
+//	}
+//
+//	switch (state_)
+//	{
+//	case ThrowObjBase::STATE::NON:
+//		break;
+//	case ThrowObjBase::STATE::CARRY:
+//		break;
+//	case ThrowObjBase::STATE::DROP:
+//		break;
+//	case ThrowObjBase::STATE::THROW:
+//		if (VoxelBase* voxel = dynamic_cast<RockWall*>(other)) {
+//			for (const auto& vox : voxel->GetCellCenterPoss()) {
+//				if (Cfunc::SphereAabb(unit_.pos_, unit_.para_.radius, vox, voxel->GetCellSizeVECTOR())) {
+//					aliveHitCou_++;
+//					if (aliveHitCou_ > ALIVE_HIT_NUM) {
+//						unit_.isAlive_ = false;
+//					}
+//				}
+//			}
+//		}
+//		break;
+//	}
+//
+//}
 
 void ThrowObjBase::Throw(void)
 {
 	trans_.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
 
-	moveVec_ = VScale(VTransform(THROW_VEC, MGetRotY(playerAngle_.y)), unit_.para_.speed);
+	moveVec_ = THROW_VEC.TransMat(MGetRotY(playerAngle_.y)) * speed_;
 
 	aliveCounter_ = aliveTime;
 
@@ -132,26 +134,22 @@ void ThrowObjBase::Throw(void)
 
 void ThrowObjBase::CarryStateFunc(void)
 {
-	unit_.pos_ = VAdd(playerPos_, VTransform(CARRY_OBJ_LOCAL_POS, Utility::MatrixAllMultY({ playerAngle_ })));
-	unit_.angle_ = playerAngle_;
-	unit_.isAlive_ = false;
+	trans_.pos = playerPos_ + CARRY_OBJ_LOCAL_POS.TransMat(Utility::MatrixAllMultY({ playerAngle_ }));
+	trans_.angle = playerAngle_;
 }
 void ThrowObjBase::DropStateFunc(void)
 {
-	unit_.pos_.y -= 5.0f;
-	if (unit_.pos_.y < -50.0f) { state_ = STATE::NON; }
-	unit_.isAlive_ = false;
+	trans_.pos.y -= 5.0f;
+	if (trans_.pos.y < -50.0f) { state_ = STATE::NON; }
 }
 
 void ThrowObjBase::ThrowStateFunc(void)
 {
-	unit_.pos_ = VAdd(unit_.pos_, moveVec_);
+	trans_.pos += moveVec_;
 
 	if (--aliveCounter_ <= 0) {
 		aliveCounter_ = 0;
 		state_ = STATE::NON;
-		unit_.isAlive_ = false;
 	}
-	else { unit_.isAlive_ = true; }
 }
 

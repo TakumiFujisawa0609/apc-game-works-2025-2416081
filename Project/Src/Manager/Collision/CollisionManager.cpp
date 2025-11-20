@@ -4,11 +4,15 @@
 
 #include"CollisionUtility.h"
 
+std::vector<ColliderBase*> CollisionManager::playerColliders_ = {};
+std::vector<ColliderBase*> CollisionManager::enemyColliders_ = {};
+std::vector<ColliderBase*> CollisionManager::stageColliders_ = {};
+
 void CollisionManager::Add(ColliderBase*& collider)
 {
 	if (!collider) { return; }
 
-	// タイプを見分けて適した配列に格納
+	// タグを見分けて適した配列に格納
 	switch (collider->GetTag())
 	{
 		case TAG::NON:break;
@@ -55,8 +59,8 @@ void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<Coll
 			if (b->GetJudge() == 1) { continue; }
 
 			if (IsHit(a, b)) {
-				a->CallOnCollision(b->GetTag());
-				b->CallOnCollision(a->GetTag());
+				a->CallOnCollision(*b);
+				b->CallOnCollision(*a);
 			}
 		}
 	}

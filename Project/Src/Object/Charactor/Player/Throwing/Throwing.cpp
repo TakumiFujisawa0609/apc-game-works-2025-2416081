@@ -1,8 +1,8 @@
 #include"Throwing.h"
 
-#include"../../../Manager/Collision/Collision.h"
+#include"../../../../Manager/Collision/Collision.h"
 
-Throwing::Throwing(const VECTOR& playerPos, const VECTOR& playerAngle) :
+Throwing::Throwing(const Vector3& playerPos, const Vector3& playerAngle) :
 	models_(),
 
 	playerPos_(playerPos),
@@ -17,7 +17,6 @@ Throwing::~Throwing()
 void Throwing::Load(void)
 {
 	models_[(int)THROW_TYPE::ROCK] = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
-
 }
 
 void Throwing::Init(void)
@@ -27,18 +26,18 @@ void Throwing::Init(void)
 
 void Throwing::Update(void)
 {
-	for (auto& obj : throwObj_) { obj.ins->Update(); }
+	for (THROW_OBJ_INFO& obj : throwObj_) { obj.ins->Update(); }
 }
 
 void Throwing::Draw(void)
 {
-	for (auto& obj : throwObj_) { obj.ins->Draw(); }
+	for (THROW_OBJ_INFO& obj : throwObj_) { obj.ins->Draw(); }
 }
 
 void Throwing::Release(void)
 {
-	for (auto& id : models_) { MV1DeleteModel(id); }
-	for (auto& obj : throwObj_) {
+	for (int& id : models_) { MV1DeleteModel(id); }
+	for (THROW_OBJ_INFO& obj : throwObj_) {
 		if (!obj.ins) { continue; }
 		obj.ins->Release();
 		delete obj.ins;
@@ -48,8 +47,8 @@ void Throwing::Release(void)
 
 void Throwing::Carry(THROW_TYPE type)
 {
-	for (auto& obj : throwObj_) {
-		if (obj.ins->GetState() == (int)ThrowObjBase::STATE::NON) {
+	for (THROW_OBJ_INFO& obj : throwObj_) {
+		if (obj.ins->GetState() == ThrowObjBase::STATE::NON) {
 			obj.ins->Carry();
 			return;
 		}
@@ -67,13 +66,13 @@ void Throwing::Carry(THROW_TYPE type)
 	throwObj_.back().ins->Load();
 	throwObj_.back().ins->Init();
 	throwObj_.back().ins->Carry();
-	Collision::AddPlayer(throwObj_.back().ins);
+	//Collision::AddPlayer(throwObj_.back().ins);
 }
 
 void Throwing::Drop()
 {
 	for (auto& obj : throwObj_) {
-		if (obj.ins->GetState() == (int)ThrowObjBase::STATE::CARRY) {
+		if (obj.ins->GetState() == ThrowObjBase::STATE::CARRY) {
 			obj.ins->Drop();
 		}
 	}
@@ -81,7 +80,7 @@ void Throwing::Drop()
 void Throwing::Throw()
 {
 	for (auto& obj : throwObj_) {
-		if (obj.ins->GetState() == (int)ThrowObjBase::STATE::CARRY) {
+		if (obj.ins->GetState() == ThrowObjBase::STATE::CARRY) {
 			obj.ins->Throw();
 		}
 	}

@@ -10,27 +10,22 @@
 class CollisionManager
 {
 public:
-	CollisionManager() :
-		playerColliders_(),
-		enemyColliders_(),
-		stageColliders_()
-	{
-	}
+	CollisionManager() {}
 	~CollisionManager() {}
 
 	// オブジェクト追加
-	void Add(ColliderBase*& collider);
+	static void Add(ColliderBase*& collider);
 	// オブジェクト追加
-	void Add(std::vector<ColliderBase*>& collider) { for (ColliderBase*& c : collider) { Add(c); } }
+	static void Add(std::vector<ColliderBase*>& collider) { for (ColliderBase*& c : collider) { Add(c); } }
 
 	// 判定実行
 	void Check(void);
 
 private:
 #pragma region タイプ別コライダー格納配列
-	std::vector<ColliderBase*>playerColliders_;
-	std::vector<ColliderBase*>enemyColliders_;
-	std::vector<ColliderBase*>stageColliders_;
+	static std::vector<ColliderBase*>playerColliders_;
+	static std::vector<ColliderBase*>enemyColliders_;
+	static std::vector<ColliderBase*>stageColliders_;
 #pragma endregion
 
 #pragma region 当たり判定用
