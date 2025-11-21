@@ -35,7 +35,7 @@ public:
 		LINE,
 		SPHERE,
 		CAPSULE,
-		AABB,
+		BOX,
 		MODEL,
 		VOXEL,
 	};

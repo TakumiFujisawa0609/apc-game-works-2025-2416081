@@ -94,7 +94,7 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::CAPSULE) { return false; }
 
 	// ボックス同士
-	if (aShape == SHAPE::AABB && bShape == SHAPE::AABB) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::BOX) { return false; }
 
 	// モデルポリゴン同士
 	if (aShape == SHAPE::MODEL && bShape == SHAPE::MODEL) { return false; }
@@ -115,8 +115,8 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::LINE) { return false; }
 
 	// 線分×ボックス
-	if (aShape == SHAPE::LINE && bShape == SHAPE::AABB) { return false; }
-	if (aShape == SHAPE::AABB && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::BOX) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::LINE) { return false; }
 
 	// 線分×モデルポリゴン
 	if (aShape == SHAPE::LINE && bShape == SHAPE::MODEL) { return false; }
@@ -131,8 +131,8 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::SPHERE) { return false; }
 
 	// 球体×ボックス
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::AABB) { return false; }
-	if (aShape == SHAPE::AABB && bShape == SHAPE::SPHERE) { return false; }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::BOX) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::SPHERE) { return false; }
 
 	// 球体×モデルポリゴン
 	if (aShape == SHAPE::SPHERE && bShape == SHAPE::MODEL) { return false; }
@@ -143,8 +143,8 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 	if (aShape == SHAPE::VOXEL && bShape == SHAPE::SPHERE) { return false; }
 
 	// カプセル×ボックス
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::AABB) { return false; }
-	if (aShape == SHAPE::AABB && bShape == SHAPE::CAPSULE) { return false; }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::BOX) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::CAPSULE) { return false; }
 
 	// カプセル×モデルポリゴン
 	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::MODEL) { return false; }
@@ -155,12 +155,12 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 	if (aShape == SHAPE::VOXEL && bShape == SHAPE::CAPSULE) { return false; }
 
 	// ボックス×モデルポリゴン
-	if (aShape == SHAPE::AABB && bShape == SHAPE::MODEL) { return false; }
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::AABB) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::MODEL) { return false; }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::BOX) { return false; }
 
 	// ボックス×ボクセル
-	if (aShape == SHAPE::AABB && bShape == SHAPE::VOXEL) { return false; }
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::AABB) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::VOXEL) { return false; }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::BOX) { return false; }
 
 	// モデルポリゴン×ボクセル
 	if (aShape == SHAPE::MODEL && bShape == SHAPE::VOXEL) { return false; }

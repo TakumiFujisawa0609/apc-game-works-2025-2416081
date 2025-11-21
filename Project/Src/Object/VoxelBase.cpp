@@ -32,10 +32,16 @@ VoxelBase::VoxelBase() :
 
 void VoxelBase::Load(void)
 {
+	// 派生先の読み込み処理
     SubLoad();
 
+	// モデルに制御情報を適用しておく
+    trans_.Attach();
+
+	// ボクセルメッシュ生成（モデルが正常に読み込まれていれば）
     if (trans_.model != -1) {
 
+		// メッシュ生成実行
         BuildVoxelMeshFromMV1Handle(
             trans_.model,
             cell_,
@@ -43,6 +49,8 @@ void VoxelBase::Load(void)
             ,
             batches_
         );
+
+        // モデルはもう使わないので解放
         trans_.Release();
     }
 }
@@ -50,8 +58,10 @@ void VoxelBase::Load(void)
 
 void VoxelBase::Init(void)
 {
+	// 派生先の初期化処理
     SubInit();
 
+	// フラグ初期化
     regeneration_ = false;
     nowFrameRemesh_ = false;
 }
@@ -59,15 +69,20 @@ void VoxelBase::Init(void)
 
 void VoxelBase::Update(void)
 {
+	// 派生先の更新処理
     SubUpdate();
 
-    if (unit_.isAlive_ == false) { return; }
+    // 実質的な生存判定
+    if (!GetJudgeFlg()) { return; }
 
+    // フラグリセット（形状変化）
     nowFrameRemesh_ = false;
 
     if (regeneration_) {
+	    // メッシュ再生成処理
         BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches_);
 
+		// フラグリセット（メッシュ再生成処理）
         regeneration_ = false;
     }
 }
@@ -75,24 +90,30 @@ void VoxelBase::Update(void)
 
 void VoxelBase::Draw(void)
 {
+	// 派生先の描画処理
     SubDraw();
 
-    MATRIX M = MGetTranslate(unit_.WorldPos());
+	// 描画判定
+	if (!GetIsDraw()) { return; }
+
+	// 座標を移動して描画
+    MATRIX M = MGetTranslate(trans_.WorldPos().ToVECTOR());
     SetTransformToWorld(&M);
 
+	// メッシュ描画
     for (auto& b : batches_) {
         if (b.i.empty()) { continue; }
         DrawPolygonIndexed3D(
             b.v.empty() ? b.v.data() : b.v.data(),
             (int)(b.v.empty() ? b.v.size() : b.v.size()),
             b.i.data(), (int)(b.i.size() / 3),
-            textureId_, true
+            (textureId_ != -1) ? textureId_ : textureId_, true
         );
     }
 
+	// 座標を元に戻す
     M = MGetIdent();
     SetTransformToWorld(&M);
-
 }
 
 
@@ -411,295 +432,27 @@ void VoxelBase::BuildGreedyMesh(
 
 	// 生存比率を計算して、一定以下なら死滅扱いにする
 	const int totalCells = Nx * Ny * Nz;
-	if (((float)cellCenterPoss_.size() / (float)totalCells) < aliveNeedRatio_) { unit_.isAlive_ = false; }
+    if (((float)cellCenterPoss_.size() / (float)totalCells) < aliveNeedRatio_) { SetJudge(false); SetIsDraw(false); }
 }
 #pragma endregion
 
 
-bool VoxelBase::ApplyBrush(const Base& other, uint8_t amount)
+void VoxelBase::ApplyBrush(unsigned char amount)
 {
-    if (nowFrameRemesh_) { return false; }
+	// 今フレームすでにリメッシュしていたら何もしない(軽量化 妥協)
+    if (nowFrameRemesh_) { return; }
     else { nowFrameRemesh_ = true; }
-    if (amount == 0) { return false; }
-    if (density_.empty()) { return false; }
 
-    switch (other.para_.colliShape)
-    {
-    case CollisionShape::NON: { break; }
-    case CollisionShape::SPHERE: { return ApplyBrushSphere(other, amount); }
-    case CollisionShape::OBB: { return ApplyBrushAABB(other, amount); }
-    case CollisionShape::CAPSULE: { return ApplyBrushCapsule(other, amount); }
+	// 減少量が0以下なら何もしない
+    if (amount <= 0) { return; }
+
+	// 現在セル情報群が空なら何もしない
+    if (density_.empty()) { return; }
+
+	// 衝突情報群を取得して、該当セルの密度を、引数指定分減少させる
+    for (int idx : ColliderSerch<VoxelCollider>().back()->GetHitCellIdxs()) {
+        density_.at(idx) = (std::max)(density_.at(idx) - amount, 0);
     }
-
-    return false;
-}
-
-bool VoxelBase::ApplyBrushSphere(const Base& other, uint8_t amount)
-{
-    if (amount == 0 || density_.empty()) return false;
-
-    const Vector3 centerW = trans_.WorldPos();
-    const Vector3 C = other.WorldPos();
-    const float  R = other.para_.radius;
-
-    const int cx = (int)std::round((C.x - centerW.x) / cell_) + Nx_ / 2;
-    const int cy = (int)std::round((C.y - centerW.y) / cell_) + Ny_ / 2;
-    const int cz = (int)std::round((C.z - centerW.z) / cell_) + Nz_ / 2;
-    const int rr = (int)std::ceil(R / cell_);
-    const float RR = R * R;
-
-    bool touched = false;
-    int  minx = Nx_, miny = Ny_, minz = Nz_;
-    int  maxx = -1, maxy = -1, maxz = -1;
-
-    for (int z = cz - rr; z <= cz + rr; ++z)
-        for (int y = cy - rr; y <= cy + rr; ++y)
-            for (int x = cx - rr; x <= cx + rr; ++x) {
-                if ((unsigned)x >= (unsigned)Nx_ ||
-                    (unsigned)y >= (unsigned)Ny_ ||
-                    (unsigned)z >= (unsigned)Nz_) continue;
-
-                // セル中心（ワールド）
-                const VECTOR wp = {
-                    (x - Nx_ / 2) * cell_ + centerW.x,
-                    (y - Ny_ / 2) * cell_ + centerW.y,
-                    (z - Nz_ / 2) * cell_ + centerW.z
-                };
-                const float dx = wp.x - C.x, dy = wp.y - C.y, dz = wp.z - C.z;
-                if (dx * dx + dy * dy + dz * dz > RR) continue;
-
-                auto& v = density_[Idx(x, y, z)];
-                if (v == 0) continue;
-
-                const uint8_t old = v;
-                v = (v > amount) ? (uint8_t)(v - amount) : 0;
-                if (v != old) {
-                    touched = true;
-                    // 局所AABBを記録（次の再メッシュ範囲最適化の足掛かり）
-                    if (x < minx) minx = x; if (x > maxx) maxx = x;
-                    if (y < miny) miny = y; if (y > maxy) maxy = y;
-                    if (z < minz) minz = z; if (z > maxz) maxz = z;
-                }
-            }
-
-    if (touched) {
-        regeneration_ = true;
-    }
-
-    return touched;
-}
-bool VoxelBase::ApplyBrushAABB(const Base& other, uint8_t amount)
-{
-
-    // 相手のワールドAABB（中心＋サイズ前提）
-    const VECTOR otherCenterW = VAdd(other.pos_, other.para_.center);
-    const VECTOR halfSize = VScale(other.para_.size, 0.5f);
-    const VECTOR posMin = VSub(otherCenterW, halfSize);
-    const VECTOR posMax = VAdd(otherCenterW, halfSize);
-
-    // ★このボクセルオブジェクトの“ワールド中心”
-    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
-
-    // AABB→セル範囲（このボクセル座標系で）
-    auto toIdxMin = [&](float w, float c, int N) { return (int)std::floor((w - c) / cell_) + N / 2; };
-    auto toIdxMax = [&](float w, float c, int N) { return (int)std::floor((w - c) / cell_) + N / 2; };
-
-    int ix0 = toIdxMin(posMin.x, gridCenterW.x, Nx_);
-    int iy0 = toIdxMin(posMin.y, gridCenterW.y, Ny_);
-    int iz0 = toIdxMin(posMin.z, gridCenterW.z, Nz_);
-    int ix1 = toIdxMax(posMax.x, gridCenterW.x, Nx_);
-    int iy1 = toIdxMax(posMax.y, gridCenterW.y, Ny_);
-    int iz1 = toIdxMax(posMax.z, gridCenterW.z, Nz_);
-
-    // クランプ＆早期終了
-    ix0 = (std::max)(0, ix0); iy0 = (std::max)(0, iy0); iz0 = (std::max)(0, iz0);
-    ix1 = (std::min)(Nx_ - 1, ix1); iy1 = (std::min)(Ny_ - 1, iy1); iz1 = (std::min)(Nz_ - 1, iz1);
-    if (ix0 > ix1 || iy0 > iy1 || iz0 > iz1) { return false; } // そもそも交差なし
-
-    bool touched = false;
-
-    for (int z = iz0; z <= iz1; ++z)
-        for (int y = iy0; y <= iy1; ++y)
-            for (int x = ix0; x <= ix1; ++x) {
-                // ★セル中心のローカル座標 → ワールド座標（毎回“新しく”計算）
-                const VECTOR lp = {
-                    (x - Nx_ / 2) * cell_,
-                    (y - Ny_ / 2) * cell_,
-                    (z - Nz_ / 2) * cell_
-                };
-                const VECTOR wp = VAdd(gridCenterW, lp);
-
-                // AABB 内判定
-                if (wp.x < posMin.x || wp.x > posMax.x) continue;
-                if (wp.y < posMin.y || wp.y > posMax.y) continue;
-                if (wp.z < posMin.z || wp.z > posMax.z) continue;
-
-                auto& v = density_[Idx(x, y, z)];
-                uint8_t nv = (v > amount) ? (uint8_t)(v - amount) : 0;
-                if (nv != v) { v = nv; touched = true; }
-            }
-
-    if (touched) { regeneration_ = true; }
-
-	return regeneration_;
-}
-
-bool VoxelBase::ApplyBrushCapsule(const Base& other, uint8_t amount)
-{
-    return regeneration_;
-}
-
-// 球 vs AABB の最小押し戻し
-static bool SphereVsAABB_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
-    VECTOR& outN, float& outDepth)
-{
-    VECTOR cp = Utility::Clamp(C, bmin, bmax);
-    VECTOR d = VSub(C, cp);
-    float L2 = VDot(d, d);
-    if (L2 > R * R) return false;
-
-    if (L2 > 1e-12f) {
-        float L = std::sqrt(L2);
-        outN = VScale(d, 1.0f / L);
-        outDepth = R - L;
-        return true;
-    }
-    else {
-        float dx = (std::min)(C.x - bmin.x, bmax.x - C.x);
-        float dy = (std::min)(C.y - bmin.y, bmax.y - C.y);
-        float dz = (std::min)(C.z - bmin.z, bmax.z - C.z);
-        if (dx <= dy && dx <= dz) { outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }; outDepth = R + dx; }
-        else if (dy <= dz) { outN = { 0, (C.y < (bmin.y + bmax.y) * 0.5f) ? -1.f : +1.f, 0 }; outDepth = R + dy; }
-        else { outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }; outDepth = R + dz; }
-        return true;
-    }
-}
-
-// 円(XZ) vs 矩形(XZ) の最小押し戻し（カプセル側面用）
-static bool CircleXZ_vs_RectXZ_MTV(const VECTOR& C, float R, const VECTOR& bmin, const VECTOR& bmax,
-    VECTOR& outN, float& outDepth)
-{
-    float qx = Utility::Clamp(C.x, bmin.x, bmax.x);
-    float qz = Utility::Clamp(C.z, bmin.z, bmax.z);
-    float dx = C.x - qx, dz = C.z - qz;
-    float L2 = dx * dx + dz * dz;
-    if (L2 > R * R) return false;
-    if (L2 > 1e-12f) {
-        float L = std::sqrt(L2);
-        outN = { dx / L, 0.0f, dz / L };
-        outDepth = R - L;
-        return true;
-    }
-    else {
-        float rx = (std::min)(std::abs(C.x - bmin.x), std::abs(bmax.x - C.x));
-        float rz = (std::min)(std::abs(C.z - bmin.z), std::abs(bmax.z - C.z));
-        if (rx <= rz) { outN = { (C.x < (bmin.x + bmax.x) * 0.5f) ? -1.f : +1.f, 0, 0 }; outDepth = R + rx; }
-        else { outN = { 0, 0, (C.z < (bmin.z + bmax.z) * 0.5f) ? -1.f : +1.f }; outDepth = R + rz; }
-        return true;
-    }
-}
-
-bool VoxelBase::ResolveCapsule(
-    VECTOR& center, float R, float halfH,
-    VECTOR& vel, bool& grounded,
-    float slopeLimitDeg, int maxIters)
-{
-    if (!unit_.isAlive_) return false;
-    if (Nx_ <= 0 || Ny_ <= 0 || Nz_ <= 0) return false;
-
-    grounded = false;
-
-    // 描画と同じ基準（常に加算：para.center は通常 0 だが例外にも対応）
-    const VECTOR gridCenterW = VAdd(unit_.pos_, unit_.para_.center);
-
-    auto solidAt = [&](int x, int y, int z)->bool {
-        if (x < 0 || y < 0 || z < 0 || x >= Nx_ || y >= Ny_ || z >= Nz_) return false;
-        return density_[Idx(x, y, z, Nx_, Ny_)] > 0;
-        };
-    auto cellMinX = [&](int ix) { return gridCenterW.x + (ix - Nx_ / 2) * cell_; };
-    auto cellMinY = [&](int iy) { return gridCenterW.y + (iy - Ny_ / 2) * cell_; };
-    auto cellMinZ = [&](int iz) { return gridCenterW.z + (iz - Nz_ / 2) * cell_; };
-
-    const float EPS = 1e-4f;
-    const float cosSlope = std::cos(slopeLimitDeg * (DX_PI_F / 180.0f));
-    const float halfY = halfH + R;
-
-    bool any = false;
-
-    for (int it = 0; it < maxIters; ++it)
-    {
-        // カプセル外接AABB（中心基準）
-        VECTOR bbmin = { center.x - R,      center.y - halfY, center.z - R };
-        VECTOR bbmax = { center.x + R,      center.y + halfY, center.z + R };
-
-        // → セル範囲へマップ
-        int ix0 = (int)std::floor((bbmin.x - gridCenterW.x) / cell_) + Nx_ / 2;
-        int iy0 = (int)std::floor((bbmin.y - gridCenterW.y) / cell_) + Ny_ / 2;
-        int iz0 = (int)std::floor((bbmin.z - gridCenterW.z) / cell_) + Nz_ / 2;
-        int ix1 = (int)std::floor((bbmax.x - gridCenterW.x) / cell_) + Nx_ / 2;
-        int iy1 = (int)std::floor((bbmax.y - gridCenterW.y) / cell_) + Ny_ / 2;
-        int iz1 = (int)std::floor((bbmax.z - gridCenterW.z) / cell_) + Nz_ / 2;
-
-        ix0 = (std::max)(0, ix0);  iy0 = (std::max)(0, iy0);  iz0 = (std::max)(0, iz0);
-        ix1 = (std::min)(Nx_ - 1, ix1); iy1 = (std::min)(Ny_ - 1, iy1); iz1 = (std::min)(Nz_ - 1, iz1);
-
-        VECTOR bestN = { 0,0,0 };
-        float  bestDepth = 0.0f;
-        bool   hit = false;
-
-        for (int z = iz0; z <= iz1; ++z)
-            for (int y = iy0; y <= iy1; ++y)
-                for (int x = ix0; x <= ix1; ++x)
-                {
-                    if (!solidAt(x, y, z)) continue;
-
-                    VECTOR bmin = { cellMinX(x), cellMinY(y), cellMinZ(z) };
-                    VECTOR bmax = { bmin.x + cell_, bmin.y + cell_, bmin.z + cell_ };
-
-                    // 上球・下球（中心 ± halfH）
-                    {
-                        VECTOR N; float D;
-                        if (SphereVsAABB_MTV(VAdd(center, VGet(0, +halfH, 0)), R, bmin, bmax, N, D) && D > bestDepth) {
-                            bestDepth = D; bestN = N; hit = true;
-                        }
-                        if (SphereVsAABB_MTV(VAdd(center, VGet(0, -halfH, 0)), R, bmin, bmax, N, D) && D > bestDepth) {
-                            bestDepth = D; bestN = N; hit = true;
-                        }
-                    }
-
-                    // 側面：Y が重なるときだけ XZ 円 vs 長方形
-                    const float yOverlap =
-                        (std::min)(bmax.y, center.y + halfH) - (std::max)(bmin.y, center.y - halfH);
-                    if (yOverlap > 0.0f) {
-                        VECTOR N3; float D3;
-                        if (CircleXZ_vs_RectXZ_MTV(center, R, bmin, bmax, N3, D3) && D3 > bestDepth) {
-                            bestDepth = D3; bestN = N3; hit = true;
-                        }
-                    }
-                }
-
-        if (!hit) break;
-
-        // 押し戻し
-        center = VAdd(center, VScale(bestN, bestDepth + EPS));
-        any = true;
-
-        // スライド：速度の法線成分を殺す
-        float vn = VDot(vel, bestN);
-        if (vn < 0.0f) vel = VSub(vel, VScale(bestN, vn));
-
-        // 接地判定（床っぽい法線で落下中）
-        if (bestN.y > cosSlope && vel.y <= 0.0f) {
-            grounded = true;
-            if (vel.y < 0) vel.y = 0;
-        }
-    }
-
-    // 微小速度丸め（角でのチラつき回避）
-    auto killTiny = [](float& a) { if (std::fabs(a) < 1e-6f) a = 0.0f; };
-    killTiny(vel.x); killTiny(vel.y); killTiny(vel.z);
-
-    return any;
 }
 
 void VoxelBase::ReVival(void)
@@ -707,5 +460,6 @@ void VoxelBase::ReVival(void)
     density_ = densityInit_;
     regeneration_ = true;
 
-    unit_.isAlive_ = true;
+    SetJudge(true);
+    SetIsDraw(true);
 }

@@ -201,12 +201,12 @@
     <ClInclude Include="Src\Object\Boss\Attack\Stone\StoneShooter.h" />
     <ClInclude Include="Src\Object\Boss\Boss.h" />
     <ClInclude Include="Src\Object\Charactor\CharactorBase.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderAabb.h" />
+    <ClInclude Include="Src\Object\Common\Collider\BoxCollider.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderBase.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderCapsule.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderLine.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderSphere.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderVoxel.h" />
+    <ClInclude Include="Src\Object\Common\Collider\CapsuleCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\LineCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\SphereCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\VoxelCollider.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Player.h" />

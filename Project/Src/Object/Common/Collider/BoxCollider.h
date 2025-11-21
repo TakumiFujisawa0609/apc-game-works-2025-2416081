@@ -2,15 +2,15 @@
 
 #include"ColliderBase.h"
 
-class ColliderAabb : public ColliderBase
+class BoxCollider : public ColliderBase
 {
 public:
-	ColliderAabb(TAG type, Vector3 size, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+	BoxCollider(TAG type, Vector3 size, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
 		size_(size)
 	{
 	}
-	~ColliderAabb()override {}
+	~BoxCollider()override {}
 
 	Vector3 GetSize(void)const { return size_; }
 

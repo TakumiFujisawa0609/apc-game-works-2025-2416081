@@ -2,16 +2,16 @@
 
 #include"ColliderBase.h"
 
-class ColliderCapsule : public ColliderBase
+class CapsuleCollider : public ColliderBase
 {
 public:
-	ColliderCapsule(TAG type,float halfLen,float radius, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }):
+	CapsuleCollider(TAG type,float halfLen,float radius, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }):
 		ColliderBase(type, enoughDistance, pos),
 		halfLen_(halfLen),
 		radius_(radius)
 	{
 	}
-	~ColliderCapsule()override {}
+	~CapsuleCollider()override {}
 
 	float GetHalfLen(void)const { return halfLen_; }
 	float GetRadius(void)const { return radius_; }

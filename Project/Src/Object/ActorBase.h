@@ -87,8 +87,8 @@ protected:
 	/// <summary>
 	/// 特定のコライダーを探す
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	/// <param name="tag"></param>
+	/// <typeparam name="T">探したいクラス</typeparam>
+	/// <param name="tag">タグ種類</param>
 	/// <returns></returns>
 	template<typename T>
 	std::vector<T*> ColliderSerch(TAG tag = TAG::NON) {
@@ -135,6 +135,9 @@ protected:
 			c->SetJudgeFlg((flg) ? 1 : 0);
 		}
 	}
+
+	// 描画判定の取得
+	bool GetIsDraw(void)const { return (isDraw == 1) ? true : false; }
 
 	// 描画判定の設定（true = 「描画する」、false = 「描画しない」）
 	void SetIsDraw(bool flg) { isDraw = (flg) ? 1 : 0; }

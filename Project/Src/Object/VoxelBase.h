@@ -4,6 +4,8 @@
 #include<array>
 #include<map>
 
+#include"Common/Collider/VoxelCollider.h"
+
 class Camera;
 
 class VoxelBase : public ActorBase
@@ -44,32 +46,38 @@ public:
 	// メッシュバッチ群を取得
 	std::vector<MeshBatch> GetBatches(void)const { return batches_; }
 
-	// 押し戻し処理（カプセル版）
-	bool ResolveCapsule(Vector3& center, float R, float halfH, Vector3& vel, bool& grounded, float slopeLimitDeg, int maxIter);
-
 	// 生存しているセルの中心座標を配列で取得
 	std::map<int,Vector3> GetCellCenterPoss(void) const { return cellCenterPoss_; };
 	std::map<int,Vector3> GetCellCenterWorldPoss(void) const { return cellCenterWorldPoss_; };
 
 	// セルサイズを取得(float版)
 	float GetCellSize(void)const { return cell_; }
-
 	// セルサイズを取得(VECTOR版)
 	Vector3 GetCellSizeVECTOR(void) const { return Vector3(cell_, cell_, cell_); }
 
 	// 全セルを復活させる
 	void ReVival(void);
 
-protected:
+#pragma region ユーティリティ
+	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }
+	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx_, Ny_); }
 
-	virtual void SubLoad(void) = 0;
+	Vector3 IdxReverse(int idx, int Nx, int Ny) const {
+		Vector3 out;
+		int layer = Nx * Ny;
+		out.z = idx / layer;
+		int rem = idx % layer;
+		out.y = rem / Nx;
+		out.x = rem % Nx;
+		return out;
+	}
+	Vector3 IdxReverse(int idx) const { return IdxReverse(idx, Nx_, Ny_); }
 
-	// カメラポインタ
-	Camera* camera_;
+	bool Inb(int x, int y, int z, int Nx, int Ny, int Nz) { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; }
+	bool Inb(int x, int y, int z) { return Inb(x, y, z, Nx_, Ny_, Nz_); }
+#pragma endregion
 
-	// テクスチャID
-	int textureId_;
-
+private:
 #pragma region ボクセルメッシュを構成するメンバ変数
 	// 密度情報
 	std::vector<uint8_t> density_;
@@ -78,6 +86,8 @@ protected:
 
 	// グリッド数
 	int Nx_, Ny_, Nz_;
+
+	Vector3 roughSize_;
 
 	// セルサイズ
 	float cell_;
@@ -104,24 +114,11 @@ protected:
 	int solid;
 #pragma endregion
 
-#pragma region ユーティリティ
-	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }
-	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx_, Ny_); }
+	// テクスチャID
+	int textureId_;
 
-	Vector3 IdxReverse(int idx, int Nx, int Ny) const {
-		Vector3 out;
-		int layer = Nx * Ny;
-		out.z = idx / layer;
-		int rem = idx % layer;
-		out.y = rem / Nx;
-		out.x = rem % Nx;
-		return out;
-	}
-	Vector3 IdxReverse(int idx) const { return IdxReverse(idx, Nx_, Ny_); }
-
-	bool Inb(int x, int y, int z, int Nx, int Ny, int Nz) { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; }
-	bool Inb(int x, int y, int z) { return Inb(x, y, z, Nx_, Ny_, Nz_); }
-#pragma endregion
+	// カメラポインタ
+	Camera* camera_;
 
 #pragma region メッシュ生成
 	// 初期化時～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
@@ -149,17 +146,31 @@ protected:
 	void BuildGreedyMesh(const std::vector<uint8_t>& density, int Nx, int Ny, int Nz, float cell, std::vector<MeshBatch>& batches);
 #pragma endregion
 
+protected:
+
+	virtual void SubLoad(void) = 0;
+
+	/// <summary>
+	/// ボクセルメッシュ生成情報設定
+	/// </summary>
+	/// <param name="roughSize">大まかに全体を囲めるサイズ</param>
+	/// <param name="texturePath">テクスチャパス</param>
+	/// <param name="cell">セルサイズ</param>
+	/// <param name="gridCenter">グリッド中心位置(モデルによる中心座標のズレの補完用)</param>
+	/// <param name="aliveNeedRatio">生存に必要な密度比率(density_が１以上で生存扱い)</param>
+	void VoxelInfoInit(const Vector3& roughSize, std::string texturePath = "", float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+		roughSize_ = roughSize;
+		textureId_ = (texturePath == "") ? LoadGraph(texturePath.c_str()) : -1;
+		cell_ = cell;
+		gridCenter_ = gridCenter;
+		aliveNeedRatio_ = aliveNeedRatio;
+	}
+
+
 #pragma region 削る
 	// 振り分け
-	bool ApplyBrush(const Base& other, uint8_t amount);
+	void ApplyBrush(unsigned char amount);
 	
-	// 球体
-	bool ApplyBrushSphere(const Base& other, uint8_t amount);
-	// AABB
-	bool ApplyBrushAABB(const Base& other, uint8_t amount);
-	// カプセル
-	bool ApplyBrushCapsule(const Base& other, uint8_t amount);
-
 	bool nowFrameRemesh_;
 #pragma endregion
 };

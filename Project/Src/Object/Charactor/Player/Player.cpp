@@ -9,8 +9,8 @@
 
 #include"../../../Scene/Game/GameScene.h"
 
-#include"../../Common/Collider/ColliderCapsule.h"
-#include"../../Common/Collider/ColliderLine.h"
+#include"../../Common/Collider/CapsuleCollider.h"
+#include"../../Common/Collider/LineCollider.h"
 
 #include"../../Boss/Boss.h"
 
@@ -62,7 +62,7 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
 	// コライダー生成
-	ColliderCreate(new ColliderCapsule(TAG::PLAYER, HALF_LEN, RADIUS));
+	ColliderCreate(new CapsuleCollider(TAG::PLAYER, HALF_LEN, RADIUS));
 
 	// プレイヤーが抱える下位クラスの読み込み処理
 	LowerLoad();
