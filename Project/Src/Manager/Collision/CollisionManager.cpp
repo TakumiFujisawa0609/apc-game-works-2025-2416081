@@ -174,23 +174,23 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 	return false;
 }
 
-bool CollisionManager::LineToLine(ColliderLine* a, ColliderLine* b)
+bool CollisionManager::LineToLine(LineCollider*& a, LineCollider*& b)
 {
 	// ü•ª“¯m‚Ì“–‚½‚è”»’è
 	return false;
 }
 
-bool CollisionManager::SphereToSphere(ColliderBase* a, ColliderBase* b)
+bool CollisionManager::SphereToSphere(SphereCollider*& a, SphereCollider*& b)
 {
 	return false;
 }
 
-bool CollisionManager::CapsuleToCapsule(ColliderBase* a, ColliderBase* b)
+bool CollisionManager::CapsuleToCapsule(CapsuleCollider*& a, CapsuleCollider*& b)
 {
 	return false;
 }
 
-bool CollisionManager::AabbToAabb(ColliderBase* a, ColliderBase* b)
+bool CollisionManager::BoxToBox(BoxCollider*& a, BoxCollider*& b)
 {
 	return false;
 }

@@ -46,7 +46,7 @@ void VoxelBase::Load(void)
             trans_.model,
             cell_,
             trans_.WorldPos() + gridCenter_,
-            ,
+            roughSize_,
             batches_
         );
 
@@ -132,16 +132,16 @@ void VoxelBase::Release(void)
 
 
 #pragma region メッシュ生成
-bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& halfExt, std::vector<MeshBatch>& batches)
+bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& roughSize, std::vector<MeshBatch>& batches)
 {
     // 1) グリッド解像度
-    Nx_ = (int)std::ceil((halfExt.x * 2) / cell);
-    Ny_ = (int)std::ceil((halfExt.y * 2) / cell);
-    Nz_ = (int)std::ceil((halfExt.z * 2) / cell);
+    Nx_ = (int)std::ceil(roughSize.x / cell);
+    Ny_ = (int)std::ceil(roughSize.y / cell);
+    Nz_ = (int)std::ceil(roughSize.z / cell);
 
     // 2) 表面マーキング
 	density_.resize(Nx_ * Ny_ * Nz_, 0);
-    MarkSurfaceByCollisionProbe(mv1, cell, center, halfExt, Nx_, Ny_, Nz_, density_);
+    MarkSurfaceByCollisionProbe(mv1, cell, center, roughSize, Nx_, Ny_, Nz_, density_);
 
     // 3) 内部充填
     SolidFill(density_, Nx_, Ny_, Nz_);
@@ -152,10 +152,10 @@ bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& 
     return !(batches.empty());
 }
 
-void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const Vector3& center, const Vector3& halfExt, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
+void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const Vector3& center, const Vector3& roughSize, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
 {
     MV1SetupCollInfo(mv1, -1);
-    Vector3 minW = center - halfExt;
+    Vector3 minW = center - (roughSize / 2);
     float r = cell * 0.5f;
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)

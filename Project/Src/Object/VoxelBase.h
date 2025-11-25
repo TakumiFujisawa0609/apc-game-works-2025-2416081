@@ -87,6 +87,7 @@ private:
 	// ƒOƒŠƒbƒh”
 	int Nx_, Ny_, Nz_;
 
+	// ‘å‚Ü‚©‚É‘S‘Ì‚ğˆÍ‚ß‚éƒTƒCƒY
 	Vector3 roughSize_;
 
 	// ƒZƒ‹ƒTƒCƒY
@@ -128,17 +129,17 @@ private:
 		int mv1,
 		float cell,
 		const Vector3& center,
-		const Vector3& halfExt,
+		const Vector3& roughSize,
 		std::vector<MeshBatch>& batches);
 
 	// Õ“Ëƒvƒ[ƒu‚Å•\–Ê‚ğƒ}[ƒLƒ“ƒO										 
-	void MarkSurfaceByCollisionProbe(										 
-		int mv1,															 
-		float cell, const Vector3& center, const Vector3& halfExt,
-		int Nx, int Ny, int Nz, std::vector<uint8_t>& density);				 
+	void MarkSurfaceByCollisionProbe(
+		int mv1,
+		float cell, const Vector3& center, const Vector3& roughSize,
+		int Nx, int Ny, int Nz, std::vector<uint8_t>& density);
 																			 
 	// “à•”‚ğƒ\ƒŠƒbƒh‚É‚·‚é												     
-	void SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz);	 
+	void SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz);
 																			 
 	// ```````````````````````````````````
 

@@ -4,8 +4,11 @@
 
 #include"../../Object/Common/Transform.h"
 
-#include"../../Object/Common/Collider/ColliderBase.h"
-#include"../../Object/Common/Collider/ColliderLine.h"
+#include"../../Object/Common/Collider/LineCollider.h"
+#include"../../Object/Common/Collider/SphereCollider.h"
+#include"../../Object/Common/Collider/CapsuleCollider.h"
+#include"../../Object/Common/Collider/BoxCollider.h"
+#include"../../Object/Common/Collider/VoxelCollider.h"
 
 class CollisionManager
 {
@@ -32,10 +35,10 @@ private:
 	void Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs);
 	bool IsHit(ColliderBase*& a, ColliderBase*& b);
 
-	bool LineToLine(ColliderLine* a, ColliderLine* b);
-	bool SphereToSphere(ColliderBase* a, ColliderBase* b);
-	bool CapsuleToCapsule(ColliderBase* a, ColliderBase* b);
-	bool AabbToAabb(ColliderBase* a, ColliderBase* b);
+	bool LineToLine(LineCollider*& a, LineCollider*& b);
+	bool SphereToSphere(SphereCollider*& a, SphereCollider*& b);
+	bool CapsuleToCapsule(CapsuleCollider*& a, CapsuleCollider*& b);
+	bool BoxToBox(BoxCollider*& a, BoxCollider*& b);
 
 #pragma endregion
 };
