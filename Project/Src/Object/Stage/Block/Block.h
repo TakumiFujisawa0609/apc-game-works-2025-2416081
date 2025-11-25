@@ -26,7 +26,7 @@ public:
 	// ブロックを生成する
 	void Create(TYPE type, int baseModelId,int textureId, int mapX, int mapY, int mapZ);
 
-	void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
 private:
 	// ブロック種別

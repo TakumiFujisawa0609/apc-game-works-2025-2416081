@@ -69,48 +69,16 @@ void Block::SubLoad(void)
 
 void Block::SubInit(void)
 {
-	unit_.isAlive_ = true;
-
-	unit_.para_.size = VScale(unit_.para_.size, 1.3f);
+	SetJudge(true);
+	SetIsDraw(true);
 }
 
 void Block::SubUpdate(void)
 {
-	VECTOR vec = {};
-
-	if (CheckHitKey(KEY_INPUT_0)) { vec.x++; }
-	if (CheckHitKey(KEY_INPUT_9)) { vec.x--; }
-	if (CheckHitKey(KEY_INPUT_6)) { vec.y++; }
-	if (CheckHitKey(KEY_INPUT_7)) { vec.y--; }
-
-	vec = Utility::Normalize(vec);
-
-	unit_.pos_ = VAdd(unit_.pos_, VScale(vec, unit_.para_.speed));
 }
 
 void Block::SubDraw(void)
 {
-//	DrawSphere3D(VAdd(unit_.pos_, unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
-//
-	// //デバッグ用に当たり判定の表示
-	//VECTOR debugPos[8] =
-	//{
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
-	//};
-	//for (int i = 0; i < 8; i++) {
-	//	DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
-	//}
-
-	//for (auto& vPos : GetCellCenterPoss()) {
-	//	DrawSphere3D(vPos, GetCellSize() / 2, 4, 0xffffff, 0xffffff, true);
-	//}
 }
 
 void Block::SubRelease(void)
@@ -118,19 +86,31 @@ void Block::SubRelease(void)
 
 }
 
-void Block::OnCollision(UnitBase* other)
+void Block::OnCollision(const ColliderBase& collider)
 {
-	auto apply = [&](int amount, bool shake)->void {
-		if (ApplyBrush(other->GetUnit(), (uint8_t)amount)) {
-			if (shake) GameScene::Shake();
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
-		}
-		};
+	switch (collider.GetTag())
+	{
+	case TAG::PLAYER_PUNCH:
+	case TAG::PLAYER_GOUGE:
+	case TAG::PLAYER_THROWING:
+	case TAG::GOLEM_ATTACK_FALL:
+	case TAG::GOLEM_ATTACK_PSYCHOROCK:
+	case TAG::GOLEM_ATTACK_STONE: {
 
-	if (dynamic_cast<PlayerPunch*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<PlayerGouge*>(other)) { apply(255, true); return; }
-	if (dynamic_cast<ThrowObjBase*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<Stone*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<Fall*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<PsychoRock*>(other)) { apply(200, true); return; }
+		// ブロックを壊す
+		ApplyBrush(255);
+
+		// 画面を揺らす
+		GameScene::Shake();
+
+		// 音を鳴らす
+		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+
+		break;
+	}
+	default: { break; }	// それ以外は何もしない
+	}
+
+	// 当たったセルのインデックスをクリアする
+	ColliderSerch<VoxelCollider>().back()->ClearHitCellIdxs();
 }

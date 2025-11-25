@@ -43,7 +43,7 @@ public:
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列をクリア
 	void ClearHitCellIdxs(void) { hitCellIdxs_.clear(); }
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列をセット
-	void SetHitCellIdxs(const  std::vector<int>& idxs) { hitCellIdxs_ = std::move(idxs); }
+	void SetHitCellIdxs(const  std::vector<int>& idxs) { hitCellIdxs_.clear(); hitCellIdxs_ = std::move(idxs); }
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列に追加
 	void AddHitCellIdx(int idx) { hitCellIdxs_.push_back(idx); }
 

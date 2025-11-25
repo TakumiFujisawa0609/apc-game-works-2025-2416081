@@ -6,7 +6,9 @@
 
 class Block;
 
-class BlockManager
+#include"../../ActorBase.h"
+
+class BlockManager : public ActorBase
 {
 public:
 	// ブロック用のモデル種類
@@ -20,12 +22,13 @@ public:
 	// デストラクタ
 	~BlockManager(void);
 
-	void Load(void);
-	void Update(void);
-	void Draw(void);
-	void Release(void);
+	void Load(void)override;
+	void Init(void)override;
+	void Update(void)override;
+	void Draw(void)override;
+	void Release(void)override;
 
-	const std::vector<UnitBase*>GetBlocks(void)const;
+	const std::vector<ActorBase*>GetBlocks(void)const;
 
 	void SetCamera(Camera* c);
 
