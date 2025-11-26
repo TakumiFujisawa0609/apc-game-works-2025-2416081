@@ -81,6 +81,7 @@ struct Vector3
 
 
 	void operator=(float value) { x = value; y = value; z = value; }
+	void operator=(const VECTOR& value) { x = value.x; y = value.y; z = value.z; }
 
 
 	// ƒxƒNƒgƒ‹‚Ì‘å‚«‚³(ã‚È‚µ)

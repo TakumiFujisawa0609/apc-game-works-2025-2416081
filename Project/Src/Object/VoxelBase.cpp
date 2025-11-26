@@ -53,17 +53,22 @@ void VoxelBase::Load(void)
         // モデルはもう使わないので解放
         trans_.Release();
     }
+
+	// ボクセルオブジェクト専用のコライダーを生成
+    ColliderCreate(new VoxelCollider(TAG::STAGE, cell_, cellCenterPoss_, (roughSize_ / 2).Length()));
 }
 
 
 void VoxelBase::Init(void)
 {
-	// 派生先の初期化処理
-    SubInit();
-
 	// フラグ初期化
+    SetJudge(true);
+    SetIsDraw(true);
     regeneration_ = false;
     nowFrameRemesh_ = false;
+
+    // 派生先の初期化処理
+    SubInit();
 }
 
 

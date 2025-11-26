@@ -8,6 +8,7 @@
 #include"../../Object/Common/Collider/SphereCollider.h"
 #include"../../Object/Common/Collider/CapsuleCollider.h"
 #include"../../Object/Common/Collider/BoxCollider.h"
+#include"../../Object/Common/Collider/ModelCollider.h"
 #include"../../Object/Common/Collider/VoxelCollider.h"
 
 class CollisionManager
@@ -35,10 +36,28 @@ private:
 	void Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs);
 	bool IsHit(ColliderBase*& a, ColliderBase*& b);
 
-	bool LineToLine(LineCollider*& a, LineCollider*& b);
-	bool SphereToSphere(SphereCollider*& a, SphereCollider*& b);
-	bool CapsuleToCapsule(CapsuleCollider*& a, CapsuleCollider*& b);
-	bool BoxToBox(BoxCollider*& a, BoxCollider*& b);
+	bool LineToLine(LineCollider* a, LineCollider* b);
+	bool SphereToSphere(SphereCollider* a, SphereCollider* b);
+	bool CapsuleToCapsule(CapsuleCollider* a, CapsuleCollider* b);
+	bool BoxToBox(BoxCollider* a, BoxCollider* b);
+	bool ModelToModel(ModelCollider* a, ModelCollider* b);
+	bool VoxelToVoxel(VoxelCollider* a, VoxelCollider* b);
+
+	bool LineToSphere(LineCollider* line, SphereCollider* sphere);
+	bool LineToCapsule(LineCollider* line, CapsuleCollider* capsule);
+	bool LineToBox(LineCollider* line, BoxCollider* box);
+	bool LineToModel(LineCollider* line, ModelCollider* model);
+	bool LineToVoxel(LineCollider* line, VoxelCollider* voxel);
+	bool SphereToCapsule(SphereCollider* sphere, CapsuleCollider* capsule);
+	bool SphereToBox(SphereCollider* sphere, BoxCollider* box);
+	bool SphereToModel(SphereCollider* sphere, ModelCollider* model);
+	bool SphereToVoxel(SphereCollider* sphere, VoxelCollider* voxel);
+	bool CapsuleToBox(CapsuleCollider* capsule, BoxCollider* box);
+	bool CasuleToModel(CapsuleCollider* capsule, ModelCollider* model);
+	bool CapsuleToVoxel(CapsuleCollider* capsule, VoxelCollider* voxel);
+	bool BoxToModel(BoxCollider* box, ModelCollider* model);
+	bool BoxToVoxel(BoxCollider* box, VoxelCollider* voxel);
+	bool ModelToVoxel(ModelCollider* model, VoxelCollider* voxel);
 
 #pragma endregion
 };

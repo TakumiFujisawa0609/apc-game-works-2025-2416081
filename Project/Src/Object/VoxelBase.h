@@ -167,6 +167,22 @@ protected:
 		aliveNeedRatio_ = aliveNeedRatio;
 	}
 
+	/// <summary>
+	/// ボクセルメッシュ生成情報設定
+	/// </summary>
+	/// <param name="roughSize">大まかに全体を囲めるサイズ</param>
+	/// <param name="texturePath">テクスチャパス</param>
+	/// <param name="cell">セルサイズ</param>
+	/// <param name="gridCenter">グリッド中心位置(モデルによる中心座標のズレの補完用)</param>
+	/// <param name="aliveNeedRatio">生存に必要な密度比率(density_が１以上で生存扱い)</param>
+	void VoxelInfoInit(const Vector3& roughSize, int texture = -1, float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+		roughSize_ = roughSize;
+		textureId_ = texture;
+		cell_ = cell;
+		gridCenter_ = gridCenter;
+		aliveNeedRatio_ = aliveNeedRatio;
+	}
+
 
 #pragma region 削る
 	// 振り分け

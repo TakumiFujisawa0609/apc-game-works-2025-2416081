@@ -68,7 +68,13 @@ public:
 	float GetEnoughDistance(void)const { return enoughDistance_; }
 
 	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
-	unsigned char GetJudge(void)const { return judgeFlg_; }
+	bool GetJudge(void)const { return (judgeFlg_ == 1) ? true : false; }
+
+	// 押し出しのフラグ
+	bool GetPushFlg(void)const { return (pushFlg_ == 1) ? true : false; }
+
+	// 押し出しを行う際の重さ（0 ～ 100）
+	unsigned char GetPushWeight(void)const { return pushWeight_; }
 
 	// 当たり判定のタイプ
 	TAG GetTag(void)const { return type_; }
@@ -81,11 +87,11 @@ public:
 #pragma endregion
 
 #pragma region 各セット関数
-	// 当たり判定フラグセット（1 = 「判定する」、0 = 「判定しない」、指定なし = 現在と逆にスイッチ）
-	void SetJudgeFlg(unsigned char flg = 255) {
-		if (flg == 255) { judgeFlg_ = 1 - judgeFlg_; }
-		judgeFlg_ = (flg == 1 || flg == 0) ? flg : judgeFlg_;
-	}
+	// 当たり判定フラグセット（true = 「判定する」、false = 「判定しない」）
+	void SetJudgeFlg(bool flg) { judgeFlg_ = (flg) ? 1 : 0; }
+
+	// 押し出しを行うかどうかのフラグを設定（true = 「押し出す」、false = 「押し出さない」）
+	void SetPushFlg(bool flg) { pushFlg_ = (flg) ? 1 : 0; }
 #pragma endregion
 
 
@@ -102,8 +108,12 @@ private:
 	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
 	unsigned char judgeFlg_;
 
-	// 押し出しを行うかどうかのフラグ（1 = 「行う」、0 = 「行わない」）
+	// 押し出しを行うかどうかのフラグ（1 = 「押し出す」、0 = 「押し出さず通り抜ける」）
 	unsigned char pushFlg_;
+
+	// 押し出しを行う際の重さ（0 ～ 100 で設定）
+	unsigned char pushWeight_;
+	
 
 	// 当たり判定タイプ（何と当たったかを見分ける用）
 	TAG type_;

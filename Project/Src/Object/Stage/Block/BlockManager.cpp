@@ -97,8 +97,7 @@ void BlockManager::LoadMapCsvData(void)
 		int z = std::stoi(strSplit[1]);
 		int y = std::stoi(strSplit[2]);
 
-		blocks_.emplace_back(new Block());
-		blocks_.back()->Create((Block::TYPE)0, models_[0], textureId_, x, y, z);
+		blocks_.emplace_back(new Block((Block::TYPE)0, models_[0], textureId_, x, y, z));
 	}
 }
 

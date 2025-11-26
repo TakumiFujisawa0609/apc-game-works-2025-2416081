@@ -17,7 +17,7 @@ public:
 	virtual void Release(void);
 
 	// モデルを複製する
-	void ModelLoad(int model) { trans_.model = MV1DeleteModel(model); }
+	void ModelDuplicate(int model) { trans_.model = MV1DuplicateModel(model); }
 
 	// モデル制御情報構造体のゲット関数
 	Transform GetTrans(void)const { return trans_; }
@@ -132,7 +132,7 @@ protected:
 	void SetJudge(bool flg) {
 		for (ColliderBase*& c : collider_) {
 			if (!c) { continue; }
-			c->SetJudgeFlg((flg) ? 1 : 0);
+			c->SetJudgeFlg(flg);
 		}
 	}
 

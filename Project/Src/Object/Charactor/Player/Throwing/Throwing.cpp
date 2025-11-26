@@ -62,7 +62,7 @@ void Throwing::Carry(THROW_TYPE type)
 		break;
 	}
 
-	throwObj_.back().ins->ModelLoad(models_[(int)type]);
+	throwObj_.back().ins->ModelDuplicate(models_[(int)type]);
 	throwObj_.back().ins->Load();
 	throwObj_.back().ins->Init();
 	throwObj_.back().ins->Carry();

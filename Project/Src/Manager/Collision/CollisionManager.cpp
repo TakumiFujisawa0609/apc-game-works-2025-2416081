@@ -52,11 +52,11 @@ void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<Coll
 {
 	for (ColliderBase*& a : as) {
 		if (!a) { continue; }
-		if (a->GetJudge() == 0) { continue; }
+		if (!a->GetJudge()) { continue; }
 
 		for (ColliderBase*& b : bs) {
 			if (!b) { continue; }
-			if (b->GetJudge() == 1) { continue; }
+			if (!b->GetJudge() == false) { continue; }
 
 			if (IsHit(a, b)) {
 				a->CallOnCollision(*b);
@@ -80,117 +80,201 @@ bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 		if ((a->GetPos() - b->GetPos()).LengthSq() > std::pow(enoughDisSub, 2.0f)) { return false; }
 	}
 
-	// Œ`ó‚ğ”»•Ê‚µ‚Ä“KØ‚ÈŠÖ”‚É‚Ä”»’è‚ğs‚¤````````````````
+#pragma region Œ`ó‚ğ”»•Ê‚µ‚Ä“KØ‚ÈŠÖ”‚É‚Ä”»’è‚ğs‚¤
 
 	// “¯Œ`ó“¯m-------------------------------
 	
 	// ü•ª“¯m
-	if (aShape == SHAPE::LINE && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::LINE) { return LineToLine(dynamic_cast<LineCollider*>(a), dynamic_cast<LineCollider*>(b)); }
 
 	// ‹…‘Ì“¯m
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::SPHERE) { return false; }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::SPHERE) { return SphereToSphere(dynamic_cast<SphereCollider*>(a), dynamic_cast<SphereCollider*>(b)); }
 
 	// ƒJƒvƒZƒ‹“¯m
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::CAPSULE) { return false; }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::CAPSULE) { return CapsuleToCapsule(dynamic_cast<CapsuleCollider*>(a), dynamic_cast<CapsuleCollider*>(b)); }
 
 	// ƒ{ƒbƒNƒX“¯m
-	if (aShape == SHAPE::BOX && bShape == SHAPE::BOX) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::BOX) { return BoxToBox(dynamic_cast<BoxCollider*>(a), dynamic_cast<BoxCollider*>(b)); }
 
 	// ƒ‚ƒfƒ‹ƒ|ƒŠƒSƒ““¯m
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::MODEL) { return false; }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::MODEL) { return ModelToModel(dynamic_cast<ModelCollider*>(a), dynamic_cast<ModelCollider*>(b)); }
 
 	// ƒ{ƒNƒZƒ‹ó“¯m
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::VOXEL) { return false; }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::VOXEL) { return VoxelToVoxel(dynamic_cast<VoxelCollider*>(a), dynamic_cast<VoxelCollider*>(b)); }
 
 	// -----------------------------------------
 	
 	// •ÊŒ`ó“¯m-------------------------------
 
 	// ü•ª~‹…‘Ì
-	if (aShape == SHAPE::LINE && bShape == SHAPE::SPHERE) { return false; }
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::SPHERE) { return LineToSphere(dynamic_cast<LineCollider*>(a), dynamic_cast<SphereCollider*>(b)); }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::LINE) { return LineToSphere(dynamic_cast<LineCollider*>(b), dynamic_cast<SphereCollider*>(a)); }
 
 	// ü•ª~ƒJƒvƒZƒ‹
-	if (aShape == SHAPE::LINE && bShape == SHAPE::CAPSULE) { return false; }
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::CAPSULE) { return LineToCapsule(dynamic_cast<LineCollider*>(a), dynamic_cast<CapsuleCollider*>(b)); }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::LINE) { return LineToCapsule(dynamic_cast<LineCollider*>(b), dynamic_cast<CapsuleCollider*>(a)); }
 
 	// ü•ª~ƒ{ƒbƒNƒX
-	if (aShape == SHAPE::LINE && bShape == SHAPE::BOX) { return false; }
-	if (aShape == SHAPE::BOX && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::BOX) { return LineToBox(dynamic_cast<LineCollider*>(a), dynamic_cast<BoxCollider*>(b)); }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::LINE) { return LineToBox(dynamic_cast<LineCollider*>(b), dynamic_cast<BoxCollider*>(a)); }
 
 	// ü•ª~ƒ‚ƒfƒ‹ƒ|ƒŠƒSƒ“
-	if (aShape == SHAPE::LINE && bShape == SHAPE::MODEL) { return false; }
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::MODEL) { return LineToModel(dynamic_cast<LineCollider*>(a), dynamic_cast<ModelCollider*>(b)); }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::LINE) { return LineToModel(dynamic_cast<LineCollider*>(b), dynamic_cast<ModelCollider*>(a)); }
 
 	// ü•ª~ƒ{ƒNƒZƒ‹
-	if (aShape == SHAPE::LINE && bShape == SHAPE::VOXEL) { return false; }
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::LINE) { return false; }
+	if (aShape == SHAPE::LINE && bShape == SHAPE::VOXEL) { return LineToVoxel(dynamic_cast<LineCollider*>(a), dynamic_cast<VoxelCollider*>(b)); }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::LINE) { return LineToVoxel(dynamic_cast<LineCollider*>(b), dynamic_cast<VoxelCollider*>(a)); }
 
 	// ‹…‘Ì~ƒJƒvƒZƒ‹
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::CAPSULE) { return false; }
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::SPHERE) { return false; }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::CAPSULE) { return SphereToCapsule(dynamic_cast<SphereCollider*>(a), dynamic_cast<CapsuleCollider*>(b)); }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::SPHERE) { return SphereToCapsule(dynamic_cast<SphereCollider*>(b), dynamic_cast<CapsuleCollider*>(a)); }
 
 	// ‹…‘Ì~ƒ{ƒbƒNƒX
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::BOX) { return false; }
-	if (aShape == SHAPE::BOX && bShape == SHAPE::SPHERE) { return false; }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::BOX) { return SphereToBox(dynamic_cast<SphereCollider*>(a), dynamic_cast<BoxCollider*>(b)); }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::SPHERE) { return SphereToBox(dynamic_cast<SphereCollider*>(b), dynamic_cast<BoxCollider*>(a)); }
 
 	// ‹…‘Ì~ƒ‚ƒfƒ‹ƒ|ƒŠƒSƒ“
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::MODEL) { return false; }
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::SPHERE) { return false; }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::MODEL) { return SphereToModel(dynamic_cast<SphereCollider*>(a), dynamic_cast<ModelCollider*>(b)); }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::SPHERE) { return SphereToModel(dynamic_cast<SphereCollider*>(b), dynamic_cast<ModelCollider*>(a)); }
 
 	// ‹…‘Ì~ƒ{ƒNƒZƒ‹
-	if (aShape == SHAPE::SPHERE && bShape == SHAPE::VOXEL) { return false; }
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::SPHERE) { return false; }
+	if (aShape == SHAPE::SPHERE && bShape == SHAPE::VOXEL) { return SphereToVoxel(dynamic_cast<SphereCollider*>(a), dynamic_cast<VoxelCollider*>(b)); }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::SPHERE) { return SphereToVoxel(dynamic_cast<SphereCollider*>(b), dynamic_cast<VoxelCollider*>(a)); }
 
 	// ƒJƒvƒZƒ‹~ƒ{ƒbƒNƒX
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::BOX) { return false; }
-	if (aShape == SHAPE::BOX && bShape == SHAPE::CAPSULE) { return false; }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::BOX) { return CapsuleToBox(dynamic_cast<CapsuleCollider*>(a), dynamic_cast<BoxCollider*>(b)); }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::CAPSULE) { return CapsuleToBox(dynamic_cast<CapsuleCollider*>(b), dynamic_cast<BoxCollider*>(a)); }
 
 	// ƒJƒvƒZƒ‹~ƒ‚ƒfƒ‹ƒ|ƒŠƒSƒ“
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::MODEL) { return false; }
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::CAPSULE) { return false; }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::MODEL) { return SphereToModel(dynamic_cast<SphereCollider*>(a), dynamic_cast<ModelCollider*>(b)); }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::CAPSULE) { return SphereToModel(dynamic_cast<SphereCollider*>(b), dynamic_cast<ModelCollider*>(a)); }
 
 	// ƒJƒvƒZƒ‹~ƒ{ƒNƒZƒ‹
-	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::VOXEL) { return false; }
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::CAPSULE) { return false; }
+	if (aShape == SHAPE::CAPSULE && bShape == SHAPE::VOXEL) { return SphereToVoxel(dynamic_cast<SphereCollider*>(a), dynamic_cast<VoxelCollider*>(b)); }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::CAPSULE) { return SphereToVoxel(dynamic_cast<SphereCollider*>(b), dynamic_cast<VoxelCollider*>(a)); }
 
 	// ƒ{ƒbƒNƒX~ƒ‚ƒfƒ‹ƒ|ƒŠƒSƒ“
-	if (aShape == SHAPE::BOX && bShape == SHAPE::MODEL) { return false; }
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::BOX) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::MODEL) { return BoxToModel(dynamic_cast<BoxCollider*>(a), dynamic_cast<ModelCollider*>(b)); }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::BOX) { return BoxToModel(dynamic_cast<BoxCollider*>(b), dynamic_cast<ModelCollider*>(a)); }
 
 	// ƒ{ƒbƒNƒX~ƒ{ƒNƒZƒ‹
-	if (aShape == SHAPE::BOX && bShape == SHAPE::VOXEL) { return false; }
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::BOX) { return false; }
+	if (aShape == SHAPE::BOX && bShape == SHAPE::VOXEL) { return BoxToVoxel(dynamic_cast<BoxCollider*>(a), dynamic_cast<VoxelCollider*>(b)); }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::BOX) { return BoxToVoxel(dynamic_cast<BoxCollider*>(b), dynamic_cast<VoxelCollider*>(a)); }
 
 	// ƒ‚ƒfƒ‹ƒ|ƒŠƒSƒ“~ƒ{ƒNƒZƒ‹
-	if (aShape == SHAPE::MODEL && bShape == SHAPE::VOXEL) { return false; }
-	if (aShape == SHAPE::VOXEL && bShape == SHAPE::MODEL) { return false; }
+	if (aShape == SHAPE::MODEL && bShape == SHAPE::VOXEL) { return ModelToVoxel(dynamic_cast<ModelCollider*>(a), dynamic_cast<VoxelCollider*>(b)); }
+	if (aShape == SHAPE::VOXEL && bShape == SHAPE::MODEL) { return ModelToVoxel(dynamic_cast<ModelCollider*>(b), dynamic_cast<VoxelCollider*>(a)); }
 	
 	// -----------------------------------------
-	
-	// ```````````````````````````````````
 
+#pragma endregion
+	
 	// ‚Ç‚Ì‘g‚İ‡‚í‚¹‚É‚à‘®‚³‚È‚©‚Á‚½ê‡”»’è‚È‚µifalse‚Å•Ô‹pj
 	return false;
 }
 
-bool CollisionManager::LineToLine(LineCollider*& a, LineCollider*& b)
-{
-	// ü•ª“¯m‚Ì“–‚½‚è”»’è
-	return false;
-}
-
-bool CollisionManager::SphereToSphere(SphereCollider*& a, SphereCollider*& b)
+bool CollisionManager::LineToLine(LineCollider* a, LineCollider* b)
 {
 	return false;
 }
 
-bool CollisionManager::CapsuleToCapsule(CapsuleCollider*& a, CapsuleCollider*& b)
+bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 {
 	return false;
 }
 
-bool CollisionManager::BoxToBox(BoxCollider*& a, BoxCollider*& b)
+bool CollisionManager::CapsuleToCapsule(CapsuleCollider* a, CapsuleCollider* b)
+{
+	return false;
+}
+
+bool CollisionManager::BoxToBox(BoxCollider* a, BoxCollider* b)
+{
+	return false;
+}
+
+bool CollisionManager::ModelToModel(ModelCollider* a, ModelCollider* b)
+{
+	return false;
+}
+
+bool CollisionManager::VoxelToVoxel(VoxelCollider* a, VoxelCollider* b)
+{
+	return false;
+}
+
+bool CollisionManager::LineToSphere(LineCollider* line, SphereCollider* sphere)
+{
+	return false;
+}
+
+bool CollisionManager::LineToCapsule(LineCollider* line, CapsuleCollider* capsule)
+{
+	return false;
+}
+
+bool CollisionManager::LineToBox(LineCollider* line, BoxCollider* box)
+{
+	return false;
+}
+
+bool CollisionManager::LineToModel(LineCollider* line, ModelCollider* model)
+{
+	return false;
+}
+
+bool CollisionManager::LineToVoxel(LineCollider* line, VoxelCollider* voxel)
+{
+	return false;
+}
+
+bool CollisionManager::SphereToCapsule(SphereCollider* sphere, CapsuleCollider* capsule)
+{
+	return false;
+}
+
+bool CollisionManager::SphereToBox(SphereCollider* sphere, BoxCollider* box)
+{
+	return false;
+}
+
+bool CollisionManager::SphereToModel(SphereCollider* sphere, ModelCollider* model)
+{
+	return false;
+}
+
+bool CollisionManager::SphereToVoxel(SphereCollider* sphere, VoxelCollider* voxel)
+{
+	return false;
+}
+
+bool CollisionManager::CapsuleToBox(CapsuleCollider* capsule, BoxCollider* box)
+{
+	return false;
+}
+
+bool CollisionManager::CasuleToModel(CapsuleCollider* capsule, ModelCollider* model)
+{
+	return false;
+}
+
+bool CollisionManager::CapsuleToVoxel(CapsuleCollider* capsule, VoxelCollider* voxel)
+{
+	return false;
+}
+
+bool CollisionManager::BoxToModel(BoxCollider* box, ModelCollider* model)
+{
+	return false;
+}
+
+bool CollisionManager::BoxToVoxel(BoxCollider* box, VoxelCollider* voxel)
+{
+	return false;
+}
+
+bool CollisionManager::ModelToVoxel(ModelCollider* model, VoxelCollider* voxel)
 {
 	return false;
 }
