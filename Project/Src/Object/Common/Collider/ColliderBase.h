@@ -54,15 +54,21 @@ public:
 
 #pragma region 初期設定
 	// モデル制御情報セット
-	void SetTransformPtr(const Transform* ptr) { trans_ = ptr; }
+	void SetTransformPtr(Transform* ptr) { trans_ = ptr; }
 
 	// 当たり判定通知用関数セット
 	void SetOnCollisionFun(std::function<void(const ColliderBase& type)> OnCollisionFunc) { OnCollision = std::move(OnCollisionFunc); }
 #pragma endregion
 
 #pragma region 各ゲット関数
-	// 座標
+	// コライダー座標（モデル制御情報の座標がそのままコライダーの座標とは限らない為、計算済みの座標を取得する関数を用意）
 	Vector3 GetPos(void)const { return (trans_->WorldPos() + trans_->VTrans(pos_)); }
+
+	// 1フレーム前のコライダー座標（モデル制御情報の座標がそのままコライダーの座標とは限らない為、計算済みの座標を取得する関数を用意）
+	Vector3 GetPrevPos(void)const { return (trans_->WorldPrevPos() + trans_->VTrans(pos_)); }
+
+	// モデル制御情報を直接取得
+	const Transform& GetTransform(void)const { return *trans_; }
 
 	// 判定スキップに十分な距離
 	float GetEnoughDistance(void)const { return enoughDistance_; }
@@ -87,6 +93,9 @@ public:
 #pragma endregion
 
 #pragma region 各セット関数
+	// モデル制御情報の座標情報を書き換える
+	void SetTransformPos(const Vector3& pos) { trans_->pos = pos; }
+
 	// 当たり判定フラグセット（true = 「判定する」、false = 「判定しない」）
 	void SetJudgeFlg(bool flg) { judgeFlg_ = (flg) ? 1 : 0; }
 
@@ -97,8 +106,8 @@ public:
 
 private:
 	// モデル制御情報をポインタで受け取って保持
-	const Transform* trans_;
-
+	Transform* trans_;
+	
 	// モデル制御情報の座標からの相対座標
 	Vector3 pos_;
 
@@ -108,7 +117,7 @@ private:
 	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
 	unsigned char judgeFlg_;
 
-	// 押し出しを行うかどうかのフラグ（1 = 「押し出す」、0 = 「押し出さず通り抜ける」）
+	// 判定をする場合、押し出しを行うかどうかのフラグ（1 = 「押し出す」、0 = 「押し出さず通り抜ける」）
 	unsigned char pushFlg_;
 
 	// 押し出しを行う際の重さ（0 ～ 100 で設定）

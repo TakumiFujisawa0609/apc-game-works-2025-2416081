@@ -69,12 +69,12 @@ void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<Coll
 bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
 {
 	// ローカル変数で各形状を保持（ゲット関数の呼び出しを1回で済ませるため）
-	SHAPE aShape = a->GetShape(), bShape = b->GetShape();
+	const SHAPE aShape = a->GetShape(), bShape = b->GetShape();
 
 	// どちらか、あるいは両方の形状が未設定だったら判定なし（falseで返却）
 	if (aShape == SHAPE::NON || bShape == SHAPE::NON) { return false; }
 
-	// お互いの距離による雑な判定スキップ
+	// お互いの距離による雑な判定スキップ（軽量化目的）
 	float enoughDisSub = a->GetEnoughDistance() + b->GetEnoughDistance();
 	if (enoughDisSub > 0.0f) {
 		if ((a->GetPos() - b->GetPos()).LengthSq() > std::pow(enoughDisSub, 2.0f)) { return false; }

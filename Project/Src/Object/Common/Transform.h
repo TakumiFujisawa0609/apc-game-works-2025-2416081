@@ -15,6 +15,7 @@ struct Transform
 	
 	// １フレーム前の座標（参照用）
 	const Vector3& prevPos;
+	Vector3 WorldPrevPos(void)const { return localPos + prevPos; }
 
 	// 現在の移動量
 	Vector3 Velocity(void)const { return (pos - prevPos); }
@@ -52,6 +53,7 @@ struct Transform
 
 	// 渡されたVector3構造体を自身の角度情報で回転させたVector3構造体を返す
 	Vector3 VTrans(const Vector3& v)const { return (v != 0.0f) ? VTransform(v.ToVECTOR(), AngleMat()) : Vector3(); }
+	// 渡されたVECTOR構造体を自身の角度情報で回転させたVector3構造体を返す
 	Vector3 VTrans(const VECTOR& v)const { return VTrans(Vector3(v)); }
 
 	// 角度を代入
