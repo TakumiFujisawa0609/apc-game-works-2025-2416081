@@ -181,6 +181,55 @@ bool CollisionManager::LineToLine(LineCollider* a, LineCollider* b)
 
 bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 {
+	// ベクトル
+	Vector3 vec = a->GetPos() - b->GetPos();
+
+	// 半径の合計
+	float radius = a->GetRadius() + b->GetRadius();
+
+	// ベクトルの長さの２乗と半径の合計の２乗を比べて判定
+	if (vec.LengthSq() < std::pow(radius, 2.0f)) {
+
+		// ２つとも押し出しを行うオブジェクトの場合、めり込んだ量を見て押し出す
+		if (a->GetPushFlg() && b->GetPushFlg()) {
+
+			// めり込んだ量
+			float overrap = radius - vec.Length();
+			
+			// ベクトルを正規化しておく
+			vec.Normalize();
+
+			// 動的オブジェクトか否かのフラグを取得
+			bool aDynamic = a->GetDynamicFlg(), bDynamic = b->GetDynamicFlg();
+
+			// 両方動的オブジェクトの場合
+			if (aDynamic && bDynamic) {
+
+				// お互いの重みにおける割合を計算（相手の重み ÷ 自分と相手の重みの合計）
+				float aWeightRatio, bWeightRatio;
+				WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aWeightRatio, bWeightRatio);
+
+				// 計算した重みの割合をめり込み量にかけ合わせた数値でお互いを押し出す
+				a->SetTransformPos(a->GetTransform().pos + (vec + (overrap * aWeightRatio)));
+				b->SetTransformPos(b->GetTransform().pos + (-vec + (overrap * bWeightRatio)));
+
+			}
+			// aだけ動的オブジェクトの場合
+			else if (aDynamic && !bDynamic) {
+				a->SetTransformPos(a->GetTransform().pos + (vec + overrap));
+			}
+			// bだけ動的オブジェクトの場合
+			else if (!aDynamic && bDynamic) {
+				b->SetTransformPos(b->GetTransform().pos + (-vec + overrap));
+			}
+			else { /*何もしない*/ }
+		}
+
+		// 当たった
+		return true;
+	}
+
+	// 当たってない
 	return false;
 }
 

@@ -1,6 +1,8 @@
 #pragma once
 
-#include"../Utility/Utility.h"
+#include<DxLib.h>
+#include<algorithm>
+#include<cmath>
 
 struct Vector3
 {
@@ -82,7 +84,8 @@ struct Vector3
 
 	void operator=(float value) { x = value; y = value; z = value; }
 	void operator=(const VECTOR& value) { x = value.x; y = value.y; z = value.z; }
-
+	
+	Vector3 operator-(void)const { return Vector3(-x, -y, -z); }
 
 	// ベクトルの大きさ(√なし)
 	float LengthSq(void)const { return (x * x + y * y + z * z); }
@@ -94,21 +97,18 @@ struct Vector3
 	Vector3 Normalized(void)const { return (*this / Length()); }
 
 	// 正規化する
-	void Normalize(void) {
-		float len = Length();
-		x /= len; y /= len; z /= len;
-	}
+	void Normalize(void) { *this /= Length(); }
 
 	// 行列で変換
 	Vector3 TransMat(const MATRIX& mat)const {
 		if (*this == 0.0f) { return Vector3(); }
-		return VTransform(*this, mat);
+		return Vector3(VTransform(ToVECTOR(), mat));
 	}
 
 	// 行列で変換(自身を変換)
 	void TransMatOwn(const MATRIX& mat) {
 		if (*this == 0.0f) { return; }
-		*this = VTransform(*this, mat);
+		*this = VTransform(ToVECTOR(), mat);
 	}
 
 };

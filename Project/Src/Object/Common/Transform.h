@@ -3,6 +3,8 @@
 
 #include"../../Utility/Utility.h"
 
+#include"../../Common/Vector3.h"
+
 struct Transform
 {
 	// ƒ‚ƒfƒ‹

@@ -76,6 +76,7 @@ protected:
 	void ColliderCreate(ColliderBase* newClass) {
 		collider_.emplace_back(newClass);
 		collider_.back()->SetTransformPtr(&trans_);
+		collider_.back()->SetDynamicFlg((dynamicFlg_ == 1) ? true : false);
 		collider_.back()->SetOnCollisionFun([this](const ColliderBase& collider) { this->OnCollision(collider); });
 	}
 
@@ -108,7 +109,12 @@ protected:
 	/// 移動するかを切り替える
 	/// </summary>
 	/// <param name="flg">1 = 「移動する」に切り替える、0 = 「移動しない」に切り替える</param>
-	void SetDynamicFlg(bool flg) { dynamicFlg_ = (flg) ? 1 : 0; }
+	void SetDynamicFlg(bool flg) { 
+		dynamicFlg_ = (flg) ? 1 : 0; 
+		for (ColliderBase*& collider : GetCollider()) {
+			collider->SetDynamicFlg(flg);
+		}
+	}
 
 	/// <summary>
 	/// 重力を適用するかを切り替える

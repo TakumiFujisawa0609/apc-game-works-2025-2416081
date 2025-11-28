@@ -70,10 +70,13 @@ public:
 	// モデル制御情報を直接取得
 	const Transform& GetTransform(void)const { return *trans_; }
 
+	// 動的オブジェクトか否か（true = 動的、false = 静的）
+	bool GetDynamicFlg(void)const { return (dynamicFlg_ == 1) ? true : false; }
+
 	// 判定スキップに十分な距離
 	float GetEnoughDistance(void)const { return enoughDistance_; }
 
-	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
+	// 当たり判定フラグ（true = 「判定する」、false = 「判定しない」）
 	bool GetJudge(void)const { return (judgeFlg_ == 1) ? true : false; }
 
 	// 押し出しのフラグ
@@ -96,6 +99,9 @@ public:
 	// モデル制御情報の座標情報を書き換える
 	void SetTransformPos(const Vector3& pos) { trans_->pos = pos; }
 
+	// 動的オブジェクトか否かを設定する（true = 動的、false = 静的）
+	void SetDynamicFlg(bool flg) { dynamicFlg_ = (flg) ? 1 : 0; }
+
 	// 当たり判定フラグセット（true = 「判定する」、false = 「判定しない」）
 	void SetJudgeFlg(bool flg) { judgeFlg_ = (flg) ? 1 : 0; }
 
@@ -113,6 +119,9 @@ private:
 
 	// 絶対に当たらない距離（判定時早期リターン用）
 	float enoughDistance_;
+
+	// 動的オブジェクトか否か（1 = 動的、0 = 静的）
+	unsigned char dynamicFlg_;
 
 	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
 	unsigned char judgeFlg_;

@@ -1,7 +1,6 @@
 #include"Stone.h"
 
-#include"../../../Player/Player.h"
-
+#include"../../../Charactor/Player/Player.h"
 
 Stone::Stone():
 	moveVec_(),

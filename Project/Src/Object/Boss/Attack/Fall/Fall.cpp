@@ -3,8 +3,6 @@
 #include"../../../../Manager/Sound/SoundManager.h"
 #include"../../../../Manager/Collision/Collision.h"
 
-#include"../../../Player/Player.h"
-
 Fall::Fall(int model):
 	state_(),
 
