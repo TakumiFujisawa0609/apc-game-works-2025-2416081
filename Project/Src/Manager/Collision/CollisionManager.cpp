@@ -206,13 +206,12 @@ bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 			if (aDynamic && bDynamic) {
 
 				// お互いの重みにおける割合を計算（相手の重み ÷ 自分と相手の重みの合計）
-				float aWeightRatio, bWeightRatio;
+				float aWeightRatio = 0.0f, bWeightRatio = 0.0f;
 				WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aWeightRatio, bWeightRatio);
 
 				// 計算した重みの割合をめり込み量にかけ合わせた数値でお互いを押し出す
 				a->SetTransformPos(a->GetTransform().pos + (vec + (overrap * aWeightRatio)));
 				b->SetTransformPos(b->GetTransform().pos + (-vec + (overrap * bWeightRatio)));
-
 			}
 			// aだけ動的オブジェクトの場合
 			else if (aDynamic && !bDynamic) {
