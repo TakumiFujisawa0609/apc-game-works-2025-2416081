@@ -4,6 +4,8 @@
 
 #include"Common/Collider/ColliderBase.h"
 
+#include"../Manager/Collision/CollisionManager.h"
+
 class ActorBase
 {
 public:
@@ -27,6 +29,11 @@ public:
 
 	// 接地判定の通知
 	virtual void OnGrounded() {}
+
+	/// <summary>
+	/// コライダーすべてを取得
+	/// </summary>
+	std::vector<ColliderBase*> GetCollider(void)const { return collider_; }
 
 private:
 	// 当たり判定情報
@@ -79,11 +86,6 @@ protected:
 		collider_.back()->SetDynamicFlg((dynamicFlg_ == 1) ? true : false);
 		collider_.back()->SetOnCollisionFun([this](const ColliderBase& collider) { this->OnCollision(collider); });
 	}
-
-	/// <summary>
-	/// コライダーすべてを取得
-	/// </summary>
-	std::vector<ColliderBase*> GetCollider(void)const { return collider_; }
 
 	/// <summary>
 	/// 特定のコライダーを探す

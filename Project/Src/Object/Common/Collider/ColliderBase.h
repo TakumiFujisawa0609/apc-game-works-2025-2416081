@@ -62,10 +62,10 @@ public:
 
 #pragma region 各ゲット関数
 	// コライダー座標（モデル制御情報の座標がそのままコライダーの座標とは限らない為、計算済みの座標を取得する関数を用意）
-	Vector3 GetPos(void)const { return (trans_->WorldPos() + trans_->VTrans(pos_)); }
+	Vector3 GetPos(void)const { return (trans_->pos + trans_->VTrans(pos_)); }
 
 	// 1フレーム前のコライダー座標（モデル制御情報の座標がそのままコライダーの座標とは限らない為、計算済みの座標を取得する関数を用意）
-	Vector3 GetPrevPos(void)const { return (trans_->WorldPrevPos() + trans_->VTrans(pos_)); }
+	Vector3 GetPrevPos(void)const { return (trans_->prevPos + trans_->VTrans(pos_)); }
 
 	// モデル制御情報を直接取得
 	const Transform& GetTransform(void)const { return *trans_; }

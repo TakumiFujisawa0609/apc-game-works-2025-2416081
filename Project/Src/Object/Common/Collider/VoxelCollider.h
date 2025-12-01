@@ -47,7 +47,6 @@ public:
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列に追加
 	void AddHitCellIdx(int idx) { hitCellIdxs_.push_back(idx); }
 
-
 #pragma endregion
 
 

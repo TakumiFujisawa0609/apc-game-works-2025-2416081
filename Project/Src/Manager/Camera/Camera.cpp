@@ -26,6 +26,9 @@ void Camera::Init(void)
 
 	xAngle_ = Utility::Deg2RadF(30.0f);
 	yAngle_ = 0.0f;
+
+	Update();
+	Update();
 }
 
 void Camera::Update(void)

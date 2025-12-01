@@ -1,34 +1,32 @@
 #pragma once
 
-#include"../UnitBase.h"
-
-#include"../../Manager/AnimationController/AnimationController.h"
+#include"../CharactorBase.h"
 
 #include"Attack/Fall/FallManager.h"
 #include"Attack/Stone/StoneShooter.h"
 #include"Attack/PsychoRock/PsychoRockShooter.h"
 #include"Attack/RockWall/RockWallShooter.h"
 
-class Boss : public UnitBase
+class Boss : public CharactorBase
 {
 public:
-	static constexpr VECTOR SCALE = { 2.0f,2.0f,2.0f };
-	static constexpr VECTOR SIZE = { 500.0f,850.0f,350.0f };
-	static constexpr VECTOR CENTER_DIFF = { 0.0f,SIZE.y / 2,0.0f };
 
-	Boss(const VECTOR& playerPos);
+	Boss(const Vector3& playerPos);
 	~Boss();
 
+	// “Ç‚İ‚İˆ—
 	void Load(void)override;
-	void Init(void)override;
-	void Update(void)override;
-	void Draw(void)override;
-	void UiDraw(void)override;
-	void Release(void)override;
 
-	void OnCollision(UnitBase* other)override;
+	// UI‚Ì•`‰æ
+	void UiDraw(void);
 
+	// “–‚½‚è”»’è‚Ì’Ê’m
+	void OnCollision(const ColliderBase& collider)override;
 
+	// Ú’n”»’è‚Ì’Ê’m
+	void OnGrounded()override;
+
+	// ó‘Ô’è‹`
 	enum class STATE
 	{
 		NON,
@@ -41,23 +39,25 @@ public:
 
 		MAX
 	};
-	int GetState(void)const override { return (int)state_; }
 
-
-
-
+	// Å‘åHP
 	static constexpr int HP_MAX = 200;
 
-
 private:
-#pragma region ó‘ÔŠÇ—
 
-	// Œ»İ‚Ìó‘Ô
-	STATE state_;
+	const float SCALE = 2.0f;
+	const Vector3 SIZE = Vector3(250.0f, 425.0f, 175.0f) * SCALE;;
+	const Vector3 CENTER_DIFF = Vector3(0.0f, -SIZE.y / 2, 0.0f) * SCALE;
 
-	// ŠÖ”ƒ|ƒCƒ“ƒ^”z—ñ
-	using STATEFUNC = void (Boss::*)(void);
-	STATEFUNC stateFuncPtr[(int)STATE::MAX];
+	const float CAPSULE_RADIUS = SIZE.y / 2;
+	const float CAPSULE_HALF_LEN = (SIZE.z / 2) - CAPSULE_RADIUS;
+
+	int hp_;
+
+	void CharactorInit(void)override;
+	void CharactorUpdate(void)override;
+	void CharactorDraw(void)override;
+	void CharactorRelease(void)override;
 
 	// ó‘Ô•ÊŠÖ”````
 	void Non(void) {};
@@ -69,12 +69,11 @@ private:
 	void Death(void);
 	//`````````
 
-#pragma endregion
-
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
 
-
 	// UŒ‚ó‘Ô```````````````````
+
+	// ó‘Ô’è‹`
 	enum class ATTACK_KINDS
 	{
 		NON = -1,
@@ -86,6 +85,8 @@ private:
 
 		MAX,
 	};
+
+	// Œ»İ‚ÌUŒ‚ó‘Ô
 	ATTACK_KINDS attackState_;
 
 	// UŒ‚‚Ìí—Ş‚Ì’Š‘I‚ğs‚¤ŠÖ”
@@ -100,6 +101,8 @@ private:
 
 	// UŒ‚‚ÌŠÔŠu‚ğŠÇ—‚·‚éƒJƒEƒ“ƒ^[
 	int attackInterval_;
+
+	// ŠeUŒ‚‚ÌI—¹Œã‚Ì‘Ò‹@ŠÔ
 	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
 	{
 		150,//FALL
@@ -128,9 +131,6 @@ private:
 #pragma endregion
 
 #pragma region ƒ‚[ƒVƒ‡ƒ“
-	// ƒ‚[ƒVƒ‡ƒ“ŠÇ—ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
-	AnimationController* anime_;
-
 	// ƒ‚[ƒVƒ‡ƒ“‚Ì‘S‚Ä
 	enum class ANIME_TYPE {
 		ATTACK,
@@ -155,11 +155,11 @@ private:
 #pragma endregion
 
 #pragma region ƒvƒŒƒCƒ„[‚ª•ø‚¦‚é‰ºˆÊƒNƒ‰ƒX‚ÌƒƒCƒ“ˆ—‚ğ‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
-	void SubLoad(void);
-	void SubInit(void);
-	void SubUpdate(void);
-	void SubDraw(void);
-	void SubRelease(void);
+	void LowerLoad(void);
+	void LowerInit(void);
+	void LowerUpdate(void);
+	void LowerDraw(void);
+	void LowerRelease(void);
 #pragma endregion
 
 	const int MASTER_LIFE = 2;
@@ -168,10 +168,7 @@ private:
 	void HpSharpen(int damage);
 	void LifeSharpen(void);
 
-	std::vector<COLOR_F> DEFAULT_COLOR;
+	const Vector3 LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
-
-	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
-
-	const VECTOR& playerPos;
+	const Vector3& playerPos;
 };

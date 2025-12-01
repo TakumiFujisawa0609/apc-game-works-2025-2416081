@@ -12,15 +12,14 @@ struct Transform
 
 	// 座標
 	Vector3 pos;
-	Vector3 localPos;
-	Vector3 WorldPos(void)const { return localPos + pos; }
-	
 	// １フレーム前の座標（参照用）
 	const Vector3& prevPos;
-	Vector3 WorldPrevPos(void)const { return localPos + prevPos; }
 
 	// 現在の移動量
 	Vector3 Velocity(void)const { return (pos - prevPos); }
+
+	// 描画する際の座標のズレを補完する用の変数。モデルを中心を軸に描画するため
+	Vector3 centerDiff;
 
 	// 角度
 	Vector3 angle;
@@ -38,9 +37,9 @@ struct Transform
 		model(-1),
 
 		pos(),
-		localPos(),
-
 		prevPos(prevPos),
+
+		centerDiff(),
 
 		angle(),
 		localAngle(),
@@ -78,7 +77,7 @@ struct Transform
 	void Load(std::string path) { MV1LoadModel(("Data/Model/" + path + ".mv1").c_str()); }
 
 	// 制御情報をモデルに適用
-	void Attach(void) { Utility::MV1ModelMatrix(model, scale, WorldPos(), { localAngle,angle }); }
+	void Attach(void) { Utility::MV1ModelMatrix(model, scale, pos + centerDiff, { localAngle,angle }); }
 
 	// モデルを描画（変数情報をモデルに適用してから
 	void Draw(void) {

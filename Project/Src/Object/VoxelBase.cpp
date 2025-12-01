@@ -83,6 +83,7 @@ void VoxelBase::Update(void)
     // ƒtƒ‰ƒOƒŠƒZƒbƒgiŒ`ó•Ï‰»j
     nowFrameRemesh_ = false;
 
+    // ‘OƒtƒŒ[ƒ€AŒ`ó•Ï‰»‚ª‹N‚±‚Á‚Ä‚¢‚½‚çiƒtƒ‰ƒO‚ª‚½‚Á‚Ä‚¢‚½‚çjƒƒbƒVƒ…‚ğÄ¶¬
     if (regeneration_) {
 	    // ƒƒbƒVƒ…Ä¶¬ˆ—
         BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches_);
@@ -124,58 +125,87 @@ void VoxelBase::Draw(void)
 
 void VoxelBase::Release(void)
 {
+    // ”h¶æ‚Å’Ç‰Á‚Ì‰ğ•úˆ—
     SubRelease();
 
+    // ƒƒbƒVƒ…î•ñŒQ‚ğ‘S‚Ä”jŠü
     for (auto& b : batches_) {
         b.i.clear();
         b.v.clear();
     }
     batches_.clear();
-    DeleteGraph(textureId_);
+
+    // ƒeƒNƒXƒ`ƒƒ‚ğ‰ğ•úi“Ç‚İ‚Ü‚ê‚Ä‚¢‚½ê‡j
+    if (textureId_ != -1) { DeleteGraph(textureId_); }
 }
 
 
 
 #pragma region ƒƒbƒVƒ…¶¬
-bool VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& roughSize, std::vector<MeshBatch>& batches)
+void VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& roughSize, std::vector<MeshBatch>& batches)
 {
-    // 1) ƒOƒŠƒbƒh‰ğ‘œ“x
+    // ‡@ƒZƒ‹”‚ğZo````````````````
     Nx_ = (int)std::ceil(roughSize.x / cell);
     Ny_ = (int)std::ceil(roughSize.y / cell);
     Nz_ = (int)std::ceil(roughSize.z / cell);
+    // `````````````````````````
 
-    // 2) •\–Êƒ}[ƒLƒ“ƒO
-	density_.resize(Nx_ * Ny_ * Nz_, 0);
-    MarkSurfaceByCollisionProbe(mv1, cell, center, roughSize, Nx_, Ny_, Nz_, density_);
+    // ‡A•\–Ê‚ğƒ}[ƒLƒ“ƒO```````````````````````
+    MarkSurface(mv1, cell, center, roughSize, Nx_, Ny_, Nz_, density_);
+    // ````````````````````````````````
 
-    // 3) “à•”[“U
+    // ‡B“à•”[“U```````````````````
     SolidFill(density_, Nx_, Ny_, Nz_);
 
-    // 4) ƒƒbƒVƒ…‰»
-    BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches);
+    // ‰Šú–§“xî•ñ‚ğ•Û‚µ‚ÄŠÈ’P‚É–ß‚¹‚é‚æ‚¤‚É‚µ‚Ä‚¨‚­
     densityInit_ = density_;
-    return !(batches.empty());
+    // ````````````````````````
+
+    // ‡CƒƒbƒVƒ…‰»`````````````````````
+    BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches);
+
+    // ƒƒbƒVƒ…¶¬‚ª³í‚És‚í‚ê‚½‚©”Û‚©i¸”s‚ª‚ ‚ê‚Î’Ê’m‚µ‚Ä‚¨‚­j
+    if (batches.empty()) { printfDx("ƒ{ƒNƒZƒ‹ƒƒbƒVƒ…¶¬‚É¸”s‚µ‚Ü‚µ‚½"); }
+    // ```````````````````````````
 }
 
-void VoxelBase::MarkSurfaceByCollisionProbe(int mv1, float cell, const Vector3& center, const Vector3& roughSize, int Nx, int Ny, int Nz, std::vector<uint8_t>& density)
+void VoxelBase::MarkSurface(int mv1, float cell, const Vector3& center, const Vector3& roughSize, int Nx, int Ny, int Nz, std::vector<unsigned char>& density)
 {
+    // –§“xî•ñŒQ‚Ì”z—ñ”‚ğƒOƒŠƒbƒh”•ªŠm•Ûi‚O‚Å‰Šú‰»j
+    density.resize(Nx_ * Ny_ * Nz_, 0);
+
+    // ƒ‚ƒfƒ‹‚ÌƒƒbƒVƒ…‚Ì“–‚½‚è”»’è‚ÌƒZƒbƒgƒAƒbƒv
     MV1SetupCollInfo(mv1, -1);
+
+    // 
     Vector3 minW = center - (roughSize / 2);
+
+    // ƒZƒ‹ƒTƒCƒY‚Ì”¼•ª‚ÌƒTƒCƒY‚ğ”¼Œa‚Æ‚µ‚Ä•Û‘¶iˆ—Œø—¦“I‚ÉƒZƒ‹‚ğ‹…‘Ì‚Æ‚µ‚ÄƒƒbƒVƒ…‚Æ‚Ì“–‚½‚è”»’è‚ğs‚¤j
     float r = cell * 0.5f;
+
+    // ƒOƒŠƒbƒh‘S‚Ä‚ÅƒƒbƒVƒ…‚Æ‚Ì“–‚½‚è”»’è‚ğs‚¤
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)
             for (int x = 0; x < Nx; ++x) {
+
+                // ‚RŸŒ³“I‚ÈƒOƒŠƒbƒh”Ô†‚©‚çÀ•W‚ğZo
                 Vector3 pc = Vector3(
                     minW.x + (x * cell) + (cell * 0.5f),
                     minW.y + (y * cell) + (cell * 0.5f),
                     minW.z + (z * cell) + (cell * 0.5f));
+
+                // æ“¾‚µ‚½À•W‚Å“–‚½‚è”»’èiƒƒbƒVƒ…VS‹…‘Ìj
                 auto res = MV1CollCheck_Sphere(mv1, -1, pc.ToVECTOR(), r);
+
+                // “–‚½‚Á‚Ä‚¢‚½‚çAŠO‘¤‚Æ‚µ‚Ä‚ ‚Æ‚Å”»•Ê‰Â”\‚È‚æ‚¤‚É‚Q‚O‚O‚ğ“ü‚ê‚Ä‚¨‚­
                 if ((res.HitNum > 0)) { density[Idx(x, y, z, Nx, Ny)] = 200; }
+
+                // Õ“Ë”»’èî•ñ‚ğ”jŠü
                 MV1CollResultPolyDimTerminate(res);
             }
 }
 
-void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
+void VoxelBase::SolidFill(std::vector<unsigned char>& density, int Nx, int Ny, int Nz)
 {
     const int total = Nx * Ny * Nz;
     std::vector<bool> ext(total, false);
@@ -218,7 +248,7 @@ void VoxelBase::SolidFill(std::vector<uint8_t>& density, int Nx, int Ny, int Nz)
 }
 
 void VoxelBase::BuildGreedyMesh(
-    const std::vector<uint8_t>& density,
+    const std::vector<unsigned char>& density,
     int Nx, int Ny, int Nz, float cell,
     std::vector<MeshBatch>& batches)
 {

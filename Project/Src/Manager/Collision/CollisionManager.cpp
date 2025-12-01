@@ -4,11 +4,11 @@
 
 #include"CollisionUtility.h"
 
-std::vector<ColliderBase*> CollisionManager::playerColliders_ = {};
-std::vector<ColliderBase*> CollisionManager::enemyColliders_ = {};
-std::vector<ColliderBase*> CollisionManager::stageColliders_ = {};
+//std::vector<ColliderBase*> CollisionManager::playerColliders_ = {};
+//std::vector<ColliderBase*> CollisionManager::enemyColliders_ = {};
+//std::vector<ColliderBase*> CollisionManager::stageColliders_ = {};
 
-void CollisionManager::Add(ColliderBase*& collider)
+void CollisionManager::Add(ColliderBase* collider)
 {
 	if (!collider) { return; }
 
@@ -48,7 +48,7 @@ void CollisionManager::Check(void)
 	Matching(playerColliders_, enemyColliders_);
 }
 
-void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs)
+void CollisionManager::Matching(std::vector<ColliderBase*> as, std::vector<ColliderBase*> bs)
 {
 	for (ColliderBase*& a : as) {
 		if (!a) { continue; }
@@ -66,7 +66,7 @@ void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<Coll
 	}
 }
 
-bool CollisionManager::IsHit(ColliderBase*& a, ColliderBase*& b)
+bool CollisionManager::IsHit(ColliderBase* a, ColliderBase* b)
 {
 	// ローカル変数で各形状を保持（ゲット関数の呼び出しを1回で済ませるため）
 	const SHAPE aShape = a->GetShape(), bShape = b->GetShape();

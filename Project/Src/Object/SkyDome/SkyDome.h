@@ -1,23 +1,25 @@
 #pragma once
 
-#include"../../Utility/Utility.h"
+#include"../ActorBase.h"
 
-class SkyDome
+class SkyDome : public ActorBase
 {
 public:
-	SkyDome();
-	~SkyDome();
+	SkyDome() {}
+	~SkyDome() {}
 
-	void Load(void);
-	void Update(void);
-	void Draw(void);
-	void Release(void);
+	void Load(void)override;
+	void Init(void)override {}
+	void Update(void)override;
+	void Draw(void)override;
 
-	void SetPos(const VECTOR& pos) { pos_ = pos; }
+	void SetPos(const Vector3& pos) { trans_.pos = pos; }
 private:
-	int model_;
-	VECTOR pos_;
-	VECTOR angle_;
-
+	// •\Ž¦‚·‚é‘å‚«‚³
 	const float SCALE = 50.0f;
+
+	void SubInit(void)override{}
+	void SubUpdate(void)override{}
+	void SubDraw(void)override{}
+	void SubRelease(void)override {}
 };

@@ -3,7 +3,7 @@
 
 #include"../../Common/Vector2.h"
 
-#include"../../Manager/Collision/Collision.h"
+#include"../../Manager/Collision/CollisionManager.h"
 
 #include<vector>
 
@@ -57,17 +57,13 @@ public:
 	static void Shake(ShakeKinds kinds = ShakeKinds::DIAG, ShakeSize size = ShakeSize::MEDIUM, int time = 20);
 
 private:
+	// カメラ
 	Camera* camera_;
-	Collision* collision_;
 
-	SkyDome* skyDome_;
+	// 当たり判定管理クラス
+	CollisionManager* collision_;
 
-	BlockManager* blocks_;
-
-	std::vector<RockWall*> rock_;
-	Player* player_;
-	Boss* boss_;
-
+	// オブジェクト格納用の配列
 	std::vector<ActorBase*>objects_;
 
 	// 配列の中から特定のオブジェクトを探す
@@ -84,6 +80,7 @@ private:
 		return out;
 	}
 
+#pragma region 画面演出用
 	// ヒットストップカウンター
 	static int hitStop_;
 
@@ -98,6 +95,7 @@ private:
 	static ShakeSize shakeSize_;
 	Vector2I ShakePoint(void);
 	//---------------------------------
+#pragma endregion
 };
 
 

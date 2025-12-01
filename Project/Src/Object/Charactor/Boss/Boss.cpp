@@ -1,16 +1,14 @@
 #include"Boss.h"
 
-#include"../../Manager/Input/KeyManager.h"
-#include"../../Manager/Sound/SoundManager.h"
+#include"../../../Manager/Input/KeyManager.h"
+#include"../../../Manager/Sound/SoundManager.h"
 
-#include"../../Application/Application.h"
-#include"../../Scene/Game/GameScene.h"
+#include"../../../Application/Application.h"
+#include"../../../Scene/Game/GameScene.h"
 
 #include"../Player/Player.h"
 
-Boss::Boss(const VECTOR& playerPos):
-	state_(Boss::STATE::NON),
-	stateFuncPtr(),
+Boss::Boss(const Vector3& playerPos):
 
 	rockWall_(nullptr),
 	stone_(nullptr),
@@ -26,8 +24,6 @@ Boss::Boss(const VECTOR& playerPos):
 
 	masterLife_(0),
 
-	anime_(nullptr),
-
 	playerPos(playerPos)
 {
 }
@@ -38,29 +34,22 @@ Boss::~Boss()
 
 void Boss::Load(void)
 {
-	unit_.model_ = MV1LoadModel("Data/Model/Boss/Giant.mv1");
-	MV1SetScale(unit_.model_, SCALE);
+	// モデルをロード
+	trans_.Load("Boss/Giant");
 
-	unit_.para_.size = SIZE;
-	unit_.para_.radius = SIZE.y / 4;
-	unit_.para_.capsuleHalfLen = unit_.para_.size.y / 2 - unit_.para_.radius;
-	unit_.para_.colliShape = CollisionShape::SPHERE;
+	// スケールを設定
+	trans_.scale = SCALE;
 
-	unit_.para_.speed = 10.0f;
+	// 相対　座標/角度
+	trans_.centerDiff = CENTER_DIFF;
+	trans_.localAngle = LOCAL_ROT;
 
-	int mnum = MV1GetMaterialNum(unit_.model_);
-	for (int i = 0; i < mnum; ++i) {
-		COLOR_F emi = MV1GetMaterialEmiColor(unit_.model_, i);
-		DEFAULT_COLOR.emplace_back(emi);
-		emi.r = (std::min)(emi.r + 0.3f, 1.0f);
-		emi.g = (std::min)(emi.g + 0.3f, 1.0f);
-		emi.b = (std::min)(emi.b + 0.3f, 1.0f);
-		MV1SetMaterialEmiColor(unit_.model_, i, emi);
-	}
+	// コライダーを生成
+	ColliderCreate(new CapsuleCollider(TAG::BOSS, CAPSULE_HALF_LEN, CAPSULE_RADIUS, CAPSULE_HALF_LEN + CAPSULE_RADIUS));
+
+	//unit_.para_.speed = 10.0f;
 
 #pragma region 関数ポインタ配列へ各関数を格納
-
-#define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
 
 	SET_STATE(STATE::NON, &Boss::Non);
 	SET_STATE(STATE::IDLE, &Boss::Idle);
@@ -74,87 +63,43 @@ void Boss::Load(void)
 
 	// アニメーション
 	AnimeLoad();
-	anime_->Play((int)ANIME_TYPE::WALK);
+	AnimePlay((int)ANIME_TYPE::WALK);
 
 	// Bossクラスが抱える子クラス達の読み込み処理
-	SubLoad();
+	LowerLoad();
 }
 
-void Boss::Init(void)
+void Boss::CharactorInit(void)
 {
-	state_ = STATE::IDLE;
+	state_ = (int)STATE::IDLE;
 
-	unit_.pos_ = { 1000.0f,300.0f,1000.0f };
+	trans_.pos= { 1000.0f,300.0f,1000.0f };
 
-	unit_.angle_ = {};
-
-	unit_.isAlive_ = true;
+	SetJudge(true);
+	SetIsDraw(true);
 
 	masterLife_ = MASTER_LIFE;
-	unit_.hp_ = HP_MAX;
+	hp_ = HP_MAX;
 
 	attackInterval_ = ATTACK_INTERVAL[0];
 
 	stanTimer_ = 0;
 
 	// Bossクラスが抱える子クラスの初期化処理
-	SubInit();
+	LowerInit();
 }
 
-void Boss::Update(void)
+void Boss::CharactorUpdate(void)
 {
-	if (!unit_.isAlive_) { return; }
-
-	// 無敵カウンターの更新
-	Invi();
-
-	// 前フレームの座標をローカル変数に保持(押し戻し処理に使う)
-	BeginFrame();
-
-	// 現在のステートに対応する関数を実行
-	(this->*stateFuncPtr[(int)state_])();
-
-	// Bossクラスが抱える子クラスの更新処理
-	SubUpdate();
-
-	// 加速度の加算
-	AccelUpdate();
-
-	// アニメーションの更新
-	anime_->Update();
-
-	// ダメージ演出
-	if (unit_.inviciCounter_ > 1) {
-		if (unit_.inviciCounter_ / 10 % 2 == 0) {
-			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
-				MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
-			}
-		}
-		else {
-			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
-				COLOR_F emi = DEFAULT_COLOR[i];
-				emi.r = (std::min)(DEFAULT_COLOR[i].r + 0.6f, 1.0f);
-				MV1SetMaterialEmiColor(unit_.model_, i, emi);
-			}
-		}
-
-	}
-	else if (unit_.inviciCounter_ == 1) {
-		for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
-			MV1SetMaterialEmiColor(unit_.model_, i, DEFAULT_COLOR[i]);
-		}
-	}
+	LowerUpdate();
 }
 
-void Boss::Draw(void)
+void Boss::CharactorDraw(void)
 {
-	if (!unit_.isAlive_) { return; }
-
-	Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.pos_, CENTER_DIFF), { LOCAL_ROT,unit_.angle_ });
-	MV1DrawModel(unit_.model_);
+	if (!GetIsDraw()) { return; }
 
 	// Bossクラスが抱える子クラスの描画処理
-	SubDraw();
+	LowerDraw();
 }
 
 void Boss::UiDraw(void)
@@ -176,37 +121,33 @@ void Boss::UiDraw(void)
 
 	drawHpBar(sPos, size, 0x000000);
 
-	size.x *= ((float)unit_.hp_ / (float)HP_MAX);
+	size.x *= ((float)hp_ / (float)HP_MAX);
 	drawHpBar(sPos, size, 0xff0000);
 
-	if (state_ == STATE::STAN && stanTimer_ / 15 % 2 == 0) {
+	if (state_ == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
 		SetFontSize(45);
 		DrawString(App::SCREEN_SIZE_X/2, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
 		SetFontSize(16);
 	}
 }
 
-void Boss::Release(void)
+void Boss::CharactorRelease(void)
 {
 	// Bossクラスが抱える子クラスの解放処理
-	SubRelease();
-
-	MV1DeleteModel(unit_.model_);
+	LowerRelease();
 }
 
-void Boss::OnCollision(UnitBase* other)
+void Boss::OnCollision(const ColliderBase& collider)
 {
-	if (state_ == STATE::STAN) {
-		if (dynamic_cast<PlayerPunch*>(other)) {
+	if (state_ == (int)STATE::STAN) {
+		if (collider.GetTag() == TAG::PLAYER_PUNCH) {
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 			LifeSharpen();
-			return;
 		}
-
 		return;
 	}
 
-	if (dynamic_cast<ThrowObjBase*>(other)) {
+	if (collider.GetTag() == TAG::PLAYER_THROWING) {
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(30);
@@ -216,15 +157,15 @@ void Boss::OnCollision(UnitBase* other)
 
 void Boss::Idle(void)
 {
-	anime_->Play((int)ANIME_TYPE::IDLE);
+	AnimePlay((int)ANIME_TYPE::IDLE);
 
-	VECTOR vec = VSub(playerPos, unit_.pos_);
-	unit_.angle_.y = atan2f(vec.x, vec.z);
+	Vector3 vec = playerPos - trans_.pos;
+	trans_.angle.y = atan2f(vec.x, vec.z);
 
 	if (--attackInterval_ <= 0) {
 		attackInterval_ = 0;
 		attackInit_ = true;
-		state_ = STATE::ATTACK;
+		state_ = (int)STATE::ATTACK;
 	}
 }
 void Boss::Attack(void)
@@ -244,18 +185,18 @@ void Boss::Attack(void)
 			attackEnd_ = true;
 			break;
 		case Boss::ATTACK_KINDS::FALL:
-			anime_->Play((int)ANIME_TYPE::SLAP, false);
+			AnimePlay((int)ANIME_TYPE::SLAP, false);
 			fall_->Set();
 			break;
 		case Boss::ATTACK_KINDS::STONE:
-			anime_->Play((int)ANIME_TYPE::PUNCH, false);
+			AnimePlay((int)ANIME_TYPE::PUNCH, false);
 			break;
 		case Boss::ATTACK_KINDS::PSYCHO:
-			anime_->Play((int)ANIME_TYPE::SLAP, false);
+			AnimePlay((int)ANIME_TYPE::SLAP, false);
 			psycho_->Set();
 			break;
 		case Boss::ATTACK_KINDS::WALL:
-			anime_->Play((int)ANIME_TYPE::SLAP, false);
+			AnimePlay((int)ANIME_TYPE::SLAP, false);
 			break;
 		}
 	}
@@ -268,28 +209,28 @@ void Boss::Attack(void)
 			attackStart_ = false;
 			break;
 		case Boss::ATTACK_KINDS::FALL:
-			if (anime_->GetAnimEnd()) {
+			if (IsAnimeEnd()) {
 				attackStart_ = false;
 				fall_->On();
 			}
 			else { return; }
 			break;
 		case Boss::ATTACK_KINDS::STONE:
-			if (anime_->GetAnimEnd()) {
+			if (IsAnimeEnd()) {
 				attackStart_ = false;
 				stone_->On();
 			}
 			else { return; }
 			break;
 		case Boss::ATTACK_KINDS::PSYCHO:
-			if (anime_->GetAnimEnd()) {
+			if (IsAnimeEnd()) {
 				attackStart_ = false;
 				psycho_->On();
 			}
 			else { return; }
 			break;
 		case Boss::ATTACK_KINDS::WALL:
-			if (anime_->GetAnimEnd()) {
+			if (IsAnimeEnd()) {
 				attackStart_ = false;
 				rockWall_->On();
 			}
@@ -313,41 +254,41 @@ void Boss::Attack(void)
 	case Boss::ATTACK_KINDS::WALL:
 		break;
 	}
-	if (anime_->GetAnimEnd()) { attackEnd_ = true; }
+	if (IsAnimeEnd()) { attackEnd_ = true; }
 #pragma endregion
 #pragma region 攻撃終了 通常状態へ遷移
 	if (attackEnd_) {
 		if (attackState_ != ATTACK_KINDS::NON) { attackInterval_ = ATTACK_INTERVAL[(int)attackState_]; }
-		state_ = STATE::IDLE;
-		anime_->Play((int)ANIME_TYPE::IDLE);
+		state_ = (int)STATE::IDLE;
+		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 #pragma endregion
 }
 void Boss::Damage(void)
 {
-	if (anime_->GetAnimEnd()) {
-		state_ = STATE::IDLE;
+	if (IsAnimeEnd()) {
+		state_ = (int)STATE::IDLE;
 	}
 }
 void Boss::Stan(void)
 {
 	if (--stanTimer_ <= 0) {
-		unit_.hp_ = (int)(HP_MAX * 0.1f);
-		state_ = STATE::IDLE;
+		hp_ = (int)(HP_MAX * 0.1f);
+		state_ = (int)STATE::IDLE;
 	}
 }
 void Boss::BigDamage(void)
 {
-	if (anime_->GetAnimeRatio() > 0.4f) {
-		unit_.hp_ = HP_MAX;
-		state_ = STATE::IDLE;
-		anime_->Play((int)ANIME_TYPE::IDLE);
+	if (GetAnimeRatio() > 0.4f) {
+		hp_ = HP_MAX;
+		state_ = (int)STATE::IDLE;
+		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 }
 void Boss::Death(void)
 {
-	if (anime_->GetAnimEnd()) {
-		unit_.isAlive_ = false;
+	if (IsAnimeEnd()) {
+		SetJudge(false);
 	}
 }
 
@@ -379,18 +320,14 @@ Boss::ATTACK_KINDS Boss::AttackLottery(void)
 
 void Boss::AnimeLoad(void)
 {
-	anime_ = new AnimationController(unit_.model_);
-
-	for (int i = 0; i < (int)ANIME_TYPE::MAX; i++) {
-		anime_->AddInFbx(i, 30.0f, i);
-	}
+	AddInFbxAnimation((int)ANIME_TYPE::MAX, 1.0f);
 
 	const std::string ANIME_PATH = "Data/Model/Boss/Animation/";
 	//anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
 }
 
 
-void Boss::SubLoad(void)
+void Boss::LowerLoad(void)
 {
 	fall_ = new FallManager(playerPos);
 	fall_->Load();
@@ -404,27 +341,27 @@ void Boss::SubLoad(void)
 	rockWall_ = new RockWallShooter(unit_.pos_, unit_.angle_);
 	rockWall_->Load();
 }
-void Boss::SubInit(void)
+void Boss::LowerInit(void)
 {
 	fall_->Init();
 	stone_->Init();
 	rockWall_->Init();
 }
-void Boss::SubUpdate(void)
+void Boss::LowerUpdate(void)
 {
 	fall_->Update();
 	stone_->Update();
 	psycho_->Update();
 	rockWall_->Update();
 }
-void Boss::SubDraw(void)
+void Boss::LowerDraw(void)
 {
 	fall_->Draw();
 	rockWall_->Draw();
 	stone_->Draw();
 	psycho_->Draw();
 }
-void Boss::SubRelease(void)
+void Boss::LowerRelease(void)
 {
 	if (rockWall_) {
 		rockWall_->Release();

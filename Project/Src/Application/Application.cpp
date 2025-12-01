@@ -77,12 +77,12 @@ void Application::Run(void)
 		if (!fps_->UpdateFrameRate()) { continue; }
 		KeyManager::GetIns().Update();
 		SceneManager::GetIns().Update();	// シーン管理更新
-		fps_->CalcFrameRate();					// フレームレート計算
+		fps_->CalcFrameRate();				// フレームレート計算
 
 		ClearDrawScreen();
 
 		SceneManager::GetIns().Draw();		// シーン管理描画
-		//fps_->DrawFrameRate();					// フレームレート描画
+		//fps_->DrawFrameRate();			// フレームレート描画
 
 		ScreenFlip();
 	}

@@ -50,13 +50,13 @@ public:
 	void Release(void);
 
 	// 座標の取得
-	const VECTOR& GetPos(void) const { return pos_; }
+	const Vector3& GetPos(void) const { return pos_; }
 
 	// 角度の取得
-	const VECTOR& GetAngles(void) const { return angles_; }
+	const Vector3& GetAngles(void) const { return angles_; }
 
 	// 追従モードのターゲット座標セット
-	void SetLookAtPos(const VECTOR* pos) { lookAt_ = pos; }
+	void SetLookAtPos(const Vector3* pos) { lookAt_ = pos; }
 
 
 	// カメラモードの変更
@@ -67,14 +67,14 @@ private:
 	MODE mode_;
 
 	// カメラの位置
-	VECTOR pos_;
+	Vector3 pos_;
 
 	// カメラの角度
-	VECTOR angles_;
+	Vector3 angles_;
 
-	const VECTOR* lookAt_;
-	VECTOR lookAtMultPos_;
-	static constexpr VECTOR LOOKAT_DIFF = { 0.0f, 0.0f, -300.0f };
+	const Vector3* lookAt_;
+	Vector3 lookAtMultPos_;
+	const Vector3 LOOKAT_DIFF = { 0.0f, 0.0f, -300.0f };
 
 	float xAngle_;
 	float yAngle_;

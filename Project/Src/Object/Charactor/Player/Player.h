@@ -20,15 +20,15 @@ public:
 
 
 
-	Player(const VECTOR& cameraAngle);
+	Player(const Vector3& cameraAngle);
 	~Player()override {};
 
 	void Load(void)override;
-	virtual void CharactorInit(void) = 0;
-	virtual void CharactorUpdate(void) = 0;
-	virtual void CharactorDraw(void) = 0;
+	void CharactorInit(void)override;
+	void CharactorUpdate(void)override;
+	void CharactorDraw(void)override;
 	void UiDraw(void);
-	virtual void CharactorRelease(void) = 0;
+	void CharactorRelease(void)override;
 
 	void OnCollision(const ColliderBase& collider)override;
 	void OnGrounded()override;
@@ -119,7 +119,7 @@ private:
 	void Jump(void);		//ジャンプ関数
 
 	// 変数
-	const VECTOR& cameraAngle_;	//カメラの角度
+	const Vector3& cameraAngle_;	//カメラの角度
 
 	bool isJump_[JUMP_NUM];	//ジャンプしているかの変数
 	int jumpKeyCounter_[JUMP_NUM];

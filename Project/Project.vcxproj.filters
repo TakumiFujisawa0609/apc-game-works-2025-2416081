@@ -48,7 +48,7 @@
     <ClCompile Include="Src\Object\Charactor\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWall.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWall.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\UnitBase.cpp">
@@ -90,10 +90,10 @@
     <ClCompile Include="Src\Object\Stage\Block\Block.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Boss.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Boss.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWallShooter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.cpp">
@@ -108,25 +108,25 @@
     <ClCompile Include="Src\Scene\Game\Pause\GamePause.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\Stone\Stone.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\Stone\Stone.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\Stone\StoneShooter.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\Stone\StoneShooter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\Over\OverScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\Fall\Fall.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\Fall\Fall.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\Fall\FallManager.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\Fall\FallManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\PsychoRock\PsychoRock.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\PsychoRock\PsychoRock.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Boss\Attack\PsychoRock\PsychoRockShooter.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\Attack\PsychoRock\PsychoRockShooter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp">
@@ -182,7 +182,7 @@
     <ClInclude Include="Src\Object\Charactor\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWall.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWall.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\UnitBase.h">
@@ -224,10 +224,10 @@
     <ClInclude Include="Src\Object\Stage\Block\Block.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Boss.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Boss.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\RockWall\RockWallShooter.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWallShooter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.h">
@@ -242,25 +242,25 @@
     <ClInclude Include="Src\Scene\Game\Pause\GamePauseh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\Stone\Stone.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\Stone\Stone.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\Stone\StoneShooter.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\Stone\StoneShooter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\Over\OverScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\Fall\Fall.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\Fall\Fall.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\Fall\FallManager.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\Fall\FallManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\PsychoRock\PsychoRock.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\PsychoRock\PsychoRock.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Boss\Attack\PsychoRock\PsychoRockShooter.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\Attack\PsychoRock\PsychoRockShooter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\SkyDome\SkyDome.h">

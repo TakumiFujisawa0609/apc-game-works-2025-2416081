@@ -14,27 +14,38 @@
 class CollisionManager
 {
 public:
-	CollisionManager() {}
+	CollisionManager():
+		playerColliders_(),
+		enemyColliders_(),
+		stageColliders_()
+	{}
 	~CollisionManager() {}
 
 	// オブジェクト追加
-	static void Add(ColliderBase*& collider);
+	void Add(ColliderBase* collider);
 	// オブジェクト追加
-	static void Add(std::vector<ColliderBase*>& collider) { for (ColliderBase*& c : collider) { Add(c); } }
+	void Add(std::vector<ColliderBase*> collider) { for (ColliderBase*& c : collider) { Add(c); } }
 
 	// 判定実行
 	void Check(void);
 
+	// 解放
+	void Clear(void) {
+		playerColliders_.clear();
+		enemyColliders_.clear();
+		stageColliders_.clear();
+	}
+
 private:
 #pragma region タイプ別コライダー格納配列
-	static std::vector<ColliderBase*>playerColliders_;
-	static std::vector<ColliderBase*>enemyColliders_;
-	static std::vector<ColliderBase*>stageColliders_;
+	std::vector<ColliderBase*>playerColliders_;
+	std::vector<ColliderBase*>enemyColliders_;
+	std::vector<ColliderBase*>stageColliders_;
 #pragma endregion
 
 #pragma region 当たり判定用
-	void Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs);
-	bool IsHit(ColliderBase*& a, ColliderBase*& b);
+	void Matching(std::vector<ColliderBase*> as, std::vector<ColliderBase*> bs);
+	bool IsHit(ColliderBase* a, ColliderBase* b);
 
 	bool LineToLine(LineCollider* a, LineCollider* b);
 	bool SphereToSphere(SphereCollider* a, SphereCollider* b);

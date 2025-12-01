@@ -14,7 +14,7 @@
 
 #include"../../Boss/Boss.h"
 
-Player::Player(const VECTOR& cameraPos):
+Player::Player(const Vector3& cameraPos):
 	CharactorBase(),
 
 	cameraAngle_(cameraPos),
@@ -71,7 +71,7 @@ void Player::Load(void)
 void Player::CharactorInit(void)
 {
 	trans_.pos = { 1000.0f,1000.0f,200.0f };
-	trans_.localPos = CENTER_DIFF;
+	trans_.centerDiff = CENTER_DIFF;
 
 	trans_.angle = {};
 	trans_.localAngle = LOCAL_ROT;

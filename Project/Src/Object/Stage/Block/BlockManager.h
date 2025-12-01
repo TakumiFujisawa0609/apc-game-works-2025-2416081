@@ -1,6 +1,4 @@
 #pragma once
-#include <DxLib.h>
-
 #include<map>
 #include<vector>
 
@@ -44,5 +42,10 @@ private:
 	std::map<int, int>models_;
 
 	void LoadMapCsvData(void);
+
+	void SubInit(void)override {}
+	void SubUpdate(void)override {}
+	void SubDraw(void)override {}
+	void SubRelease(void)override {}
 };
 
