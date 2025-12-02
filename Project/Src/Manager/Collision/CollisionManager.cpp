@@ -77,7 +77,7 @@ bool CollisionManager::IsHit(ColliderBase* a, ColliderBase* b)
 	// ‚¨Œİ‚¢‚Ì‹——£‚É‚æ‚éG‚È”»’èƒXƒLƒbƒviŒy—Ê‰»–Ú“Ij
 	float enoughDisSub = a->GetEnoughDistance() + b->GetEnoughDistance();
 	if (enoughDisSub > 0.0f) {
-		if ((a->GetPos() - b->GetPos()).LengthSq() > std::pow(enoughDisSub, 2.0f)) { return false; }
+		if ((a->GetPos() - b->GetPos()).LengthSq() > enoughDisSub * enoughDisSub) { return false; }
 	}
 
 #pragma region Œ`ó‚ğ”»•Ê‚µ‚Ä“KØ‚ÈŠÖ”‚É‚Ä”»’è‚ğs‚¤
@@ -181,60 +181,171 @@ bool CollisionManager::LineToLine(LineCollider* a, LineCollider* b)
 
 bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 {
+#pragma region •K—vî•ñ‚ğ‹‚ß‚é
 	// ƒxƒNƒgƒ‹
 	Vector3 vec = a->GetPos() - b->GetPos();
-
 	// ”¼Œa‚Ì‡Œv
 	float radius = a->GetRadius() + b->GetRadius();
+#pragma endregion
 
-	// ƒxƒNƒgƒ‹‚Ì’·‚³‚Ì‚Qæ‚Æ”¼Œa‚Ì‡Œv‚Ì‚Qæ‚ğ”ä‚×‚Ä”»’è
-	if (vec.LengthSq() < std::pow(radius, 2.0f)) {
+#pragma region Õ“Ë”»’èi‚Q“_ŠÔ‚Ì‹——£‚ğ‚Í‚©‚Á‚ÄA–¢Õ“Ë‚È‚çI—¹j
+	// ƒxƒNƒgƒ‹‚Ì’·‚³‚Ì‚Qæ‚Æ”¼Œa‚Ì‡Œv‚Ì‚Qæ‚ğ”ä‚×‚Ä”»’èi–¢Õ“Ë‚È‚çI—¹j
+	//if (vec.LengthSq() > radius * radius) { return false; }
 
-		// ‚Q‚Â‚Æ‚à‰Ÿ‚µo‚µ‚ğs‚¤ƒIƒuƒWƒFƒNƒg‚Ìê‡A‚ß‚è‚ñ‚¾—Ê‚ğŒ©‚Ä‰Ÿ‚µo‚·
-		if (a->GetPushFlg() && b->GetPushFlg()) {
+	// Sphere ~ Sphere ‚Ìê‡A‚·‚Å‚É”»’è‚ÍÏ‚ñ‚Å‚¢‚é‚Ì‚Å‰Ÿ‚µo‚µ“–‚½‚Á‚Ä‚¢‚é‘O’ñ‚Åi‚ß‚é
+#pragma endregion
 
-			// ‚ß‚è‚ñ‚¾—Ê
-			float overrap = radius - vec.Length();
-			
-			// ƒxƒNƒgƒ‹‚ğ³‹K‰»‚µ‚Ä‚¨‚­
-			vec.Normalize();
+#pragma region Õ“ËŠm’èF‰Ÿ‚µo‚µ‚ª•K—v‚©->•K—v‚È‚ç‰Ÿ‚µo‚µ
+	// ‚Q‚Â‚Æ‚à‰Ÿ‚µo‚µ‚ğs‚¤ƒIƒuƒWƒFƒNƒg‚Ìê‡A‚ß‚è‚ñ‚¾—Ê‚ğŒ©‚Ä‰Ÿ‚µo‚·
+	if (a->GetPushFlg() && b->GetPushFlg()) {
 
-			// “®“IƒIƒuƒWƒFƒNƒg‚©”Û‚©‚Ìƒtƒ‰ƒO‚ğæ“¾
-			bool aDynamic = a->GetDynamicFlg(), bDynamic = b->GetDynamicFlg();
+		// ‚ß‚è‚ñ‚¾—Ê
+		float overrap = radius - vec.Length();
 
-			// —¼•û“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
-			if (aDynamic && bDynamic) {
+		// ƒxƒNƒgƒ‹‚ğ³‹K‰»‚µ‚Ä‚¨‚­
+		vec.Normalize();
 
-				// ‚¨Œİ‚¢‚Ìd‚İ‚É‚¨‚¯‚éŠ„‡‚ğŒvZi‘Šè‚Ìd‚İ € ©•ª‚Æ‘Šè‚Ìd‚İ‚Ì‡Œvj
-				float aWeightRatio = 0.0f, bWeightRatio = 0.0f;
-				WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aWeightRatio, bWeightRatio);
+		// “®“IƒIƒuƒWƒFƒNƒg‚©”Û‚©‚Ìƒtƒ‰ƒO‚ğæ“¾
+		bool aDynamic = a->GetDynamicFlg(), bDynamic = b->GetDynamicFlg();
 
-				// ŒvZ‚µ‚½d‚İ‚ÌŠ„‡‚ğ‚ß‚è‚İ—Ê‚É‚©‚¯‡‚í‚¹‚½”’l‚Å‚¨Œİ‚¢‚ğ‰Ÿ‚µo‚·
-				a->SetTransformPos(a->GetTransform().pos + (vec + (overrap * aWeightRatio)));
-				b->SetTransformPos(b->GetTransform().pos + (-vec + (overrap * bWeightRatio)));
-			}
-			// a‚¾‚¯“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
-			else if (aDynamic && !bDynamic) {
-				a->SetTransformPos(a->GetTransform().pos + (vec + overrap));
-			}
-			// b‚¾‚¯“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
-			else if (!aDynamic && bDynamic) {
-				b->SetTransformPos(b->GetTransform().pos + (-vec + overrap));
-			}
-			else { /*‰½‚à‚µ‚È‚¢*/ }
+		// —¼•û“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		if (aDynamic && bDynamic) {
+
+			// ‚¨Œİ‚¢‚Ìd‚İ‚É‚¨‚¯‚éŠ„‡‚ğŒvZ
+			float aWeightRatio = 0.0f, bWeightRatio = 0.0f;
+			WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aWeightRatio, bWeightRatio);
+
+			// ŒvZ‚µ‚½d‚İ‚ÌŠ„‡‚ğ‚ß‚è‚İ—Ê‚É‚©‚¯‡‚í‚¹‚½”’l‚Å‚¨Œİ‚¢‚ğ‰Ÿ‚µo‚·
+			a->SetTransformPos(a->GetTransform().pos + (vec * (overrap * aWeightRatio)));
+			b->SetTransformPos(b->GetTransform().pos + (-vec * (overrap * bWeightRatio)));
 		}
-
-		// “–‚½‚Á‚½
-		return true;
+		// a‚¾‚¯“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else if (aDynamic && !bDynamic) {
+			a->SetTransformPos(a->GetTransform().pos + (vec * overrap));
+		}
+		// b‚¾‚¯“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else if (!aDynamic && bDynamic) {
+			b->SetTransformPos(b->GetTransform().pos + (-vec * overrap));
+		}
+		// —¼•ûÃ“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else { /*‰½‚à‚µ‚È‚¢*/ }
 	}
+#pragma endregion
 
-	// “–‚½‚Á‚Ä‚È‚¢
-	return false;
+	// “–‚½‚Á‚½
+	return true;
 }
 
 bool CollisionManager::CapsuleToCapsule(CapsuleCollider* a, CapsuleCollider* b)
 {
-	return false;
+#pragma region •K—vî•ñ‚ğæ“¾
+	// ü•ª‚Ì n“_/I“_ 
+	const Vector3 aStartPos = a->GetStartPos(), aEndPos = a->GetEndPos();
+	const Vector3 bStartPos = b->GetStartPos(), bEndPos = b->GetEndPos();
+
+	// ”¼Œa
+	const float   aRadius = a->GetRadius(), bRadius = b->GetRadius();
+#pragma endregion
+
+#pragma region Õ“Ë”»’èi‚¨Œİ‚¢‚Ìü•ªã‚É‚¨‚¯‚éÅ‹ß“_‚ğ‹‚ß‚Ä‚»‚Ì‚Q“_ŠÔ‚Ì‹——£‚ğ‚Í‚©‚Á‚ÄA–¢Õ“Ë‚È‚çI—¹j
+	// ü•ª“¯m‚ÌÅ‹ßÚ“_‚ğ‹‚ß‚é ```````````
+
+	// ‚±‚±‚ÉÅ‹ßÚ“_‚ª“ü‚é
+	Vector3 pa = {}, pb = {};
+
+	// A‚Ì•ûŒüƒxƒNƒgƒ‹
+	Vector3 u = aEndPos - aStartPos;
+	// B‚Ì•ûŒüƒxƒNƒgƒ‹
+	Vector3 v = bEndPos - bStartPos;
+
+	// B‚Ìn“_‚©‚çA‚Ìn“_‚Ü‚Å‚ÌƒxƒNƒgƒ‹
+	Vector3 w = aStartPos - bStartPos;
+
+	float aLen = u.LengthSq();
+	float bLen = v.LengthSq();
+	float ab = u.Dot(v);
+	float aw = u.Dot(w);
+	float bw = v.Dot(w);
+
+	float denom = aLen * bLen - ab * ab;
+	float s, t;
+
+	if (denom < 1e-6f)	{
+		// ü•ª‚ª‚Ù‚Ú•½s ¨ •Ğ•û‚É‡‚í‚¹‚ÄŒvZ
+		s = 0.0f;
+		t = bw / bLen;
+	}
+	else {
+		s = (ab * bw - bLen * aw) / denom;
+		t = (aLen * bw - ab * aw) / denom;
+	}
+
+	// ü•ª“à‚É clamp
+	s = std::clamp(s, 0.0f, 1.0f);
+	t = std::clamp(t, 0.0f, 1.0f);
+
+	pa = aStartPos + u * s;  // Aü•ªã‚ÌÅ‹ß“_
+	pb = bStartPos + v * t;  // Bü•ªã‚ÌÅ‹ß“_
+
+	// ‹——£ŒvZ
+	Vector3 vec = pa - pb;
+	float distSq = vec.LengthSq();
+	float radSum = aRadius + bRadius;
+
+	// 
+	if (distSq >= radSum * radSum) { return false; }
+
+#pragma endregion
+
+#pragma region Õ“ËŠm’èF‰Ÿ‚µo‚µ‚ª•K—v‚©->•K—v‚È‚ç‰Ÿ‚µo‚µ
+
+	// ‰Ÿ‚µo‚µ‚ª•K—v‚©‚Ç‚¤‚©
+	if (a->GetPushFlg() && b->GetPushFlg())	{
+
+		float dist = std::sqrt(distSq);
+		if (dist < 1e-6f) {
+			// ƒ[ƒ‹——£
+			vec = -a->GetTransform().Velocity().Normalized();
+			dist = 0.0f;
+		}
+		else {
+			// ³‹K‰»
+			vec /= dist;
+		}
+
+		// ‚ß‚è‚İ—Ê
+		float overlap = radSum - dist;
+
+		// “®“Iƒtƒ‰ƒO
+		bool aDyn = a->GetDynamicFlg();
+		bool bDyn = b->GetDynamicFlg();
+
+		// —¼•û“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		if (aDyn && bDyn)
+		{
+			float aRatio = 0.0f, bRatio = 0.0f;
+			WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aRatio, bRatio);
+
+			a->SetTransformPos(a->GetTransform().pos + vec * (overlap * aRatio));
+			b->SetTransformPos(b->GetTransform().pos - vec * (overlap * bRatio));
+		}
+		// A‚¾‚¯“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else if (aDyn && !bDyn)
+		{
+			a->SetTransformPos(a->GetTransform().pos + vec * overlap);
+		}
+		// B‚¾‚¯“®‚­“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else if (!aDyn && bDyn)
+		{
+			b->SetTransformPos(b->GetTransform().pos - vec * overlap);
+		}
+		// —¼•ûÃ“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else { /*‰½‚à‚µ‚È‚¢*/ }
+	}
+#pragma endregion
+
+	// “–‚½‚Á‚½
+	return true;
 }
 
 bool CollisionManager::BoxToBox(BoxCollider* a, BoxCollider* b)
@@ -274,12 +385,129 @@ bool CollisionManager::LineToModel(LineCollider* line, ModelCollider* model)
 
 bool CollisionManager::LineToVoxel(LineCollider* line, VoxelCollider* voxel)
 {
-	return false;
+	// ”»’è‚ª•¡G‚É‚È‚é‚Ì‚ÅA”»’f‚·‚é’è‹`‚ğ‚µ‚Ä‚¨‚­
+	bool ret = false;
+#pragma region •K—vî•ñ‚ğæ“¾
+	// lineiü•ªj``````````````````````````````````
+	// n“_/I“_
+	const Vector3 lineStartPos = line->GetStartPos(), lineEndPos = line->GetEndPos();
+	// ü•ª‚Ì”¼•ª‚Ì’·‚³
+	const float lineHalfLen = line->GetHalfLength();
+	// ````````````````````````````````````````
+
+	// voxeliƒ{ƒNƒZƒ‹j````````````````
+	// À•W
+	const Vector3 voxelPos = voxel->GetPos();
+	// ‘S‘Ì‚ğˆÍ‚ß‚é‘å‚Ü‚©‚ÈƒTƒCƒY
+	const Vector3 roughlySize = voxel->GetRoughSize();
+	//`````````````````````````
+#pragma endregion
+
+
+
+
+	return ret;
 }
 
 bool CollisionManager::SphereToCapsule(SphereCollider* sphere, CapsuleCollider* capsule)
 {
-	return false;
+#pragma region •K—vî•ñ‚ğæ“¾
+	// spherei‹…‘Ìj`````````````````
+	// À•W
+	const Vector3 C = sphere->GetPos();
+	// ”¼Œa
+	const float   rS = sphere->GetRadius();
+	// ```````````````````
+
+	// capsuleiƒJƒvƒZƒ‹j```````````````
+	// ü•ª‚Ì n“_/I“_ À•W
+	const Vector3 A = capsule->GetStartPos();
+	const Vector3 B = capsule->GetEndPos();
+	// ”¼Œa
+	const float   rC = capsule->GetRadius();
+	// ```````````````````
+#pragma endregion
+
+#pragma region Õ“Ë”»’èispherei‹…‘Ìj‚Ì’†SÀ•W‚©‚çcapsuleiƒJƒvƒZƒ‹jü•ªã‚É‚¨‚¯‚éÅ‹ß“_‚Ü‚Å‚Ì‹——£‚ğ‚Í‚©‚Á‚ÄA–¢Õ“Ë‚È‚çI—¹j
+	// spherei‹…‘Ìj‚Ì’†SÀ•W‚©‚çAcapsuleiƒJƒvƒZƒ‹jü•ªã‚Åˆê”Ô‹ß‚¢“_‚ğ‹‚ß‚é``
+	Vector3 AB = B - A;
+	Vector3 AC = C - A;
+	float abLenSq = AB.LengthSq();
+
+	float t = 0.0f;
+	if (abLenSq > 1e-6f) {
+		t = AC.Dot(AB) / abLenSq;
+		t = std::clamp(t, 0.0f, 1.0f);
+	}
+	Vector3 Q = A + AB * t;
+	//````````````````````````````````````````
+
+	// spherei‹…‘Ìj‚Ì’†SÀ•W‚©‚çA‹‚ß‚½capsuleiƒJƒvƒZƒ‹jü•ªã‚É‚¨‚¯‚éÅ‹ß“_‚Ü‚Å‚Ì‹——£‚ğ‚Í‚©‚Á‚ÄA‚¨Œİ‚¢‚Ì”¼Œa‚Ì‡Œv‚Æ”ä‚×‚é``
+	
+	// ‚Q“_ŠÔ‚ÌƒxƒNƒgƒ‹
+	Vector3 vec = C - Q;
+
+	// ‹——£‚Ì‚QæiŒvZ—ÊŒyŒ¸‚Ì‚½‚ß‚Qæ‚Åæ“¾jAŒã‚Ù‚Çg‚¤‰Â”\«‚ª‚ ‚é‚Ì‚Åƒ[ƒJƒ‹•Ï”‚É•Û‚µ‚Ä‚¨‚­
+	float distSq = vec.LengthSq();
+
+	// ‚¨Œİ‚¢‚Ì”¼Œa‚Ì‡Œv
+	float radiusSum = rS + rC;
+
+	// ‹——£‚Ì‚Qæ‚Æ‚¨Œİ‚¢‚Ì”¼Œa‚Ì‡Œv‚Ì‚Qæ‚ğ”ä‚×‚Ä”»’èi–¢Õ“Ë‚È‚çI—¹j
+	if (distSq >= radiusSum * radiusSum) { return false; }
+
+	//````````````````````````````````````````````````````````````````
+#pragma endregion
+
+#pragma region Õ“ËŠm’èF‰Ÿ‚µo‚µ‚ª•K—v‚©->•K—v‚È‚ç‰Ÿ‚µo‚µ
+	// ‰Ÿ‚µo‚µ‚ª•K—v‚©‚Ç‚¤‚©
+	if (sphere->GetPushFlg() && capsule->GetPushFlg())
+	{
+		// Õ“Ë”»’èæ“¾‚µ‚½dispSq‚ğg‚Á‚ÄAÀÛ‚Ì‹——£‚ğZo‚·‚é
+		float dist = std::sqrtf(distSq);
+
+		if (dist < 1e-6f) {
+			// Š®‘Sˆê’v‚µ‚Ä‚¢‚½‚ç“K“–‚È•ûŒü‚ğ—^‚¦‚é
+			vec = -sphere->GetTransform().Velocity();
+			dist = 0.0f;
+		}
+
+		// ³‹K‰»
+		vec.Normalize();
+
+		// ‚ß‚è‚İ—Ê
+		float overlap = radiusSum - dist;
+
+		// “®“Iƒtƒ‰ƒO
+		bool sDynamic = sphere->GetDynamicFlg();
+		bool cDynamic = capsule->GetDynamicFlg();
+
+		// —¼•û“®“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		if (sDynamic && cDynamic)
+		{
+			float sRatio = 0.0f, cRatio = 0.0f;
+			WeightRatioCalculation(sphere->GetPushWeight(), capsule->GetPushWeight(), sRatio, cRatio);
+
+			sphere->SetTransformPos(sphere->GetTransform().pos + vec * (overlap * sRatio));
+			capsule->SetTransformPos(capsule->GetTransform().pos - vec * (overlap * cRatio));
+		}
+		// spherei‹…‘Ìj‚¾‚¯“®“I‚Ìê‡
+		else if (sDynamic && !cDynamic)
+		{
+			sphere->SetTransformPos(sphere->GetTransform().pos + vec * overlap);
+		}
+		// capsuleiƒJƒvƒZƒ‹j‚¾‚¯“®“I‚Ìê‡
+		else if (!sDynamic && cDynamic)
+		{
+			capsule->SetTransformPos(capsule->GetTransform().pos - vec * overlap);
+		}
+		// —¼•ûÃ“IƒIƒuƒWƒFƒNƒg‚Ìê‡
+		else { /*‰½‚à‚µ‚È‚¢*/ }
+	}
+#pragma endregion
+
+	// “–‚½‚Á‚½
+	return true;
 }
 
 bool CollisionManager::SphereToBox(SphereCollider* sphere, BoxCollider* box)

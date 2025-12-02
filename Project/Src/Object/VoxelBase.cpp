@@ -45,7 +45,7 @@ void VoxelBase::Load(void)
         BuildVoxelMeshFromMV1Handle(
             trans_.model,
             cell_,
-            trans_.WorldPos() + gridCenter_,
+            trans_.pos + gridCenter_,
             roughSize_,
             batches_
         );
@@ -55,7 +55,7 @@ void VoxelBase::Load(void)
     }
 
 	// ボクセルオブジェクト専用のコライダーを生成
-    ColliderCreate(new VoxelCollider(TAG::STAGE, cell_, cellCenterPoss_, (roughSize_ / 2).Length()));
+    ColliderCreate(new VoxelCollider(TAG::STAGE, roughSize_, cell_, cellCenterPoss_, (roughSize_ / 2).Length()));
 }
 
 

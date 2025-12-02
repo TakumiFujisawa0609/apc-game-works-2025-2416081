@@ -7,8 +7,9 @@
 class VoxelCollider : public ColliderBase
 {
 public:
-	VoxelCollider(TAG type, const float& cellSize, const std::map<int, Vector3>& cellLocalPoss, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+	VoxelCollider(TAG type, const Vector3& roughSize, const float& cellSize, const std::map<int, Vector3>& cellLocalPoss, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
+		roughSize_(roughSize),
 		cellSize_(cellSize),
 		cellLocalPoss_(cellLocalPoss)
 	{
@@ -16,11 +17,14 @@ public:
 	~VoxelCollider()override {}
 
 #pragma region 各ゲット関数
+
+	// 全体を囲める大まかなサイズを取得
+	const Vector3& GetRoughSize(void)const { return roughSize_; }
 	
 	// セルサイズを取得(float版)
 	const float& GetCellSize(void)const { return cellSize_; }
 	// セルサイズを取得(Vector3版)
-	const Vector3 GetCellSizeVECTOR(void) const { return Vector3(cellSize_, cellSize_, cellSize_); }
+	Vector3 GetCellSizeVECTOR(void) const { return Vector3(cellSize_, cellSize_, cellSize_); }
 
 	// 生存しているセルのローカル中心座標群を取得
 	const std::map<int, Vector3>& GetCellLocalPoss(void) const { return cellLocalPoss_; }
@@ -43,7 +47,7 @@ public:
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列をクリア
 	void ClearHitCellIdxs(void) { hitCellIdxs_.clear(); }
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列をセット
-	void SetHitCellIdxs(const  std::vector<int>& idxs) { hitCellIdxs_.clear(); hitCellIdxs_ = std::move(idxs); }
+	void SetHitCellIdxs(const  std::vector<int>& idxs) { hitCellIdxs_.clear(); hitCellIdxs_ = idxs; }
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列に追加
 	void AddHitCellIdx(int idx) { hitCellIdxs_.push_back(idx); }
 
@@ -51,6 +55,9 @@ public:
 
 
 private:
+	// 全体を囲める大まかなサイズ
+	Vector3 roughSize_;
+
 	// セルサイズ
 	const float& cellSize_;
 
