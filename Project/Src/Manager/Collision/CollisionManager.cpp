@@ -2,8 +2,6 @@
 
 #include<cmath>
 
-#include"CollisionUtility.h"
-
 //std::vector<ColliderBase*> CollisionManager::playerColliders_ = {};
 //std::vector<ColliderBase*> CollisionManager::enemyColliders_ = {};
 //std::vector<ColliderBase*> CollisionManager::stageColliders_ = {};
@@ -192,7 +190,7 @@ bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 	// ベクトルの長さの２乗と半径の合計の２乗を比べて判定（未衝突なら終了）
 	//if (vec.LengthSq() > radius * radius) { return false; }
 
-	// Sphere × Sphere の場合、すでに判定は済んでいるので押し出し当たっている前提で進める
+	// Sphere × Sphere の場合、すでに判定は済んでいるので当たっている前提で進める
 #pragma endregion
 
 #pragma region 衝突確定：押し出しが必要か->必要なら押し出し

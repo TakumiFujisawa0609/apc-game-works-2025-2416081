@@ -2,7 +2,6 @@
 
 #include"../../../Manager/Input/KeyManager.h"
 #include"../../../Manager/Sound/SoundManager.h"
-#include"../../../Manager/Collision/CollisionUtility.h"
 
 #include"../../../Application/Application.h"
 #include"../../../scene/SceneManager/SceneManager.h"
@@ -12,7 +11,7 @@
 #include"../../Common/Collider/CapsuleCollider.h"
 #include"../../Common/Collider/LineCollider.h"
 
-#include"../../Boss/Boss.h"
+#include"../Boss/Boss.h"
 
 Player::Player(const Vector3& cameraPos):
 	CharactorBase(),
@@ -62,7 +61,7 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
 	// コライダー生成
-	ColliderCreate(new CapsuleCollider(TAG::PLAYER, HALF_LEN, RADIUS));
+	ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, RADIUS));
 
 	// プレイヤーが抱える下位クラスの読み込み処理
 	LowerLoad();

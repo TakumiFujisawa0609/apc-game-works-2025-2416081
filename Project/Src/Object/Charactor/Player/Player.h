@@ -15,8 +15,11 @@ public:
 	//static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
 	const Vector3 SIZE = Vector3(25.0f, 70.0f, 35.0f) * SCALE;
 	const Vector3 CENTER_DIFF = Vector3(0.0f, ((SIZE.y / 2) * SCALE), 15.0f) * SCALE;
-	const float HALF_LEN = SIZE.y / 2 - SIZE.z;
+
 	const float RADIUS = SIZE.z;
+
+	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3(0.0f, SIZE.y / 2 - RADIUS, 0.0f);
+	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3(0.0f, 0.0f, 0.0f);
 
 
 

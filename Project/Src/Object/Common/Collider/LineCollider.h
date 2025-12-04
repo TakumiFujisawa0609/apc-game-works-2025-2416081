@@ -8,26 +8,32 @@ public:
 	/// コンストラクト
 	/// </summary>
 	/// <param name="type">当たり判定タイプ</param>
-	/// <param name="halfLength">線分の半分の長さ</param>
+	/// <param name="localStartPos">線分の開始点</param>
+	/// <param name="localEndPos">線分の終了点</param>
+	/// <param name="enoughDistance">判定スキップに十分な距離　-1.0fで未設定とし、距離による判定スキップを行わない（引数省略で-1.0f）</param>
 	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
-	LineCollider(TAG type, float halfLength, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+	LineCollider(TAG type, const Vector3& localStartPos, const Vector3& localEndPos, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
-		halfLength_(halfLength)
+		startPos_(localStartPos),
+		endPos_(localEndPos)
 	{
 	}
 	~LineCollider()override {}
 
-	float GetHalfLength(void)const { return halfLength_; }
+	// 線分の長さ
+	float GetLen(void)const { return (startPos_ - endPos_).Length(); }
+
+	// 線分の半分の長さ
+	float GetHalfLen(void)const { return (startPos_ - endPos_).Length() / 2; }
+
 	// 線分の始点
-	Vector3 GetStartPos(void)const {
-		// 無回転で真上方向にのばした場所を始点とする
-		return GetPos() + (GetTransform().VTrans(Vector3(0.0f, 1.0f, 0.0f)) * halfLength_);
-	}
+	Vector3 GetStartPos(void)const { return GetTransform().VTrans(startPos_); }
 	// 線分の終点
-	Vector3 GetEndPos(void)const {
-		// 無回転で真下方向にのばした場所を始点とする
-		return GetPos() + (GetTransform().VTrans(Vector3(0.0f, -1.0f, 0.0f)) * halfLength_);
-	}
+	Vector3 GetEndPos(void)const { return GetTransform().VTrans(endPos_); }
+
 private:
-	float halfLength_;
+	// 線分の開始点
+	Vector3 startPos_;
+	// 線分の終了点
+	Vector3 endPos_;
 };
