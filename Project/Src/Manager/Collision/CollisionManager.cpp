@@ -41,12 +41,12 @@ void CollisionManager::Check(void)
 	
 	// エネミー×ステージ
 	Matching(enemyColliders_, stageColliders_);
-
+	
 	// プレイヤー×エネミー
 	Matching(playerColliders_, enemyColliders_);
 }
 
-void CollisionManager::Matching(std::vector<ColliderBase*> as, std::vector<ColliderBase*> bs)
+void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs)
 {
 	for (ColliderBase*& a : as) {
 		if (!a) { continue; }
@@ -181,7 +181,7 @@ bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 {
 #pragma region 必要情報を求める
 	// ベクトル
-	Vector3 vec = a->GetPos() - b->GetPos();
+	Vector3 normal = a->GetPos() - b->GetPos();
 	// 半径の合計
 	float radius = a->GetRadius() + b->GetRadius();
 #pragma endregion
@@ -195,38 +195,12 @@ bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 
 #pragma region 衝突確定：押し出しが必要か->必要なら押し出し
 	// ２つとも押し出しを行うオブジェクトの場合、めり込んだ量を見て押し出す
-	if (a->GetPushFlg() && b->GetPushFlg()) {
-
+	if (NeedPush(a,b)) {
 		// めり込んだ量
-		float overrap = radius - vec.Length();
+		float overrap = radius - normal.Length();
 
-		// ベクトルを正規化しておく
-		vec.Normalize();
-
-		// 動的オブジェクトか否かのフラグを取得
-		bool aDynamic = a->GetDynamicFlg(), bDynamic = b->GetDynamicFlg();
-
-		// 両方動的オブジェクトの場合
-		if (aDynamic && bDynamic) {
-
-			// お互いの重みにおける割合を計算
-			float aWeightRatio = 0.0f, bWeightRatio = 0.0f;
-			WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aWeightRatio, bWeightRatio);
-
-			// 計算した重みの割合をめり込み量にかけ合わせた数値でお互いを押し出す
-			a->SetTransformPos(a->GetTransform().pos + (vec * (overrap * aWeightRatio)));
-			b->SetTransformPos(b->GetTransform().pos + (-vec * (overrap * bWeightRatio)));
-		}
-		// aだけ動的オブジェクトの場合
-		else if (aDynamic && !bDynamic) {
-			a->SetTransformPos(a->GetTransform().pos + (vec * overrap));
-		}
-		// bだけ動的オブジェクトの場合
-		else if (!aDynamic && bDynamic) {
-			b->SetTransformPos(b->GetTransform().pos + (-vec * overrap));
-		}
-		// 両方静的オブジェクトの場合
-		else { /*何もしない*/ }
+		// 押し出し処理
+		ApplyPush(a, b, normal.Normalized(), overrap);
 	}
 #pragma endregion
 
@@ -286,8 +260,8 @@ bool CollisionManager::CapsuleToCapsule(CapsuleCollider* a, CapsuleCollider* b)
 	pb = bStartPos + v * t;  // B線分上の最近点
 
 	// 距離計算
-	Vector3 vec = pa - pb;
-	float distSq = vec.LengthSq();
+	Vector3 normal = pa - pb;
+	float distSq = normal.LengthSq();
 	float radSum = aRadius + bRadius;
 
 	// 
@@ -296,49 +270,21 @@ bool CollisionManager::CapsuleToCapsule(CapsuleCollider* a, CapsuleCollider* b)
 #pragma endregion
 
 #pragma region 衝突確定：押し出しが必要か->必要なら押し出し
-
 	// 押し出しが必要かどうか
-	if (a->GetPushFlg() && b->GetPushFlg())	{
+	if (NeedPush(a, b)) {
 
 		float dist = std::sqrt(distSq);
 		if (dist < 1e-6f) {
 			// ゼロ距離
-			vec = -a->GetTransform().Velocity().Normalized();
+			normal = -a->GetTransform().Velocity();
 			dist = 0.0f;
-		}
-		else {
-			// 正規化
-			vec /= dist;
 		}
 
 		// めり込み量
 		float overlap = radSum - dist;
 
-		// 動的フラグ
-		bool aDyn = a->GetDynamicFlg();
-		bool bDyn = b->GetDynamicFlg();
-
-		// 両方動的オブジェクトの場合
-		if (aDyn && bDyn)
-		{
-			float aRatio = 0.0f, bRatio = 0.0f;
-			WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aRatio, bRatio);
-
-			a->SetTransformPos(a->GetTransform().pos + vec * (overlap * aRatio));
-			b->SetTransformPos(b->GetTransform().pos - vec * (overlap * bRatio));
-		}
-		// Aだけ動的オブジェクトの場合
-		else if (aDyn && !bDyn)
-		{
-			a->SetTransformPos(a->GetTransform().pos + vec * overlap);
-		}
-		// Bだけ動く動的オブジェクトの場合
-		else if (!aDyn && bDyn)
-		{
-			b->SetTransformPos(b->GetTransform().pos - vec * overlap);
-		}
-		// 両方静的オブジェクトの場合
-		else { /*何もしない*/ }
+		// 押し出し処理
+		ApplyPush(a, b, normal.Normalized(), overlap);
 	}
 #pragma endregion
 
@@ -363,12 +309,65 @@ bool CollisionManager::VoxelToVoxel(VoxelCollider* a, VoxelCollider* b)
 
 bool CollisionManager::LineToSphere(LineCollider* line, SphereCollider* sphere)
 {
-	return false;
+#pragma region 必要情報を取得
+	// sphere（球体）～～～～～～～～～～～
+	Vector3 spherePos = sphere->GetPos();
+	float radius = sphere->GetRadius();
+	// ～～～～～～～～～～～～～～～～～～
+#pragma endregion
+
+#pragma region 衝突判定（）
+	// 最近点-sphere（球体）中心座標とのベクトルをとる
+	Vector3 normal = line->ClosestPoint(spherePos) - spherePos;
+
+	// ベクトルの距離の２乗を算出する
+	float distSq = normal.LengthSq();
+
+	// 距離の２乗とsphere（球体）の半径の２乗を比べて判定
+	if (distSq > radius * radius) { return false; }
+#pragma endregion
+
+#pragma region 衝突確定：押し出しが必要か->必要なら押し出し
+	// 押し出しが必要かどうか
+	if (NeedPush(line, sphere)) {
+		// 押し出し方向：Lineの方向に強制固定
+		Vector3 pushDir = line->GetDirection();
+
+		// 衝突判定時取得したdispSqを使って、実際の距離を算出する
+		float dist = sqrtf(distSq);
+
+		// めり込んだ量
+		float overlap = radius - dist;
+
+		// 押し戻し処理
+		ApplyPush(line, sphere, normal.Normalized(), overlap);
+	}
+#pragma endregion
+
+	// 当たった
+	return true;
 }
 
 bool CollisionManager::LineToCapsule(LineCollider* line, CapsuleCollider* capsule)
 {
-	return false;
+#pragma region 必要情報を取得
+	// line（線分）～～～～～～～～～
+
+	// ～～～～～～～～～～～～～～～
+
+	// capsule（カプセル）～～～～～～～～
+
+	//～～～～～～～～～～～～～～～～～～
+#pragma endregion
+
+#pragma region 衝突判定（）
+
+#pragma endregion
+
+#pragma region 衝突確定：押し出しが必要か->必要なら押し出し
+#pragma endregion
+
+	return true;
 }
 
 bool CollisionManager::LineToBox(LineCollider* line, BoxCollider* box)
@@ -401,8 +400,13 @@ bool CollisionManager::LineToVoxel(LineCollider* line, VoxelCollider* voxel)
 	//～～～～～～～～～～～～～～～～～～～～～～～～～
 #pragma endregion
 
+#pragma region 衝突判定（）
 
+#pragma endregion
 
+#pragma region 衝突確定：押し出しが必要か->必要なら押し出し
+
+#pragma endregion
 
 	return ret;
 }
@@ -443,10 +447,10 @@ bool CollisionManager::SphereToCapsule(SphereCollider* sphere, CapsuleCollider* 
 	// sphere（球体）の中心座標から、求めたcapsule（カプセル）線分上における最近点までの距離をはかって、お互いの半径の合計と比べる～～
 	
 	// ２点間のベクトル
-	Vector3 vec = C - Q;
+	Vector3 normal = C - Q;
 
 	// 距離の２乗（計算量軽減のため２乗で取得）、後ほど使う可能性があるのでローカル変数に保持しておく
-	float distSq = vec.LengthSq();
+	float distSq = normal.LengthSq();
 
 	// お互いの半径の合計
 	float radiusSum = rS + rC;
@@ -459,48 +463,22 @@ bool CollisionManager::SphereToCapsule(SphereCollider* sphere, CapsuleCollider* 
 
 #pragma region 衝突確定：押し出しが必要か->必要なら押し出し
 	// 押し出しが必要かどうか
-	if (sphere->GetPushFlg() && capsule->GetPushFlg())
+	if (NeedPush(sphere, capsule))
 	{
 		// 衝突判定時取得したdispSqを使って、実際の距離を算出する
 		float dist = std::sqrtf(distSq);
 
 		if (dist < 1e-6f) {
-			// 完全一致していたら適当な方向を与える
-			vec = -sphere->GetTransform().Velocity();
+			// 完全一致していたら適当な方向（移動方向の逆方向）を与える
+			normal = -sphere->GetTransform().Velocity();
 			dist = 0.0f;
 		}
-
-		// 正規化
-		vec.Normalize();
 
 		// めり込み量
 		float overlap = radiusSum - dist;
 
-		// 動的フラグ
-		bool sDynamic = sphere->GetDynamicFlg();
-		bool cDynamic = capsule->GetDynamicFlg();
-
-		// 両方動的オブジェクトの場合
-		if (sDynamic && cDynamic)
-		{
-			float sRatio = 0.0f, cRatio = 0.0f;
-			WeightRatioCalculation(sphere->GetPushWeight(), capsule->GetPushWeight(), sRatio, cRatio);
-
-			sphere->SetTransformPos(sphere->GetTransform().pos + vec * (overlap * sRatio));
-			capsule->SetTransformPos(capsule->GetTransform().pos - vec * (overlap * cRatio));
-		}
-		// sphere（球体）だけ動的の場合
-		else if (sDynamic && !cDynamic)
-		{
-			sphere->SetTransformPos(sphere->GetTransform().pos + vec * overlap);
-		}
-		// capsule（カプセル）だけ動的の場合
-		else if (!sDynamic && cDynamic)
-		{
-			capsule->SetTransformPos(capsule->GetTransform().pos - vec * overlap);
-		}
-		// 両方静的オブジェクトの場合
-		else { /*何もしない*/ }
+		// 押し出し処理
+		ApplyPush(sphere, capsule, normal.Normalized(), overlap);
 	}
 #pragma endregion
 
@@ -510,7 +488,57 @@ bool CollisionManager::SphereToCapsule(SphereCollider* sphere, CapsuleCollider* 
 
 bool CollisionManager::SphereToBox(SphereCollider* sphere, BoxCollider* box)
 {
-	return false;
+#pragma region 必要情報を取得
+	// sphere(球体)～～～～～～～～
+	// 座標
+	Vector3 c = sphere->GetPos();
+	// 半径
+	float r = sphere->GetRadius();
+	// ～～～～～～～～～～～～～～
+
+	// box(ボックス形状)～～～～～～～～
+	// 座標
+	Vector3 boxPos = box->GetPos();
+	// 大きさ（半分）
+	Vector3 half = box->GetSize() / 2;
+	//～～～～～～～～～～～～～～～～～
+#pragma endregion
+
+#pragma region 衝突判定（sphere(球体)からみて最も近い１点を求めて、そこまでの距離をはかって、未衝突なら終了）
+	// 最も近い点を求める
+	Vector3 nearest;
+	nearest.x = std::clamp(c.x, boxPos.x - half.x, boxPos.x + half.x);
+	nearest.y = std::clamp(c.y, boxPos.y - half.y, boxPos.y + half.y);
+	nearest.z = std::clamp(c.z, boxPos.z - half.z, boxPos.z + half.z);
+
+	Vector3 normal = c - nearest;
+	float distSq = normal.LengthSq();
+
+	if (distSq > r * r) { return false; }
+#pragma endregion
+
+#pragma region 衝突確定：押し出しが必要か->必要なら押し出し
+	// 押し出しが必要かどうか
+	if (NeedPush(sphere, box)) {
+
+		// 衝突判定時取得したdispSqを使って、実際の距離を算出する
+		float dist = sqrtf(distSq);
+
+		if (dist > 0.0001f) {
+			// 完全一致していたら適当な方向（移動方向の逆方向）を与える
+			normal = -sphere->GetTransform().Velocity();
+			dist = 0.0f;
+		}
+
+		// めり込んだ量
+		float overlap = r - dist;
+
+		// 押し出し処理
+		ApplyPush(sphere, box, normal.Normalized(), overlap);
+	}
+#pragma endregion
+
+	return true;
 }
 
 bool CollisionManager::SphereToModel(SphereCollider* sphere, ModelCollider* model)
@@ -525,7 +553,72 @@ bool CollisionManager::SphereToVoxel(SphereCollider* sphere, VoxelCollider* voxe
 
 bool CollisionManager::CapsuleToBox(CapsuleCollider* capsule, BoxCollider* box)
 {
-	return false;
+#pragma region 必要情報の取得
+	// capsule（カプセル）～～～～～～～～～～～
+	// 線分の 始点/終点 座標
+	const Vector3 A = capsule->GetStartPos(), B = capsule->GetEndPos();
+	// 半径
+	const float   r = capsule->GetRadius();
+	// ～～～～～～～～～～～～～～～～～～～～
+
+	// box（ボックス）～～～～～～～～～～～～～
+	// 座標
+	const Vector3 boxPos = box->GetPos();
+	// 大きさ（半分）
+	const Vector3 half = box->GetSize() / 2;
+	// ～～～～～～～～～～～～～～～～～～～～
+#pragma endregion
+
+#pragma region 衝突判定（）
+	// Step1：capsule（カプセル）線分上でbox（ボックス）に最も近い点を求める
+	Vector3 AB = B - A;
+	float abLenSq = AB.LengthSq();
+	float t = 0.0f;
+
+	if (abLenSq > 1e-6f) {
+		// A→Bの線分上で、Box中心がどの位置に投影されるか
+		t = (boxPos - A).Dot(AB) / abLenSq;
+		t = std::clamp(t, 0.0f, 1.0f);
+	}
+
+	// 最近点（カプセル線分上）
+	Vector3 P = A + AB * t;
+
+	// Step2：P と Box の最も近い点を求める（SphereToBox と同じ原理）
+	Vector3 nearest;
+	nearest.x = std::clamp(P.x, boxPos.x - half.x, boxPos.x + half.x);
+	nearest.y = std::clamp(P.y, boxPos.y - half.y, boxPos.y + half.y);
+	nearest.z = std::clamp(P.z, boxPos.z - half.z, boxPos.z + half.z);
+
+	Vector3 normal = P - nearest;
+	float distSq = normal.LengthSq();
+
+	// 未衝突
+	if (distSq > r * r) { return false; }
+#pragma endregion
+
+#pragma region 衝突確定：押し出しが必要か->必要なら押し出し
+	// 押し出しが必要か
+	if (NeedPush(capsule, box)) {
+
+		// 衝突判定時取得したdispSqを使って、実際の距離を算出する
+		float dist = sqrtf(distSq);
+
+		if (dist <= 0.0001f) {
+			// 完全一致していたら適当な方向（移動方向の逆方向）を与える
+			normal = -capsule->GetTransform().Velocity();
+			dist = 0.0f;
+		}
+
+		// めり込んだ量
+		float overlap = r - dist;
+
+		// 押し出し処理
+		ApplyPush(capsule, box, normal.Normalized(), overlap);
+	}
+#pragma endregion
+
+	return true;
 }
 
 bool CollisionManager::CasuleToModel(CapsuleCollider* capsule, ModelCollider* model)

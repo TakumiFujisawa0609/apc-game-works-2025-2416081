@@ -44,7 +44,7 @@ private:
 #pragma endregion
 
 #pragma region 当たり判定用
-	void Matching(std::vector<ColliderBase*> as, std::vector<ColliderBase*> bs);
+	void Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs);
 	bool IsHit(ColliderBase* a, ColliderBase* b);
 
 	bool LineToLine(LineCollider* a, LineCollider* b);
@@ -74,16 +74,62 @@ private:
 
 #pragma region ユーティリティ
 	/// <summary>
+	/// 指定した２つのコライダー同士に押し出し処理が必要かどうか
+	/// </summary>
+	/// <param name="a">コライダー１</param>
+	/// <param name="b">コライダー２</param>
+	/// <returns></returns>
+	bool NeedPush(ColliderBase* a, ColliderBase* b)const {
+		if (a->GetPushFlg() && b->GetPushFlg()) { return true; }
+		return false;
+	}
+
+	/// <summary>
 	/// 重みづけの割合を計算
 	/// </summary>
 	/// <param name="aWeight">（in） 重み</param>
 	/// <param name="bWeight">（in） 重み</param>
 	/// <param name="aWeightRatio">（out） 重みの割合</param>
 	/// <param name="bWeightRatio">（out） 重みの割合</param>
-	void WeightRatioCalculation(unsigned char aWeight, unsigned char bWeight, float aWeightRatio, float bWeightRatio) {
+	void WeightRatioCalculation(unsigned char aWeight, unsigned char bWeight, float& aWeightRatio, float& bWeightRatio) {
 		// お互いの重みにおける割合を計算（相手の重み ÷ 自分と相手の重みの合計）
 		aWeightRatio = (float)bWeight / (float)(aWeight + bWeight);
 		bWeightRatio = (float)aWeight / (float)(aWeight + bWeight);
+	}
+
+	/// <summary>
+	/// 押し出し処理
+	/// </summary>
+	/// <param name="a">コライダー１</param>
+	/// <param name="b">コライダー２</param>
+	/// <param name="normal">押し出し方向</param>
+	/// <param name="overlap">めり込んだ量</param>
+	void ApplyPush(ColliderBase* a, ColliderBase* b, const Vector3& normal, float overlap) {
+		// 動的フラグ
+		bool aDynamic = a->GetDynamicFlg();
+		bool bDynamic = b->GetDynamicFlg();
+
+		// 両方動的オブジェクトの場合
+		if (aDynamic && bDynamic)
+		{
+			float aRatio = 0.0f, bRatio = 0.0f;
+			WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aRatio, bRatio);
+
+			a->SetTransformPos(a->GetTransform().pos + normal * (overlap * aRatio));
+			b->SetTransformPos(b->GetTransform().pos - normal * (overlap * bRatio));
+		}
+		// sphere（球体）だけ動的の場合
+		else if (aDynamic && !bDynamic)
+		{
+			a->SetTransformPos(a->GetTransform().pos + normal * overlap);
+		}
+		// capsule（カプセル）だけ動的の場合
+		else if (!aDynamic && bDynamic)
+		{
+			b->SetTransformPos(b->GetTransform().pos - normal * overlap);
+		}
+		// 両方静的オブジェクトの場合
+		else { /*何もしない*/ }
 	}
 #pragma endregion
 
