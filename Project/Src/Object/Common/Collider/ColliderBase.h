@@ -57,7 +57,10 @@ public:
 	void SetTransformPtr(Transform* ptr) { trans_ = ptr; }
 
 	// 当たり判定通知用関数セット
-	void SetOnCollisionFun(std::function<void(const ColliderBase& type)> OnCollisionFunc) { OnCollision = std::move(OnCollisionFunc); }
+	void SetOnCollisionFunc(std::function<void(const ColliderBase& type)> OnCollisionFunc) { OnCollision = std::move(OnCollisionFunc); }
+
+	// 接地判定通知用関数セット
+	void SetOnGroundedFunc(std::function<void(void)>OnGroundedFunc) { OnGrounded = std::move(OnGroundedFunc); }
 #pragma endregion
 
 #pragma region 各ゲット関数
@@ -109,7 +112,6 @@ public:
 	void SetPushFlg(bool flg) { pushFlg_ = (flg) ? 1 : 0; }
 #pragma endregion
 
-
 private:
 	// モデル制御情報をポインタで受け取って保持
 	Transform* trans_;
@@ -141,6 +143,9 @@ private:
 	
 	// 当たったときに呼び出す関数をポインタで受け取って保持
 	std::function<void(const ColliderBase& type)>OnCollision;
+
+	// 接地したときに呼び出す関数をポインタで受け取って保持
+	std::function<void(void)>OnGrounded;
 };
 
 using TAG = ColliderBase::TAG;

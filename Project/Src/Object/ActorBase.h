@@ -84,7 +84,8 @@ protected:
 		collider_.emplace_back(newClass);
 		collider_.back()->SetTransformPtr(&trans_);
 		collider_.back()->SetDynamicFlg((dynamicFlg_ == 1) ? true : false);
-		collider_.back()->SetOnCollisionFun([this](const ColliderBase& collider) { this->OnCollision(collider); });
+		collider_.back()->SetOnCollisionFunc([this](const ColliderBase& collider) { this->OnCollision(collider); });
+		collider_.back()->SetOnGroundedFunc([this](void) {this->OnGrounded(); });
 	}
 
 	/// <summary>

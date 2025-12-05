@@ -76,10 +76,10 @@ private:
 	/// <summary>
 	/// 重みづけの割合を計算
 	/// </summary>
-	/// <param name="aWeight">in 重み</param>
-	/// <param name="bWeight">in 重み</param>
-	/// <param name="aWeightRatio">out 重みの割合</param>
-	/// <param name="bWeightRatio">out 重みの割合</param>
+	/// <param name="aWeight">（in） 重み</param>
+	/// <param name="bWeight">（in） 重み</param>
+	/// <param name="aWeightRatio">（out） 重みの割合</param>
+	/// <param name="bWeightRatio">（out） 重みの割合</param>
 	void WeightRatioCalculation(unsigned char aWeight, unsigned char bWeight, float aWeightRatio, float bWeightRatio) {
 		// お互いの重みにおける割合を計算（相手の重み ÷ 自分と相手の重みの合計）
 		aWeightRatio = (float)bWeight / (float)(aWeight + bWeight);

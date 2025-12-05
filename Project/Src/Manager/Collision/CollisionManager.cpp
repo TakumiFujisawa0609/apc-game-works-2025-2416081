@@ -390,7 +390,7 @@ bool CollisionManager::LineToVoxel(LineCollider* line, VoxelCollider* voxel)
 	// énì_/èIì_
 	const Vector3 lineStartPos = line->GetStartPos(), lineEndPos = line->GetEndPos();
 	// ê¸ï™ÇÃîºï™ÇÃí∑Ç≥
-	const float lineHalfLen = line->GetHalfLength();
+	const float lineHalfLen = line->GetHalfLen();
 	// Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
 	// voxelÅiÉ{ÉNÉZÉãÅjÅ`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
