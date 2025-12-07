@@ -1,11 +1,9 @@
 #include"PlayerGouge.h"
 
-#include"../../../../Manager/Collision/CollisionUtility.h"
-
-#include"../../../Common/Collider/ColliderSphere.h"
+#include"../../../Common/Collider/SphereCollider.h"
 
 #include"../../../Stage/Block/Block.h"
-#include"../../../Boss/Attack/RockWall/RockWall.h"
+#include"../../Boss/Attack/RockWall/RockWall.h"
 
 PlayerGouge::PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle) :
 	ActorBase(),
@@ -25,7 +23,7 @@ PlayerGouge::PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle) :
 void PlayerGouge::Load(void)
 {
 	// コライダー生成
-	ColliderCreate(new ColliderSphere(TAG::PLAYER_GOUGE, STATE_RADIUS[(int)state_]));
+	ColliderCreate(new SphereCollider(TAG::PLAYER_GOUGE, STATE_RADIUS[(int)state_]));
 }
 
 void PlayerGouge::SubInit(void)
@@ -38,7 +36,7 @@ void PlayerGouge::SubUpdate(void)
 {
 	if (!GetJudgeFlg()) { return; }
 
-	ColliderSerch<ColliderSphere>().back()->SetRadius(STATE_RADIUS[(int)state_]);
+	ColliderSerch<SphereCollider>().back()->SetRadius(STATE_RADIUS[(int)state_]);
 
 	switch (state_)
 	{

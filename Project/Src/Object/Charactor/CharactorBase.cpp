@@ -15,10 +15,6 @@ CharactorBase::CharactorBase():
 {
 }
 
-CharactorBase::~CharactorBase()
-{
-}
-
 void CharactorBase::SubInit(void)
 {
 	// モデルのカラーの初期化
@@ -38,13 +34,18 @@ void CharactorBase::SubUpdate(void)
 
 	// 派生先で割り振り可能のステート別関数
 	(this->*stateFuncPtr[state_])();
-
 }
 
 void CharactorBase::SubDraw(void)
 {
 	// キャラクター固有の描画
 	CharactorDraw();
+}
+
+void CharactorBase::SubAlphaDraw(void)
+{
+	// キャラクター固有の描画
+	CharactorAlphaDraw();
 }
 
 void CharactorBase::SubRelease(void)

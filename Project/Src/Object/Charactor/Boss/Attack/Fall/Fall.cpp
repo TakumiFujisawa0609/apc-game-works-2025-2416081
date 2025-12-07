@@ -1,7 +1,9 @@
 #include"Fall.h"
 
-#include"../../../../Manager/Sound/SoundManager.h"
-#include"../../../../Manager/Collision/Collision.h"
+#include"../../../../../Manager/Sound/SoundManager.h"
+#include"../../../../../Manager/Collision/CollisionManager.h"
+
+#include"../../../../Common/Collider/SphereCollider.h"
 
 Fall::Fall(int model):
 	state_(),
@@ -9,7 +11,7 @@ Fall::Fall(int model):
 	idleCounter_(),
 	groundHeight_()
 {
-	unit_.model_ = MV1DuplicateModel(model);
+	ModelDuplicate(model);
 }
 
 Fall::~Fall()
@@ -18,83 +20,79 @@ Fall::~Fall()
 
 void Fall::Load(void)
 {
-	MV1SetScale(unit_.model_, Utility::FtoV(2.0f));
+	trans_.scale = 2.0f;
 
-	unit_.para_.colliShape = CollisionShape::SPHERE;
-	unit_.para_.radius = 190.0f;
-
-	unit_.para_.speed = 30.0f;
+	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_FALL, 190.0f));
 }
 
-void Fall::Init(void)
+void Fall::SubInit(void)
 {
+	SetDynamicFlg(true);
+	SetGravityFlg(false);
+	SetPushFlg(false);
 }
 
-void Fall::Update(void)
+void Fall::SubUpdate(void)
 {
-	if (!unit_.isAlive_) { return; }
+	if (!GetJudgeFlg()) { return; }
 
 	switch (state_)
 	{
-	case Fall::STATE::IDLE:
+	case STATE::IDLE:
 		if (++idleCounter_ > IDLE_TIME) {
 			state_ = STATE::FALL;
 		}
 		break;
-	case Fall::STATE::FALL:
-		unit_.pos_.y -= unit_.para_.speed;
-		if (unit_.pos_.y < -100.0f) { unit_.isAlive_ = false; }
+	case STATE::FALL:
+		trans_.pos.y -= 30.0f;
+		if (trans_.pos.y < -100.0f) { SetJudge(false); SetIsDraw(false); }
 		break;
 	}
-
 }
 
-void Fall::Draw(void)
+void Fall::SubAlphaDraw(void)
 {
-	if (!unit_.isAlive_) { return; }
-
 	if (state_ == STATE::IDLE && idleCounter_ / 10 % 2 == 0) {
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-		DrawSphere3D({ unit_.pos_.x,groundHeight_,unit_.pos_.z }, unit_.para_.radius * 1.3f, 4, 0xff0000, 0xff0000, true);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	}
-
-	Utility::MV1ModelMatrix(unit_.model_, unit_.pos_, { unit_.angle_ });
-	MV1DrawModel(unit_.model_);
-}
-
-void Fall::Release(void)
-{
-	MV1DeleteModel(unit_.model_);
-}
-
-void Fall::OnCollision(UnitBase* other)
-{
-	if (
-		dynamic_cast<PlayerPunch*>(other) ||
-		dynamic_cast<ThrowObjBase*>(other)
-		) {
-		unit_.isAlive_ = false;
+		VECTOR predictionPos = { trans_.pos.x,groundHeight_,trans_.pos.z };
+		float radius = ColliderSerch<SphereCollider>().back()->GetRadius();
+		DrawSphere3D(predictionPos, radius * 1.3f, 4, 0xff0000, 0xff0000, true);
 	}
 }
 
-void Fall::Set(const VECTOR& pos)
+void Fall::OnCollision(const ColliderBase& collider)
 {
-	unit_.pos_ = pos;
+	switch (collider.GetTag())
+	{
+	case TAG::PLAYER_PUNCH:
+	case TAG::PLAYER_THROWING: {
+		SetJudge(false);
+		SetIsDraw(false);
+		return;
+	}
+
+	default: { return; }
+	}
+}
+
+void Fall::Set(const Vector3& pos)
+{
+	trans_.pos = pos;
 	idleCounter_ = 0;
 	state_ = STATE::IDLE;
-	unit_.isAlive_ = true;
+
+	SetJudge(true);
+	SetIsDraw(true);
+
 	groundHeight_ = 0.0f;
 
-	for (int i = 0; i < 10000; i += 10) {
+	Vector3 work = trans_.pos;
+	work.y = 500.0f;
 
-		VECTOR work = unit_.pos_;
-		work.y -= (float)i;
+	float radius = ColliderSerch<SphereCollider>().back()->GetRadius();
 
-		if (Collision::IsStageCollision(work, unit_.para_.radius)) {
-
-			groundHeight_ = work.y - unit_.para_.radius * 1.75f;
-			break;
-		}
+	while (work.y > 0.0f) {
+		if (CollisionManager::IsStageCollision(work, radius)) { break; }
+		work.y -= 10.0f;
+		groundHeight_ = work.y - radius;
 	}
 }

@@ -1,6 +1,6 @@
 #include"PlayerPunch.h"
 
-#include"../../../Common/Collider/ColliderSphere.h"
+#include"../../../Common/Collider/SphereCollider.h"
 
 PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
 	ActorBase(),
@@ -11,7 +11,7 @@ PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
 
 void PlayerPunch::Load(void)
 {
-	ColliderCreate(new ColliderSphere(TAG::PLAYER_PUNCH, RADIUS));
+	ColliderCreate(new SphereCollider(TAG::PLAYER_PUNCH, RADIUS));
 }
 
 void PlayerPunch::SubUpdate(void)
@@ -22,5 +22,4 @@ void PlayerPunch::SubUpdate(void)
 
 void PlayerPunch::OnCollision(const ColliderBase& collider)
 {
-
 }

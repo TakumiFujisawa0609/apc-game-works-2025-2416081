@@ -1,80 +1,75 @@
 #include"RockWallShooter.h"
 
-#include"../../../../Manager/Collision/Collision.h"
-
-RockWallShooter::RockWallShooter(const VECTOR& bossPos, const VECTOR& bossAngle) :
+RockWallShooter::RockWallShooter(const Vector3& bossPos, const Vector3& bossAngle) :
 	bossPos(bossPos),
 	bossAngle(bossAngle),
 
+	modelId_(-1),
 	textureId_(-1)
-{
-}
-
-RockWallShooter::~RockWallShooter()
 {
 }
 
 void RockWallShooter::Load(void)
 {
+	modelId_ = MV1LoadModel("Data/Model/Rock/Rock.mv1");
 	Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
 
-	walls_.reserve(CREATE_WALL_NUM * 5);
+	for (unsigned char i = 0; i < WALL_MAX_NUM; i++) {
+		walls_[i] = new RockWall(modelId_, textureId_);
+	}
+	for (RockWall*& wall : walls_) { wall->Load(); }
 }
 
 void RockWallShooter::Init(void)
 {
+	for (RockWall*& wall : walls_) { wall->Init(); }
 }
 
 void RockWallShooter::Update(void)
 {
-	for (const auto& wall : walls_) { wall->Update(); }
+	for (RockWall*& wall : walls_) { wall->Update(); }
 }
 
 void RockWallShooter::Draw(void)
 {
-	for (const auto& wall : walls_) { wall->Draw(); }
+	for (RockWall*& wall : walls_) { wall->Draw(); }
+}
+
+void RockWallShooter::AlphaDraw(void)
+{
+	for (RockWall*& wall : walls_) { wall->AlphaDraw(); }
 }
 
 void RockWallShooter::Release(void)
 {
-	for (auto& wall : walls_) {
+	for (RockWall*& wall : walls_) {
 		if (!wall) { continue; }
 		wall->Release();
 		delete wall;
 		wall = nullptr;
 	}
-	walls_.clear();
 }
 
 void RockWallShooter::On(void)
 {
-	VECTOR vec = VTransform(CREATE_ST_LOCAL_POS, Utility::MatrixAllMultY({ bossAngle }));
-	VECTOR pos = VAdd(bossPos, vec);
+	Vector3 vec = VTransform(CREATE_ST_LOCAL_POS, Utility::MatrixAllMultY({ bossAngle }));
+	Vector3 pos = bossPos + vec;
 
-	vec = Utility::Normalize(vec);
-	vec = VScale(vec, ONE_DISTANCE);
+	vec = vec.Normalized() * ONE_DISTANCE;
 
-	for (int i = 0; i < CREATE_WALL_NUM; i++) {
+	unsigned char serchNum = 0;
 
-		bool recycle = false;
+	for (unsigned char i = 0; i < CREATE_WALL_NUM; i++) {
 
-		for (const auto& wall : walls_) {
-			if (wall->GetUnit().isAlive_ == false) {
-				wall->On(pos);
-				pos = VAdd(pos, vec);
-				recycle = true;
+		for (unsigned char j = serchNum; j < WALL_MAX_NUM; j++) {
+
+			if (!walls_[j]->GetJudgeFlg()) {
+				walls_[j]->On(pos);
+				pos += vec;
+				serchNum = j + 1;
 				break;
 			}
+
 		}
-
-		if (recycle) { continue; }
-
-		walls_.emplace_back(new RockWall(textureId_));
-		walls_.back()->Load();
-		walls_.back()->Init();
-		walls_.back()->On(pos);
-		Collision::AddStage(walls_.back());
-
-		pos = VAdd(pos, vec);
 	}
 }

@@ -1,20 +1,14 @@
 #pragma once
 
-#include"../../../UnitBase.h"
+#include"../../../../ActorBase.h"
 
-class PsychoRock : public UnitBase
+class PsychoRock : public ActorBase
 {
 public:
-	PsychoRock(int model, const VECTOR& playerPos);
+	PsychoRock(int model, const Vector3& playerPos);
 	~PsychoRock();
 
 	void Load(void)override;
-	void Init(void)override {};
-	void Update(void)override;
-	void Draw(void)override;
-	void Release(void)override;
-
-	void OnCollision(UnitBase* other)override;
 
 	enum class STATE {
 		NON,
@@ -24,12 +18,19 @@ public:
 
 		MAX,
 	};
-	int GetState(void)const override { return (int)state_; }
+	STATE GetState(void)const { return state_; }
 
 	void Set(float x, float z);
 	void On(void);
 
 private:
+
+	void SubInit(void)override;
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override;
+	void SubRelease(void)override {}
+
 	STATE state_;
 
 	// 関数ポインタ配列
@@ -47,14 +48,15 @@ private:
 	void RiseDraw(void);
 	void ShotDraw(void);
 
+	const float MOVE_SPEED = 30.0f;
 
 	const int PREPARA_TIME = 500;
 	int preparaTimer_;
 
 	const float RISE_SPEED = 10.0f;
 
-	VECTOR moveVec_;
-	VECTOR targetPos_;
+	Vector3 moveVec_;
+	Vector3 targetPos_;
 
-	const VECTOR& playerPos;
+	const Vector3& playerPos;
 };

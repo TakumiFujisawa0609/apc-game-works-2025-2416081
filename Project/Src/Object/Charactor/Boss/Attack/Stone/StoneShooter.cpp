@@ -1,8 +1,6 @@
 #include"StoneShooter.h"
 
-#include"../../../../Manager/Collision/Collision.h"
-
-StoneShooter::StoneShooter(const VECTOR& bossPos, const VECTOR& bossAngle):
+StoneShooter::StoneShooter(const Vector3& bossPos, const Vector3& bossAngle):
 
 
 	bossPos(bossPos),
@@ -16,28 +14,40 @@ StoneShooter::~StoneShooter()
 
 void StoneShooter::Load(void)
 {
-	stones_.reserve(ONE_SHOT_NUM * 2);
-
 	model_ = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
+
+	stones_.reserve(NUM_MAX);
+
+	for (unsigned char i = 0; i < NUM_MAX; i++) {
+		stones_.emplace_back(new Stone(model_));
+	}
+
+	for (Stone*& stone : stones_) { stone->Load(); }
 }
 
 void StoneShooter::Init(void)
 {
+	for (Stone*& stone : stones_) { stone->Init(); }
 }
 
 void StoneShooter::Update(void)
 {
-	for (auto& stone : stones_) { stone->Update(); }
+	for (Stone*& stone : stones_) { stone->Update(); }
 }
 
 void StoneShooter::Draw(void)
 {
-	for (auto& stone : stones_) { stone->Draw(); }
+	for (Stone*& stone : stones_) { stone->Draw(); }
+}
+
+void StoneShooter::AlphaDraw(void)
+{
+	for (Stone*& stone : stones_) { stone->AlphaDraw(); }
 }
 
 void StoneShooter::Release(void)
 {
-	for (auto& stone : stones_) {
+	for (Stone*& stone : stones_) {
 		if (!stone) { continue; }
 		stone->Release();
 		delete stone;
@@ -50,39 +60,38 @@ void StoneShooter::Release(void)
 
 void StoneShooter::On(void)
 {
-	VECTOR dir = VTransform(LOCAL_POS, Utility::MatrixAllMultXYZ({ bossAngle }));
+	Vector3 dir = VTransform(LOCAL_POS, Utility::MatrixAllMultXYZ({ bossAngle }));
 	dir = VTransform(dir, MGetRotY(-ONE_DIFF * (ONE_SHOT_NUM / 2)));
 
 	for (int i = 0; i < ONE_SHOT_NUM; i++) {
 
-		VECTOR pos = VAdd(bossPos, dir);
-		VECTOR vec = VSub(pos, bossPos);
+		Vector3 pos = bossPos + dir;
+		Vector3 vec = pos - bossPos;
 		vec.y = 0.0f;
-		vec = Utility::Normalize(vec);
+		vec.Normalize();
 
-		bool recycle = false;
+		//bool recycle = false;
 
 		for (auto& stone : stones_) {
-			if (stone->GetUnit().isAlive_ == false) {
+			if (stone->GetJudgeFlg() == false) {
 				stone->On(pos, vec);
-				recycle = true;
+				//recycle = true;
 				break;
 			}
 		}
+		dir.TransMatOwn(MGetRotY(ONE_DIFF));
 
-		if (recycle) {
-			dir = VTransform(dir, MGetRotY(ONE_DIFF));
-			continue;
-		}
+		//if (recycle) {
+		//	dir = VTransform(dir, MGetRotY(ONE_DIFF));
+		//	continue;
+		//}
 
-		stones_.emplace_back(new Stone());
-		stones_.back()->ModelLoad(model_);
-		stones_.back()->Load();
-		stones_.back()->Init();
-		stones_.back()->On(pos, vec);
+		//stones_.emplace_back(new Stone());
+		//stones_.back()->ModelLoad(model_);
+		//stones_.back()->Load();
+		//stones_.back()->Init();
+		//stones_.back()->On(pos, vec);
 
-		Collision::AddEnemy(stones_.back());
-
-		dir = VTransform(dir, MGetRotY(ONE_DIFF));
+		//Collision::AddEnemy(stones_.back());
 	}
 }

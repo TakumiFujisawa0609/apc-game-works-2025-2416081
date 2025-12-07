@@ -1,6 +1,5 @@
 #include"Throwing.h"
 
-#include"../../../../Manager/Collision/Collision.h"
 
 Throwing::Throwing(const Vector3& playerPos, const Vector3& playerAngle) :
 	models_(),
@@ -32,6 +31,11 @@ void Throwing::Update(void)
 void Throwing::Draw(void)
 {
 	for (THROW_OBJ_INFO& obj : throwObj_) { obj.ins->Draw(); }
+}
+
+void Throwing::AlphaDraw(void)
+{
+	for (THROW_OBJ_INFO& obj : throwObj_) { obj.ins->AlphaDraw(); }
 }
 
 void Throwing::Release(void)

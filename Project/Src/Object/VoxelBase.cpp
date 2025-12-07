@@ -55,7 +55,7 @@ void VoxelBase::Load(void)
     }
 
 	// ボクセルオブジェクト専用のコライダーを生成
-    ColliderCreate(new VoxelCollider(TAG::STAGE, roughSize_, cell_, cellCenterPoss_, (roughSize_ / 2).Length()));
+    ColliderCreate(new VoxelCollider(TAG::STAGE, roughSize_, cell_, cellCenterWorldPoss_, (roughSize_ / 2).Length()));
 }
 
 
@@ -103,7 +103,7 @@ void VoxelBase::Draw(void)
 	if (!GetIsDraw()) { return; }
 
 	// 座標を移動して描画
-    MATRIX M = MGetTranslate(trans_.WorldPos().ToVECTOR());
+    MATRIX M = MGetTranslate(trans_.pos.ToVECTOR());
     SetTransformToWorld(&M);
 
 	// メッシュ描画
@@ -252,10 +252,6 @@ void VoxelBase::BuildGreedyMesh(
     int Nx, int Ny, int Nz, float cell,
     std::vector<MeshBatch>& batches)
 {
-    auto Idx = [&](int x, int y, int z) { return (z * Ny + y) * Nx + x; };
-    auto Inb = [&](int x, int y, int z) {
-        return (0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz);
-        };
     auto Solid = [&](int x, int y, int z)->int {
         return (Inb(x, y, z) && density[Idx(x, y, z)] > 0) ? 1 : 0;
         };

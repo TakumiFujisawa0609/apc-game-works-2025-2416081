@@ -8,7 +8,7 @@ class CharactorBase : public ActorBase
 {
 public:
 	CharactorBase();
-	~CharactorBase()override;
+	virtual ~CharactorBase()override = default;
 
 	virtual void Load(void) = 0;
 
@@ -22,6 +22,7 @@ private:
 	void SubUpdate(void)override;
 	// 描画
 	void SubDraw(void)override;
+	void SubAlphaDraw(void)override;
 	// 解放
 	void SubRelease(void)override;
 
@@ -51,6 +52,7 @@ protected:
 	virtual void CharactorInit(void) = 0;
 	virtual void CharactorUpdate(void) = 0;
 	virtual void CharactorDraw(void) = 0;
+	virtual void CharactorAlphaDraw(void) = 0;
 	virtual void CharactorRelease(void) = 0;
 
 #pragma region アニメーションコントローラー

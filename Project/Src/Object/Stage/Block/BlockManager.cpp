@@ -57,6 +57,20 @@ void BlockManager::Release(void)
 	DeleteGraph(textureId_);
 }
 
+std::vector<ColliderBase*> BlockManager::GetCollider(void)const
+{
+	std::vector<ColliderBase*> ret = {};
+	ret.reserve(blocks_.size());
+
+	for (Block* const& b : blocks_) {
+		for (ColliderBase*& bCollider : b->GetCollider()) {
+			ret.emplace_back(bCollider);
+		}
+	}
+
+	return ret;
+}
+
 const std::vector<ActorBase*> BlockManager::GetBlocks(void) const
 {
 	std::vector<ActorBase*> ret = {};

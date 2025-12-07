@@ -9,6 +9,7 @@ public:
 		ColliderBase(type, enoughDistance, pos),
 		radius_(radius)
 	{
+		SetShape(SHAPE::SPHERE);
 	}
 	~SphereCollider()override {}
 

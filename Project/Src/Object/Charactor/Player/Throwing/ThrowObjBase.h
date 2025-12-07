@@ -6,13 +6,9 @@ class ThrowObjBase : public ActorBase
 {
 public:
 	ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_);
-	virtual ~ThrowObjBase() = 0;
+	virtual ~ThrowObjBase() = default;
 
 	void Load(void)override;
-	void SubInit(void)override;
-	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubRelease(void)override {}
 
 	void OnCollision(const ColliderBase& collider)override;
 
@@ -31,6 +27,14 @@ public:
 	virtual void Throw(void);
 
 	STATE GetState(void)const { return state_; }
+
+private:
+
+	void SubInit(void)override;
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
+	void SubRelease(void)override {}
 
 protected:
 	int model_;

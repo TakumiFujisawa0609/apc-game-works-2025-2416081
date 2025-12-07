@@ -26,6 +26,8 @@ public:
 	void Draw(void)override;
 	void Release(void)override;
 
+	std::vector<ColliderBase*> GetCollider(void)const override;
+
 	const std::vector<ActorBase*>GetBlocks(void)const;
 
 	void SetCamera(Camera* c);
@@ -46,6 +48,7 @@ private:
 	void SubInit(void)override {}
 	void SubUpdate(void)override {}
 	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
 	void SubRelease(void)override {}
 };
 

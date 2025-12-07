@@ -60,14 +60,14 @@ void Camera::Apply(void)
 		break;
 	case Camera::MODE::FREE:
 		SetCameraPositionAndAngle(
-			pos_,
+			pos_.ToVECTOR(),
 			angles_.x,
 			angles_.y,
 			angles_.z
 		);
 		break;
 	case Camera::MODE::FOLLOW:
-		if (lookAt_ != nullptr) { SetCameraPositionAndTarget_UpVecY(pos_, *lookAt_); }
+		if (lookAt_ != nullptr) { SetCameraPositionAndTarget_UpVecY(pos_.ToVECTOR(), lookAt_->ToVECTOR()); }
 		break;
 	}
 }
@@ -108,10 +108,10 @@ void Camera::SetBeforeDrawFree(void)
 		mat = MMult(mat, MGetRotY(angles_.y));
 
 		// ‰ñ“]s—ñ‚ðŽg—p‚µ‚ÄAƒxƒNƒgƒ‹‚ð‰ñ“]‚³‚¹‚é
-		VECTOR moveDir = VTransform(dir, mat);
+		Vector3 moveDir = VTransform(dir, mat);
 
 		// •ûŒü~ƒXƒs[ƒh‚ÅˆÚ“®—Ê‚ðì‚Á‚ÄAÀ•W‚É‘«‚µ‚ÄˆÚ“®
-		pos_ = VAdd(pos_, VScale(moveDir, movePow));
+		pos_ += moveDir * movePow;
 	}
 }
 
@@ -121,12 +121,12 @@ void Camera::SetBeforeDrawFollow(void)
 	auto& key = KEY::GetIns();
 	// ’Ç]‘ÎÛ‚ÌÀ•W: lookAt_ (VECTORŒ^)
 	// ƒJƒƒ‰‚ÌYŽ²‰ñ“]Šp“x: yAngle_ (floatŒ^)
-	VECTOR vec = {};
+	Vector3 vec = {};
 	vec = { key.GetRightStickVec().y,key.GetRightStickVec().x,0.0f };
-	if (Utility::VZERO(vec)) {
+	if (vec == 0.0f) {
 		vec = { key.GetMouceMove().y,key.GetMouceMove().x,0.0f };
 	}
-	if (Utility::VZERO(vec)) {
+	if (vec == 0.0f) {
 		if (key.GetInfo(KEY_TYPE::CAMERA_UP).now) { vec.x++; }
 		if (key.GetInfo(KEY_TYPE::CAMERA_DOWN).now) { vec.x--; }
 		if (key.GetInfo(KEY_TYPE::CAMERA_RIGHT).now) { vec.y++; }
@@ -135,11 +135,9 @@ void Camera::SetBeforeDrawFollow(void)
 
 	float rotPow = 3.5f * DX_PI_F / 180.0f;
 
-	if (!Utility::VZERO(vec)) {
-		vec = Utility::Normalize(vec);
-		vec = VScale(vec, rotPow);
-		angles_ = VAdd(angles_, vec);
-
+	if (vec != 0.0f) {
+		angles_ += vec.Normalized() * rotPow;
+		
 		if (angles_.y >= Utility::Deg2RadF(360.0f)) { angles_.y -= Utility::Deg2RadF(360.0f); }
 		if (angles_.y <= Utility::Deg2RadF(0.0f)) { angles_.y += Utility::Deg2RadF(360.0f); }
 		if (angles_.x < Utility::Deg2RadF(-30.0f)) { angles_.x = Utility::Deg2RadF(-30.0f); }
@@ -150,11 +148,11 @@ void Camera::SetBeforeDrawFollow(void)
 	mat = MMult(mat, MGetRotX(angles_.x));
 	mat = MMult(mat, MGetRotY(angles_.y));
 
-	pos_ = VAdd(lookAtMultPos_, VTransform(LOOKAT_DIFF, mat));
+	pos_ = lookAtMultPos_ + VTransform(LOOKAT_DIFF, mat);
 
 	mat = MGetIdent();
 	mat = MMult(mat, MGetRotY(angles_.y));
-	lookAtMultPos_ = VAdd(*lookAt_, VTransform(LOOKAT_DIFF, mat));
+	lookAtMultPos_ = *lookAt_ + VTransform(LOOKAT_DIFF, mat);
 }
 
 void Camera::DrawDebug(void)

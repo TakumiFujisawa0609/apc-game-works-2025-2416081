@@ -1,19 +1,15 @@
 #pragma once
-#include"../../../UnitBase.h"
+#include"../../../../ActorBase.h"
 
-class Fall : public UnitBase
+class Fall : public ActorBase
 {
 public:
 	Fall(int model);
 	~Fall();
 
 	void Load(void)override;
-	void Init(void)override;
-	void Update(void)override;
-	void Draw(void)override;
-	void Release(void)override;
 
-	void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
 	enum class STATE
 	{
@@ -23,12 +19,19 @@ public:
 		MAX
 	};
 
-	void Set(const VECTOR& pos);
+	void Set(const Vector3& pos);
 	void On(void) { state_ = STATE::FALL; }
 
-	int GetState(void)const override { return (int)state_; }
+	STATE GetState(void)const { return state_; }
 
 private:
+
+	void SubInit(void)override;
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override;
+	void SubRelease(void)override {}
+
 	STATE state_;
 	
 	const int IDLE_TIME = 1000;

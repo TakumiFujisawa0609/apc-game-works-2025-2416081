@@ -9,6 +9,7 @@ public:
 		ColliderBase(type, enoughDistance, pos),
 		size_(size)
 	{
+		SetShape(SHAPE::BOX);
 	}
 	~BoxCollider()override {}
 

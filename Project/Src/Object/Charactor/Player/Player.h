@@ -21,17 +21,15 @@ public:
 	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3(0.0f, SIZE.y / 2 - RADIUS, 0.0f);
 	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3(0.0f, 0.0f, 0.0f);
 
+	const Vector3 LINE_COLLIDER_START_POS = Vector3(0.0f, 0.0f, 0.0f);
+	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y / 2, 0.0f);
 
 
 	Player(const Vector3& cameraAngle);
 	~Player()override {};
 
 	void Load(void)override;
-	void CharactorInit(void)override;
-	void CharactorUpdate(void)override;
-	void CharactorDraw(void)override;
 	void UiDraw(void);
-	void CharactorRelease(void)override;
 
 	void OnCollision(const ColliderBase& collider)override;
 	void OnGrounded()override;
@@ -77,6 +75,12 @@ public:
 	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival_ = std::move(ptr); }
 
 private:
+
+	void CharactorInit(void)override;
+	void CharactorUpdate(void)override;
+	void CharactorDraw(void)override;
+	void CharactorAlphaDraw(void)override;
+	void CharactorRelease(void)override;
 
 #pragma region èÛë‘ä«óù
 
@@ -187,6 +191,7 @@ private:
 	void LowerInit(void);
 	void LowerUpdate(void);
 	void LowerDraw(void);
+	void LowerAlphaDraw(void);
 	void LowerRelease(void);
 #pragma endregion
 

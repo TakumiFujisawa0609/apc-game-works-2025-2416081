@@ -1,10 +1,8 @@
 #include"FallManager.h"
 
-#include"../../../../Utility/Utility.h"
+#include"../../../../../Utility/Utility.h"
 
-#include"../../../../Manager/Collision/Collision.h"
-
-FallManager::FallManager(const VECTOR& playerPos):
+FallManager::FallManager(const Vector3& playerPos):
 	model(-1),
 	falls_(),
 
@@ -20,60 +18,57 @@ void FallManager::Load(void)
 {
 	model = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
 
-	falls_.reserve(3);
+	for (unsigned char i = 0; i < FALL_NUM_MAX; i++) {
+		falls_[i] = new Fall(model);
+	}
+
+	for (Fall*& fall : falls_) { fall->Load(); }
 }
 
 void FallManager::Init(void)
 {
-
+	for (Fall*& fall : falls_) { fall->Init(); }
 }
 
 void FallManager::Update(void)
 {
-	for (auto& fall : falls_) { fall->Update(); }
+	for (Fall*& fall : falls_) { fall->Update(); }
 }
 
 void FallManager::Draw(void)
 {
-	for (auto& fall : falls_) { fall->Draw(); }
+	for (Fall*& fall : falls_) { fall->Draw(); }
+}
+void FallManager::AlphaDraw(void)
+{
+	for (Fall*& fall : falls_) { fall->AlphaDraw(); }
 }
 
 void FallManager::Release(void)
 {
-	for (auto& fall : falls_) {
+	for (Fall*& fall : falls_) {
 		if (!fall) { continue; }
 		fall->Release();
 		delete fall;
 		fall = nullptr;
 	}
-	falls_.clear();
 
 }
 
 void FallManager::Set(void)
 {
-	VECTOR pos = VAdd(playerPos, LOCAL_POS);
-
-
-	for (auto& fall : falls_) {
-		if (fall->GetUnit().isAlive_ == false) {
-			fall->Set(pos);
+	for (Fall*& fall : falls_) {
+		if (!fall->GetJudgeFlg()) {
+			fall->Set(playerPos + LOCAL_POS);
 			return;
 		}
 	}
-
-	falls_.emplace_back(new Fall(model));
-	falls_.back()->Load();
-	falls_.back()->Init();
-	falls_.back()->Set(pos);
-
-	Collision::AddEnemy(falls_.back());
 }
 
 void FallManager::On(void)
 {
 	for (auto& fall : falls_) {
-		if (fall->GetState() == (int)Fall::STATE::IDLE) {
+		if (fall->GetState() == Fall::STATE::IDLE) {
 			fall->On();
 		}
 	}

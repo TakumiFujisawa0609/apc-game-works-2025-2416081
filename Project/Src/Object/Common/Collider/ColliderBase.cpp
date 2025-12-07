@@ -12,18 +12,13 @@ ColliderBase::ColliderBase(TAG type, float enoughDistance, Vector3 pos) :
 	pos_(pos),
 	enoughDistance_(enoughDistance),
 	judgeFlg_(1),
+	dynamicFlg_(1),
 	pushFlg_(1),
+	pushWeight_(0),
 	type_(type),
 	shape_(SHAPE::NON),
 	OnCollision(nullptr)
 {
-	// ©•ª‚ÌƒNƒ‰ƒX‚ğ”»•Ê‚µ‚ÄŒ`ó‚ğ•Û‚·‚é
-	if (dynamic_cast<LineCollider*>(this)) { shape_ = SHAPE::LINE; }
-	else if (dynamic_cast<SphereCollider*>(this)) { shape_ = SHAPE::SPHERE; }
-	else if (dynamic_cast<CapsuleCollider*>(this)) { shape_ = SHAPE::CAPSULE; }
-	else if (dynamic_cast<BoxCollider*>(this)) { shape_ = SHAPE::BOX; }
-	//else if (dynamic_cast<ColliderModel*>(this)) { shape_ = SHAPE::MODEL; }
-	else if (dynamic_cast<VoxelCollider*>(this)) { shape_ = SHAPE::VOXEL; }
 }
 void ColliderBase::DrawDebug(unsigned int color)
 {

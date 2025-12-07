@@ -164,7 +164,6 @@
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\Block.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\BlockManager.cpp" />
-    <ClCompile Include="Src\Object\UnitBase.cpp" />
     <ClCompile Include="Src\Object\VoxelBase.cpp" />
     <ClCompile Include="Src\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Explanat\Explanat.cpp" />
@@ -215,7 +214,6 @@
     <ClInclude Include="Src\Object\SkyDome\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage\Block\Block.h" />
     <ClInclude Include="Src\Object\Stage\Block\BlockManager.h" />
-    <ClInclude Include="Src\Object\UnitBase.h" />
     <ClInclude Include="Src\Object\VoxelBase.h" />
     <ClInclude Include="Src\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Src\Scene\Game\Explanat\Explanat.h" />

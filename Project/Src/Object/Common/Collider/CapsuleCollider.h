@@ -11,6 +11,7 @@ public:
 		endPos_(localEndPos),
 		radius_(radius)
 	{
+		SetShape(SHAPE::CAPSULE);
 	}
 	~CapsuleCollider()override {}
 
@@ -26,6 +27,31 @@ public:
 	Vector3 GetStartPos(void)const { return GetTransform().VTrans(startPos_); }
 	// カプセル線分の終点
 	Vector3 GetEndPos(void)const { return GetTransform().VTrans(endPos_); }
+
+	// 指定した座標から線分の中で一番近い座標を取得する
+	Vector3 ClosestPoint(const Vector3& point) const {
+		// 始点と終点
+		Vector3 s = GetStartPos();
+		Vector3 e = GetEndPos();
+
+		Vector3 se = e - s;
+		Vector3 sp = point - s;
+
+		float lenSq = se.LengthSq();
+		if (lenSq < 1e-6f) {
+			// 始点 = 終点 の場合、始点を返す
+			return s;
+		}
+
+		// 点を線分に射影するパラメータt
+		float t = sp.Dot(se) / lenSq;
+
+		// 線分範囲に clamp
+		t = std::clamp(t, 0.0f, 1.0f);
+
+		// 最近点
+		return s + se * t;
+	}
 #pragma endregion
 
 private:

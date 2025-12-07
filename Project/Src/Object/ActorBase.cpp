@@ -7,7 +7,10 @@ ActorBase::ActorBase() :
 	collider_(),
 
 	dynamicFlg_(1),
-	isGravity(1),
+	isGravity_(0),
+
+	pushFlg_(1),
+	pushWeight_(0),
 
 	prevPos_(trans_.pos),
 
@@ -15,7 +18,8 @@ ActorBase::ActorBase() :
 
 	isGroundMaster(false),
 
-	isDraw(1)
+	isDraw(1),
+	isAlphaDraw(0)
 {
 }
 
@@ -33,7 +37,7 @@ void ActorBase::Update(void)
 	SubUpdate();
 
 	// 重力処理
-	if (dynamicFlg_ == 1 && isGravity == 1) { Gravity(); }
+	if (dynamicFlg_ == 1 && isGravity_ == 1) { Gravity(); }
 
 	// 加速度更新
 	if (dynamicFlg_ == 1) { AccelUpdate(); }
@@ -45,7 +49,16 @@ void ActorBase::Draw(void)
 	SubDraw();
 
 	// モデルの描画
-	trans_.Draw();
+	if (isDraw == 1 && isAlphaDraw == 0) { trans_.Draw(); }
+}
+
+void ActorBase::AlphaDraw(void)
+{
+	// 派生先追加アルファ描画
+	SubAlphaDraw();
+
+	// モデルの描画
+	if (isDraw == 1 && isAlphaDraw == 1) { trans_.Draw(); }
 
 	// 当たり判定のデバッグ描画
 	if (App::GetIns().IsDrawDebug()) {

@@ -17,6 +17,7 @@ public:
 		startPos_(localStartPos),
 		endPos_(localEndPos)
 	{
+		SetShape(SHAPE::LINE);
 	}
 	~LineCollider()override {}
 
@@ -27,9 +28,9 @@ public:
 	float GetHalfLen(void)const { return (startPos_ - endPos_).Length() / 2; }
 
 	// 線分の始点
-	Vector3 GetStartPos(void)const { return GetTransform().VTrans(startPos_); }
+	Vector3 GetStartPos(void)const { return GetPos() + GetTransform().VTrans(startPos_); }
 	// 線分の終点
-	Vector3 GetEndPos(void)const { return GetTransform().VTrans(endPos_); }
+	Vector3 GetEndPos(void)const { return GetPos() + GetTransform().VTrans(endPos_); }
 
 	// 押し出しの方向
 	Vector3 GetDirection(void)const { return GetStartPos() - GetEndPos(); }
@@ -57,6 +58,24 @@ public:
 
 		// 最近点
 		return s + se * t;
+	}
+
+	Vector3 ClosestPointAABB(const Vector3& bmin, const Vector3& bmax) const {
+		// AABB 内部の基準点として clamp する
+		Vector3 p = ClosestPoint(
+			Vector3(
+				std::clamp(GetPos().x, bmin.x, bmax.x),
+				std::clamp(GetPos().y, bmin.y, bmax.y),
+				std::clamp(GetPos().z, bmin.z, bmax.z)
+			)
+		);
+
+		// さらに AABB 側の clamp
+		return {
+			std::clamp(p.x, bmin.x, bmax.x),
+			std::clamp(p.y, bmin.y, bmax.y),
+			std::clamp(p.z, bmin.z, bmax.z)
+		};
 	}
 
 private:

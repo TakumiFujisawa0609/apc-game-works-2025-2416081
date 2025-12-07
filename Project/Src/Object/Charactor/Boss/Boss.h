@@ -12,7 +12,7 @@ class Boss : public CharactorBase
 public:
 
 	Boss(const Vector3& playerPos);
-	~Boss();
+	~Boss()override {}
 
 	// ì«Ç›çûÇ›èàóù
 	void Load(void)override;
@@ -57,6 +57,7 @@ private:
 	void CharactorInit(void)override;
 	void CharactorUpdate(void)override;
 	void CharactorDraw(void)override;
+	void CharactorAlphaDraw(void)override;
 	void CharactorRelease(void)override;
 
 	// èÛë‘ï ä÷êîÅ`Å`Å`Å`
@@ -159,6 +160,7 @@ private:
 	void LowerInit(void);
 	void LowerUpdate(void);
 	void LowerDraw(void);
+	void LowerAlphaDraw(void);
 	void LowerRelease(void);
 #pragma endregion
 

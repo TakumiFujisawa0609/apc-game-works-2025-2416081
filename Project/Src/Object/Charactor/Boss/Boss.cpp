@@ -28,10 +28,6 @@ Boss::Boss(const Vector3& playerPos):
 {
 }
 
-Boss::~Boss()
-{
-}
-
 void Boss::Load(void)
 {
 	// モデルをロード
@@ -41,7 +37,7 @@ void Boss::Load(void)
 	trans_.scale = SCALE;
 
 	// 相対　座標/角度
-	trans_.centerDiff = CENTER_DIFF;
+	trans_.centerDiff = -CENTER_DIFF;
 	trans_.localAngle = LOCAL_ROT;
 
 	// コライダーを生成
@@ -62,6 +58,7 @@ void Boss::Load(void)
 #pragma endregion
 
 	// アニメーション
+	CreateAnimationController();
 	AnimeLoad();
 	AnimePlay((int)ANIME_TYPE::WALK);
 
@@ -100,6 +97,14 @@ void Boss::CharactorDraw(void)
 
 	// Bossクラスが抱える子クラスの描画処理
 	LowerDraw();
+}
+
+void Boss::CharactorAlphaDraw(void)
+{
+	if (!GetIsDraw()) { return; }
+
+	// Bossクラスが抱える子クラスの描画処理
+	LowerAlphaDraw();
 }
 
 void Boss::UiDraw(void)
@@ -153,6 +158,11 @@ void Boss::OnCollision(const ColliderBase& collider)
 		HpSharpen(30);
 		return;
 	}
+}
+
+void Boss::OnGrounded(void) 
+{
+
 }
 
 void Boss::Idle(void)
@@ -332,19 +342,20 @@ void Boss::LowerLoad(void)
 	fall_ = new FallManager(playerPos);
 	fall_->Load();
 
-	stone_ = new StoneShooter(unit_.pos_, unit_.angle_);
+	stone_ = new StoneShooter(trans_.pos, trans_.angle);
 	stone_->Load();
 
-	psycho_ = new PsychoRockShooter(unit_.pos_, playerPos);
+	psycho_ = new PsychoRockShooter(trans_.pos, playerPos);
 	psycho_->Load();
 
-	rockWall_ = new RockWallShooter(unit_.pos_, unit_.angle_);
+	rockWall_ = new RockWallShooter(trans_.pos, trans_.angle);
 	rockWall_->Load();
 }
 void Boss::LowerInit(void)
 {
 	fall_->Init();
 	stone_->Init();
+	psycho_->Init();
 	rockWall_->Init();
 }
 void Boss::LowerUpdate(void)
@@ -360,6 +371,13 @@ void Boss::LowerDraw(void)
 	rockWall_->Draw();
 	stone_->Draw();
 	psycho_->Draw();
+}
+void Boss::LowerAlphaDraw(void)
+{
+	fall_->AlphaDraw();
+	rockWall_->AlphaDraw();
+	stone_->AlphaDraw();
+	psycho_->AlphaDraw();
 }
 void Boss::LowerRelease(void)
 {
@@ -387,29 +405,29 @@ void Boss::LowerRelease(void)
 
 void Boss::HpSharpen(int damage)
 {
-	if (unit_.hp_ <= 0) { return; }
+	if (hp_ <= 0) { return; }
 
-	unit_.hp_ -= damage;
+	hp_ -= damage;
 
-	if (unit_.hp_ <= 0) {
-		unit_.hp_ = 0;
+	if (hp_ <= 0) {
+		hp_ = 0;
 
-		unit_.inviciCounter_ = 60;
+		SetInviCounter(60);
 
 		stanTimer_ = STAN_TIME;
 
-		state_ = STATE::STAN;
-		anime_->Play((int)ANIME_TYPE::STAN);
+		state_ = (int)STATE::STAN;
+		AnimePlay((int)ANIME_TYPE::STAN);
 		return;
 	}
 
-	if (state_ != STATE::ATTACK) {
+	if (state_ != (int)STATE::ATTACK) {
 		stanTimer_ = STAN_TIME;
 
-		state_ = STATE::DAMAGE;
-		anime_->Play((int)ANIME_TYPE::DAMAGE, false);
+		state_ = (int)STATE::DAMAGE;
+		AnimePlay((int)ANIME_TYPE::DAMAGE, false);
 	}
-	unit_.inviciCounter_ = 60;
+	SetInviCounter(60);
 }
 void Boss::LifeSharpen(void)
 {
@@ -417,8 +435,8 @@ void Boss::LifeSharpen(void)
 
 	if (--masterLife_ <= 0) {
 		masterLife_ = 0;
-		state_ = STATE::DEATH;
-		anime_->Play((int)ANIME_TYPE::DEATH, false);
+		state_ = (int)STATE::DEATH;
+		AnimePlay((int)ANIME_TYPE::DEATH, false);
 
 		GameScene::Slow(100, 10);
 		GameScene::Shake(ShakeKinds::WID, ShakeSize::BIG, 100);
@@ -428,9 +446,9 @@ void Boss::LifeSharpen(void)
 	GameScene::Slow(20);
 	GameScene::Shake();
 
-	VECTOR vec = VSub(playerPos, unit_.pos_);
-	unit_.angle_.y = atan2f(vec.x, vec.z);
+	Vector3 vec = playerPos - trans_.pos;
+	trans_.angle.y = atan2f(vec.x, vec.z);
 
-	state_ = STATE::BIG_DAMAGE;
-	anime_->Play((int)ANIME_TYPE::DEATH, false);
+	state_ = (int)STATE::BIG_DAMAGE;
+	AnimePlay((int)ANIME_TYPE::DEATH, false);
 }

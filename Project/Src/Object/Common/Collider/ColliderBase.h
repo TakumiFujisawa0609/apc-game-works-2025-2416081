@@ -21,6 +21,8 @@ public:
 		ENEMY,
 
 		BOSS,
+
+		GOLEM_ATTACK_WALL,
 		GOLEM_ATTACK_FALL,
 		GOLEM_ATTACK_PSYCHOROCK,
 		GOLEM_ATTACK_STONE,
@@ -47,7 +49,7 @@ public:
 	/// <param name="enoughDistance">判定スキップに十分な距離　-1.0fで未設定とし、距離による判定スキップを行わない（引数省略で-1.0f）</param>
 	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
 	ColliderBase(TAG type, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f });
-	virtual ~ColliderBase() = 0;
+	virtual ~ColliderBase() = default;
 
 	// デバッグ描画
 	void DrawDebug(unsigned int color = 0xffffff);
@@ -96,6 +98,9 @@ public:
 
 	// 判定通知の呼び出し
 	void CallOnCollision(const ColliderBase& collider) { OnCollision(collider); }
+
+	// 接地判定の呼び出し
+	void CallOnGrounded(void) { OnGrounded(); }
 #pragma endregion
 
 #pragma region 各セット関数
@@ -110,6 +115,9 @@ public:
 
 	// 押し出しを行うかどうかのフラグを設定（true = 「押し出す」、false = 「押し出さない」）
 	void SetPushFlg(bool flg) { pushFlg_ = (flg) ? 1 : 0; }
+
+	// 押し出しを行う際の重さ（0 ～ 100 で設定）
+	void SetPushWeight(unsigned char weight) { pushWeight_ = weight; }
 #pragma endregion
 
 private:
@@ -146,6 +154,9 @@ private:
 
 	// 接地したときに呼び出す関数をポインタで受け取って保持
 	std::function<void(void)>OnGrounded;
+
+protected:
+	void SetShape(SHAPE s) { shape_ = s; }
 };
 
 using TAG = ColliderBase::TAG;

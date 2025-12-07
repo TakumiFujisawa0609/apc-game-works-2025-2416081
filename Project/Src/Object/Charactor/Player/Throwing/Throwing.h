@@ -17,6 +17,7 @@ public:
 	void Init(void);
 	void Update(void);
 	void Draw(void);
+	void AlphaDraw(void);
 	void Release(void);
 
 	void Carry(THROW_TYPE type);

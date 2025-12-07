@@ -1,11 +1,12 @@
 #include"Stone.h"
 
-#include"../../../Charactor/Player/Player.h"
+#include"../../../../Common/Collider/SphereCollider.h"
 
-Stone::Stone():
+Stone::Stone(int model):
 	moveVec_(),
 	aliveCounter_()
 {
+	ModelDuplicate(model);
 }
 
 Stone::~Stone()
@@ -14,61 +15,55 @@ Stone::~Stone()
 
 void Stone::Load(void)
 {
-	unit_.para_.colliShape = CollisionShape::SPHERE;
-	unit_.para_.radius = 100.0f;
-	MV1SetScale(unit_.model_, Utility::FtoV(1.3f));
+	SetDynamicFlg(true);
+	SetGravityFlg(false);
+	SetPushFlg(false);
 
-	unit_.para_.speed = 30.0f;
+	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_STONE, RADIUS));
+
+	trans_.scale = 1.3f;
+
+	trans_.Attach();
 }
 
-void Stone::Init(void)
+void Stone::SubInit(void)
 {
-	unit_.isAlive_ = false;
+	SetJudge(false);
+	SetIsDraw(false);
 	aliveCounter_ = 0;
 }
 
-void Stone::Update(void)
+void Stone::SubUpdate(void)
 {
-	if (unit_.isAlive_ == false) { return; }
+	if (GetJudgeFlg() == false) { return; }
 
 	if (--aliveCounter_ <= 0) {
 		aliveCounter_ = 0;
-		unit_.isAlive_ = false;
+		SetJudge(false);
+		SetIsDraw(false);
 	}
 
-	unit_.pos_ = VAdd(unit_.pos_, moveVec_);
+	trans_.pos += moveVec_;
 }
 
-void Stone::Draw(void)
+void Stone::On(const Vector3& pos, const Vector3& moveVec)
 {
-	if (unit_.isAlive_ == false) { return; }
-
-	Utility::MV1ModelMatrix(unit_.model_, unit_.pos_, { unit_.angle_ });
-	MV1DrawModel(unit_.model_);
-}
-
-void Stone::Release(void)
-{
-	MV1DeleteModel(unit_.model_);
-}
-
-void Stone::On(const VECTOR& pos, const VECTOR& moveVec)
-{
-	unit_.pos_ = pos;
-	moveVec_ = VScale(moveVec, unit_.para_.speed);
+	trans_.pos = pos;
+	moveVec_ = moveVec * MOVE_SPEED;
 
 	aliveCounter_ = ALIVE_TIME;
 
-	unit_.isAlive_ = true;
+	SetJudge(true);
+	SetIsDraw(true);
 }
 
-void Stone::OnCollision(UnitBase* other)
+void Stone::OnCollision(const ColliderBase& collider)
 {
 	if (
-		dynamic_cast<Player*>(other) ||
-		dynamic_cast<PlayerPunch*>(other)
+		collider.GetTag() == TAG::PLAYER ||
+		collider.GetTag() == TAG::PLAYER_PUNCH
 		) {
-		unit_.isAlive_ = false;
+		SetJudge(false);
+		SetIsDraw(false);
 	}
 }
-

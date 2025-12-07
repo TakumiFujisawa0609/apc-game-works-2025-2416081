@@ -3,21 +3,17 @@
 #include<DxLib.h>
 #include<vector>
 
-#include"../../../VoxelBase.h"
+#include"../../../../VoxelBase.h"
 
 class RockWall : public VoxelBase
 {
 public:
-	static constexpr VECTOR SIZE = { 250.0f, 293.0f, 325.0f };
-	static constexpr VECTOR CENTER_DIFF = { -10.0f, SIZE.y / 2 - 10.0f, 0.0f };
-
-	RockWall(int textureId);
+	RockWall(int modelId, int textureId);
 	~RockWall()override {};
 
-	void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
-	int GetState(void)const override { return (int)state_; }
-
+	// ó‘Ô‚Ì—ñ‹“Œ^’è‹`
 	enum class STATE
 	{
 		NON,
@@ -27,14 +23,21 @@ public:
 		MAX
 	};
 
-	void On(const VECTOR& pos);
+	void On(const Vector3& pos);
 
 private:
+
+#pragma region ’è”’è‹`
+	const Vector3 SIZE = { 250.0f, 293.0f, 325.0f };
+	const Vector3 CENTER_DIFF = { -10.0f, SIZE.y / 2 - 10.0f, 0.0f };
+#pragma endregion
+
 	void SubLoad(void)override;
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-	void SubDraw(void)override;
-	void SubRelease(void)override;
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
+	void SubRelease(void)override {}
 
 #pragma region ó‘ÔŠÇ—
 	STATE state_;
@@ -50,14 +53,9 @@ private:
 #pragma endregion
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
-	// Create`````
-	const int CREATE_IDLE_TIME = 180;	//¶¬‚©‚ç“®‚«o‚·‚Ü‚Å‚ÌŠÔ
-	int createIdleCounter_;
-	//`````````
-
 	// Move``````
 	const float MOVE_SPEED = 20.0f;
-	
+	unsigned char stageCollisionFlg_;
 	//`````````
 
 	// Be```````

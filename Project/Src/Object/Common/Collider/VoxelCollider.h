@@ -7,12 +7,13 @@
 class VoxelCollider : public ColliderBase
 {
 public:
-	VoxelCollider(TAG type, const Vector3& roughSize, const float& cellSize, const std::map<int, Vector3>& cellLocalPoss, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+	VoxelCollider(TAG type, const Vector3& roughSize, const float& cellSize, const std::map<int, Vector3>& cellWorldPoss, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
 		roughSize_(roughSize),
 		cellSize_(cellSize),
-		cellLocalPoss_(cellLocalPoss)
+		cellWorldPoss_(cellWorldPoss)
 	{
+		SetShape(SHAPE::VOXEL);
 	}
 	~VoxelCollider()override {}
 
@@ -26,16 +27,8 @@ public:
 	// セルサイズを取得(Vector3版)
 	Vector3 GetCellSizeVECTOR(void) const { return Vector3(cellSize_, cellSize_, cellSize_); }
 
-	// 生存しているセルのローカル中心座標群を取得
-	const std::map<int, Vector3>& GetCellLocalPoss(void) const { return cellLocalPoss_; }
 	// 生存しているセルのワールド中心座標群を取得
-	std::map<int, Vector3> GetCellWorldPoss(void)const {
-		std::map<int, Vector3> ret;
-		for (const std::pair<int,Vector3>& localPos : cellLocalPoss_) {
-			ret[localPos.first] = GetPos() + localPos.second;
-		}
-		return ret;
-	}
+	std::map<int, Vector3> GetCellWorldPoss(void)const { return cellWorldPoss_; }
 
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列を取得
 	const std::vector<int>& GetHitCellIdxs(void)const { return hitCellIdxs_; }
@@ -62,7 +55,7 @@ private:
 	const float& cellSize_;
 
 	// 生存しているセルのローカル中心座標群
-	const std::map<int, Vector3>& cellLocalPoss_;
+	const std::map<int, Vector3>& cellWorldPoss_;
 
 	// 当たり判定毎に更新してその衝突判定であたったセルのインデックスを格納する配列
 	std::vector<int> hitCellIdxs_;

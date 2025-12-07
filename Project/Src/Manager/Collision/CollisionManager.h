@@ -14,17 +14,17 @@
 class CollisionManager
 {
 public:
-	CollisionManager():
-		playerColliders_(),
-		enemyColliders_(),
-		stageColliders_()
+	CollisionManager()
+		//playerColliders_(),
+		//enemyColliders_(),
+		//stageColliders_()
 	{}
 	~CollisionManager() {}
 
 	// オブジェクト追加
-	void Add(ColliderBase* collider);
+	static void Add(ColliderBase* collider);
 	// オブジェクト追加
-	void Add(std::vector<ColliderBase*> collider) { for (ColliderBase*& c : collider) { Add(c); } }
+	static void Add(std::vector<ColliderBase*> collider) { for (ColliderBase*& c : collider) { Add(c); } }
 
 	// 判定実行
 	void Check(void);
@@ -36,15 +36,38 @@ public:
 		stageColliders_.clear();
 	}
 
+	// 
+	static bool IsStageCollision(const Vector3& pos, float radius);
+
 private:
 #pragma region タイプ別コライダー格納配列
-	std::vector<ColliderBase*>playerColliders_;
-	std::vector<ColliderBase*>enemyColliders_;
-	std::vector<ColliderBase*>stageColliders_;
+	// プレイヤー系
+	static std::vector<ColliderBase*>playerColliders_;
+	// エネミー系	
+	static std::vector<ColliderBase*>enemyColliders_;
+	// ステージ系
+	static std::vector<ColliderBase*>stageColliders_;
+
+	// それ以外
+	static std::vector<ColliderBase*>otherColliders_;
+
+	/*以下の組み合わせの判定が実行される（順番も以下の通り）
+	* 
+	* ①プレイヤー系×ステージ系
+	* ②エネミー系×ステージ系
+	* ③それ以外×ステージ系
+	* 
+	* ④プレイヤー系×エネミー系
+	* ⑤プレイヤー系×それ以外
+	* ⑥エネミー系×それ以外
+	* 
+	* ⑦それ以外×それ以外
+	*/
 #pragma endregion
 
 #pragma region 当たり判定用
 	void Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs);
+	void Matching(std::vector<ColliderBase*>& s);
 	bool IsHit(ColliderBase* a, ColliderBase* b);
 
 	bool LineToLine(LineCollider* a, LineCollider* b);
@@ -118,12 +141,12 @@ private:
 			a->SetTransformPos(a->GetTransform().pos + normal * (overlap * aRatio));
 			b->SetTransformPos(b->GetTransform().pos - normal * (overlap * bRatio));
 		}
-		// sphere（球体）だけ動的の場合
+		// aだけ動的の場合
 		else if (aDynamic && !bDynamic)
 		{
 			a->SetTransformPos(a->GetTransform().pos + normal * overlap);
 		}
-		// capsule（カプセル）だけ動的の場合
+		// bだけ動的の場合
 		else if (!aDynamic && bDynamic)
 		{
 			b->SetTransformPos(b->GetTransform().pos - normal * overlap);

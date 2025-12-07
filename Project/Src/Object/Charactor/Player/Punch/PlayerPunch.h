@@ -12,10 +12,6 @@ public:
 	~PlayerPunch()override {};
 
 	void Load(void)override;
-	void SubInit(void)override {}
-	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubRelease(void)override {}
 
 	void OnCollision(const ColliderBase& collider)override;
 
@@ -23,6 +19,13 @@ public:
 	void Off(void) { SetJudge(false); }
 
 private:
+
+	void SubInit(void)override {}
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
+	void SubRelease(void)override {}
+
 	const Vector3& playerPos;
 	const Vector3& playerAngle;
 };

@@ -1,8 +1,6 @@
 #include"ThrowObjBase.h"
 
-#include"../../../../Manager/Collision/CollisionUtility.h"
-
-#include"../../../Boss/Boss.h"
+#include"../../Boss/Boss.h"
 
 ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_) :
 	ActorBase(),
@@ -24,10 +22,6 @@ ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle
 	speed_(10.0f),
 
 	moveVec_()
-{
-}
-
-ThrowObjBase::~ThrowObjBase()
 {
 }
 
@@ -84,39 +78,6 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 	}
 }
 
-//void ThrowObjBase::OnCollision(UnitBase* other)
-//{
-//	if (
-//		dynamic_cast<Boss*>(other) ||
-//		dynamic_cast<Stone*>(other) 
-//		) {
-//		unit_.isAlive_ = false;
-//	}
-//
-//	switch (state_)
-//	{
-//	case ThrowObjBase::STATE::NON:
-//		break;
-//	case ThrowObjBase::STATE::CARRY:
-//		break;
-//	case ThrowObjBase::STATE::DROP:
-//		break;
-//	case ThrowObjBase::STATE::THROW:
-//		if (VoxelBase* voxel = dynamic_cast<RockWall*>(other)) {
-//			for (const auto& vox : voxel->GetCellCenterPoss()) {
-//				if (Cfunc::SphereAabb(unit_.pos_, unit_.para_.radius, vox, voxel->GetCellSizeVECTOR())) {
-//					aliveHitCou_++;
-//					if (aliveHitCou_ > ALIVE_HIT_NUM) {
-//						unit_.isAlive_ = false;
-//					}
-//				}
-//			}
-//		}
-//		break;
-//	}
-//
-//}
-
 void ThrowObjBase::Throw(void)
 {
 	trans_.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
@@ -129,8 +90,6 @@ void ThrowObjBase::Throw(void)
 
 	state_ = STATE::THROW;
 }
-
-
 
 void ThrowObjBase::CarryStateFunc(void)
 {
@@ -152,4 +111,3 @@ void ThrowObjBase::ThrowStateFunc(void)
 		state_ = STATE::NON;
 	}
 }
-

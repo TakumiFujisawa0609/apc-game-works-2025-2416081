@@ -19,10 +19,6 @@ public:
 	~PlayerGouge()override {}
 
 	void Load(void)override;
-	void SubInit(void)override;
-	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubRelease(void)override {}
 
 	void OnCollision(const ColliderBase& collider)override;
 
@@ -33,6 +29,13 @@ public:
 	bool Gouge(void);
 
 private:
+
+	void SubInit(void)override;
+	void SubUpdate(void)override;
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
+	void SubRelease(void)override {}
+
 	STATE state_;
 
 	const float STATE_RADIUS[(int)STATE::MAX] = { 10.0f,150.0f };

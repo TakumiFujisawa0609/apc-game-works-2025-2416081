@@ -1,5 +1,6 @@
 #pragma once
 #include <DxLib.h>
+#include"../../Common/Vector3.h"
 
 class Camera
 {

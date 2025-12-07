@@ -75,7 +75,7 @@ void GameScene::Load(void)
 	ObjAdd(new SkyDome());
 	ObjAdd(new BlockManager());
 	ObjAdd(new Player(camera_->GetAngles()));
-	//ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
+	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
 
 	// ƒXƒe[ƒW‚ÉƒJƒƒ‰‚ğ“n‚·
 	ObjSerch<BlockManager>().back()->SetCamera(camera_);
@@ -95,12 +95,12 @@ void GameScene::Init(void)
 
 	// ƒJƒƒ‰‰Šú‰»`````````````````````````````
 	camera_->ChangeMode(Camera::MODE::FOLLOW);
-	camera_->SetLookAtPos(&ObjSerch<Player>().back()->GetTrans().pos);
+	camera_->SetLookAtPos(&(ObjSerch<Player>().back()->GetTrans().pos));
 	camera_->Init();
 	// ```````````````````````````````````
 
 	// ƒ}ƒEƒX‚ğ’†S‚ÉŒÅ’è
-	KEY::GetIns().SetMouceFixed(true);
+	//KEY::GetIns().SetMouceFixed(true);
 
 	// ƒCƒxƒ“ƒgƒV[ƒ“‚ğ‚Í‚³‚Ş
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
@@ -163,6 +163,9 @@ void GameScene::Draw(void)
 #pragma region •`‰æˆ—iƒƒCƒ“j
 	// ƒIƒuƒWƒFƒNƒg‘S‚Ä‚Ì•`‰æˆ—
 	for (ActorBase*& obj : objects_) { obj->Draw(); }
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+	for (ActorBase*& obj : objects_) { obj->AlphaDraw(); }
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 #pragma endregion
 
 #pragma region ‰æ–Ê‰‰o

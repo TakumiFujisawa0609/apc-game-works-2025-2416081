@@ -37,6 +37,8 @@ void Player::Load(void)
 	trans_.Load("Player/Player");
 	trans_.scale = SCALE;
 
+	SetGravityFlg(true);
+
 #pragma region 関数ポインタ配列へ各関数を格納
 	SET_STATE(STATE::NON, &Player::Non);
 	SET_STATE(STATE::MOVE, &Player::Move);
@@ -61,7 +63,8 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
 	// コライダー生成
-	ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, RADIUS));
+	ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, (CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + RADIUS * 2));
+	ColliderCreate(new LineCollider(TAG::PLAYER, LINE_COLLIDER_START_POS, LINE_COLLIDER_END_POS, (LINE_COLLIDER_START_POS / 2 - LINE_COLLIDER_END_POS / 2).Length()));
 
 	// プレイヤーが抱える下位クラスの読み込み処理
 	LowerLoad();
@@ -129,6 +132,10 @@ void Player::CharactorDraw(void)
 	//	VSub(unit_.WorldPos(), localPos),
 	//	VAdd(unit_.WorldPos(), localPos),
 	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
+}
+
+void Player::CharactorAlphaDraw(void)
+{
 }
 
 void Player::UiDraw(void)
@@ -665,11 +672,11 @@ void Player::LowerLoad(void)
 	punch_->Load();
 
 	// 抉り
-	gouge_ = new PlayerGouge(unit_.pos_, unit_.angle_);
+	gouge_ = new PlayerGouge(trans_.pos, trans_.angle);
 	gouge_->Load();
 
 	// 特殊攻撃（投げ）
-	throwing_ = new Throwing(unit_.pos_, unit_.angle_);
+	throwing_ = new Throwing(trans_.pos, trans_.angle);
 	throwing_->Load();
 
 }
@@ -705,6 +712,17 @@ void Player::LowerDraw(void)
 
 	// 特殊攻撃（投げ）
 	throwing_->Draw();
+}
+void Player::LowerAlphaDraw(void)
+{
+	// 通常攻撃（パンチ）
+	punch_->AlphaDraw();
+
+	// 抉り
+	gouge_->AlphaDraw();
+
+	// 特殊攻撃（投げ）
+	throwing_->AlphaDraw();
 }
 void Player::LowerRelease(void)
 {
