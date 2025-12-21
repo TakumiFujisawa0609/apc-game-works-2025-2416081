@@ -35,7 +35,7 @@ void Application::Init(void)
 
 	// ウィンドウ関連
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);	// サイズ変更
-	ChangeWindowMode(true);	// false = フルスクリーン
+	ChangeWindowMode(false);	// false = フルスクリーン
 
 	// DxLibの初期化
 	isInitFail_ = false;
@@ -77,12 +77,19 @@ void Application::Run(void)
 		if (!fps_->UpdateFrameRate()) { continue; }
 		KeyManager::GetIns().Update();
 		SceneManager::GetIns().Update();	// シーン管理更新
+
+		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_VOXEl_CREATE).down) { DrawDebugSwitch(); }
+
 		fps_->CalcFrameRate();					// フレームレート計算
 
 		ClearDrawScreen();
 
 		SceneManager::GetIns().Draw();		// シーン管理描画
-		//fps_->DrawFrameRate();					// フレームレート描画
+
+#if _DEBUG
+		// フレームレート描画
+		if (IsDrawDebug())fps_->DrawFrameRate();
+#endif
 
 		ScreenFlip();
 	}

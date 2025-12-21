@@ -161,16 +161,20 @@ void GameScene::Draw(void)
 	player_->UiDraw();
 	boss_->UiDraw();
 
-	if (KEY::GetIns().GetControllerConnect()) {
-		DrawString(10, 0, 
-			"\nコントローラー操作方法\n\n移動：左スティック or 十字ボタン\n\nジャンプ：A\n\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\n回避：LT or B\n\nカメラ操作：右スティック\n\nポーズ：START",
-			0xffffff);
+#if _DEBUG
+	if (App::GetIns().IsDrawDebug()) {
+		if (KEY::GetIns().GetControllerConnect()) {
+			DrawString(10, 0,
+				"\nコントローラー操作方法\n\n移動：左スティック or 十字ボタン\n\nジャンプ：A\n\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\n回避：LT or B\n\nカメラ操作：右スティック\n\nポーズ：START",
+				0xffffff);
+		}
+		else {
+			DrawString(10, 0,
+				"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：左クリック or J\n\nつかむ：右クリック or K  長押し\n\n投げる：左クリック or J\n\n回避：左Shift or H\n\nカメラ操作：マウス or 十字キー\n\nポーズ：ESC",
+				0xffffff);
+		}
 	}
-	else {
-		DrawString(10, 0,
-			"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：左クリック or J\n\nつかむ：右クリック or K  長押し\n\n投げる：左クリック or J\n\n回避：左Shift or H\n\nカメラ操作：マウス or 十字キー\n\nポーズ：ESC",
-			0xffffff);
-	}
+#endif
 }
 
 void GameScene::Release(void)

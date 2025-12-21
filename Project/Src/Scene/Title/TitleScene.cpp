@@ -63,17 +63,22 @@ void TitleScene::Draw(void)
 
 	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, img_, true);
 
-	SetFontSize(32);
-	if (KEY::GetIns().GetControllerConnect()) {
-		DrawString(10, 0, 
-			"ゲームスタート：B\n\nゲーム終了：START",
-			0xffffff);
-	} else {
-		DrawString(10, 0,
-			"ゲームスタート：SPACE\n\nゲーム終了：ESC",
-			0xffffff);
+#if _DEBUG
+	if (App::GetIns().IsDrawDebug()) {
+		SetFontSize(32);
+		if (KEY::GetIns().GetControllerConnect()) {
+			DrawString(10, 0,
+				"ゲームスタート：B\n\nゲーム終了：START",
+				0xffffff);
+		}
+		else {
+			DrawString(10, 0,
+				"ゲームスタート：SPACE\n\nゲーム終了：ESC",
+				0xffffff);
+		}
+		SetFontSize(16);
 	}
-	SetFontSize(16);
+#endif
 }
 void TitleScene::Release(void)
 {
