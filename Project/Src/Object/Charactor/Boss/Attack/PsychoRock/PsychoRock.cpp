@@ -142,7 +142,7 @@ void PsychoRock::ShotDraw(void)
 
 void PsychoRock::Set(float x, float z)
 {
-	trans_.pos = { x,500.0f,z };
+	trans_.pos = Vector3(x, 500.0f, z);
 
 	trans_.angle = {};
 

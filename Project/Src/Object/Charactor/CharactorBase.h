@@ -38,8 +38,8 @@ private:
 	// 無敵カウンターの更新
 	void Invi(void);
 
-	// 無敵カウンターによるダメージ演出を行うかどうか（1 = 「する」、0 = 「しない」）← デフォルトは「する」
-	unsigned char isInviEffect_;
+	// 無敵カウンターによるダメージ演出を行うかどうか（true = 「する」、false = 「しない」）← デフォルトは「する」
+	bool isInviEffect_;
 
 protected:
 	// ステート管理用変数
@@ -91,9 +91,9 @@ protected:
 
 	// 無敵演出フラグのセット関数（true = 「する」、false = 「しない」）← デフォルトは「する」
 	void SetInviEffectFlg(bool flg = true) {
-		if (isInviEffect_ == (flg) ? 1 : 0) { return; }
+		if (isInviEffect_ == flg) { return; }
 
-		isInviEffect_ = (flg) ? 1 : 0;
+		isInviEffect_ = flg;
 
 		// 無敵演出フラグが変わったとき色をデフォルトに戻す
 
@@ -113,7 +113,7 @@ protected:
 		}
 
 		// 「しない」に変わったときは必要ないので情報を破棄する
-		if (isInviEffect_ == 0) { DEFAULT_COLOR.clear(); }
+		if (!isInviEffect_) { DEFAULT_COLOR.clear(); }
 	}
 
 };

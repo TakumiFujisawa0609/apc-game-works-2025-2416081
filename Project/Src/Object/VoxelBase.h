@@ -20,6 +20,7 @@ public:
 	void Init(void)override;
 	void Update(void)override;
 	void Draw(void)override;
+	void AlphaDraw(void)override;
 	void Release(void)override;
 
 	void SetCamera(Camera* c) { camera_ = c; }
@@ -205,7 +206,7 @@ protected:
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
 	void VoxelInfoInit(const Vector3& roughSize, std::string texturePath = "", float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
 		roughSize_ = roughSize;
-		textureId_ = (texturePath == "") ? LoadGraph(texturePath.c_str()) : -1;
+		textureId_ = (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1;
 		cell_ = cell;
 		gridCenter_ = gridCenter;
 		aliveNeedRatio_ = aliveNeedRatio;

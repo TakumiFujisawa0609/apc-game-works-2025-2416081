@@ -16,6 +16,10 @@ public:
 	float GetRadius(void)const { return radius_; }
 	void SetRadius(float radius) { radius_ = radius; }
 
+	void DrawDebug(unsigned int color = 0xffffff)override {
+		DrawSphere3D(GetPos().ToVECTOR(), radius_, 12, color, color, true);
+	}
+
 private:
 	float radius_;
 };

@@ -70,7 +70,7 @@ void Boss::CharactorInit(void)
 {
 	state_ = (int)STATE::IDLE;
 
-	trans_.pos= { 1000.0f,300.0f,1000.0f };
+	trans_.pos = Vector3(1000.0f, 300.0f, 1000.0f);
 
 	SetJudge(true);
 	SetIsDraw(true);

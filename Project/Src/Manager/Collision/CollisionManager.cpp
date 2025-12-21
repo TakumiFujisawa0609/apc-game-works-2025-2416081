@@ -20,27 +20,25 @@ void CollisionManager::Add(ColliderBase* collider)
 		//ƒvƒŒƒCƒ„[Œn
 	case TAG::PLAYER:
 	case TAG::PLAYER_PUNCH:
-	case TAG::PLAYER_GOUGE:
-	case TAG::PLAYER_THROWING:
 		playerColliders_.emplace_back(collider);
 		break;
 
 		// ƒGƒlƒ~[Œn
-	case TAG::ENEMY:
-	case TAG::BOSS:
-	case TAG::GOLEM_ATTACK_FALL:
-	case TAG::GOLEM_ATTACK_PSYCHOROCK:
-	case TAG::GOLEM_ATTACK_STONE:
 		enemyColliders_.emplace_back(collider);
 		break;
 
 		// ƒXƒe[ƒWŒn
+	case TAG::STAGE_DEBUG_OBJECT:
 	case TAG::STAGE:
 		stageColliders_.emplace_back(collider);
 		break;
 
 		// ‚»‚êˆÈŠO
-	case TAG::GOLEM_ATTACK_WALL:
+	case TAG::BOX_DEBUG_OBJECT:
+	case TAG::LINE_DEBUG_OBJECT:
+	case TAG::SPHERE_DEBUG_OBJECT:
+	case TAG::CAPSULE_DEBUG_OBJECT:
+	case TAG::VOXEL_DEBUG_OBJECT:
 		otherColliders_.emplace_back(collider);
 		break;
 	}
@@ -74,40 +72,54 @@ bool CollisionManager::IsStageCollision(const Vector3& pos, float radius)
 {
 	for (ColliderBase*& collider : stageColliders_) {
 
-		if (auto voxel = dynamic_cast<VoxelCollider*>(collider)) {
+		// ƒ{ƒNƒZƒ‹Œ`ó‚¾‚Á‚½‚ç
+		if (VoxelCollider* voxel = dynamic_cast<VoxelCollider*>(collider)) {
 			Vector3 nearest = {};
 
 			Vector3 voxelRoughPos = voxel->GetPos();
 			Vector3 voxelRoughHalfSize = voxel->GetRoughSize();
 
-			nearest = {
+			nearest = Vector3(
 				std::clamp(pos.x, voxelRoughPos.x - voxelRoughHalfSize.x, voxelRoughPos.x + voxelRoughHalfSize.x),
 				std::clamp(pos.y, voxelRoughPos.y - voxelRoughHalfSize.y, voxelRoughPos.y + voxelRoughHalfSize.y),
 				std::clamp(pos.z, voxelRoughPos.z - voxelRoughHalfSize.z, voxelRoughPos.z + voxelRoughHalfSize.z)
-			};
+			);
 
 			if ((pos - nearest).LengthSq() >= radius * radius) { continue; }
 
 			float cellHalfSize = voxel->GetCellSize() * 0.5f;
 
 			for (std::pair<const int, Vector3>& cellPos : voxel->GetCellWorldPoss()) {
-				nearest = {
+				nearest = Vector3(
 					std::clamp(pos.x, cellPos.second.x - cellHalfSize, cellPos.second.x + cellHalfSize),
 					std::clamp(pos.z, cellPos.second.z - cellHalfSize, cellPos.second.z + cellHalfSize),
 					std::clamp(pos.y, cellPos.second.y - cellHalfSize, cellPos.second.y + cellHalfSize)
-				};
+				);
 
 				if ((pos - nearest).LengthSq() < radius * radius) { return true; }
 			}
+
+			continue;
 		}
 
+		// ‹…‘ÌŒ`ó‚¾‚Á‚½‚ç
+		if(SphereCollider* sphere = dynamic_cast<SphereCollider*>(collider)) {
+			if ((pos - sphere->GetPos()).LengthSq() < std::pow(radius + sphere->GetRadius(), 2.0f)) { return true; }
+			continue;
+		}
+
+		// ƒ{ƒNƒZƒ‹Œ`ó‚¾‚Á‚½‚ç
+		if (BoxCollider* box = dynamic_cast<BoxCollider*>(collider)) {
+
+			continue;
+		}
 	}
 	return false;
 }
 
 void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<ColliderBase*>& bs)
 {
-	for (ColliderBase*& a : as) {
+	for (ColliderBase* a : as) {
 		if (!a) { continue; }
 		if (!a->GetJudge()) { continue; }
 
@@ -150,6 +162,9 @@ bool CollisionManager::IsHit(ColliderBase* a, ColliderBase* b)
 
 	// ‚Ç‚¿‚ç‚©A‚ ‚é‚¢‚Í—¼•û‚ÌŒ`ó‚ª–¢İ’è‚¾‚Á‚½‚ç”»’è‚È‚µifalse‚Å•Ô‹pj
 	if (aShape == SHAPE::NON || bShape == SHAPE::NON) { return false; }
+
+	// ‚»‚à‚»‚àA“¯‚¶ƒ^ƒO“¯m‚Í“–‚½‚è”»’è‚µ‚È‚¢
+	//if (a->GetTag() == b->GetTag()) { return false; }
 
 	// ‚¨Œİ‚¢‚Ì‹——£‚É‚æ‚éG‚È”»’èƒXƒLƒbƒviŒy—Ê‰»–Ú“Ij
 	float enoughDisSub = a->GetEnoughDistance() + b->GetEnoughDistance();
@@ -277,6 +292,11 @@ bool CollisionManager::SphereToSphere(SphereCollider* a, SphereCollider* b)
 		// ‚ß‚è‚ñ‚¾—Ê
 		float overrap = radius - normal.Length();
 
+		if (normal == 0.0f) {
+			Vector3 velocity = a->GetTransform().Velocity();
+			normal = (velocity != 0.0f) ? velocity : Vector3(0.0f, 1.0f, 0.0f);
+		}
+
 		// ‰Ÿ‚µo‚µˆ—
 		ApplyPush(a, b, normal.Normalized(), overrap);
 	}
@@ -372,7 +392,27 @@ bool CollisionManager::CapsuleToCapsule(CapsuleCollider* a, CapsuleCollider* b)
 
 bool CollisionManager::BoxToBox(BoxCollider* a, BoxCollider* b)
 {
-	return false;
+#pragma region •K—vî•ñ‚ğæ“¾
+	Vector3 normal = a->GetPos() - b->GetPos();
+	Vector3 halfSizeSum = (a->GetSize() + b->GetSize()) * 0.5f;
+#pragma endregion
+
+#pragma region Õ“Ë”»’èij
+	if (abs(normal.x) > halfSizeSum.x) { return false; }
+	if (abs(normal.y) > halfSizeSum.y) { return false; }
+	if (abs(normal.z) > halfSizeSum.z) { return false; }
+#pragma endregion
+
+#pragma region Õ“ËŠm’èF•K—v‚È‚ç‰Ÿ‚µo‚µ
+	if (NeedPush(a, b)) {
+
+		Vector3 overlapNorm = halfSizeSum - normal.Abs();
+
+		ApplyPush(a, b, overlapNorm.MinElement() * (normal / normal.Abs()));
+	}
+#pragma endregion
+
+	return true;
 }
 
 bool CollisionManager::ModelToModel(ModelCollider* a, ModelCollider* b)
@@ -388,57 +428,45 @@ bool CollisionManager::VoxelToVoxel(VoxelCollider* a, VoxelCollider* b)
 bool CollisionManager::LineToSphere(LineCollider* line, SphereCollider* sphere)
 {
 #pragma region •K—vî•ñ‚ğæ“¾
+	// lineiü•ªj`````````````````````
+	Vector3 dir = line->GetStartPos() - line->GetEndPos();
+	Vector3 dirN = dir.Normalized(); 
+	// ```````````````````````````
 	// spherei‹…‘Ìj```````````
-	// À•W
 	Vector3 spherePos = sphere->GetPos();
-	// ”¼Œa
 	float radius = sphere->GetRadius();
 	// ``````````````````
 #pragma endregion
 
-#pragma region Õ“Ë”»’èispherei‹…‘Ìj‚ÌÀ•W‚Æü•ªã‚ÌÅ‹ß“_‚Ì‹——£‚ğ‚Í‚©‚Á‚Ä –¢Õ“Ë‚È‚çI—¹j
-	// spherei‹…‘Ìj‚ÌÀ•W‚©‚ç‚İ‚½ü•ªã‚É‚¨‚¯‚éÅ‹ß“_‚ğæ“¾‚µ‚Ä‚»‚±‚Æ‚ÌƒxƒNƒgƒ‹‚ğì¬
-	Vector3 normal = spherePos - line->ClosestPoint(spherePos);
+#pragma region Õ“Ë”»’èiSphere’†S‚©‚çü•ªÅ‹ß“_‚Ü‚Å‚Ì‹——£j
+	Vector3 cp = line->ClosestPoint(spherePos);
+	Vector3 diff = spherePos - cp;
+	float distSq = diff.LengthSq();
 
-	// ƒxƒNƒgƒ‹‚©‚ç‹——£‚Ì‚Qæ‚ğŒvZ
-	float distSq = normal.LengthSq();
-
-	// ‹——£‚Ì‚Qæ‚Æspherei‹…‘Ìj‚Ì”¼Œa‚Ì‚Qæ‚ğ”ä‚×‚éB–¢Õ“Ë‚¾‚Á‚½‚çI—¹
 	if (distSq > radius * radius) { return false; }
 #pragma endregion
 
-#pragma region Õ“ËŠm’èF‰Ÿ‚µo‚µ‚ª•K—v‚©->•K—v‚È‚ç‰Ÿ‚µo‚µ
-	// ‰Ÿ‚µo‚µ‚ª•K—v‚©‚Ç‚¤‚©
-	if (NeedPush(line, sphere))
-	{
-		// Õ“Ë”»’èæ“¾‚µ‚½dispSq‚ğg‚Á‚ÄAÀÛ‚Ì‹——£‚ğZo‚·‚é
-		float dist = sqrtf(distSq);
+#pragma region Õ“ËŠm’èF•K—v‚É‰‚¶‚Ä‰Ÿ‚µo‚µ
+	if (NeedPush(line, sphere)) {
 
-		// ‚ß‚è‚ñ‚¾—Ê
-		float overlap = radius - dist;
+		// ”»’è—pƒ‰ƒ€ƒ_ŠÖ”
+		auto juged = [&](void)->bool {
+			Vector3 sPos = sphere->GetPos();
+			Vector3 lineClosePos = line->ClosestPoint(sPos);
+			if ((sPos - lineClosePos).LengthSq() <= radius * radius) { return true; }
+			return false;
+			};
 
-		// –{—ˆ‚Ì–@ü•ûŒü
-		Vector3 n = (dist > 0.0001f) ? normal / dist : Vector3(0, 1, 0);
+		// 1‰ñ‚Ì‰Ÿ‚µo‚·—Ê
+		const float onePush = 5.0f;
+		
+		// ‰Ÿ‚µo‚µ‚ÌÅI“I‚ÈƒxƒNƒgƒ‹
+		const Vector3 pushVec = line->GetDirection().Normalized() * onePush;
 
-		// ‰Ÿ‚µo‚µ•ûŒüiLine ‚ğ‰Ÿ‚µo‚·•ûŒüj
-		Vector3 pushDir = line->GetDirection().Normalized();
-
-		// –@ü‚ğ‰Ÿ‚µo‚µ•ûŒü‚É“Š‰e‚·‚é
-		float dotValue = n.Dot(pushDir);
-
-		// ‚±‚Ì dot ‚ª 0 ‚È‚ç‰Ÿ‚µo‚¹‚È‚¢iŠ®‘S‚É’¼Œğj
-		if (fabs(dotValue) < 1e-5f) {
-			return true; // ‚Ü‚½‚Í–@ü•ûŒü‚Å‰Ÿ‚µo‚· fallback ‚ğ‘‚¢‚Ä‚à—Ç‚¢
-		}
-
-		// “Š‰e—Ê‚É‚æ‚Á‚Ä“KØ‚È‰Ÿ‚µo‚µ—Ê‚ğŒˆ’è
-		float finalOverlap = overlap * dotValue;
-
-		// ¡‰ñ‚Íuline ‚Ì•ûv‚ğ‰Ÿ‚µo‚·
-		if (line->GetDynamicFlg())
-		{
-			Vector3 pushVec = pushDir * finalOverlap;
-			line->SetTransformPos(line->GetTransform().pos + pushVec);
+		// “–‚½‚ç‚È‚­‚È‚é‚Ü‚Å×‚©‚­‰Ÿ‚µo‚µ‘±‚¯‚éi–³ŒÀƒ‹[ƒv‘Îô‚ÅãŒÀ‚ğİ’è‚µ‚Ä‚¢‚éj
+		for (unsigned char i = 0; i < 50; i++) {
+			line->SetTransformPosAdd(pushVec);
+			if (juged() == false) { break; }
 		}
 	}
 #pragma endregion
@@ -449,20 +477,49 @@ bool CollisionManager::LineToSphere(LineCollider* line, SphereCollider* sphere)
 bool CollisionManager::LineToCapsule(LineCollider* line, CapsuleCollider* capsule)
 {
 #pragma region •K—vî•ñ‚ğæ“¾
-	// lineiü•ªj`````````
+	// lineiü•ªj``````````````
+	const Vector3 P = line->GetStartPos();
+	const Vector3 Q = line->GetEndPos();
+	// ````````````````````
 
-	// ```````````````
+	// capsuleiƒJƒvƒZƒ‹j```````````
+	const Vector3 A = capsule->GetStartPos();
+	const Vector3 B = capsule->GetEndPos();
+	const float radius = capsule->GetRadius();
+	//`````````````````````
 
-	// capsuleiƒJƒvƒZƒ‹j````````
+	// Å‹ß“_iCapsule‘¤j
+	Vector3 capClosest = capsule->ClosestPoint(P);
 
-	//``````````````````
+	// Å‹ß“_iLine‘¤j 
+	Vector3 lineClosest = line->ClosestPoint(capClosest);
 #pragma endregion
 
 #pragma region Õ“Ë”»’èij
-
+	if ((capClosest - lineClosest).LengthSq() > radius * radius) { return false; }
 #pragma endregion
 
-#pragma region Õ“ËŠm’èF‰Ÿ‚µo‚µ‚ª•K—v‚©->•K—v‚È‚ç‰Ÿ‚µo‚µ
+#pragma region Õ“ËŠm’èF•K—v‚É‰‚¶‚Ä‰Ÿ‚µo‚µ
+	if (NeedPush(line, capsule)) {
+		// Õ“Ë”»’èƒ‰ƒ€ƒ_ŠÖ”
+		auto juged = [&]() -> bool {
+			Vector3 capC = capsule->ClosestPoint(line->GetPos());
+			Vector3 lineC = line->ClosestPoint(capC);
+			return (capC - lineC).LengthSq() <= radius * radius;
+			};
+
+		// ‚P‰ñ‚Å‰Ÿ‚µo‚·—Ê
+		const float step = 5.0f;
+
+		// ÅI“I‚É‰Ÿ‚µo‚·ƒxƒNƒgƒ‹
+		Vector3 pushVec = line->GetDirection().Normalized() * step;
+
+		// “–‚½‚ç‚È‚­‚È‚é‚Ü‚Å×‚©‚­‰Ÿ‚µo‚·i–³ŒÀƒ‹[ƒv‘Îô‚ÅãŒÀ‚ğİ’è‚µ‚Ä‚¨‚­j
+		for (int i = 0; i < 50; i++) {
+			line->SetTransformPosAdd(pushVec);
+			if (juged() == false) { break; }
+		}
+	}
 #pragma endregion
 
 	return true;
@@ -471,79 +528,79 @@ bool CollisionManager::LineToCapsule(LineCollider* line, CapsuleCollider* capsul
 bool CollisionManager::LineToBox(LineCollider* line, BoxCollider* box)
 {
 #pragma region •K—vî•ñ‚ğæ“¾
-	// boxiƒ{ƒbƒNƒXj````````````
+	// lineiü•ªj````````````````````
+	Vector3 dir = line->GetStartPos() - line->GetEndPos();
+	Vector3 dirN = dir.Normalized();
+	// ``````````````````````````
+
+	// boxiƒ{ƒbƒNƒXj``````````
 	Vector3 boxPos = box->GetPos();
-	Vector3 half = box->GetSize() / 2;
-	//````````````````````
+	Vector3 half = box->GetSize() * 0.5f;
+
+	// AABB ‚ÌÅ¬/Å‘å
+	Vector3 bmin = boxPos - half;
+	Vector3 bmax = boxPos + half;
+	//``````````````````
 #pragma endregion
 
 #pragma region Õ“Ë”»’èij
+	// ü•ªÅ‹ß“_
+	Vector3 cp = line->ClosestPoint(boxPos);
 
-	// ü•ªã‚ÌÅ‹ß“_‚ğ‹‚ß‚é
-	Vector3 closest = line->ClosestPoint(boxPos);
-	// Box ‚É‘Î‚·‚éÅ‹ß“_‚ğ‹‚ß‚é
-	Vector3 nearest;
-	nearest.x = std::clamp(closest.x, boxPos.x - half.x, boxPos.x + half.x);
-	nearest.y = std::clamp(closest.y, boxPos.y - half.y, boxPos.y + half.y);
-	nearest.z = std::clamp(closest.z, boxPos.z - half.z, boxPos.z + half.z);
+	// Å‹ß“_‚ª AABB ‚Ì’†‚É“ü‚Á‚Ä‚¢‚é‚©H
+	bool insideX = (cp.x >= bmin.x && cp.x <= bmax.x);
+	bool insideY = (cp.y >= bmin.y && cp.y <= bmax.y);
+	bool insideZ = (cp.z >= bmin.z && cp.z <= bmax.z);
 
-	// Å‹ß“_ŠÔƒxƒNƒgƒ‹
-	Vector3 normal = closest - nearest;
-	float distSq = normal.LengthSq();
+	if (!(insideX && insideY && insideZ)) { return false; }
 
-	// Š®‘Sˆê’vid‚È‚è‹É¬j‰ñ”ğ
-	if (distSq < 1e-8f) {
-		normal = Vector3(0, 1, 0); // ‰¼‚Ì–@ü
-		distSq = 0.0f;
-	}
+	Vector3 diff = boxPos - cp;
 
-	// Õ“Ë”»’è
-	if (distSq > 0.0f) {
-		// Box ‚Í”¼Œa‚Å‚Í‚È‚­u“_‚Æ‹«ŠE‚Ì‹——£v‚Å‚ß‚è‚İ—Ê‚ğ‘ª‚é‚½‚ßA
-		// ‚±‚±‚Å‚Í distSq > 0 (=–¢Õ“Ë) ‚ğ•Ô‚·B
-		// ‚½‚¾‚µAclosest ‚ª Box ‚Ì“à•”‚É‚ ‚éê‡‚ÍÕ“Ë 100%
-		// ¨ ‰º‚Ì‰Ÿ‚µo‚µŒvZ‚Éi‚Ş
-		float dist = sqrtf(distSq);
+	float overlapX = half.x - abs(diff.x);
+	float overlapY = half.y - abs(diff.y);
+	float overlapZ = half.z - abs(diff.z);
 
-		// Å‹ß“_‚ª Box “à•”‚È‚ç dist == 0 ‚É‚È‚éƒP[ƒX‚à‚ ‚é
-		if (dist > 0.0f) {
-			// Box ‚ÌŠO‘¤ ¨ –¢Õ“Ë
-			return false;
-		}
-	}
+	if (overlapX <= 0 || overlapY <= 0 || overlapZ <= 0) { return false; }
 #pragma endregion
 
 #pragma region Õ“ËŠm’èF•K—v‚É‰‚¶‚Ä‰Ÿ‚µo‚µ
-	// Õ“ËŠm’èiclosest ‚ª Box ‚Ì“à‘¤j
-	float dist = sqrtf(distSq);
-	// Š®‘S‚É‚ß‚è‚ñ‚Å‚é‚Æ‰Ÿ‚µo‚µ•s”\‚È‚Ì‚ÅÅ’á—Ê‚Ì‰Ÿ‚µo‚µ•â³
-	float overlap = (dist > 0.0f) ? -dist : 0.01f;
+	if (NeedPush(line, box)) {
+		// Õ“Ë”»’èƒ‰ƒ€ƒ_ŠÖ”
+		auto juged = [&]() -> bool {
+			// ü•ªÅ‹ß“_
+			Vector3 cp = line->ClosestPoint(boxPos);
 
-	// ‰Ÿ‚µo‚µ‚ª•K—v‚©H
-	if (NeedPush(line, box))
-	{
-		// –{—ˆ‚Ì–@ü•ûŒüi’nŒ`‘¤‚ª‚ß‚è‚ñ‚Å‚é•ûŒüj
-		Vector3 n;
-		if (dist > 0.0f) { n = normal / dist; }
-		else { n = Vector3(0, 1, 0); }
+			// Å‹ß“_‚ª AABB ‚Ì’†‚É“ü‚Á‚Ä‚¢‚é‚©H
+			bool insideX = (cp.x >= bmin.x && cp.x <= bmax.x);
+			bool insideY = (cp.y >= bmin.y && cp.y <= bmax.y);
+			bool insideZ = (cp.z >= bmin.z && cp.z <= bmax.z);
 
-		// Line ‘¤‚É‰Ÿ‚µo‚µ‚½‚¢•ûŒü
-		Vector3 pushDir = line->GetDirection().Normalized();
+			if (!(insideX && insideY && insideZ)) { return false; }
 
-		// –@ü‚ğ‰Ÿ‚µo‚µ•ûŒü‚É“Š‰e ¨ ³Šm‚É‰Ÿ‚µo‚¹‚é—Ê‚ª‹‚Ü‚é
-		float dotValue = n.Dot(pushDir);
+			Vector3 diff = boxPos - cp;
 
-		// ‰Ÿ‚µo‚µƒ[ƒ‚È‚ç‚Ç‚¤‚µ‚æ‚¤‚à‚È‚¢i’¼Œğj
-		if (fabs(dotValue) < 1e-5f) { return true; }
+			float overlapX = half.x - abs(diff.x);
+			float overlapY = half.y - abs(diff.y);
+			float overlapZ = half.z - abs(diff.z);
 
-		float finalOverlap = overlap * dotValue;
+			if (overlapX <= 0 || overlapY <= 0 || overlapZ <= 0) { return false; }
 
-		// lineiü•ªj‚ğ‰Ÿ‚µo‚·
-		if (line->GetDynamicFlg())
-		{
-			Vector3 pushVec = pushDir * finalOverlap;
-			line->SetTransformPos(line->GetTransform().pos + pushVec);
+			return true;
+			};
+
+		// ‚P‰ñ‚Å‰Ÿ‚µo‚·—Ê
+		const float step = 5.0f;
+
+		// ÅI“I‚É‰Ÿ‚µo‚·ƒxƒNƒgƒ‹
+		Vector3 pushVec = line->GetDirection().Normalized() * step;
+
+		// “–‚½‚ç‚È‚­‚È‚é‚Ü‚Å×‚©‚­‰Ÿ‚µo‚·i–³ŒÀƒ‹[ƒv‘Îô‚ÅãŒÀ‚ğİ’è‚µ‚Ä‚¨‚­j
+		for (int i = 0; i < 50; i++) {
+			line->SetTransformPosAdd(pushVec);
+			if (juged() == false) { break; }
 		}
+
+		if (pushVec.y > 0.5f) { line->CallOnGrounded(); }
 	}
 #pragma endregion
 
@@ -560,96 +617,135 @@ bool CollisionManager::LineToVoxel(LineCollider* line, VoxelCollider* voxel)
 	voxel->ClearHitCellIdxs();
 
 #pragma region •K—vî•ñ‚ğæ“¾
-	// lineiü•ªj````````````````````````````````````````
-	Vector3 a = line->GetStartPos();
-	Vector3 b = line->GetEndPos();
-	Vector3 lineMin = Vector3((std::min)(a.x, b.x), (std::min)(a.y, b.y), (std::min)(a.z, b.z));
-	Vector3 lineMax = Vector3((std::max)(a.x, b.x), (std::max)(a.y, b.y), (std::max)(a.z, b.z));
-	// ``````````````````````````````````````````````
+	// lineiü•ªj````````````````````
+	Vector3 dir = line->GetDirection();
+	Vector3 dirN = dir.Normalized();
+	// ``````````````````````````
 
-	// voxeliƒ{ƒNƒZƒ‹j````````````````
-	Vector3 voxPos = voxel->GetPos();
+	// voxeliƒ{ƒNƒZƒ‹j``````````
+	// À•W
+	Vector3 voxelPos = voxel->GetPos();
+	// ƒ{ƒNƒZƒ‹ŒQ‚ğ‘å‚Ü‚©‚ÉˆÍ‚ß‚éƒ{ƒbƒNƒX‚ÌƒTƒCƒYi”¼ƒTƒCƒYj
 	Vector3 roughHalf = voxel->GetRoughSize() * 0.5f;
-	Vector3 voxMin = voxPos - roughHalf;
-	Vector3 voxMax = voxPos + roughHalf;
-	//`````````````````````````
+
+	// ƒ{ƒNƒZƒ‹ŒQ‚ğ‘å‚Ü‚©‚ÉˆÍ‚ß‚éƒ{ƒbƒNƒX ‚ÌÅ¬/Å‘å À•W
+	Vector3 bmin = voxelPos - roughHalf;
+	Vector3 bmax = voxelPos + roughHalf;
+	//``````````````````
 #pragma endregion
 
-#pragma region Õ“Ë”»’èij
-	//------------------------------------------------------
-	// ‡@ ‘e”»’èFLine ‚Ì AABB vs Voxel RoughAABB
-	//------------------------------------------------------
+#pragma region Õ“Ë”»’èi‚P‰ñ–Ú ‘å‚Ü‚©‚Éj
+	// ü•ªÅ‹ß“_
+	Vector3 cp = line->ClosestPoint(voxelPos);
 
-	// ‘e”»’èAABBŒğ·
-	if (lineMax.x < voxMin.x || lineMin.x > voxMax.x) { return false; }
-	if (lineMax.y < voxMin.y || lineMin.y > voxMax.y) { return false; }
-	if (lineMax.z < voxMin.z || lineMin.z > voxMax.z) { return false; }
+	// Å‹ß“_‚ª AABB ‚Ì’†‚É“ü‚Á‚Ä‚¢‚é‚©H
+	bool insideX = (cp.x >= bmin.x && cp.x <= bmax.x);
+	bool insideY = (cp.y >= bmin.y && cp.y <= bmax.y);
+	bool insideZ = (cp.z >= bmin.z && cp.z <= bmax.z);
 
-	//------------------------------------------------------
-	// ‡A ×”»’èFƒZƒ‹’PˆÊ‚ÌÚ×ƒ`ƒFƒbƒN
-	//------------------------------------------------------
-	const float cell = voxel->GetCellSize();
+	if (!(insideX && insideY && insideZ)) { return false; }
 
+	Vector3 diff = voxelPos - cp;
+
+	float overlapX = roughHalf.x - abs(diff.x);
+	float overlapY = roughHalf.y - abs(diff.y);
+	float overlapZ = roughHalf.z - abs(diff.z);
+
+	// “–‚½‚Á‚Ä‚¢‚È‚¯‚ê‚ÎI—¹
+	if (overlapX <= 0 || overlapY <= 0 || overlapZ <= 0) { return false; }
+#pragma endregion
+
+
+#pragma region Õ“Ë”»’èi‚Q‰ñ–Ú ×‚©‚­j
+
+	// ”»’è‚ª•¡G‚É‚È‚é‚Ì‚Å
 	bool hit = false;
-	float maxOverlap = -1.0f;
-	Vector3 deepestNormal = line->GetDirection().Normalized();
-	int deepestIdx = -1;
 
-	for (const auto& kv : voxel->GetCellWorldPoss()) {
-		Vector3 cmin = kv.second - Vector3(cell * 0.5f);
-		Vector3 cmax = kv.second + Vector3(cell * 0.5f);
+	// voxeliƒ{ƒNƒZƒ‹j‚Ì‚PƒZƒ‹ƒTƒCƒY
+	const float cellSize = voxel->GetCellSize();
 
-		// ü•ª‚Æ AABB ‚ÌÅ‹ß“_‚ğæ“¾
-		Vector3 closest = line->ClosestPointAABB(cmin, cmax);
+	Vector3 halfCellSize = Vector3(cellSize * 0.5f);
 
-		// ü•ª‘¤‚ÌÅ‹ß“_‚àæ‚é
-		Vector3 closestOnLine = line->ClosestPoint(closest);
+	for (auto& cellPos : voxel->GetCellWorldPoss()) {
 
-		Vector3 diff = closestOnLine - closest;
-		float distSq = diff.LengthSq();
+		// Å¬/Å‘å À•W
+		Vector3 
+			minCellPos = cellPos.second - halfCellSize,
+			maxCellPos = cellPos.second + halfCellSize;
 
-		if (distSq <= 0.000001f) {
-			// ƒR[ƒi[‚ÉŠ®‘Sˆê’v‚Ìê‡
-			diff = -line->GetDirection().Normalized();
-			distSq = 0.0f;
-		}
+		// Å‹ß“_
+		Vector3 lineClosePos = line->ClosestPoint(cellPos.second);
 
-		if (distSq <= 0.0001f) {
-			hit = true;
-			voxel->AddHitCellIdx(kv.first);
+		// Å‹ß“_‚ª AABB ‚Ì’†‚É“ü‚Á‚Ä‚¢‚é‚©H
+		bool inCellX = (lineClosePos.x >= minCellPos.x && lineClosePos.x <= maxCellPos.x);
+		bool inCellY = (lineClosePos.y >= minCellPos.y && lineClosePos.y <= maxCellPos.y);
+		bool inCellZ = (lineClosePos.z >= minCellPos.z && lineClosePos.z <= maxCellPos.z);
 
-			float dist = sqrtf(distSq);
-			float overlap = (dist > 0.0f) ? -dist : 0.01f;
+		if (!(inCellX && inCellY && inCellZ)) { continue; }
 
-			if (overlap > maxOverlap) {
-				maxOverlap = overlap;
+		Vector3 cellSizeHalfV = cellSize * 0.5f;
 
-				if (dist > 0.0001f) { deepestNormal = diff / dist; }
-				else { deepestNormal = -line->GetDirection().Normalized(); }
+		Vector3 cellOverlap = cellSizeHalfV - (cellPos.second - lineClosePos).Abs();
 
-				deepestIdx = kv.first;
-			}
-		}
+		if (cellOverlap.x <= 0 || cellOverlap.y <= 0 || cellOverlap.z <= 0) { continue; }
+
+		voxel->AddHitCellIdx(cellPos.first);
+		hit = true;
 	}
 
+	// “–‚½‚Á‚Ä‚¢‚È‚©‚Á‚½‚çI—¹
 	if (!hit) { return false; }
+
 #pragma endregion
 
-	//------------------------------------------------------
-	// ‡B ‰Ÿ‚µo‚µiLineCollider ‘¤‚¾‚¯‰Ÿ‚·j
-	//------------------------------------------------------
-	if (line->GetPushFlg() && line->GetDynamicFlg()) {
-		Vector3 pushDir = line->GetDirection().Normalized();
+#pragma region Õ“ËŠm’èF•K—v‚É‰‚¶‚Ä‰Ÿ‚µo‚µ
+	if (NeedPush(line, voxel)) {
+		// Õ“Ë”»’èƒ‰ƒ€ƒ_ŠÖ”
+		auto juged = [&]() -> bool {
+			// ‘S•””»’è
+			for (std::pair<const int, Vector3>cellPos : voxel->GetCellWorldPoss()) {
+				// Å¬/Å‘å À•W
+				Vector3
+					minCellPos = cellPos.second - halfCellSize,
+					maxCellPos = cellPos.second + halfCellSize;
 
-		// –@ü•ûŒü‚ğ Line ‚Ì‰Ÿ‚µo‚µ•ûŒü‚Ö“Š‰e‚·‚é
-		float dotValue = deepestNormal.Dot(pushDir);
+				// Å‹ß“_
+				Vector3 lineClosePos = line->ClosestPoint(cellPos.second);
 
-		if (fabs(dotValue) > 1e-5f) {
-			Vector3 pushVec = pushDir * (maxOverlap * dotValue);
+				// Å‹ß“_‚ª AABB ‚Ì’†‚É“ü‚Á‚Ä‚¢‚é‚©H
+				bool inCellX = (lineClosePos.x >= minCellPos.x && lineClosePos.x <= maxCellPos.x);
+				bool inCellY = (lineClosePos.y >= minCellPos.y && lineClosePos.y <= maxCellPos.y);
+				bool inCellZ = (lineClosePos.z >= minCellPos.z && lineClosePos.z <= maxCellPos.z);
 
-			line->SetTransformPos(line->GetTransform().pos + pushVec);
+				if (!(inCellX && inCellY && inCellZ)) { continue; }
+
+				Vector3 cellSizeHalfV = cellSize * 0.5f;
+
+				Vector3 cellOverlap = cellSizeHalfV - (cellPos.second - lineClosePos).Abs();
+
+				if (cellOverlap.x <= 0 || cellOverlap.y <= 0 || cellOverlap.z <= 0) { continue; }
+
+				return true;
+			}
+			return false;
+			};
+
+		// ‚P‰ñ‚Å‰Ÿ‚µo‚·—Ê
+		const float step = 5.0f;
+
+		// ÅI“I‚É‰Ÿ‚µo‚·ƒxƒNƒgƒ‹
+		Vector3 pushVec = line->GetDirection().Normalized() * step;
+
+		// “–‚½‚ç‚È‚­‚È‚é‚Ü‚Å×‚©‚­‰Ÿ‚µo‚·i–³ŒÀƒ‹[ƒv‘Îô‚ÅãŒÀ‚ğİ’è‚µ‚Ä‚¨‚­j
+		for (int i = 0; i < 50; i++) {
+			line->SetTransformPosAdd(pushVec);
+			if (juged() == false) { break; }
 		}
+
+		if (pushVec.Normalized().y > 0.5f) { line->CallOnGrounded(); }
+
 	}
+#pragma endregion
 
 	return true;
 }
@@ -731,24 +827,13 @@ bool CollisionManager::SphereToCapsule(SphereCollider* sphere, CapsuleCollider* 
 
 bool CollisionManager::SphereToBox(SphereCollider* sphere, BoxCollider* box)
 {
-#pragma region •K—vî•ñ‚ğæ“¾
-	// sphere(‹…‘Ì)````````
-	// À•W
 	Vector3 c = sphere->GetPos();
-	// ”¼Œa
 	float r = sphere->GetRadius();
-	// ``````````````
 
-	// box(ƒ{ƒbƒNƒXŒ`ó)````````
-	// À•W
 	Vector3 boxPos = box->GetPos();
-	// ‘å‚«‚³i”¼•ªj
-	Vector3 half = box->GetSize() / 2;
-	//`````````````````
-#pragma endregion
+	Vector3 half = box->GetSize() * 0.5f;
 
-#pragma region Õ“Ë”»’èisphere(‹…‘Ì)‚©‚ç‚İ‚ÄÅ‚à‹ß‚¢‚P“_‚ğ‹‚ß‚Ä ‚»‚±‚Ü‚Å‚Ì‹——£‚ğ‚Í‚©‚Á‚Ä –¢Õ“Ë‚È‚çI—¹j
-	// Å‚à‹ß‚¢“_‚ğ‹‚ß‚é
+	// Å‹ß“_
 	Vector3 nearest;
 	nearest.x = std::clamp(c.x, boxPos.x - half.x, boxPos.x + half.x);
 	nearest.y = std::clamp(c.y, boxPos.y - half.y, boxPos.y + half.y);
@@ -758,28 +843,48 @@ bool CollisionManager::SphereToBox(SphereCollider* sphere, BoxCollider* box)
 	float distSq = normal.LengthSq();
 
 	if (distSq > r * r) { return false; }
-#pragma endregion
 
-#pragma region Õ“ËŠm’èF‰Ÿ‚µo‚µ‚ª•K—v‚©->•K—v‚È‚ç‰Ÿ‚µo‚µ
-	// ‰Ÿ‚µo‚µ‚ª•K—v‚©‚Ç‚¤‚©
-	if (NeedPush(sphere, box)) {
-
-		// Õ“Ë”»’èæ“¾‚µ‚½dispSq‚ğg‚Á‚ÄAÀÛ‚Ì‹——£‚ğZo‚·‚é
+	//------------------------------------------
+	// ‰Ÿ‚µo‚µ
+	//------------------------------------------
+	if (NeedPush(sphere, box))
+	{
 		float dist = sqrtf(distSq);
 
-		if (dist > 0.0001f) {
-			// Š®‘Sˆê’v‚µ‚Ä‚¢‚½‚ç“K“–‚È•ûŒüiˆÚ“®•ûŒü‚Ì‹t•ûŒüj‚ğ—^‚¦‚é
-			normal = -sphere->GetTransform().Velocity();
-			dist = 0.0f;
+		Vector3 pushNormal;
+
+		if (dist > 0.0001f)
+		{
+			pushNormal = normal / dist;
+		}
+		else
+		{
+			// ˆê’v ¨ ‹…‚ª‚¿‚å‚¤‚Ç–Ê‚Éæ‚Á‚Ä‚¢‚é
+			// –Ê–@ü‚ğŒvZ‚·‚é
+			Vector3 diff = c - boxPos;
+
+			float dx = fabs(diff.x) - half.x;
+			float dy = fabs(diff.y) - half.y;
+			float dz = fabs(diff.z) - half.z;
+
+			// 1”Ô‚ß‚è‚ñ‚Å‚¢‚é•ûŒü–Ê–@ü
+			if (dx >= dy && dx >= dz)
+				pushNormal = Vector3((diff.x > 0 ? 1 : -1), 0, 0);
+			else if (dy >= dx && dy >= dz)
+				pushNormal = Vector3(0, (diff.y > 0 ? 1 : -1), 0);
+			else
+				pushNormal = Vector3(0, 0, (diff.z > 0 ? 1 : -1));
 		}
 
-		// ‚ß‚è‚ñ‚¾—Ê
 		float overlap = r - dist;
+		if (overlap < 0) overlap = 0;
 
-		// ‰Ÿ‚µo‚µˆ—
-		ApplyPush(sphere, box, normal.Normalized(), overlap);
+		ApplyPush(sphere, box, pushNormal, overlap);
+
+		// °Ú’n”»’è
+		if (pushNormal.y > 0.5f)
+			sphere->CallOnGrounded();
 	}
-#pragma endregion
 
 	return true;
 }
@@ -1079,7 +1184,27 @@ bool CollisionManager::BoxToModel(BoxCollider* box, ModelCollider* model)
 
 bool CollisionManager::BoxToVoxel(BoxCollider* box, VoxelCollider* voxel)
 {
-	return false;
+#pragma region •K—vî•ñ‚ğæ“¾
+	Vector3 normal = box->GetPos() - voxel->GetPos();
+	Vector3 halfSizeSum = (box->GetSize() + voxel->GetRoughSize()) * 0.5f;
+#pragma endregion
+
+#pragma region Õ“Ë”»’èij
+	if (abs(normal.x) > halfSizeSum.x) { return false; }
+	if (abs(normal.y) > halfSizeSum.y) { return false; }
+	if (abs(normal.z) > halfSizeSum.z) { return false; }
+#pragma endregion
+
+#pragma region Õ“ËŠm’èF•K—v‚È‚ç‰Ÿ‚µo‚µ
+	if (NeedPush(box, voxel)) {
+
+		Vector3 overlapNorm = halfSizeSum - normal.Abs();
+
+		ApplyPush(box, voxel, overlapNorm.MinElement() * (normal / normal.Abs()));
+	}
+#pragma endregion
+
+	return true;
 }
 
 bool CollisionManager::ModelToVoxel(ModelCollider* model, VoxelCollider* voxel)

@@ -24,9 +24,9 @@ public:
 	float GetRadius(void)const { return radius_; }
 
 	// カプセル線分の始点
-	Vector3 GetStartPos(void)const { return GetTransform().VTrans(startPos_); }
+	Vector3 GetStartPos(void)const { return GetPos() + GetTransform().VTrans(startPos_); }
 	// カプセル線分の終点
-	Vector3 GetEndPos(void)const { return GetTransform().VTrans(endPos_); }
+	Vector3 GetEndPos(void)const { return GetPos() + GetTransform().VTrans(endPos_); }
 
 	// 指定した座標から線分の中で一番近い座標を取得する
 	Vector3 ClosestPoint(const Vector3& point) const {
@@ -54,6 +54,9 @@ public:
 	}
 #pragma endregion
 
+	void DrawDebug(unsigned int color = 0xffffff)override {
+		DrawCapsule3D(GetStartPos().ToVECTOR(), GetEndPos().ToVECTOR(), radius_, 12, color, color, true);
+	}
 private:
 
 	// 線分の開始点

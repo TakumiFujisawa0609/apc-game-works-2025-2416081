@@ -24,7 +24,6 @@ struct Transform
 	// 角度
 	Vector3 angle;
 	Vector3 localAngle;
-	Vector3 WorldAngle(void)const { return localAngle + angle; }
 
 	// スケール
 	Vector3 scale;
@@ -44,7 +43,7 @@ struct Transform
 		angle(),
 		localAngle(),
 
-		scale()
+		scale(1)
 	{
 	}
 

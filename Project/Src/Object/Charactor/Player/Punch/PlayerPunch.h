@@ -20,7 +20,7 @@ public:
 
 private:
 
-	void SubInit(void)override {}
+	void SubInit(void)override { Off(); }
 	void SubUpdate(void)override;
 	void SubDraw(void)override {}
 	void SubAlphaDraw(void)override {}

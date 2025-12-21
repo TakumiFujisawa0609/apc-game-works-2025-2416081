@@ -1,6 +1,6 @@
 #include"CharactorBase.h"
 
-CharactorBase::CharactorBase():
+CharactorBase::CharactorBase() :
 	ActorBase(),
 
 	state_(0),
@@ -11,7 +11,7 @@ CharactorBase::CharactorBase():
 	anime_(nullptr),
 
 	inviCounter_(0),
-	isInviEffect_(1)
+	isInviEffect_(true)
 {
 }
 
@@ -34,6 +34,9 @@ void CharactorBase::SubUpdate(void)
 
 	// 派生先で割り振り可能のステート別関数
 	(this->*stateFuncPtr[state_])();
+
+	// アニメーション更新
+	if (anime_) { anime_->Update(); }
 }
 
 void CharactorBase::SubDraw(void)
@@ -72,7 +75,7 @@ void CharactorBase::Invi(void)
 	else { inviCounter_ = 0; }
 
 	// ダメージ演出
-	if (isInviEffect_ == 0) { return; }
+	if (!isInviEffect_) { return; }
 
 	if (inviCounter_ > 1) {
 		if (inviCounter_ / 10 % 2 == 0) {

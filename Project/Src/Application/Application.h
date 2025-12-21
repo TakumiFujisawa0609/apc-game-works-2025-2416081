@@ -31,9 +31,12 @@ public:
 	// ゲーム終了
 	void GameEnd(void) { gameEnd_ = true; }
 
-	// デバッグ描画
-	bool IsDrawDebug(void)const { return drawDebug_ == 1; }
-	void DrawDebugSwitch(void) { drawDebug_ = 1 - drawDebug_; }
+	// デバッグ描画（true = 「描画する」、false = 「描画しない」）
+	bool IsDrawDebug(void)const { return drawDebug_; }
+	// デバッグ描画の設定（true = 「描画する」に設定、false = 「描画しない」に設定）
+	void SetDrawDebug(bool flg) { drawDebug_ = flg; }
+	// デバッグ描画の切り替え（現在の逆に切り替える）
+	void DrawDebugSwitch(void) { drawDebug_ = !drawDebug_; }
 
 
 private:
@@ -71,8 +74,8 @@ private:
 	// FPS
 	FPS* fps_;
 
-	// デバッグ表示
-	char drawDebug_;
+	// デバッグ描画（true = 「描画する」、false = 「描画しない」）
+	bool drawDebug_;
 };
 
 // Applicationの省略形

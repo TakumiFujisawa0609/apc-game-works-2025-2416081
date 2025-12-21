@@ -116,8 +116,18 @@ private:
 	/// <param name="bWeightRatio">（out） 重みの割合</param>
 	void WeightRatioCalculation(unsigned char aWeight, unsigned char bWeight, float& aWeightRatio, float& bWeightRatio) {
 		// お互いの重みにおける割合を計算（相手の重み ÷ 自分と相手の重みの合計）
-		aWeightRatio = (float)bWeight / (float)(aWeight + bWeight);
-		bWeightRatio = (float)aWeight / (float)(aWeight + bWeight);
+
+		// 自分と相手の重みの合計
+		float abWeightSum = (float)(aWeight + bWeight);
+
+		if (abWeightSum != 0.0f) {
+			aWeightRatio = (float)bWeight / abWeightSum;
+			bWeightRatio = (float)aWeight / abWeightSum;
+		}
+		else {
+			// 両方重み０だったら半分ずつで返す（例外処理）
+			aWeightRatio = bWeightRatio = 0.5f;
+		}
 	}
 
 	/// <summary>
@@ -140,19 +150,76 @@ private:
 
 			a->SetTransformPos(a->GetTransform().pos + normal * (overlap * aRatio));
 			b->SetTransformPos(b->GetTransform().pos - normal * (overlap * bRatio));
+
+			if (normal.y > 0.5f) { a->CallOnGrounded(); }
+			else if (normal.y < -0.5f) { b->CallOnGrounded(); }
 		}
 		// aだけ動的の場合
 		else if (aDynamic && !bDynamic)
 		{
 			a->SetTransformPos(a->GetTransform().pos + normal * overlap);
+			if (normal.y > 0.5f) { a->CallOnGrounded(); }
 		}
 		// bだけ動的の場合
 		else if (!aDynamic && bDynamic)
 		{
 			b->SetTransformPos(b->GetTransform().pos - normal * overlap);
+			if (normal.y < -0.5f) { b->CallOnGrounded(); }
 		}
 		// 両方静的オブジェクトの場合
 		else { /*何もしない*/ }
+	}
+
+	/// <summary>
+	/// 押し出し処理
+	/// </summary>
+	/// <param name="a">コライダー１</param>
+	/// <param name="b">コライダー２</param>
+	/// <param name="overlapVec">押し出しベクトル</param>
+	void ApplyPush(ColliderBase* a, ColliderBase* b, const Vector3& overlapVec) {
+		// 動的フラグ
+		bool aDynamic = a->GetDynamicFlg();
+		bool bDynamic = b->GetDynamicFlg();
+
+		// 両方動的オブジェクトの場合
+		if (aDynamic && bDynamic)
+		{
+			float aRatio = 0.0f, bRatio = 0.0f;
+			WeightRatioCalculation(a->GetPushWeight(), b->GetPushWeight(), aRatio, bRatio);
+
+			a->SetTransformPos(a->GetTransform().pos + overlapVec * aRatio);
+			b->SetTransformPos(b->GetTransform().pos - overlapVec * bRatio);
+
+			Vector3 normalOverlapVec = overlapVec.Normalized();
+
+			if (normalOverlapVec.y > 0.5f) { a->CallOnGrounded(); }
+			else if (normalOverlapVec.y < -0.5f) { b->CallOnGrounded(); }
+		}
+		// aだけ動的の場合
+		else if (aDynamic && !bDynamic)
+		{
+			a->SetTransformPos(a->GetTransform().pos + overlapVec);
+			if (overlapVec.Normalized().y > 0.5f) { a->CallOnGrounded(); }
+		}
+		// bだけ動的の場合
+		else if (!aDynamic && bDynamic)
+		{
+			b->SetTransformPos(b->GetTransform().pos - overlapVec);
+			if (overlapVec.Normalized().y < -0.5f) { b->CallOnGrounded(); }
+		}
+		// 両方静的オブジェクトの場合
+		else { /*何もしない*/ }
+	}
+
+	/// <summary>
+	/// 押し出し処理
+	/// </summary>
+	/// <param name="a">無条件に押し出される方</param>
+	/// <param name="b">無条件に動かさず押し出す方</param>
+	/// <param name="overlapVec">押し出しベクトル</param>
+	void ApplyPushOneSide(ColliderBase* dynamicColl, ColliderBase* staticColl, const Vector3& overlapVec) {
+		dynamicColl->SetTransformPos(dynamicColl->GetTransform().pos + overlapVec);
+		if (overlapVec.Normalized().y > 0.5f) { dynamicColl->CallOnGrounded(); }
 	}
 #pragma endregion
 

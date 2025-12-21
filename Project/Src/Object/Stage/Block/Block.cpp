@@ -31,11 +31,11 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 	const float SIZE_HALF_BLOCK = (SIZE_BLOCK / 2.0f);
 
 	// 引数で指定されたマップ座標から座標を計算する
-	trans_.pos = {
+	trans_.pos = Vector3(
 		((float)mapX * SIZE_BLOCK) + SIZE_HALF_BLOCK,
 		((float)mapY * SIZE_BLOCK) + SIZE_HALF_BLOCK,
 		((float)mapZ * SIZE_BLOCK) + SIZE_HALF_BLOCK
-	};
+	);
 
 	// 大きさ設定
 	trans_.scale = SCALE;

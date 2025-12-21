@@ -153,7 +153,6 @@
     <ClCompile Include="Src\Object\Charactor\Boss\Attack\Stone\StoneShooter.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\Boss.cpp" />
     <ClCompile Include="Src\Object\Charactor\CharactorBase.cpp" />
-    <ClCompile Include="Src\Object\Common\Collider\ColliderBase.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Player.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Punch\PlayerPunch.cpp" />

@@ -11,19 +11,10 @@
 class Player : public CharactorBase
 {
 public:
-	static constexpr float SCALE = 2.5f;
+	//static constexpr float SCALE = 2.5f;
 	//static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
-	const Vector3 SIZE = Vector3(25.0f, 70.0f, 35.0f) * SCALE;
-	const Vector3 CENTER_DIFF = Vector3(0.0f, ((SIZE.y / 2) * SCALE), 15.0f) * SCALE;
-
-	const float RADIUS = SIZE.z;
-
-	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3(0.0f, SIZE.y / 2 - RADIUS, 0.0f);
-	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3(0.0f, 0.0f, 0.0f);
-
-	const Vector3 LINE_COLLIDER_START_POS = Vector3(0.0f, 0.0f, 0.0f);
-	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y / 2, 0.0f);
-
+	//const Vector3 SIZE = Vector3(25.0f, 70.0f, 35.0f) * SCALE;
+	//const Vector3 CENTER_DIFF = Vector3(0.0f, ((SIZE.y / 2) * SCALE), 15.0f) * SCALE;
 
 	Player(const Vector3& cameraAngle);
 	~Player()override {};
@@ -76,6 +67,28 @@ public:
 
 private:
 
+#pragma region 定数定義
+	// スケール
+	const float SCALE = 2.5f;
+
+	// モデルのサイズ
+	const Vector3 SIZE = Vector3(73.204f, 73.096f, 32.071f) * SCALE;
+
+	// モデルの中心点のズレ
+	const Vector3 CENTER_DIFF = Vector3(0, -37, 0) * SCALE;
+
+	// モデルの角度のズレ
+	const Vector3 LOCAL_ROT = Vector3(0.0f, Utility::Deg2RadF(180.0f), 0.0f);
+
+	const float RADIUS = SIZE.z;
+
+	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3(0.0f, SIZE.y / 2 - RADIUS, 0.0f);
+	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3(0.0f, 0.0f, 0.0f);
+
+	const Vector3 LINE_COLLIDER_START_POS = Vector3(0.0f, 0.0f, 0.0f);
+	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y / 2, 0.0f);
+#pragma endregion
+
 	void CharactorInit(void)override;
 	void CharactorUpdate(void)override;
 	void CharactorDraw(void)override;
@@ -111,7 +124,7 @@ private:
 
 #pragma endregion
 
-	const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
+	//const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
 	int hp_;
 

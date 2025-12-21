@@ -12,7 +12,8 @@ public:
 	}
 	~ModelCollider()override {}
 
-
+	void DrawDebug(unsigned int color = 0xffffff)override {
+	}
 private:
 
 };

@@ -46,6 +46,44 @@ public:
 
 #pragma endregion
 
+	void DrawDebug(unsigned int color = 0xffffff)override {
+
+		float cellSizeHalf = GetCellSize() * 0.5f;
+
+		for (std::pair<const int, Vector3> cellPos : GetCellWorldPoss()) {
+			DrawSphere3D(cellPos.second.ToVECTOR(), cellSizeHalf, 4, color, color, true);
+		}
+
+		Vector3 half = roughSize_ * 0.5f;
+		Vector3 center = GetPos();
+
+		// 8頂点
+		Vector3 p[8] =
+		{
+			{ center.x - half.x, center.y - half.y, center.z - half.z }, // 0
+			{ center.x + half.x, center.y - half.y, center.z - half.z }, // 1
+			{ center.x + half.x, center.y + half.y, center.z - half.z }, // 2
+			{ center.x - half.x, center.y + half.y, center.z - half.z }, // 3
+
+			{ center.x - half.x, center.y - half.y, center.z + half.z }, // 4
+			{ center.x + half.x, center.y - half.y, center.z + half.z }, // 5
+			{ center.x + half.x, center.y + half.y, center.z + half.z }, // 6
+			{ center.x - half.x, center.y + half.y, center.z + half.z }, // 7
+		};
+
+		// 辺を描く（12本）
+		auto L = [&](int a, int b)
+			{
+				DrawLine3D(p[a].ToVECTOR(), p[b].ToVECTOR(), color);
+			};
+
+		// 手前
+		L(0, 1); L(1, 2); L(2, 3); L(3, 0);
+		// 奥
+		L(4, 5); L(5, 6); L(6, 7); L(7, 4);
+		// 側面
+		L(0, 4); L(1, 5); L(2, 6); L(3, 7);
+	}
 
 private:
 	// 全体を囲める大まかなサイズ

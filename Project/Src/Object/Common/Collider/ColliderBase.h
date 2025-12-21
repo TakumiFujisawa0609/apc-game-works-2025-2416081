@@ -13,20 +13,26 @@ public:
 	{
 		NON = -1,
 
+		SPHERE_DEBUG_OBJECT,
+		BOX_DEBUG_OBJECT,
+		CAPSULE_DEBUG_OBJECT,
+		LINE_DEBUG_OBJECT,
+		VOXEL_DEBUG_OBJECT,
+		STAGE_DEBUG_OBJECT,
+		
 		PLAYER,
 		PLAYER_PUNCH,
 		PLAYER_GOUGE,
 		PLAYER_THROWING,
 
-		ENEMY,
-
 		BOSS,
 
-		GOLEM_ATTACK_WALL,
 		GOLEM_ATTACK_FALL,
 		GOLEM_ATTACK_PSYCHOROCK,
 		GOLEM_ATTACK_STONE,
-		
+
+		ENEMY,
+
 		STAGE,
 	};
 
@@ -48,11 +54,23 @@ public:
 	/// <param name="type">当たり判定タイプ</param>
 	/// <param name="enoughDistance">判定スキップに十分な距離　-1.0fで未設定とし、距離による判定スキップを行わない（引数省略で-1.0f）</param>
 	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
-	ColliderBase(TAG type, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f });
+	ColliderBase(TAG type, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+		trans_(nullptr),
+		pos_(pos),
+		enoughDistance_(enoughDistance),
+		judgeFlg_(true),
+		dynamicFlg_(true),
+		pushFlg_(true),
+		pushWeight_(0),
+		type_(type),
+		shape_(SHAPE::NON),
+		OnCollision(nullptr)
+	{
+	}
 	virtual ~ColliderBase() = default;
 
 	// デバッグ描画
-	void DrawDebug(unsigned int color = 0xffffff);
+	virtual void DrawDebug(unsigned int color = 0xffffff) = 0;
 
 #pragma region 初期設定
 	// モデル制御情報セット
@@ -76,16 +94,16 @@ public:
 	const Transform& GetTransform(void)const { return *trans_; }
 
 	// 動的オブジェクトか否か（true = 動的、false = 静的）
-	bool GetDynamicFlg(void)const { return (dynamicFlg_ == 1) ? true : false; }
+	bool GetDynamicFlg(void)const { return dynamicFlg_; }
 
 	// 判定スキップに十分な距離
 	float GetEnoughDistance(void)const { return enoughDistance_; }
 
 	// 当たり判定フラグ（true = 「判定する」、false = 「判定しない」）
-	bool GetJudge(void)const { return (judgeFlg_ == 1) ? true : false; }
+	bool GetJudge(void)const { return judgeFlg_; }
 
 	// 押し出しのフラグ
-	bool GetPushFlg(void)const { return (pushFlg_ == 1) ? true : false; }
+	bool GetPushFlg(void)const { return pushFlg_; }
 
 	// 押し出しを行う際の重さ（0 ～ 100）
 	unsigned char GetPushWeight(void)const { return pushWeight_; }
@@ -106,6 +124,7 @@ public:
 #pragma region 各セット関数
 	// モデル制御情報の座標情報を書き換える
 	void SetTransformPos(const Vector3& pos) { trans_->pos = pos; }
+	void SetTransformPosAdd(const Vector3& vec) { trans_->pos += vec; }
 
 	// 動的オブジェクトか否かを設定する（true = 動的、false = 静的）
 	void SetDynamicFlg(bool flg) { dynamicFlg_ = (flg) ? 1 : 0; }
@@ -130,14 +149,14 @@ private:
 	// 絶対に当たらない距離（判定時早期リターン用）
 	float enoughDistance_;
 
-	// 動的オブジェクトか否か（1 = 動的、0 = 静的）
-	unsigned char dynamicFlg_;
+	// 動的オブジェクトか否か（true = 動的、false = 静的）
+	bool dynamicFlg_;
 
-	// 当たり判定フラグ（1 = 「判定する」、0 = 「判定しない」）
-	unsigned char judgeFlg_;
+	// 当たり判定フラグ（true = 「判定する」、false = 「判定しない」）
+	bool judgeFlg_;
 
-	// 判定をする場合、押し出しを行うかどうかのフラグ（1 = 「押し出す」、0 = 「押し出さず通り抜ける」）
-	unsigned char pushFlg_;
+	// 判定をする場合、押し出しを行うかどうかのフラグ（true = 「押し出す」、false = 「押し出さず通り抜ける」）
+	bool pushFlg_;
 
 	// 押し出しを行う際の重さ（0 ～ 100 で設定）
 	unsigned char pushWeight_;

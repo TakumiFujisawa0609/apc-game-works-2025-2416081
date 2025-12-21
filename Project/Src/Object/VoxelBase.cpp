@@ -67,18 +67,26 @@ void VoxelBase::Init(void)
     regeneration_ = false;
     nowFrameRemesh_ = false;
 
-    // 派生先の初期化処理
-    SubInit();
+    ActorBase::Init();
 }
 
 
 void VoxelBase::Update(void)
 {
-	// 派生先の更新処理
-    SubUpdate();
+    ActorBase::Update();
 
     // 実質的な生存判定
     if (!GetJudgeFlg()) { return; }
+
+	// 動的オブジェクトの場合、移動していたらセル中心位置群を更新する
+    if (GetDynamicFlg()) {
+        if (trans_.Velocity() != 0.0f) {
+            cellCenterWorldPoss_.clear();
+            for (std::pair<const int, Vector3>cellPosLocal : cellCenterPoss_) {
+                cellCenterWorldPoss_[cellPosLocal.first] = trans_.pos + cellPosLocal.second;
+            }
+        }
+    }
 
     // フラグリセット（形状変化）
     nowFrameRemesh_ = false;
@@ -99,35 +107,74 @@ void VoxelBase::Draw(void)
 	// 派生先の描画処理
     SubDraw();
 
-	// 描画判定
-	if (!GetIsDraw()) { return; }
+    // 描画判定
+    if (!GetIsDraw()) { return; }
+    
+    // メインの描画処理
+    if (!GetIsAlphaDraw()) {
 
-	// 座標を移動して描画
-    MATRIX M = MGetTranslate(trans_.pos.ToVECTOR());
-    SetTransformToWorld(&M);
+        // 座標を移動して描画
+        MATRIX M = MGetTranslate(trans_.pos.ToVECTOR());
+        SetTransformToWorld(&M);
 
-	// メッシュ描画
-    for (auto& b : batches_) {
-        if (b.i.empty()) { continue; }
-        DrawPolygonIndexed3D(
-            b.v.empty() ? b.v.data() : b.v.data(),
-            (int)(b.v.empty() ? b.v.size() : b.v.size()),
-            b.i.data(), (int)(b.i.size() / 3),
-            (textureId_ != -1) ? textureId_ : textureId_, true
-        );
+        // メッシュ描画
+        for (auto& b : batches_) {
+            if (b.i.empty()) { continue; }
+            DrawPolygonIndexed3D(
+                b.v.empty() ? b.v.data() : b.v.data(),
+                (int)(b.v.empty() ? b.v.size() : b.v.size()),
+                b.i.data(), (int)(b.i.size() / 3),
+                (textureId_ != -1) ? textureId_ : textureId_, true
+            );
+        }
+
+        // 座標を元に戻す
+        M = MGetIdent();
+        SetTransformToWorld(&M);
+    }
+}
+
+void VoxelBase::AlphaDraw(void)
+{
+    // 派生先の描画処理
+    SubAlphaDraw();
+
+    // 描画判定
+    if (!GetIsDraw()) { return; }
+
+	// メインの描画処理（アルファ描画）
+    if (GetIsAlphaDraw()) {
+
+        // 座標を移動して描画
+        MATRIX M = MGetTranslate(trans_.pos.ToVECTOR());
+        SetTransformToWorld(&M);
+
+        // メッシュ描画
+        for (auto& b : batches_) {
+            if (b.i.empty()) { continue; }
+            DrawPolygonIndexed3D(
+                b.v.empty() ? b.v.data() : b.v.data(),
+                (int)(b.v.empty() ? b.v.size() : b.v.size()),
+                b.i.data(), (int)(b.i.size() / 3),
+                (textureId_ != -1) ? textureId_ : textureId_, true
+            );
+        }
+
+        // 座標を元に戻す
+        M = MGetIdent();
+        SetTransformToWorld(&M);
+
     }
 
-	// 座標を元に戻す
-    M = MGetIdent();
-    SetTransformToWorld(&M);
+
+    if (App::GetIns().IsDrawDebug()) {
+        for (ColliderBase*& c : GetCollider()) { c->DrawDebug(); }
+    }
 }
 
 
 void VoxelBase::Release(void)
 {
-    // 派生先で追加の解放処理
-    SubRelease();
-
     // メッシュ情報群を全て破棄
     for (auto& b : batches_) {
         b.i.clear();
@@ -137,6 +184,8 @@ void VoxelBase::Release(void)
 
     // テクスチャを解放（読み込まれていた場合）
     if (textureId_ != -1) { DeleteGraph(textureId_); }
+
+    ActorBase::Release();
 }
 
 
@@ -260,8 +309,8 @@ void VoxelBase::BuildGreedyMesh(
 
     MeshBatch cur;
     const float INF = 1e30f;
-    cur.bmin = { +INF, +INF, +INF };
-    cur.bmax = { -INF, -INF, -INF };
+    cur.bmin = Vector3(+INF, +INF, +INF);
+    cur.bmax = Vector3(-INF, -INF, -INF);
 
     auto updAabb = [&](const Vector3& p) {
         cur.bmin.x = (std::min)(cur.bmin.x, p.x);
@@ -275,15 +324,15 @@ void VoxelBase::BuildGreedyMesh(
     static const size_t kMaxVerts = 65000;
     auto flush = [&]() {
         if (!cur.v.empty()) {
-            cur.centerLocal = {
+            cur.centerLocal = Vector3(
                 (cur.bmin.x + cur.bmax.x) * 0.5f,
                 (cur.bmin.y + cur.bmax.y) * 0.5f,
                 (cur.bmin.z + cur.bmax.z) * 0.5f
-            };
+            );
             batches.push_back(std::move(cur));
             cur = MeshBatch{};
-            cur.bmin = { +INF, +INF, +INF };
-            cur.bmax = { -INF, -INF, -INF };
+            cur.bmin = Vector3(+INF, +INF, +INF);
+            cur.bmax = Vector3(-INF, -INF, -INF);
         }
         };
 
@@ -453,9 +502,9 @@ void VoxelBase::BuildGreedyMesh(
             for (int x = 0; x < Nx; ++x) {
                 if (density[Idx(x, y, z)] == 0) continue;
                 Vector3 lp = {
-                    (x - Nx / 2) * cell,
-                    (y - Ny / 2) * cell,
-                    (z - Nz / 2) * cell
+                    (x - Nx / 2) * cell + (cell * 0.5f),
+                    (y - Ny / 2) * cell + (cell * 0.5f),
+                    (z - Nz / 2) * cell + (cell * 0.5f)
                 };
                 cellCenterPoss_[Idx(x, y, z)] = lp;
                 cellCenterWorldPoss_[Idx(x, y, z)] = trans_.pos + lp;
@@ -483,6 +532,7 @@ void VoxelBase::ApplyBrush(unsigned char amount)
 	// 衝突情報群を取得して、該当セルの密度を、引数指定分減少させる
     for (int idx : ColliderSerch<VoxelCollider>().back()->GetHitCellIdxs()) {
         density_.at(idx) = (std::max)(density_.at(idx) - amount, 0);
+        regeneration_ = true;
     }
 }
 

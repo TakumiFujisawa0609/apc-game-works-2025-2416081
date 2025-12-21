@@ -48,7 +48,7 @@ public:
 		RIGHT,
 
 		// デバッグキー
-		DEBUG_VOXEl_CREATE,
+		DEBUG_DRAW_SWITCH,
 
 		MAX,
 	};

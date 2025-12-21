@@ -6,20 +6,20 @@ ActorBase::ActorBase() :
 	trans_(prevPos_),
 	collider_(),
 
-	dynamicFlg_(1),
-	isGravity_(0),
+	dynamicFlg_(true),
+	isGravity_(false),
 
-	pushFlg_(1),
+	pushFlg_(true),
 	pushWeight_(0),
 
 	prevPos_(trans_.pos),
 
 	AccelSum(0.0f, 0.0f, 0.0f),
 
-	isGroundMaster(false),
+	isGroundMaster_(false),
 
-	isDraw(1),
-	isAlphaDraw(0)
+	isDraw_(true),
+	isAlphaDraw_(false)
 {
 }
 
@@ -31,16 +31,16 @@ void ActorBase::Init(void)
 void ActorBase::Update(void)
 {
 	// 動的オブジェクトは１フレーム前の座標を保持
-	if (dynamicFlg_ == 1) { prevPos_ = trans_.pos; }
+	if (dynamicFlg_) { prevPos_ = trans_.pos; }
 
 	// 派生先追加更新
 	SubUpdate();
 
 	// 重力処理
-	if (dynamicFlg_ == 1 && isGravity_ == 1) { Gravity(); }
+	if (dynamicFlg_ && isGravity_) { Gravity(); }
 
 	// 加速度更新
-	if (dynamicFlg_ == 1) { AccelUpdate(); }
+	if (dynamicFlg_) { AccelUpdate(); }
 }
 
 void ActorBase::Draw(void)
@@ -48,8 +48,11 @@ void ActorBase::Draw(void)
 	// 派生先追加描画
 	SubDraw();
 
+	// 描画判定
+	if (!isDraw_) { return; }
+
 	// モデルの描画
-	if (isDraw == 1 && isAlphaDraw == 0) { trans_.Draw(); }
+	if (!isAlphaDraw_) { trans_.Draw(); }
 }
 
 void ActorBase::AlphaDraw(void)
@@ -57,8 +60,11 @@ void ActorBase::AlphaDraw(void)
 	// 派生先追加アルファ描画
 	SubAlphaDraw();
 
-	// モデルの描画
-	if (isDraw == 1 && isAlphaDraw == 1) { trans_.Draw(); }
+	// 描画判定
+	if (!isDraw_) { return; }
+
+	// モデルの描画（アルファ描画）
+	if (isAlphaDraw_) { trans_.Draw(); }
 
 	// 当たり判定のデバッグ描画
 	if (App::GetIns().IsDrawDebug()) {

@@ -122,9 +122,9 @@ void Camera::SetBeforeDrawFollow(void)
 	// í«è]ëŒè€ÇÃç¿ïW: lookAt_ (VECTORå^)
 	// ÉJÉÅÉâÇÃYé≤âÒì]äpìx: yAngle_ (floatå^)
 	Vector3 vec = {};
-	vec = { key.GetRightStickVec().y,key.GetRightStickVec().x,0.0f };
+	vec = Vector3(key.GetRightStickVec().y, key.GetRightStickVec().x, 0.0f);
 	if (vec == 0.0f) {
-		vec = { key.GetMouceMove().y,key.GetMouceMove().x,0.0f };
+		vec = Vector3( key.GetMouceMove().y,key.GetMouceMove().x,0.0f );
 	}
 	if (vec == 0.0f) {
 		if (key.GetInfo(KEY_TYPE::CAMERA_UP).now) { vec.x++; }

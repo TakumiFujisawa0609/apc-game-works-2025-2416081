@@ -36,7 +36,9 @@ void Player::Load(void)
 {
 	trans_.Load("Player/Player");
 	trans_.scale = SCALE;
+	trans_.localAngle = LOCAL_ROT;
 
+	SetDynamicFlg(true);
 	SetGravityFlg(true);
 
 #pragma region 関数ポインタ配列へ各関数を格納
@@ -63,8 +65,8 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
 	// コライダー生成
-	ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, (CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + RADIUS * 2));
-	ColliderCreate(new LineCollider(TAG::PLAYER, LINE_COLLIDER_START_POS, LINE_COLLIDER_END_POS, (LINE_COLLIDER_START_POS / 2 - LINE_COLLIDER_END_POS / 2).Length()));
+	//ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, (CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + RADIUS * 2));
+	ColliderCreate(new LineCollider(TAG::PLAYER, LINE_COLLIDER_START_POS, LINE_COLLIDER_END_POS, (LINE_COLLIDER_START_POS - LINE_COLLIDER_END_POS).Length()));
 
 	// プレイヤーが抱える下位クラスの読み込み処理
 	LowerLoad();
@@ -72,7 +74,10 @@ void Player::Load(void)
 
 void Player::CharactorInit(void)
 {
-	trans_.pos = { 1000.0f,1000.0f,200.0f };
+	SetIsDraw(true);
+	SetJudge(true);;
+
+	trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);;
 	trans_.centerDiff = CENTER_DIFF;
 
 	trans_.angle = {};
@@ -102,7 +107,7 @@ void Player::CharactorUpdate(void)
 	LowerUpdate();
 
 	if (trans_.pos.y < -500.0f) {
-		trans_.pos = { 1000.0f,1000.0f,200.0f };
+		trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);
 		AccelSum.y = 0.0f;
 		
 		SetInviCounter(100);

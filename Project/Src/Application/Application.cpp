@@ -18,7 +18,7 @@ Application::Application(void) :
 
 	fps_(nullptr),
 
-	drawDebug_(0)
+	drawDebug_(false)
 {
 }
 
@@ -76,13 +76,17 @@ void Application::Run(void)
 		// 1/60秒経過していないなら再ループさせる
 		if (!fps_->UpdateFrameRate()) { continue; }
 		KeyManager::GetIns().Update();
-		SceneManager::GetIns().Update();	// シーン管理更新
-		fps_->CalcFrameRate();				// フレームレート計算
+		SceneManager::GetIns().Update();// シーン管理更新
+
+		// デバッグ表示切替
+		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
+
+		fps_->CalcFrameRate();			// フレームレート計算
 
 		ClearDrawScreen();
 
-		SceneManager::GetIns().Draw();		// シーン管理描画
-		//fps_->DrawFrameRate();			// フレームレート描画
+		SceneManager::GetIns().Draw();	// シーン管理描画
+		fps_->DrawFrameRate();			// フレームレート描画
 
 		ScreenFlip();
 	}

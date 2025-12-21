@@ -100,7 +100,7 @@ void GameScene::Init(void)
 	// ```````````````````````````````````
 
 	// ƒ}ƒEƒX‚ğ’†S‚ÉŒÅ’è
-	//KEY::GetIns().SetMouceFixed(true);
+	KEY::GetIns().SetMouceFixed(true);
 
 	// ƒCƒxƒ“ƒgƒV[ƒ“‚ğ‚Í‚³‚Ş
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());

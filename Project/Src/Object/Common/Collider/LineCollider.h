@@ -78,6 +78,9 @@ public:
 		};
 	}
 
+	void DrawDebug(unsigned int color = 0xffffff)override {
+		DrawLine3D(GetStartPos().ToVECTOR(), GetEndPos().ToVECTOR(), color);
+	}
 private:
 	// ü•ª‚ÌŠJn“_
 	Vector3 startPos_;
