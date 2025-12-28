@@ -5,7 +5,7 @@
 class PlayerPunch : public ActorBase
 {
 public:
-	const float RADIUS = 120.0f;
+	const float RADIUS = 100.0f;
 	const Vector3 LOCAL_POS = { 0.0f,0.0f,70.0f };
 
 	PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle);
@@ -15,8 +15,8 @@ public:
 
 	void OnCollision(const ColliderBase& collider)override;
 
-	void On(void) { SetJudge(true); }
-	void Off(void) { SetJudge(false); }
+	void On(void) { SetJudge(true); SetIsDraw(true); }
+	void Off(void) { SetJudge(false); SetIsDraw(false); }
 
 private:
 

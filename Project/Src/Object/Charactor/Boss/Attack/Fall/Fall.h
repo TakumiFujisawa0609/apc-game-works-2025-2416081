@@ -33,9 +33,13 @@ private:
 	void SubRelease(void)override {}
 
 	STATE state_;
-	
-	const int IDLE_TIME = 1000;
-	int idleCounter_;
+
+	const float SCALE = 2.0f;
+
+	const float RADIUS = 65.0f * SCALE;
+
+	const short IDLE_TIME = 1000;
+	short idleCounter_;
 
 	float groundHeight_;
 };

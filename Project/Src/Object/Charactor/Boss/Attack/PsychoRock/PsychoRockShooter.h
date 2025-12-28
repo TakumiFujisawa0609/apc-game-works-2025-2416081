@@ -19,14 +19,26 @@ public:
 	void Set(void);
 	void On(void);
 
+	std::vector<ColliderBase*> GetCollider(void)const {
+		std::vector<ColliderBase*> ret = {};
+
+		for (PsychoRock* const& rock : rocks_) {
+			for (ColliderBase* const& col : rock->GetCollider()) {
+				ret.emplace_back(col);
+			}
+		}
+
+		return ret;
+	}
+
 private:
-	const unsigned char ONE_SHOT_NUM = 4;
-	const unsigned char NUM_MAX = ONE_SHOT_NUM * 3;
+	static constexpr unsigned char ONE_SHOT_NUM = 4;
+	static constexpr unsigned char NUM_MAX = ONE_SHOT_NUM * 3;
 
 	int model_;
 
-	std::vector<PsychoRock*>rocks_;
-
+	PsychoRock* rocks_[NUM_MAX];
+	
 	void RandPos(float& x, float& z);
 	const float CONST_RADIUS_SUB = 300.0f;
 	const float RANDAM_RADIUS_MAX = 600.0f;

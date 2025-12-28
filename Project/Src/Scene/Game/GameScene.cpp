@@ -21,6 +21,8 @@
 #include"../../Object/Charactor/Player/Player.h"
 #include"../../Object/Charactor/Boss/Boss.h"
 
+#include"../../Object/DebugObject/SphereDebugObject.h"
+
 
 int GameScene::hitStop_ = 0;
 
@@ -76,6 +78,7 @@ void GameScene::Load(void)
 	ObjAdd(new BlockManager());
 	ObjAdd(new Player(camera_->GetAngles()));
 	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
+	//ObjAdd(new SphereDebugObject(camera_->GetAngles()));
 
 	// ステージにカメラを渡す
 	ObjSerch<BlockManager>().back()->SetCamera(camera_);

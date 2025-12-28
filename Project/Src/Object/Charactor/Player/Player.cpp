@@ -41,6 +41,9 @@ void Player::Load(void)
 	SetDynamicFlg(true);
 	SetGravityFlg(true);
 
+	SetPushFlg(true);
+	SetPushWeight(50);
+
 #pragma region 関数ポインタ配列へ各関数を格納
 	SET_STATE(STATE::NON, &Player::Non);
 	SET_STATE(STATE::MOVE, &Player::Move);
@@ -65,8 +68,8 @@ void Player::Load(void)
 	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
 
 	// コライダー生成
-	//ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, (CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + RADIUS * 2));
 	ColliderCreate(new LineCollider(TAG::PLAYER, LINE_COLLIDER_START_POS, LINE_COLLIDER_END_POS, (LINE_COLLIDER_START_POS - LINE_COLLIDER_END_POS).Length()));
+	ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, RADIUS,(CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + RADIUS * 2));
 
 	// プレイヤーが抱える下位クラスの読み込み処理
 	LowerLoad();
@@ -187,6 +190,7 @@ void Player::OnGrounded()
 
 void Player::OnCollision(const ColliderBase& collider)
 {
+	return;
 	auto knockBack = [&](Vector3 pos)->void {
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
 		GameScene::Slow(20);
@@ -207,8 +211,8 @@ void Player::OnCollision(const ColliderBase& collider)
 		HpSharpen(10);
 		return;
 	case TAG::BOSS:
-		knockBack(collider.GetPos());
-		HpSharpen(10);
+		//knockBack(collider.GetPos());
+		//HpSharpen(10);
 		return;
 	case TAG::GOLEM_ATTACK_FALL:
 		knockBack(collider.GetPos());
@@ -350,7 +354,7 @@ void Player::Attack(void)
 	float nowAnimeRatio = GetAnimeRatio();
 
 	// 攻撃の判定が発生する前の間、前方に移動させる
-	if (nowAnimeRatio < 0.5f) {
+	if (nowAnimeRatio <= 0.6f) {
 		// 移動方向ベクトル
 		Vector3 vec = {};
 
@@ -359,17 +363,14 @@ void Player::Attack(void)
 		vec.z = cosf(trans_.angle.y);
 
 		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
-		vec.Normalize();
-		trans_.pos += vec * 10.0f;
+		trans_.pos += vec.Normalized() * 10.0f;
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
 	punch_->Off();
 
 	// 大体攻撃判定を発生させる時間
-	if (nowAnimeRatio >= 0.2f && nowAnimeRatio <= 0.5f) {
-		punch_->On();
-	}
+	if (0.4f <= nowAnimeRatio && nowAnimeRatio <= 0.6f) { punch_->On(); }
 
 	// 攻撃判定終わったらボタンで次段攻撃に遷移可能にしておく(操作性向上)
 	if (nowAnimeRatio > 0.6f) { AttackMove(); DoStateAttack(); }
@@ -426,7 +427,7 @@ void Player::Evasion(void)
 
 	// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 	vec.Normalize();
-	trans_.pos += vec, 15.0f/*unit_.para_.speed * 1.5f*/;
+	trans_.pos += vec * 15.0f/*unit_.para_.speed * 1.5f*/;
 
 	// 無敵(無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように １ を代入し続けておく)
 	if (GetAnimeRatio() <= 0.7f) { SetInviCounter(1); }

@@ -11,7 +11,7 @@ CharactorBase::CharactorBase() :
 	anime_(nullptr),
 
 	inviCounter_(0),
-	isInviEffect_(true)
+	isInviEffect_(false)
 {
 }
 

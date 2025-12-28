@@ -48,6 +48,9 @@ private:
 	void RiseDraw(void);
 	void ShotDraw(void);
 
+	const float SCALE = 1.5f;
+	const float RADIUS = 65.0f * SCALE;
+
 	const float MOVE_SPEED = 30.0f;
 
 	const int PREPARA_TIME = 500;

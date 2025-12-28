@@ -28,8 +28,10 @@ public:
 private:
 
 #pragma region ’è”’è‹`
-	const Vector3 SIZE = { 250.0f, 293.0f, 325.0f };
-	const Vector3 CENTER_DIFF = { -10.0f, SIZE.y / 2 - 10.0f, 0.0f };
+	const Vector3 ROUGH_SIZE = { 224.68f,278.946f,309.564f };
+	const Vector3 GRID_CENTER_DIFF = { -25.382f,135.837f,9.876f };
+
+	const float ROUGH_RADIUS = ROUGH_SIZE.Length() / 3.0f;
 #pragma endregion
 
 	void SubLoad(void)override;
@@ -55,7 +57,7 @@ private:
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
 	// Move``````
 	const float MOVE_SPEED = 20.0f;
-	unsigned char stageCollisionFlg_;
+	bool stageCollisionFlg_;
 	//`````````
 
 	// Be```````

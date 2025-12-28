@@ -26,9 +26,9 @@ void PsychoRock::Load(void)
 {
 	state_ = STATE::NON;
 
-	trans_.scale = 1.5f;
+	trans_.scale = SCALE;
 
-	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_PSYCHOROCK, 130.0f));
+	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_PSYCHOROCK, RADIUS, RADIUS));
 
 #pragma region 関数ポインタ配列へ各関数を格納
 #define SET_STATE_UPDATE(state, func) stateUpdateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
@@ -47,7 +47,10 @@ void PsychoRock::Load(void)
 
 void PsychoRock::SubInit(void)
 {
+	SetDynamicFlg(true);
+	SetGravityFlg(false);
 
+	SetPushFlg(false);
 }
 
 void PsychoRock::SubUpdate(void)
@@ -78,7 +81,7 @@ void PsychoRock::RiseUpdate(void)
 	if (trans_.pos.y >= 800.0f) {
 
 		// 移動ベクトルの取得(スピードも入れておく)
-		moveVec_ = (targetPos_, trans_.pos).Normalized() * MOVE_SPEED;
+		moveVec_ = (targetPos_ - trans_.pos).Normalized() * MOVE_SPEED;
 
 		// 状態を遷移
 		state_ = STATE::SHOT;

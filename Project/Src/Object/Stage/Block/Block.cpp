@@ -13,28 +13,16 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 	ModelDuplicate(baseModelId);
 	
 	// ボクセルメッシュ生成に必要な情報を設定する
-	VoxelInfoInit(
-		Vector3(
-			BlockManager::SIZE_BLOCK,
-			BlockManager::SIZE_BLOCK,
-			BlockManager::SIZE_BLOCK),
-		textureId,
-		20.0f,
-		Vector3(0.0f, 0.0f, 0.0f),
-		0.1f
-	);
-
-	// 1ブロックあたりの大きさ
-	const float SIZE_BLOCK = BlockManager::SIZE_BLOCK;
+	VoxelInfoInit(TAG::STAGE,Vector3(BlockManager::SIZE_BLOCK), textureId, 25.0f, Vector3(), 0.1f);
 
 	// 1ブロックあたりの半分の大きさ
-	const float SIZE_HALF_BLOCK = (SIZE_BLOCK / 2.0f);
+	const float SIZE_HALF_BLOCK = (BlockManager::SIZE_BLOCK / 2.0f);
 
 	// 引数で指定されたマップ座標から座標を計算する
 	trans_.pos = Vector3(
-		((float)mapX * SIZE_BLOCK) + SIZE_HALF_BLOCK,
-		((float)mapY * SIZE_BLOCK) + SIZE_HALF_BLOCK,
-		((float)mapZ * SIZE_BLOCK) + SIZE_HALF_BLOCK
+		((float)mapX * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK,
+		((float)mapY * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK,
+		((float)mapZ * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK
 	);
 
 	// 大きさ設定
@@ -42,12 +30,20 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 
 	// モデル制御情報を反映する
 	trans_.Attach();
+
+	SetDynamicFlg(false);
+	SetGravityFlg(false);
 }
 
 void Block::OnCollision(const ColliderBase& collider)
 {
+	if (collider.GetTag() == TAG::GOLEM_ATTACK_PSYCHOROCK) {
+		char aaa = 0;
+	}
+
 	switch (collider.GetTag())
 	{
+	case TAG::SPHERE_DEBUG_OBJECT:
 	case TAG::PLAYER_PUNCH:
 	case TAG::PLAYER_GOUGE:
 	case TAG::PLAYER_THROWING:

@@ -15,11 +15,7 @@ Stone::~Stone()
 
 void Stone::Load(void)
 {
-	SetDynamicFlg(true);
-	SetGravityFlg(false);
-	SetPushFlg(false);
-
-	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_STONE, RADIUS));
+	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_STONE, RADIUS, RADIUS));
 
 	trans_.scale = 1.3f;
 
@@ -28,8 +24,13 @@ void Stone::Load(void)
 
 void Stone::SubInit(void)
 {
+	SetDynamicFlg(true);
+	SetGravityFlg(false);
+	SetPushFlg(false);
+
 	SetJudge(false);
 	SetIsDraw(false);
+
 	aliveCounter_ = 0;
 }
 

@@ -129,9 +129,6 @@
     <ClCompile Include="Src\Object\ActorBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Common\Collider\ColliderBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Manager\Collision\CollisionManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -285,6 +282,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Common\Collider\ModelCollider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\DebugObject\SphereDebugObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

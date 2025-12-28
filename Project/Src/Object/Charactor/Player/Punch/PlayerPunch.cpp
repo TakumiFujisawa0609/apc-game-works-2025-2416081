@@ -11,7 +11,7 @@ PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
 
 void PlayerPunch::Load(void)
 {
-	ColliderCreate(new SphereCollider(TAG::PLAYER_PUNCH, RADIUS));
+	ColliderCreate(new SphereCollider(TAG::PLAYER_PUNCH, RADIUS, RADIUS));
 }
 
 void PlayerPunch::SubUpdate(void)

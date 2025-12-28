@@ -8,6 +8,7 @@ struct Vector3
 {
 	float x = 0.0f, y = 0.0f, z = 0.0f;
 
+#pragma region ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 	// Vector3¶¬
 	Vector3(void) :x(0.0f), y(0.0f), z(0.0f) {}
 
@@ -25,98 +26,64 @@ struct Vector3
 
 	// Vector3¶¬
 	Vector3(int value) :x((float)value), y((float)value), z((float)value) {}
+#pragma endregion
+
+#pragma region Vector3¶¬(“Áê)
+	// X‚Ì‚İ
+	static Vector3 Xonly(float value) { return Vector3(value, 0.0f, 0.0f); }
+
+	// Y‚Ì‚İ
+	static Vector3 Yonly(float value) { return Vector3(0.0f, value, 0.0f); }
+
+	// Z‚Ì‚İ
+	static Vector3 Zonly(float value) { return Vector3(0.0f, 0.0f, value); }
+
+	// XY‚Ì‚İ
+	static Vector3 XYonly(float x, float y) { return Vector3(x, y, 0.0f); }
+
+	// XZ‚Ì‚İ
+	static Vector3 XZonly(float x, float z) { return Vector3(x, 0.0f, z); }
+
+	// YZ‚Ì‚İ
+	static Vector3 YZonly(float y, float z) { return Vector3(0.0f, y, z); }
+#pragma endregion
+
 
 	// VECTOR(Dxlib)‚É•ÏŠ·
 	VECTOR ToVECTOR(void)const { return VGet(x, y, z); }
 
 #pragma region ‰‰Z
-
-	// ‰ÁZ``````````````````````````````````````````````````
-	
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚Å‰ÁZ
+	// ‰ÁZ
 	Vector3 operator+(const Vector3& value)const { return Vector3(x + value.x, y + value.y, z + value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚Å‰ÁZ
 	Vector3 operator+(const VECTOR& value)const { return Vector3(x + value.x, y + value.y, z + value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚Å‰ÁZ
 	Vector3 operator+(float value)const { return Vector3(x + value, y + value, z + value); }
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚Å‰ÁZ‘ã“ü
 	void operator+=(const Vector3& value) { x += value.x; y += value.y; z += value.z; }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚Å‰ÁZ‘ã“ü
 	void operator+=(const VECTOR& value) { x += value.x; y += value.y; z += value.z; }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚Å‰ÁZ‘ã“ü
 	void operator+=(float value) { x += value; y += value; z += value; }
 
-	// ````````````````````````````````````````````````````
-	
-	// Œ¸Z``````````````````````````````````````````````````
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚ÅŒ¸Z
+	// Œ¸Z
 	Vector3 operator-(const Vector3& value)const { return Vector3(x - value.x, y - value.y, z - value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ÅŒ¸Z
 	Vector3 operator-(const VECTOR& value)const { return Vector3(x - value.x, y - value.y, z - value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ÅŒ¸Z
 	Vector3 operator-(float value)const { return Vector3(x - value, y - value, z - value); }
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚ÅŒ¸Z‘ã“ü
 	void operator-=(const Vector3& value) { x -= value.x; y -= value.y; z -= value.z; }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ÅŒ¸Z‘ã“ü
 	void operator-=(const VECTOR& value) { x -= value.x; y -= value.y; z -= value.z; }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ÅŒ¸Z‘ã“ü
 	void operator-=(float value) { x -= value; y -= value; z -= value; }
-	// ````````````````````````````````````````````````````
 
-	// æZ``````````````````````````````````````````````````
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚ÅæZ
+	// æZ
 	Vector3 operator*(const Vector3& value)const { return Vector3(x * value.x, y * value.y, z * value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ÅæZ
 	Vector3 operator*(const VECTOR& value)const { return Vector3(x * value.x, y * value.y, z * value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ÅæZ
 	Vector3 operator*(float value)const { return Vector3(x * value, y * value, z * value); }
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚ÅæZ‘ã“ü
 	void operator*=(const Vector3& value) { x *= value.x; y *= value.y; z *= value.z; }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ÅæZ‘ã“ü
 	void operator*=(const VECTOR& value) { x *= value.x; y *= value.y; z *= value.z; }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ÅæZ‘ã“ü
 	void operator*=(float value) { x *= value; y *= value; z *= value; }
 
-	// ````````````````````````````````````````````````````
-
-	// œZ````````````````````````````````````````````````````````````````````````````````````````
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚ÅœZ
+	// œZ
 	Vector3 operator/(const Vector3& value)const { return Vector3(x / ((value.x != 0.0f) ? value.x : 1), y / ((value.y != 0.0f) ? value.y : 1), z / ((value.z != 0.0f) ? value.z : 1)); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ÅœZ
 	Vector3 operator/(const VECTOR& value)const { return Vector3(x / ((value.x != 0.0f) ? value.x : 1), y / ((value.y != 0.0f) ? value.y : 1), z / ((value.z != 0.0f) ? value.z : 1)); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ÅœZ
 	Vector3 operator/(float value)const { return Vector3(x / ((value != 0.0f) ? value : 1), y / ((value != 0.0f) ? value : 1), z / ((value != 0.0f) ? value : 1)); }
-
-	// “¯‚¶\‘¢‘Ì“¯m‚Æ“¯‚¶—v‘f”“¯m‚ÅœZ‘ã“ü
 	void operator/=(const Vector3& value) { x /= ((value.x != 0.0f) ? value.x : 1); y /= ((value.y != 0.0f) ? value.y : 1); z /= ((value.z != 0.0f) ? value.z : 1); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ÅœZ‘ã“ü
 	void operator/=(const VECTOR& value) { x /= ((value.x != 0.0f) ? value.x : 1); y /= ((value.y != 0.0f) ? value.y : 1); z /= ((value.z != 0.0f) ? value.z : 1); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ÅœZ‘ã“ü
 	void operator/=(float value) { x /= ((value != 0.0f) ? value : 1); y /= ((value != 0.0f) ? value : 1); z /= ((value != 0.0f) ? value : 1); }
-
-	// ``````````````````````````````````````````````````````````````````````````````````````````
 
 	// “àÏ
 	float Dot(const Vector3& value)const { return x * value.x + y * value.y + z * value.z; }
@@ -125,83 +92,35 @@ struct Vector3
 
 #pragma endregion
 
-#pragma region ”äŠr
-
-	// “¯‚¶\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä“¯‚¶‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator==(const Vector3& value)const { return (x == value.x && y == value.y && z == value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä“¯‚¶‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator==(const VECTOR& value)const { return (x == value.x && y == value.y && z == value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ğ”äŠr‚µA‘S‚Ä“¯‚¶‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator==(float value)const { return (x == value && y == value && z == value); }
 
-
-	// “¯‚¶\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä“¯‚¶‚È‚çufalsev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îutruev‚ğ•Ô‚·
 	bool operator!=(const Vector3& value)const { return (x != value.x || y != value.y || z != value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä“¯‚¶‚È‚çufalsev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îutruev‚ğ•Ô‚·
 	bool operator!=(const VECTOR& value)const { return (x != value.x || y != value.y || z != value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ğ”äŠr‚µA‘S‚Ä“¯‚¶‚È‚çufalsev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îutruev‚ğ•Ô‚·
 	bool operator!=(float value)const { return (x != value || y != value || z != value); }
 
-
-	// “¯‚¶\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä¬‚³‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator<(const Vector3& value)const { return (x < value.x && y < value.y && z < value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä¬‚³‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator<(const VECTOR& value)const { return (x < value.x && y < value.y && z < value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ğ”äŠr‚µA‘S‚Ä¬‚³‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator<(float value)const { return (x < value && y < value && z < value); }
 
-
-	// “¯‚¶\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä¬‚³‚¢‚©“™‚µ‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator<=(const Vector3& value)const { return (x <= value.x && y <= value.y && z <= value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä¬‚³‚¢‚©“™‚µ‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator<=(const VECTOR& value)const { return (x <= value.x && y <= value.y && z <= value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ğ”äŠr‚µA‘S‚Ä¬‚³‚¢‚©“™‚µ‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator<=(float value)const { return (x <= value && y <= value && z <= value); }
 
-
-	// “¯‚¶\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä‘å‚«‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator>(const Vector3& value)const { return (x > value.x && y > value.y && z > value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä‘å‚«‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator>(const VECTOR& value)const { return (x > value.x && y > value.y && z > value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ğ”äŠr‚µA‘S‚Ä‘å‚«‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator>(float value)const { return (x > value && y > value && z > value); }
 
-
-	// “¯‚¶\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä‘å‚«‚¢‚©“™‚µ‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator>=(const Vector3& value)const { return (x >= value.x && y >= value.y && z >= value.z); }
-
-	// Dxlib‚ÌVECTOR\‘¢‘Ì‚Æ“¯‚¶—v‘f”“¯m‚ğ”äŠr‚µA‘S‚Ä‘å‚«‚¢‚©“™‚µ‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator>=(const VECTOR& value)const { return (x >= value.x && y >= value.y && z >= value.z); }
-
-	// ‚P‚Â‚Ì’l‚Æ‘S‚Ä‚Ì—v‘f”‚ğ”äŠr‚µA‘S‚Ä‘å‚«‚¢‚©“™‚µ‚¢‚È‚çutruev‚ğA‚»‚¤‚Å‚È‚¯‚ê‚Îufalsev‚ğ•Ô‚·
 	bool operator>=(float value)const { return (x >= value && y >= value && z >= value); }
 
-#pragma endregion
 
-#pragma region ‘ã“ü
-
-	// —v‘f”‘S‚Ä‚Éw’è‚³‚ê‚½’l‚Å‘ã“ü
 	void operator=(float value) { x = value; y = value; z = value; }
-
-	// —v‘f”‚ğ‡‚í‚¹‚Ä‘ã“ü
 	void operator=(const Vector3& value) { x = value.x; y = value.y; z = value.z; }
-
-	// DxLib‚ÌVECTOR\‘¢‘Ì‚ğ—v‘f”‚ğ‡‚í‚¹‚Ä‘ã“ü
 	void operator=(const VECTOR& value) { x = value.x; y = value.y; z = value.z; }
-
-#pragma endregion
 	
-	// ‘S‚Ä‚Ì—v‘f”‚ğ”½“]‚³‚¹‚½Vector3\‘¢‘Ì‚ğ•Ô‚·
 	Vector3 operator-(void)const { return Vector3(-x, -y, -z); }
 
 	// ƒxƒNƒgƒ‹‚Ì‘å‚«‚³(ã‚È‚µ)
@@ -247,14 +166,14 @@ struct Vector3
 		return min;
 	}
 
-	// ˆê”Ô‘å‚«‚¢—v‘f”‚¾‚¯‚É‚µ‚½Vector3\‘¢‘Ì‚ğ•Ô‚·
+	// ˆê”Ô‘å‚«‚¢—v‘f”‚¾‚¯‚É‚µ‚½Vector3\‘¢‘Ì‚É‚µ‚Ä•Ô‚·
 	Vector3 MaxElement(void)const {
 		if (x >= y && x >= z) { return Vector3(x, 0.0f, 0.0f); }
 		else if (y >= z) { return Vector3(0.0f, y, 0.0f); }
 		else { return Vector3(0.0f, 0.0f, z); }
 	}
 
-	// ˆê”Ô¬‚³‚¢—v‘f”‚¾‚¯‚É‚µ‚½Vector3\‘¢‘Ì‚ğ•Ô‚·
+	// ˆê”Ô¬‚³‚¢—v‘f”‚¾‚¯‚É‚µ‚½Vector3\‘¢‘Ì‚É‚µ‚Ä•Ô‚·
 	Vector3 MinElement(void)const {
 		if (x <= y && x <= z) { return Vector3(x, 0.0f, 0.0f); }
 		else if (y <= z) { return Vector3(0.0f, y, 0.0f); }

@@ -12,13 +12,6 @@ public:
 	enum class TAG
 	{
 		NON = -1,
-
-		SPHERE_DEBUG_OBJECT,
-		BOX_DEBUG_OBJECT,
-		CAPSULE_DEBUG_OBJECT,
-		LINE_DEBUG_OBJECT,
-		VOXEL_DEBUG_OBJECT,
-		STAGE_DEBUG_OBJECT,
 		
 		PLAYER,
 		PLAYER_PUNCH,
@@ -30,10 +23,13 @@ public:
 		GOLEM_ATTACK_FALL,
 		GOLEM_ATTACK_PSYCHOROCK,
 		GOLEM_ATTACK_STONE,
+		GOLEM_ATTACK_WALL,
 
 		ENEMY,
 
 		STAGE,
+
+		SPHERE_DEBUG_OBJECT,
 	};
 
 	// 形状列挙型定義
@@ -127,13 +123,13 @@ public:
 	void SetTransformPosAdd(const Vector3& vec) { trans_->pos += vec; }
 
 	// 動的オブジェクトか否かを設定する（true = 動的、false = 静的）
-	void SetDynamicFlg(bool flg) { dynamicFlg_ = (flg) ? 1 : 0; }
+	void SetDynamicFlg(bool flg) { dynamicFlg_ = flg; }
 
 	// 当たり判定フラグセット（true = 「判定する」、false = 「判定しない」）
-	void SetJudgeFlg(bool flg) { judgeFlg_ = (flg) ? 1 : 0; }
+	void SetJudgeFlg(bool flg) { judgeFlg_ = flg; }
 
 	// 押し出しを行うかどうかのフラグを設定（true = 「押し出す」、false = 「押し出さない」）
-	void SetPushFlg(bool flg) { pushFlg_ = (flg) ? 1 : 0; }
+	void SetPushFlg(bool flg) { pushFlg_ = flg; }
 
 	// 押し出しを行う際の重さ（0 ～ 100 で設定）
 	void SetPushWeight(unsigned char weight) { pushWeight_ = weight; }

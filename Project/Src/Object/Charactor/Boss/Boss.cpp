@@ -38,12 +38,15 @@ void Boss::Load(void)
 
 	// 相対　座標/角度
 	trans_.centerDiff = -CENTER_DIFF;
-	trans_.localAngle = LOCAL_ROT;
+	trans_.localAngle = LOCAL_ANGLE;
+
+	SetDynamicFlg(false);
+	SetGravityFlg(false);
+
+	SetPushFlg(true);
 
 	// コライダーを生成
-	ColliderCreate(new CapsuleCollider(TAG::BOSS, CAPSULE_HALF_LEN, CAPSULE_RADIUS, CAPSULE_HALF_LEN + CAPSULE_RADIUS));
-
-	//unit_.para_.speed = 10.0f;
+	ColliderCreate(new CapsuleCollider(TAG::BOSS, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, CAPSULE_COLLIDER_RADIUS, CAPSULE_COLLIDER_ENOUGH_DISTANCE));
 
 #pragma region 関数ポインタ配列へ各関数を格納
 
@@ -64,6 +67,8 @@ void Boss::Load(void)
 
 	// Bossクラスが抱える子クラス達の読み込み処理
 	LowerLoad();
+
+	SetInviEffectFlg(true);
 }
 
 void Boss::CharactorInit(void)
@@ -134,6 +139,8 @@ void Boss::UiDraw(void)
 		DrawString(App::SCREEN_SIZE_X/2, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
 		SetFontSize(16);
 	}
+
+	DrawFormatString(0, 500, 0xffffff, "ボス座標：X：%.2f,Y：%.2f,Z：%.2f", trans_.pos.x, trans_.pos.y, trans_.pos.z);
 }
 
 void Boss::CharactorRelease(void)
@@ -156,6 +163,13 @@ void Boss::OnCollision(const ColliderBase& collider)
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(30);
+		return;
+	}
+
+	if(collider.GetTag()==TAG::PLAYER_PUNCH){
+		GameScene::Shake();
+		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+		HpSharpen(1);
 		return;
 	}
 }
@@ -307,7 +321,7 @@ Boss::ATTACK_KINDS Boss::AttackLottery(void)
 	//return ATTACK_KINDS::FALL;
 	//return ATTACK_KINDS::STONE;
 	//return ATTACK_KINDS::PSYCHO;
-	//return ATTACK_KINDS::WALL;
+	return ATTACK_KINDS::WALL;
 
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 

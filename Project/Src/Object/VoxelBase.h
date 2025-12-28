@@ -204,12 +204,14 @@ protected:
 	/// <param name="cell">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
-	void VoxelInfoInit(const Vector3& roughSize, std::string texturePath = "", float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, std::string texturePath = "", float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
 		roughSize_ = roughSize;
 		textureId_ = (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1;
 		cell_ = cell;
 		gridCenter_ = gridCenter;
 		aliveNeedRatio_ = aliveNeedRatio;
+		// ボクセルオブジェクト専用のコライダーを生成
+		ColliderCreate(new VoxelCollider(colliderTag, roughSize_, cell_, cellCenterWorldPoss_, (roughSize_ / 2).Length()));
 	}
 
 	/// <summary>
@@ -220,12 +222,14 @@ protected:
 	/// <param name="cell">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
-	void VoxelInfoInit(const Vector3& roughSize, int texture = -1, float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, int texture = -1, float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
 		roughSize_ = roughSize;
 		textureId_ = texture;
 		cell_ = cell;
 		gridCenter_ = gridCenter;
 		aliveNeedRatio_ = aliveNeedRatio;
+		// ボクセルオブジェクト専用のコライダーを生成
+		ColliderCreate(new VoxelCollider(colliderTag, roughSize_, cell_, cellCenterWorldPoss_, (roughSize_ / 2).Length()));
 	}
 
 #pragma region 削る

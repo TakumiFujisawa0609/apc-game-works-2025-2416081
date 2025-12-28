@@ -60,6 +60,15 @@ public:
 	// 関数
 	//----------------------------------------------------------------------------------------------
 
+	std::vector<ColliderBase*> GetCollider(void)const override { 
+		std::vector<ColliderBase*>ret = {};
+
+		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : punch_->GetCollider()) { ret.emplace_back(collider); }
+
+		return ret;
+	}
+
 	// プレイヤーが抱える下位クラスのインスタンスを配列に格納して返す
 	std::vector<ActorBase*>GetSubIns(void);
 
@@ -83,10 +92,10 @@ private:
 	const float RADIUS = SIZE.z;
 
 	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3(0.0f, SIZE.y / 2 - RADIUS, 0.0f);
-	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3(0.0f, 0.0f, 0.0f);
+	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3();
 
-	const Vector3 LINE_COLLIDER_START_POS = Vector3(0.0f, 0.0f, 0.0f);
-	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y / 2, 0.0f);
+	const Vector3 LINE_COLLIDER_START_POS = Vector3();
+	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y * 0.5f, 0.0f);
 #pragma endregion
 
 	void CharactorInit(void)override;

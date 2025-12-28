@@ -53,9 +53,6 @@ void VoxelBase::Load(void)
         // モデルはもう使わないので解放
         trans_.Release();
     }
-
-	// ボクセルオブジェクト専用のコライダーを生成
-    ColliderCreate(new VoxelCollider(TAG::STAGE, roughSize_, cell_, cellCenterWorldPoss_, (roughSize_ / 2).Length()));
 }
 
 

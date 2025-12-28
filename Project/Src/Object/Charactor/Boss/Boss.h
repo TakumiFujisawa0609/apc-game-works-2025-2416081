@@ -40,19 +40,61 @@ public:
 		MAX
 	};
 
+
+	std::vector<ColliderBase*> GetCollider(void)const {
+		std::vector<ColliderBase*>ret = {};
+
+		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : fall_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : psycho_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : stone_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : rockWall_->GetCollider()) { ret.emplace_back(collider); }
+
+		return ret;
+	}
+
 	// Å‘åHP
 	static constexpr int HP_MAX = 200;
 
 private:
 
+#pragma region ’è”’è‹`
+	// ƒ‚ƒfƒ‹‚Ì•\¦ƒXƒP[ƒ‹
 	const float SCALE = 2.0f;
-	const Vector3 SIZE = Vector3(250.0f, 425.0f, 175.0f) * SCALE;;
-	const Vector3 CENTER_DIFF = Vector3(0.0f, -SIZE.y / 2, 0.0f) * SCALE;
 
-	const float CAPSULE_RADIUS = SIZE.y / 2;
-	const float CAPSULE_HALF_LEN = (SIZE.z / 2) - CAPSULE_RADIUS;
+	// ƒTƒCƒY
+	const Vector3 SIZE = Vector3(304.004f, 387.109f, 205.034f) * SCALE;
 
-	int hp_;
+	// ’†S“_•â³
+	const Vector3 CENTER_DIFF = Vector3(0.0f, 190.9405f, 0.0f) * SCALE;
+
+	// ƒ[ƒJƒ‹‰ñ“]Šp“x
+	const Vector3 LOCAL_ANGLE = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
+
+	// ƒJƒvƒZƒ‹“–‚½‚è”»’è—p’è”`````````````````````````````````````````````````````````
+
+	// ƒJƒvƒZƒ‹‚Ì”¼Œa
+	const float CAPSULE_COLLIDER_RADIUS = SIZE.z / 2;
+
+	// ƒJƒvƒZƒ‹‚Ìƒ[ƒJƒ‹ n“_/I“_ À•W
+	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3::Yonly(SIZE.y / 2 - CAPSULE_COLLIDER_RADIUS);
+	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3::Yonly(-SIZE.y / 2 + CAPSULE_COLLIDER_RADIUS);
+
+	// ƒJƒvƒZƒ‹‚Ì\•ª—£‚ê‚Ä‚¢‚é‹——£
+	const float CAPSULE_COLLIDER_ENOUGH_DISTANCE = (CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + CAPSULE_COLLIDER_RADIUS;
+
+	// `````````````````````````````````````````````````````````````````````
+
+	// ‘¬“x
+	const float SPEED = 10.0f;
+
+	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
+	const short MAX_HP = 200;
+
+#pragma endregion
+
+	// ƒqƒbƒgƒ|ƒCƒ“ƒg
+	short hp_;
 
 	void CharactorInit(void)override;
 	void CharactorUpdate(void)override;
@@ -169,8 +211,6 @@ private:
 
 	void HpSharpen(int damage);
 	void LifeSharpen(void);
-
-	const Vector3 LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
 	const Vector3& playerPos;
 };

@@ -19,13 +19,10 @@ void PsychoRockShooter::Load(void)
 {
 	model_ = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
 
-	rocks_.reserve(NUM_MAX);
-
 	for (unsigned char i = 0; i < NUM_MAX; i++) {
-		rocks_.emplace_back(new PsychoRock(model_, playerPos));
+		rocks_[i] = new PsychoRock(model_, playerPos);
+		rocks_[i]->Load();
 	}
-
-	for (PsychoRock*& rock : rocks_) { rock->Load(); }
 }
 
 void PsychoRockShooter::Init(void)
@@ -56,7 +53,6 @@ void PsychoRockShooter::Release(void)
 		delete rock;
 		rock = nullptr;
 	}
-	rocks_.clear();
 
 	MV1DeleteModel(model_);
 }
@@ -67,21 +63,12 @@ void PsychoRockShooter::Set(void)
 		float x = 0.0f, z = 0.0f;
 		RandPos(x, z);
 
-		//bool recycle = false;
-
 		for (auto& rock : rocks_) {
 			if (rock->GetState() == PsychoRock::STATE::NON) {
 				rock->Set(x, z);
-				//recycle = true;
 				break;
 			}
 		}
-		//if (recycle) { continue; }
-
-		//rocks_.emplace_back(new PsychoRock(model_, playerPos));
-		//rocks_.back()->Load();
-		//rocks_.back()->Set(x, z);
-		//Collision::AddEnemy(rocks_.back());
 	}
 }
 

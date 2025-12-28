@@ -20,9 +20,9 @@ Fall::~Fall()
 
 void Fall::Load(void)
 {
-	trans_.scale = 2.0f;
+	trans_.scale = SCALE;
 
-	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_FALL, 190.0f));
+	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_FALL, RADIUS, RADIUS));
 }
 
 void Fall::SubInit(void)
@@ -30,6 +30,9 @@ void Fall::SubInit(void)
 	SetDynamicFlg(true);
 	SetGravityFlg(false);
 	SetPushFlg(false);
+
+	SetJudge(false);
+	SetIsDraw(false);
 }
 
 void Fall::SubUpdate(void)

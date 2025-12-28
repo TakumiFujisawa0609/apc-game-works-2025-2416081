@@ -37,7 +37,7 @@ public:
 	}
 
 	// 
-	static bool IsStageCollision(const Vector3& pos, float radius);
+	static bool IsStageCollision(const Vector3& pos, float radius, TAG tag = TAG::NON);
 
 private:
 #pragma region タイプ別コライダー格納配列

@@ -19,11 +19,11 @@ public:
 
 	void On(void);
 
-	std::vector<ColliderBase*>& GetColliders(void) {
+	std::vector<ColliderBase*> GetCollider(void) {
 		std::vector<ColliderBase*> ret = {};
 		ret.reserve(WALL_MAX_NUM);
-		for (RockWall*& wall : walls_) {
-			for (ColliderBase*& collider : wall->GetCollider()) { ret.emplace_back(collider); }
+		for (auto& wall : walls_) {
+			for (auto& collider : wall->GetCollider()) { ret.emplace_back(collider); }
 		}
 		return ret;
 	}
@@ -34,7 +34,7 @@ private:
 	const Vector3 CREATE_ST_LOCAL_POS = { 0.0f,0.0f,450.0f };
 	const float ONE_DISTANCE = 150.0f;
 
-	static constexpr unsigned char WALL_MAX_NUM = 100;
+	static constexpr unsigned char WALL_MAX_NUM = 40;
 #pragma endregion
 
 	int modelId_;

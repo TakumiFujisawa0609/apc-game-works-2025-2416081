@@ -12,14 +12,15 @@
 
 RockWall::RockWall(int modelId, int textureId) :
 
-    VoxelBase(),
+    //VoxelBase(),
 
     state_(STATE::NON),
     stateFuncPtr(),
 
     stageCollisionFlg_(0)
 {
-    SetDynamicFlg(false);
+    SetDynamicFlg(true);
+	SetGravityFlg(false);
 
     SetPushFlg(true);
     SetPushWeight(100);
@@ -28,20 +29,20 @@ RockWall::RockWall(int modelId, int textureId) :
 
     // ボクセルメッシュ生成に必要な情報を設定する
     VoxelInfoInit(
-        SIZE,
+        TAG::GOLEM_ATTACK_WALL,
+        ROUGH_SIZE,
         textureId,
         30.0f,
-        CENTER_DIFF,
+        GRID_CENTER_DIFF,
         0.1f
     );
-
-    SetJudge(false);
-    SetIsDraw(false);
 }
 
 void RockWall::On(const Vector3& pos)
 {
     ReVival();
+
+    SetDynamicFlg(true);
 
     state_ = STATE::MOVE;
 
@@ -61,10 +62,12 @@ void RockWall::SubLoad(void)
 
 void RockWall::SubInit(void)
 {
-    SetJudge(true);
-    SetIsDraw(true);
+    SetJudge(false);
+    SetIsDraw(false);
 
-    stageCollisionFlg_ = 0;
+	state_ = STATE::NON;
+
+    stageCollisionFlg_ = false;
 }
 
 void RockWall::SubUpdate(void)
@@ -75,15 +78,14 @@ void RockWall::SubUpdate(void)
 
 void RockWall::Move(void)
 {
-    if (stageCollisionFlg_ == 0) {
-        state_ = STATE::BE;
-        return;
-    }
-
-    stageCollisionFlg_ = 0;
-
     // 上に動かす（ステージとの接触がなくなるまで）
     trans_.pos.y += MOVE_SPEED;
+    if (CollisionManager::IsStageCollision(trans_.pos, ROUGH_RADIUS, TAG::GOLEM_ATTACK_WALL) == false) {
+        state_ = STATE::BE;
+        trans_.pos.y -= MOVE_SPEED;
+        SetDynamicFlg(false);
+        return;
+    }
 }
 
 void RockWall::Be(void)
@@ -93,11 +95,7 @@ void RockWall::Be(void)
 
 void RockWall::OnCollision(const ColliderBase& collider)
 {
-    if (state_ == STATE::MOVE) {
-        if (stageCollisionFlg_ == 1) { return; }
-        if (collider.GetTag() == TAG::STAGE) { stageCollisionFlg_ = 1; }
-        return;
-    }
+    if (state_ == STATE::MOVE) { return; }
 
     switch (collider.GetTag())
     {

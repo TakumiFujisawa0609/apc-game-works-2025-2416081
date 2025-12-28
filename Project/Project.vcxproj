@@ -210,6 +210,7 @@
     <ClInclude Include="Src\Object\Charactor\Player\Throwing\Throwing.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Throwing\ThrowObjBase.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWall.h" />
+    <ClInclude Include="Src\Object\DebugObject\SphereDebugObject.h" />
     <ClInclude Include="Src\Object\SkyDome\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage\Block\Block.h" />
     <ClInclude Include="Src\Object\Stage\Block\BlockManager.h" />

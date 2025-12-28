@@ -15,13 +15,16 @@ public:
 	virtual void OnCollision(const ColliderBase& collider);
 
 private:
+#pragma region ’è”’è‹`
 	const float RADIUS = 100.0f;
 
 	const float MOVE_SPEED = 30.0f;
+	
+	const int ALIVE_TIME = 200;
+#pragma endregion
 
 	Vector3 moveVec_;
 
-	const int ALIVE_TIME = 200;
 	int aliveCounter_;
 
 	void SubInit(void)override;
