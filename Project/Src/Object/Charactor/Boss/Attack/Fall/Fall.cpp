@@ -55,6 +55,8 @@ void Fall::SubUpdate(void)
 
 void Fall::SubAlphaDraw(void)
 {
+	if (!GetIsDraw()) { return; }
+
 	if (state_ == STATE::IDLE && idleCounter_ / 10 % 2 == 0) {
 		VECTOR predictionPos = { trans_.pos.x,groundHeight_,trans_.pos.z };
 		float radius = ColliderSerch<SphereCollider>().back()->GetRadius();

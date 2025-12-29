@@ -137,16 +137,16 @@ void GameScene::Update(void)
 	}
 
 	// ゲームクリア判定
-	//if () {
-	//	SceneManager::GetIns().ChangeScene(SCENE_ID::CLEAR);
-	//	return;
-	//}
+	if (ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END) {
+		SceneManager::GetIns().ChangeScene(SCENE_ID::CLEAR);
+		return;
+	}
 	
 	// ゲームオーバー判定
-	//if () {
-	//	SceneManager::GetIns().ChangeScene(SCENE_ID::OVER);
-	//	return;
-	//}
+	if (ObjSerch<Player>().back()->GetState() == (int)Player::STATE::END) {
+		SceneManager::GetIns().ChangeScene(SCENE_ID::OVER);
+		return;
+	}
 #pragma endregion
 }
 

@@ -15,12 +15,38 @@ Throwing::~Throwing()
 
 void Throwing::Load(void)
 {
+#pragma region 各種モデルを読み込む
 	models_[(int)THROW_TYPE::ROCK] = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
+#pragma endregion
+
+	unsigned short num = 0;
+
+	for (unsigned char type = 0; type < (unsigned char)THROW_TYPE::MAX; type++) {
+		for (unsigned short i = 0; i < BY_TYPE_NUM[type]; i++) {
+
+			// タイプを保持
+			throwObj_[num].type = (THROW_TYPE)type;
+
+			// タイプ別にインスタンスを生成
+			switch ((THROW_TYPE)type)
+			{
+			case THROW_TYPE::NON: { continue; }
+			case THROW_TYPE::ROCK: { throwObj_[num].ins = new ThrowRock(playerPos_, playerAngle_); break; }
+			}
+
+			num++;
+		}
+	}
+
+	for (THROW_OBJ_INFO& obj : throwObj_) { 
+		obj.ins->ModelDuplicate(models_[(int)obj.type]);
+		obj.ins->Load(); 
+	}
 }
 
 void Throwing::Init(void)
 {
-	throwObj_.reserve(MAX_OBJ_NUM);
+	for (THROW_OBJ_INFO& obj : throwObj_) { obj.ins->Init(); }
 }
 
 void Throwing::Update(void)
@@ -46,31 +72,19 @@ void Throwing::Release(void)
 		obj.ins->Release();
 		delete obj.ins;
 	}
-	throwObj_.clear();
 }
 
 void Throwing::Carry(THROW_TYPE type)
 {
 	for (THROW_OBJ_INFO& obj : throwObj_) {
-		if (obj.ins->GetState() == ThrowObjBase::STATE::NON) {
+		if (obj.type == type &&
+			obj.ins->GetState() == ThrowObjBase::STATE::NON) {
+
 			obj.ins->Carry();
+
 			return;
 		}
 	}
-
-	switch (type)
-	{
-	case THROW_TYPE::NON: { break; }
-	case THROW_TYPE::ROCK:
-		throwObj_.emplace_back(new ThrowRock(playerPos_, playerAngle_), type);
-		break;
-	}
-
-	throwObj_.back().ins->ModelDuplicate(models_[(int)type]);
-	throwObj_.back().ins->Load();
-	throwObj_.back().ins->Init();
-	throwObj_.back().ins->Carry();
-	//Collision::AddPlayer(throwObj_.back().ins);
 }
 
 void Throwing::Drop()

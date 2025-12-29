@@ -66,6 +66,8 @@ protected:
 	/// <param name="speed">再生速度</param>
 	void AddInFbxAnimation(int inFbxMaxIndex, float speed);
 
+	void AddInFbxAnimation(int inFbxMaxIndex, const float* speed);
+
 	/// <summary>
 	/// 別ファイルに保存されているFBXアニメーションを登録する
 	/// </summary>

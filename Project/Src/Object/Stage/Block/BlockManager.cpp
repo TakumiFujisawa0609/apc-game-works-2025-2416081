@@ -39,6 +39,11 @@ void BlockManager::Draw(void)
 	for (Block*& b : blocks_) { b->Draw(); }
 }
 
+void BlockManager::AlphaDraw(void)
+{
+	//for (Block*& b : blocks_) { b->AlphaDraw(); }
+}
+
 void BlockManager::Release(void)
 {
 	// ƒ‚ƒfƒ‹‚Ìƒƒ‚ƒŠ‰ğ•ú

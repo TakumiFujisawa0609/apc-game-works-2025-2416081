@@ -18,6 +18,8 @@ Player::Player(const Vector3& cameraPos):
 
 	cameraAngle_(cameraPos),
 
+	hp_(0),
+
 	isJump_(),
 	jumpKeyCounter_(),
 
@@ -26,6 +28,7 @@ Player::Player(const Vector3& cameraPos):
 	isAttack_(),
 	attackStageCounter_(0),
 
+	gouge_(nullptr),
 	throwing_(nullptr),
 	
 	knockBackVec_()
@@ -54,6 +57,7 @@ void Player::Load(void)
 	SET_STATE(STATE::EVASION, &Player::Evasion);
 	SET_STATE(STATE::DAMAGE, &Player::Damage);
 	SET_STATE(STATE::DEATH, &Player::Death);
+	SET_STATE(STATE::END, &Player::End);
 #pragma endregion
 
 	// モーションの初期設定と初期モーション再生
@@ -125,25 +129,14 @@ void Player::CharactorUpdate(void)
 
 void Player::CharactorDraw(void)
 {
-	//if (!unit_.isAlive_) { return; }
-
 	// プレイヤーが抱える下位クラスの描画処理
 	LowerDraw();
-
-	//Utility::MV1ModelMatrix(unit_.model_, VSub(unit_.WorldPos(), VTransform(CENTER_DIFF, MGetRotY(unit_.angle_.y))), { LOCAL_ROT,unit_.angle_ });
-	//MV1DrawModel(unit_.model_);
-
-	// デバッグ用に当たり判定の表示
-	//VECTOR localPos = { 0.0f,unit_.para_.capsuleHalfLen,0.0f };
-
-	//DrawCapsule3D(
-	//	VSub(unit_.WorldPos(), localPos),
-	//	VAdd(unit_.WorldPos(), localPos),
-	//	unit_.para_.radius, 6, 0xffffff, 0xffffff, true);
 }
 
 void Player::CharactorAlphaDraw(void)
 {
+	// プレイヤーが抱える下位クラスのアルファ描画処理
+	LowerAlphaDraw();
 }
 
 void Player::UiDraw(void)
@@ -190,7 +183,8 @@ void Player::OnGrounded()
 
 void Player::OnCollision(const ColliderBase& collider)
 {
-	return;
+	if (GetInviCounter() > 0) { return; }
+
 	auto knockBack = [&](Vector3 pos)->void {
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
 		GameScene::Slow(20);
@@ -209,10 +203,6 @@ void Player::OnCollision(const ColliderBase& collider)
 	case TAG::ENEMY:
 		knockBack(collider.GetPos());
 		HpSharpen(10);
-		return;
-	case TAG::BOSS:
-		//knockBack(collider.GetPos());
-		//HpSharpen(10);
 		return;
 	case TAG::GOLEM_ATTACK_FALL:
 		knockBack(collider.GetPos());
@@ -458,7 +448,7 @@ void Player::Death(void)
 {
 	if (IsAnimeEnd()) {
 		// 死亡処理
-
+		state_ = (int)STATE::END;
 	}
 }
 
@@ -752,14 +742,4 @@ void Player::LowerRelease(void)
 		delete throwing_;
 		throwing_ = nullptr;
 	}
-}
-
-std::vector<ActorBase*> Player::GetSubIns(void)
-{
-	std::vector<ActorBase*> ret = {};
-
-	ret.emplace_back(punch_);
-	ret.emplace_back(gouge_);
-
-	return ret;
 }

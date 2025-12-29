@@ -13,13 +13,13 @@ ThrowRock::~ThrowRock()
 
 void ThrowRock::Load(void)
 {
-	ColliderCreate(new SphereCollider(TAG::PLAYER_THROWING, 100.0f));
+	ColliderCreate(new SphereCollider(TAG::PLAYER_THROWING, COLLIDER_RADIUS, COLLIDER_RADIUS));
 
 	speed_ = 15.0f;
 
 	aliveTime = ALIVE_TIME;
 
-	ALIVE_HIT_NUM = 100;
+	ALIVE_HIT_NUM = 10;
 
 	trans_.scale = SCALE;
 }

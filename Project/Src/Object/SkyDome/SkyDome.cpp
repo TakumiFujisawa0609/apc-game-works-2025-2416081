@@ -6,6 +6,11 @@ void SkyDome::Load(void)
 	trans_.scale = SCALE;
 }
 
+void SkyDome::Init(void)
+{
+	trans_.pos = POS;
+}
+
 void SkyDome::Update(void)
 {
 	trans_.AddAngleYDeg(0.02f);

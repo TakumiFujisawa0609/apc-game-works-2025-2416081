@@ -8,8 +8,6 @@ public:
 	ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_);
 	virtual ~ThrowObjBase() = default;
 
-	void Load(void)override;
-
 	void OnCollision(const ColliderBase& collider)override;
 
 	enum class STATE

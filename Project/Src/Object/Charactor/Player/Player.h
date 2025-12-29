@@ -37,6 +37,7 @@ public:
 		EVASION,
 		DAMAGE,
 		DEATH,
+		END,
 
 		MAX
 	};
@@ -65,12 +66,11 @@ public:
 
 		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
 		for (ColliderBase*& collider : punch_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : gouge_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : throwing_->GetCollider()) { ret.emplace_back(collider); }
 
 		return ret;
 	}
-
-	// ƒvƒŒƒCƒ„[‚ª•ø‚¦‚é‰ºˆÊƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğ”z—ñ‚ÉŠi”[‚µ‚Ä•Ô‚·
-	std::vector<ActorBase*>GetSubIns(void);
 
 	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival_ = std::move(ptr); }
 
@@ -129,6 +129,7 @@ private:
 	void Evasion(void);
 	void Damage(void);
 	void Death(void);
+	void End(void) {};
 	//`````````
 
 #pragma endregion

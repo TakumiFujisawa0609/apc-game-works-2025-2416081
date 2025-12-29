@@ -8,7 +8,6 @@ enum class THROW_TYPE { NON = -1, ROCK, MAX };
 class Throwing
 {
 public:
-	static constexpr int MAX_OBJ_NUM = 20;
 
 	Throwing(const Vector3& playerPos, const Vector3& playerAngle);
 	~Throwing();
@@ -24,12 +23,30 @@ public:
 	void Drop(void);
 	void Throw(void);
 
+	std::vector<ColliderBase*> GetCollider(void)const {
+		std::vector<ColliderBase*>ret = {};
+
+		for (const THROW_OBJ_INFO& obj : throwObj_) {
+			for (ColliderBase*& collider : obj.ins->GetCollider()) { ret.emplace_back(collider); }
+		}
+
+		return ret;
+	}
+
 private:
 	struct THROW_OBJ_INFO {
 		ThrowObjBase* ins = nullptr;
 		THROW_TYPE type = THROW_TYPE::NON;
 	};
-	std::vector<THROW_OBJ_INFO> throwObj_;
+
+	static constexpr unsigned char BY_TYPE_NUM[(int)THROW_TYPE::MAX] = 
+	{
+		10, // ROCK
+	};
+
+	static constexpr short MAX_OBJ_NUM = 10;
+
+	THROW_OBJ_INFO throwObj_[MAX_OBJ_NUM];
 
 	int models_[(int)THROW_TYPE::MAX];
 

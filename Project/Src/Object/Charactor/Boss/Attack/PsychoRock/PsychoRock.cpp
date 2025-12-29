@@ -51,6 +51,9 @@ void PsychoRock::SubInit(void)
 	SetGravityFlg(false);
 
 	SetPushFlg(false);
+
+	SetJudge(false);
+	SetIsDraw(false);
 }
 
 void PsychoRock::SubUpdate(void)

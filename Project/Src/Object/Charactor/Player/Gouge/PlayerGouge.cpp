@@ -22,14 +22,20 @@ PlayerGouge::PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle) :
 
 void PlayerGouge::Load(void)
 {
+	SetDynamicFlg(true);
+	SetGravityFlg(false);
+
+	SetPushFlg(false);
+
 	// コライダー生成
-	ColliderCreate(new SphereCollider(TAG::PLAYER_GOUGE, STATE_RADIUS[(int)state_]));
+	ColliderCreate(new SphereCollider(TAG::PLAYER_GOUGE, STATE_RADIUS[(int)state_], STATE_RADIUS[(int)STATE::GOUGE]));
 }
 
 void PlayerGouge::SubInit(void)
 {
 	searchHit_ = false;
 	gougeHit_ = false;
+	Off();
 }
 
 void PlayerGouge::SubUpdate(void)
@@ -45,12 +51,13 @@ void PlayerGouge::SubUpdate(void)
 		xAngle_ += Utility::Deg2RadF(5.0f);
 		if (xAngle_ > Utility::Deg2RadF(200.0f)) { xAngle_ = Utility::Deg2RadF(200.0f); }
 		else {
-			trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3(xAngle_,0.0f,0.0f) , playerAngle }));
+			trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
 		}
 		break;
 	case PlayerGouge::STATE::GOUGE:
 		if(gougeHit_){
 			SetJudge(false);
+			//SetIsDraw(false);
 			state_ = STATE::NON;
 		}
 		break;
@@ -59,21 +66,24 @@ void PlayerGouge::SubUpdate(void)
 
 void PlayerGouge::OnCollision(const ColliderBase& collider)
 {
+	TAG otherTag = collider.GetTag();
+
+	if (
+		otherTag != TAG::STAGE &&
+		otherTag != TAG::GOLEM_ATTACK_WALL
+		)
+	{
+		return;
+	}
+
 	switch (state_)
 	{
 	case PlayerGouge::STATE::SEARCH:
-		if (searchHit_) { return; }
-		if (collider.GetTag() == TAG::STAGE) {
-			searchHit_ = true;
-			return;
-		}
-		break;
+		searchHit_ = true;
+		return;
 	case PlayerGouge::STATE::GOUGE:
-		if (collider.GetTag() == TAG::STAGE) {
-			gougeHit_ = true;
-			return;
-		}
-		break;
+		gougeHit_ = true;
+		return;
 	}
 }
 
@@ -81,18 +91,20 @@ void PlayerGouge::On(void)
 {
 	if (GetJudgeFlg()) { return; }
 
-	trans_.pos = playerPos + FOOT_POS;
-
 	SetJudge(true);
+	SetIsDraw(true);
 	searchHit_ = false;
 	gougeHit_ = false;
 	state_ = STATE::SEARCH;
 	xAngle_ = 0.0f;
+
+	trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
 }
 
 void PlayerGouge::Off(void)
 {
 	SetJudge(false);
+	//SetIsDraw(false);
 	state_ = STATE::NON;
 }
 

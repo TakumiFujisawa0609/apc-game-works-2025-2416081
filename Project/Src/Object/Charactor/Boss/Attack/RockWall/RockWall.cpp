@@ -82,7 +82,7 @@ void RockWall::Move(void)
     trans_.pos.y += MOVE_SPEED;
     if (CollisionManager::IsStageCollision(trans_.pos, ROUGH_RADIUS, TAG::GOLEM_ATTACK_WALL) == false) {
         state_ = STATE::BE;
-        trans_.pos.y -= MOVE_SPEED;
+        trans_.pos = trans_.prevPos;
         SetDynamicFlg(false);
         return;
     }

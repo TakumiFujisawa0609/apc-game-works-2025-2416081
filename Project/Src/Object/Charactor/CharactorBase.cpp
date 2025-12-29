@@ -106,6 +106,13 @@ void CharactorBase::AddInFbxAnimation(int inFbxMaxIndex, float speed)
 	}
 }
 
+void CharactorBase::AddInFbxAnimation(int inFbxMaxIndex, const float* speed)
+{
+	for (int index = 0; index < inFbxMaxIndex; index++) {
+		anime_->AddInFbx(index, speed[index], index);
+	}
+}
+
 void CharactorBase::AddAnimation(int index, float speed, const char* filePath)
 {
 	anime_->Add(index, speed, filePath);

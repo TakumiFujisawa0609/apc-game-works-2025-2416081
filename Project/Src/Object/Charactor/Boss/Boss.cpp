@@ -57,6 +57,7 @@ void Boss::Load(void)
 	SET_STATE(STATE::STAN, &Boss::Stan);
 	SET_STATE(STATE::BIG_DAMAGE, &Boss::BigDamage);
 	SET_STATE(STATE::DEATH, &Boss::Death);
+	SET_STATE(STATE::END, &Boss::End);
 	
 #pragma endregion
 
@@ -151,6 +152,8 @@ void Boss::CharactorRelease(void)
 
 void Boss::OnCollision(const ColliderBase& collider)
 {
+	if (GetInviCounter() > 0) { return; }
+
 	if (state_ == (int)STATE::STAN) {
 		if (collider.GetTag() == TAG::PLAYER_PUNCH) {
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
@@ -313,6 +316,7 @@ void Boss::Death(void)
 {
 	if (IsAnimeEnd()) {
 		SetJudge(false);
+		state_ = (int)STATE::END;
 	}
 }
 
@@ -321,7 +325,7 @@ Boss::ATTACK_KINDS Boss::AttackLottery(void)
 	//return ATTACK_KINDS::FALL;
 	//return ATTACK_KINDS::STONE;
 	//return ATTACK_KINDS::PSYCHO;
-	return ATTACK_KINDS::WALL;
+	//return ATTACK_KINDS::WALL;
 
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 
@@ -344,7 +348,7 @@ Boss::ATTACK_KINDS Boss::AttackLottery(void)
 
 void Boss::AnimeLoad(void)
 {
-	AddInFbxAnimation((int)ANIME_TYPE::MAX, 1.0f);
+	AddInFbxAnimation((int)ANIME_TYPE::MAX, IN_FBX_ANIME_SPEED);
 
 	const std::string ANIME_PATH = "Data/Model/Boss/Animation/";
 	//anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());

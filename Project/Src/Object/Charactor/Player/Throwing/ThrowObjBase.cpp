@@ -25,10 +25,6 @@ ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle
 {
 }
 
-void ThrowObjBase::Load(void)
-{
-}
-
 void ThrowObjBase::SubInit(void)
 {
 #pragma region 関数ポインタ配列へ各関数を格納
@@ -38,6 +34,13 @@ void ThrowObjBase::SubInit(void)
 	SET_STATE(STATE::DROP, &ThrowObjBase::DropStateFunc);
 	SET_STATE(STATE::THROW, &ThrowObjBase::ThrowStateFunc);
 #pragma endregion
+
+	state_ = STATE::NON;
+
+	SetDynamicFlg(true);
+	SetGravityFlg(false);
+
+	SetPushFlg(false);
 }
 
 void ThrowObjBase::SubUpdate(void)
@@ -74,6 +77,9 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 		return;
 	case ThrowObjBase::STATE::THROW:
 		// 何回か当たったら消える処理をあとで書きます
+		if (++aliveHitCou_ >= ALIVE_HIT_NUM) {
+			state_ = STATE::DROP;
+		}
 		return;
 	}
 }

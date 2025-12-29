@@ -9,16 +9,19 @@ public:
 	~SkyDome() {}
 
 	void Load(void)override;
-	void Init(void)override {}
+	void Init(void)override;
 	void Update(void)override;
 	void Draw(void)override;
 
 	void SetPos(const Vector3& pos) { trans_.pos = pos; }
 private:
 	// ï\é¶Ç∑ÇÈëÂÇ´Ç≥
-	const float SCALE = 50.0f;
+	const float SCALE = 30.0f;
 
-	void SubInit(void)override{}
+	// ç¿ïW
+	const Vector3 POS = { 1000.0f,0.0f,1000.0f };
+
+	void SubInit(void)override {}
 	void SubUpdate(void)override{}
 	void SubDraw(void)override {}
 	void SubAlphaDraw(void)override {}

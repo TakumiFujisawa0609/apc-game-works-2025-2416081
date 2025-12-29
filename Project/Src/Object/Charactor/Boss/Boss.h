@@ -36,6 +36,7 @@ public:
 		STAN,
 		BIG_DAMAGE,
 		DEATH,
+		END,
 
 		MAX
 	};
@@ -110,6 +111,7 @@ private:
 	void Stan(void);
 	void BigDamage(void);
 	void Death(void);
+	void End(void) {};
 	//`````````
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
@@ -143,7 +145,7 @@ private:
 	//------------------------
 
 	// UŒ‚‚ÌŠÔŠu‚ğŠÇ—‚·‚éƒJƒEƒ“ƒ^[
-	int attackInterval_;
+	unsigned short attackInterval_;
 
 	// ŠeUŒ‚‚ÌI—¹Œã‚Ì‘Ò‹@ŠÔ
 	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
@@ -161,8 +163,8 @@ private:
 	// UŒ‚I—¹‚ğŒ©•ª‚¯‚é•Ï”
 	bool attackEnd_;
 
-	const int SP_ATTACK_MEASU = 5;
-	int spAttackMeasu_;
+	const unsigned char SP_ATTACK_MEASU = 5;
+	unsigned char spAttackMeasu_;
 	// `````````````````````````
 
 	// UŒ‚ó‘Ô`````````````````````
@@ -191,6 +193,20 @@ private:
 
 		// ƒ‚ƒfƒ‹ŠO
 		FALL,
+	};
+
+	// ƒ‚ƒfƒ‹‚É•R‚Ã‚¢‚Ä‚¢‚éƒ‚[ƒVƒ‡ƒ“‚ÌƒXƒs[ƒh‚Ì’è‹`
+	const float IN_FBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] = {
+		1.0f, // ATTACK
+		1.0f, // DAMAGE
+		1.0f, // DEATH
+		1.0f, // IDLE
+		1.0f, // JUMP
+		1.0f, // PUNCH
+		1.0f, // RUN
+		1.0f, // SLAP
+		0.5f, // STAN
+		1.0f, // WALK
 	};
 
 	// ƒ‚[ƒVƒ‡ƒ“‚Ì‰Šúİ’è
