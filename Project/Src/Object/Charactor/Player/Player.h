@@ -20,7 +20,7 @@ public:
 	~Player()override {};
 
 	void Load(void)override;
-	void UiDraw(void);
+	void UiDraw(void)override;
 
 	void OnCollision(const ColliderBase& collider)override;
 	void OnGrounded()override;
@@ -42,7 +42,7 @@ public:
 		MAX
 	};
 
-	static constexpr int HP_MAX = 100;
+	static constexpr unsigned char HP_MAX = 100;
 
 	// ˆÚ“®ó‘Ô‚Åg—p‚·‚é``-------------------------------------------------------------------
 	// ’è”
@@ -96,6 +96,27 @@ private:
 
 	const Vector3 LINE_COLLIDER_START_POS = Vector3();
 	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y * 0.5f, 0.0f);
+
+	// HPƒo[‚ÉŠÖ‚·‚é’è”````````````````````````````````
+
+	// HPƒo[‚Ì•ªŠ„”
+	const unsigned char HP_BAR_DIVISION_NUM_X = 39;
+	const unsigned char HP_BAR_DIVISION_NUM_Y = 3;
+	const unsigned char HP_BAR_DIVISIONS_NUM = HP_BAR_DIVISION_NUM_X * HP_BAR_DIVISION_NUM_Y;
+
+	// HPƒo[‚Ì1•ªŠ„‚ ‚½‚è‚Ì‘å‚«‚³icA‰¡ “¯ˆêj
+	const float HP_BAR_ONE_DIVISION_SIZE = 10.0f;
+
+	// HPƒo[ƒtƒŒ[ƒ€‚Ì•`‰æˆÊ’u‚©‚çÅ‰‚ÌHPƒo[‚Ì•`‰æˆÊ’u‚Ü‚Å‚Ìƒ[ƒJƒ‹À•W
+	const Vector2 HP_BAR_FIRST_POS = Vector2(0.0f, 0.0f);
+
+	// Œ»İ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚©‚çŸ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚Ü‚Å‚Ìƒ[ƒJƒ‹À•Wic²ˆÚ“®‚Ìê‡j
+	const Vector2 HP_BAR_NEXT_POS_USUALLY = Vector2(-HP_BAR_ONE_DIVISION_SIZE, -HP_BAR_ONE_DIVISION_SIZE);
+	// Œ»İ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚©‚çŸ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚Ü‚Å‚Ìƒ[ƒJƒ‹À•Wi‰¡²ˆÚ“®‚Ìê‡j
+	const Vector2 HP_BAR_NEXT_POS_UNIQUE = Vector2(HP_BAR_ONE_DIVISION_SIZE * HP_BAR_DIVISION_NUM_Y, HP_BAR_ONE_DIVISION_SIZE * (HP_BAR_DIVISION_NUM_Y - 1));
+
+	// `````````````````````````````````````````
+
 #pragma endregion
 
 	void CharactorInit(void)override;
@@ -136,7 +157,7 @@ private:
 
 	//const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
 
-	int hp_;
+	unsigned char hp_;
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
 	// ˆÚ“®ˆ—ŠÖŒW--------------------------

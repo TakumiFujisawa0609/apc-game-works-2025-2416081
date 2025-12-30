@@ -1,5 +1,7 @@
 #pragma once
 
+#include<cmath>
+
 class Vector2;
 
 class Vector2I
@@ -127,4 +129,33 @@ public:
 
 	Vector2 Normalized(void)const;
 	void Normalize(void);
+
+	// s—ñ‚Å•ÏŠ·
+	Vector2 TransMat(float rot) const
+	{
+		if (*this == 0.0f) { return Vector2(); }
+
+		float c = cosf(rot);
+		float s = sinf(rot);
+
+		return Vector2(
+			x * c - y * s,
+			x * s + y * c
+		);
+	}
+
+	// s—ñ‚Å•ÏŠ·(©g‚ğ•ÏŠ·)
+	void TransMatOwn(float rot)
+	{
+		if (*this == 0.0f) { return; }
+
+		float c = cosf(rot);
+		float s = sinf(rot);
+
+		float nx = x * c - y * s;
+		float ny = x * s + y * c;
+
+		x = nx;
+		y = ny;
+	}
 };

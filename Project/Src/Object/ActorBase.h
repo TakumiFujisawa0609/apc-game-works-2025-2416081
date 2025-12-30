@@ -17,6 +17,7 @@ public:
 	virtual void Update(void);
 	virtual void Draw(void);
 	virtual void AlphaDraw(void);
+	virtual void UiDraw(void) {}
 	virtual void Release(void);
 
 	// モデルを複製する
@@ -61,7 +62,7 @@ private:
 
 	// 動的オブジェクトか否か（true = 動的、false = 静的）
 	bool dynamicFlg_;
-	
+
 	// 重力を適用するかどうか(true = する、false = しない)
 	bool isGravity_;
 
@@ -143,8 +144,8 @@ protected:
 	/// 移動するかを切り替える
 	/// </summary>
 	/// <param name="flg">true = 「移動する」に切り替える、false = 「移動しない」に切り替える</param>
-	void SetDynamicFlg(bool flg) { 
-		dynamicFlg_ = flg; 
+	void SetDynamicFlg(bool flg) {
+		dynamicFlg_ = flg;
 		for (ColliderBase*& collider : collider_) {
 			collider->SetDynamicFlg(flg);
 		}
@@ -200,13 +201,13 @@ protected:
 	void SetIsAlphaDraw(void) { isAlphaDraw_ = !isAlphaDraw_; }
 
 	// 派生先追加初期化
-	virtual void SubInit(void) = 0;
+	virtual void SubInit(void) {}
 	// 派生先追加更新
-	virtual void SubUpdate(void) = 0;
+	virtual void SubUpdate(void) {}
 	// 派生先追加描画
-	virtual void SubDraw(void) = 0;
+	virtual void SubDraw(void) {}
 	// 派生先追加アルファ描画
-	virtual void SubAlphaDraw(void) = 0;
+	virtual void SubAlphaDraw(void) {}
 	// 派生先追加解放
-	virtual void SubRelease(void) = 0;
+	virtual void SubRelease(void) {}
 };

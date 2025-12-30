@@ -184,8 +184,8 @@ void GameScene::Draw(void)
 
 #pragma region UI描画（画面演出をかけないもの）
 
-	ObjSerch<Player>().back()->UiDraw();
-	ObjSerch<Boss>().back()->UiDraw();
+	// オブジェクト全てのUI描画処理
+	for (ActorBase*& obj : objects_) { obj->UiDraw(); }
 
 	if (KEY::GetIns().GetControllerConnect()) {
 		DrawString(10, 0, 

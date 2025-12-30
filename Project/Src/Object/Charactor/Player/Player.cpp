@@ -147,12 +147,12 @@ void Player::UiDraw(void)
 
 	float dif = 20.0f;
 
-	Vector2 size = { Application::SCREEN_SIZE_X * 0.45,60.0f };
+	Vector2 size = { Application::SCREEN_SIZE_X * 0.45,50.0f };
 	Vector2 sPos = { dif,Application::SCREEN_SIZE_Y - dif - size.y };
 
 	drawHpBar(sPos, size, 0xffffff);
 
-	dif = 3.0f;
+	dif = 10.0f;
 	sPos += dif;
 	size -= dif * 2;
 
@@ -160,6 +160,7 @@ void Player::UiDraw(void)
 
 	size.x *= ((float)hp_ / (float)HP_MAX);
 	drawHpBar(sPos, size, 0x00ff00);
+
 }
 
 void Player::CharactorRelease(void)

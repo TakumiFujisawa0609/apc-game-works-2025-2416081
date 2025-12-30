@@ -177,11 +177,6 @@ void Boss::OnCollision(const ColliderBase& collider)
 	}
 }
 
-void Boss::OnGrounded(void) 
-{
-
-}
-
 void Boss::Idle(void)
 {
 	AnimePlay((int)ANIME_TYPE::IDLE);

@@ -18,13 +18,13 @@ public:
 	void Load(void)override;
 
 	// UIの描画
-	void UiDraw(void);
+	void UiDraw(void)override;
 
 	// 当たり判定の通知
 	void OnCollision(const ColliderBase& collider)override;
 
 	// 接地判定の通知
-	void OnGrounded()override;
+	void OnGrounded()override {}
 
 	// 状態定義
 	enum class STATE
