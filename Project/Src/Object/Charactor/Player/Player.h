@@ -8,14 +8,13 @@
 #include"Gouge/PlayerGouge.h"
 #include"Throwing/Throwing.h"
 
+#include"UI/HpBar/PlayerHpBarManager.h"
+
+#include"../../../Application/Application.h"
+
 class Player : public CharactorBase
 {
 public:
-	//static constexpr float SCALE = 2.5f;
-	//static constexpr VECTOR SIZE = { 64.0f,180.0f,35.0f };
-	//const Vector3 SIZE = Vector3(25.0f, 70.0f, 35.0f) * SCALE;
-	//const Vector3 CENTER_DIFF = Vector3(0.0f, ((SIZE.y / 2) * SCALE), 15.0f) * SCALE;
-
 	Player(const Vector3& cameraAngle);
 	~Player()override {};
 
@@ -96,26 +95,6 @@ private:
 
 	const Vector3 LINE_COLLIDER_START_POS = Vector3();
 	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y * 0.5f, 0.0f);
-
-	// HPƒo[‚ÉŠÖ‚·‚é’è”````````````````````````````````
-
-	// HPƒo[‚Ì•ªŠ„”
-	const unsigned char HP_BAR_DIVISION_NUM_X = 39;
-	const unsigned char HP_BAR_DIVISION_NUM_Y = 3;
-	const unsigned char HP_BAR_DIVISIONS_NUM = HP_BAR_DIVISION_NUM_X * HP_BAR_DIVISION_NUM_Y;
-
-	// HPƒo[‚Ì1•ªŠ„‚ ‚½‚è‚Ì‘å‚«‚³icA‰¡ “¯ˆêj
-	const float HP_BAR_ONE_DIVISION_SIZE = 10.0f;
-
-	// HPƒo[ƒtƒŒ[ƒ€‚Ì•`‰æˆÊ’u‚©‚çÅ‰‚ÌHPƒo[‚Ì•`‰æˆÊ’u‚Ü‚Å‚Ìƒ[ƒJƒ‹À•W
-	const Vector2 HP_BAR_FIRST_POS = Vector2(0.0f, 0.0f);
-
-	// Œ»İ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚©‚çŸ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚Ü‚Å‚Ìƒ[ƒJƒ‹À•Wic²ˆÚ“®‚Ìê‡j
-	const Vector2 HP_BAR_NEXT_POS_USUALLY = Vector2(-HP_BAR_ONE_DIVISION_SIZE, -HP_BAR_ONE_DIVISION_SIZE);
-	// Œ»İ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚©‚çŸ‚ÌHPƒo[‚Ì‚PƒuƒƒbƒN‚Ì•`‰æˆÊ’u‚Ü‚Å‚Ìƒ[ƒJƒ‹À•Wi‰¡²ˆÚ“®‚Ìê‡j
-	const Vector2 HP_BAR_NEXT_POS_UNIQUE = Vector2(HP_BAR_ONE_DIVISION_SIZE * HP_BAR_DIVISION_NUM_Y, HP_BAR_ONE_DIVISION_SIZE * (HP_BAR_DIVISION_NUM_Y - 1));
-
-	// `````````````````````````````````````````
 
 #pragma endregion
 
@@ -201,6 +180,16 @@ private:
 
 
 	Vector3 knockBackVec_;
+
+	// HPƒo[````````````
+
+	// HPƒo[ŠÇ—ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
+	PlayerHpBarManager* hpBar_;
+
+	// À•W
+	Vector2 HP_BAR_POS = Vector2(150.0f, App::SCREEN_SIZE_Y - PlayerHpBarManager::HP_BAR_WHOLE_SIZE_Y - 10.0);
+
+	//````````````````
 
 #pragma endregion
 

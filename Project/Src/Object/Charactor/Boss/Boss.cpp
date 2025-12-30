@@ -115,25 +115,27 @@ void Boss::CharactorAlphaDraw(void)
 
 void Boss::UiDraw(void)
 {
-	auto drawHpBar = [&](Vector2 sPos, Vector2 size, int color)->void {
-		DrawBoxAA(sPos.x, sPos.y, sPos.x + size.x, sPos.y + size.y, color, true);
-		};
+	//auto drawHpBar = [&](Vector2 sPos, Vector2 size, int color)->void {
+	//	DrawBoxAA(sPos.x, sPos.y, sPos.x + size.x, sPos.y + size.y, color, true);
+	//	};
 
-	float dif = 20.0f;
+	//float dif = 20.0f;
 
-	Vector2 size = { Application::SCREEN_SIZE_X * 0.65,60.0f };
-	Vector2 sPos = { Application::SCREEN_SIZE_X - dif - size.x,dif };
+	//Vector2 size = { Application::SCREEN_SIZE_X * 0.65,60.0f };
+	//Vector2 sPos = { Application::SCREEN_SIZE_X - dif - size.x,dif };
 
-	drawHpBar(sPos, size, 0xffffff);
+	//drawHpBar(sPos, size, 0xffffff);
 
-	dif = 3.0f;
-	sPos += dif;
-	size -= dif * 2;
+	//dif = 3.0f;
+	//sPos += dif;
+	//size -= dif * 2;
 
-	drawHpBar(sPos, size, 0x000000);
+	//drawHpBar(sPos, size, 0x000000);
 
-	size.x *= ((float)hp_ / (float)HP_MAX);
-	drawHpBar(sPos, size, 0xff0000);
+	//size.x *= ((float)hp_ / (float)HP_MAX);
+	//drawHpBar(sPos, size, 0xff0000);
+
+	for (unsigned char i = 0; i < masterLife_; i++) { hpBar_[i]->Draw(); }
 
 	if (state_ == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
 		SetFontSize(45);
@@ -173,6 +175,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(1);
+		SetInviCounter(0);
 		return;
 	}
 }
@@ -363,6 +366,12 @@ void Boss::LowerLoad(void)
 
 	rockWall_ = new RockWallShooter(trans_.pos, trans_.angle);
 	rockWall_->Load();
+
+	// HPÉoÅ[
+	for (unsigned char i = 0; i < MASTER_LIFE; i++) {
+		hpBar_[i] = new BossHpBarManager(hp_, HP_MAX, i);
+		hpBar_[i]->Load();
+	}
 }
 void Boss::LowerInit(void)
 {
@@ -370,6 +379,10 @@ void Boss::LowerInit(void)
 	stone_->Init();
 	psycho_->Init();
 	rockWall_->Init();
+	
+	for (unsigned char i = 0; i < MASTER_LIFE; i++) {
+		hpBar_[i]->Init(HP_BAR_POS, HP_BAR_COLOR[i]);
+	}
 }
 void Boss::LowerUpdate(void)
 {
@@ -377,6 +390,8 @@ void Boss::LowerUpdate(void)
 	stone_->Update();
 	psycho_->Update();
 	rockWall_->Update();
+	
+	if (masterLife_ > 0) { hpBar_[masterLife_ - 1]->Update(); }
 }
 void Boss::LowerDraw(void)
 {
@@ -414,13 +429,19 @@ void Boss::LowerRelease(void)
 		delete psycho_;
 		psycho_ = nullptr;
 	}
+
+	for (BossHpBarManager*& h : hpBar_) {
+		if (!h) { continue; }
+		h->Release();
+		delete h;
+	}
 }
 
 void Boss::HpSharpen(int damage)
 {
 	if (hp_ <= 0) { return; }
 
-	hp_ -= damage;
+	hp_ -= (hp_ >= damage) ? damage : hp_;
 
 	if (hp_ <= 0) {
 		hp_ = 0;
@@ -455,6 +476,8 @@ void Boss::LifeSharpen(void)
 		GameScene::Shake(ShakeKinds::WID, ShakeSize::BIG, 100);
 		return;
 	}
+
+	hp_ = HP_MAX;
 
 	GameScene::Slow(20);
 	GameScene::Shake();

@@ -136,8 +136,10 @@
     <ClCompile Include="Src\Application\Application.cpp" />
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp" />
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.cpp" />
-    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarMamager.cpp" />
+    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.cpp" />
     <ClCompile Include="Src\Object\Common\AnimationController\AnimationController.cpp" />
     <ClCompile Include="Src\Manager\Camera\Camera.cpp" />
     <ClCompile Include="Src\Manager\Collision\CollisionManager.cpp" />
@@ -180,8 +182,10 @@
     <ClInclude Include="Src\Application\Application.h" />
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\Common\Vector3.h" />
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h" />
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.h" />
     <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.h" />
-    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarMamager.h" />
+    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.h" />
     <ClInclude Include="Src\Object\Common\AnimationController\AnimationController.h" />
     <ClInclude Include="Src\Manager\Camera\Camera.h" />
     <ClInclude Include="Src\Manager\Collision\CollisionManager.h" />

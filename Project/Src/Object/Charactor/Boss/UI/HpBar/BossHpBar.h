@@ -1,14 +1,13 @@
 #pragma once
-
 #include"../../../../../Common/Vector2.h"
 
-class PlayerHpBar
+class BossHpBar
 {
 public:
-	PlayerHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
-	~PlayerHpBar();
+	BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
+	~BossHpBar() {}
 
-	void Init(const Vector2& localAlivePosition,unsigned int aliveColor);
+	void Init(const Vector2& localAlivePosition, unsigned int aliveColor);
 	void Update(void);
 	void Draw(void);
 
@@ -29,8 +28,8 @@ public:
 	// 状態設定
 	void SetLostIdle(void);
 	void SetLostDrop(void);
-
 private:
+
 	// 大きさ
 	const float HP_BAR_ONE_DIVISION_SIZE;
 
@@ -89,8 +88,7 @@ private:
 	void LostDrop(void);
 
 	// 状態関数ポインタ型定義
-	using STATEFUNC = void (PlayerHpBar::*)(void);
+	using STATEFUNC = void (BossHpBar::*)(void);
 	// 状態関数ポインタ配列
 	STATEFUNC stateFuncPtr[(int)STATE::MAX];
-
 };

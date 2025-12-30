@@ -1,10 +1,10 @@
-#include"PlayerHpBar.h"
+#include"BossHpBar.h"
 
 #include"../../../../../Utility/Utility.h"
 
 #include"../../../../../Application/Application.h"
 
-PlayerHpBar::PlayerHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
+BossHpBar::BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
 	position(position),
 	HP_BAR_ONE_DIVISION_SIZE(HP_BAR_ONE_DIVISION_SIZE),
 
@@ -20,11 +20,7 @@ PlayerHpBar::PlayerHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE
 {
 }
 
-PlayerHpBar::~PlayerHpBar()
-{
-}
-
-void PlayerHpBar::Init(const Vector2& localAlivePosition, unsigned int aliveColor)
+void BossHpBar::Init(const Vector2& localAlivePosition, unsigned int aliveColor)
 {
 	localPosition = localAlivePosition;
 
@@ -33,21 +29,21 @@ void PlayerHpBar::Init(const Vector2& localAlivePosition, unsigned int aliveColo
 	angle = 0.0f;
 
 	idleTimer = 0;
-	
+
 	state = STATE::ALIVE;
 
-	stateFuncPtr[(int)STATE::NON] = &PlayerHpBar::Non;
-	stateFuncPtr[(int)STATE::ALIVE] = &PlayerHpBar::Alive;
-	stateFuncPtr[(int)STATE::LOST_IDLE] = &PlayerHpBar::LostIdle;
-	stateFuncPtr[(int)STATE::LOST_DROP] = &PlayerHpBar::LostDrop;
+	stateFuncPtr[(int)STATE::NON] = &BossHpBar::Non;
+	stateFuncPtr[(int)STATE::ALIVE] = &BossHpBar::Alive;
+	stateFuncPtr[(int)STATE::LOST_IDLE] = &BossHpBar::LostIdle;
+	stateFuncPtr[(int)STATE::LOST_DROP] = &BossHpBar::LostDrop;
 }
 
-void PlayerHpBar::Update(void)
+void BossHpBar::Update(void)
 {
 	(this->*stateFuncPtr[(int)state])();
 }
 
-void PlayerHpBar::Draw(void)
+void BossHpBar::Draw(void)
 {
 	if (state == STATE::NON) { return; }
 
@@ -64,7 +60,7 @@ void PlayerHpBar::Draw(void)
 }
 
 
-void PlayerHpBar::SetLostIdle(void)
+void BossHpBar::SetLostIdle(void)
 {
 	state = STATE::LOST_IDLE;
 
@@ -72,7 +68,7 @@ void PlayerHpBar::SetLostIdle(void)
 	idleShakeSign *= -1;
 }
 
-void PlayerHpBar::LostIdle(void)
+void BossHpBar::LostIdle(void)
 {
 	if (idleTimer % 3 == 0) {
 		localPosition += (float)idleShakeSign;
@@ -82,13 +78,13 @@ void PlayerHpBar::LostIdle(void)
 	idleTimer++;
 }
 
-void PlayerHpBar::SetLostDrop(void)
+void BossHpBar::SetLostDrop(void)
 {
 	state = STATE::LOST_DROP;
 
-	dropAccel = Vector2((float)(GetRand(3) + 2), -(float)(GetRand(3) + 2));
+	dropAccel = Vector2(-(float)(GetRand(3) + 2), -(float)(GetRand(3) + 2));
 }
-void PlayerHpBar::LostDrop(void)
+void BossHpBar::LostDrop(void)
 {
 	// ‰ñ“]‚³‚¹‚é
 	angle += Utility::Deg2RadF(5.0f);

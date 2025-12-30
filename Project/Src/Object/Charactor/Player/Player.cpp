@@ -3,7 +3,6 @@
 #include"../../../Manager/Input/KeyManager.h"
 #include"../../../Manager/Sound/SoundManager.h"
 
-#include"../../../Application/Application.h"
 #include"../../../scene/SceneManager/SceneManager.h"
 
 #include"../../../Scene/Game/GameScene.h"
@@ -141,25 +140,7 @@ void Player::CharactorAlphaDraw(void)
 
 void Player::UiDraw(void)
 {
-	auto drawHpBar = [&](Vector2 sPos, Vector2 size, int color)->void {
-		DrawBoxAA(sPos.x, sPos.y, sPos.x + size.x, sPos.y + size.y, color, true);
-		};
-
-	float dif = 20.0f;
-
-	Vector2 size = { Application::SCREEN_SIZE_X * 0.45,50.0f };
-	Vector2 sPos = { dif,Application::SCREEN_SIZE_Y - dif - size.y };
-
-	drawHpBar(sPos, size, 0xffffff);
-
-	dif = 10.0f;
-	sPos += dif;
-	size -= dif * 2;
-
-	drawHpBar(sPos, size, 0x000000);
-
-	size.x *= ((float)hp_ / (float)HP_MAX);
-	drawHpBar(sPos, size, 0x00ff00);
+	hpBar_->Draw();
 
 }
 
@@ -649,7 +630,7 @@ void Player::HpSharpen(int damage)
 	punch_->Off();
 	throwing_->Drop();
 
-	hp_ -= damage;
+	hp_ -= (hp_ >= damage) ? damage : hp_;
 
 	Smng::GetIns().Stop(SOUND::PLAYER_RUN);
 	Smng::GetIns().Stop(SOUND::PLAYER_EVASION);
@@ -676,6 +657,11 @@ void Player::LowerLoad(void)
 	throwing_ = new Throwing(trans_.pos, trans_.angle);
 	throwing_->Load();
 
+
+	// HPバー
+	hpBar_ = new PlayerHpBarManager(hp_, HP_MAX);
+	hpBar_->Load();
+
 }
 void Player::LowerInit(void)
 {
@@ -687,6 +673,9 @@ void Player::LowerInit(void)
 
 	// 特殊攻撃（投げ）
 	throwing_->Init();
+
+	// HPバー
+	hpBar_->Init(HP_BAR_POS);
 }
 void Player::LowerUpdate(void)
 {
@@ -698,6 +687,9 @@ void Player::LowerUpdate(void)
 
 	// 特殊攻撃（投げ）
 	throwing_->Update();
+
+	// HPバー
+	hpBar_->Update();
 }
 void Player::LowerDraw(void)
 {
@@ -742,5 +734,12 @@ void Player::LowerRelease(void)
 		throwing_->Release();
 		delete throwing_;
 		throwing_ = nullptr;
+	}
+
+	// HPバー
+	if (hpBar_) {
+		hpBar_->Release();
+		delete hpBar_;
+		hpBar_ = nullptr;
 	}
 }
