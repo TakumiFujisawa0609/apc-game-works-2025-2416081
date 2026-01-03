@@ -123,7 +123,7 @@ void Boss::UiDraw(void)
 
 	if (state_ == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
 		SetFontSize(45);
-		DrawString(App::SCREEN_SIZE_X/2, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
+		DrawString(HP_BAR_POS.x + 60, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
 		SetFontSize(16);
 	}
 }

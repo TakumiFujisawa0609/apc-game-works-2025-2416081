@@ -92,7 +92,7 @@ void GameScene::Init(void)
 	for (ActorBase*& obj : objects_) { obj->Init(); }
 
 	// カメラ設定
-	Camera::GetIns().ChangeModeFollowRemote(&(ObjSerch<Player>().back()->GetTrans().pos));
+	Camera::GetIns().ChangeModeFollowRemote(&(ObjSerch<Player>().back()->GetTrans().pos), Vector3::Zonly(-500.0f));
 
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());

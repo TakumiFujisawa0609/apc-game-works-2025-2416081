@@ -44,21 +44,24 @@ void ClearScene::Update(void)
 
 void ClearScene::Draw(void)
 {
-	skyDome_->Draw();
-	DrawRotaGraph(App::SCREEN_SIZE_X / 2, App::SCREEN_SIZE_Y / 2, 1, 0, img_, true);
+	int x = Application::SCREEN_SIZE_X;
+	int y = Application::SCREEN_SIZE_Y;
 
-	SetFontSize(32);
-	if (KEY::GetIns().GetControllerConnect()) {
-		DrawString(10, 0,
-			"タイトルへ：B",
-			0xffffff);
-	}
-	else {
-		DrawString(10, 0,
-			"タイトルへ：SPACE",
-			0xffffff);
-	}
-	SetFontSize(16);
+	skyDome_->Draw();
+	DrawExtendGraph(0, 0, x, y, img_, true);
+
+	//SetFontSize(32);
+	//if (KEY::GetIns().GetControllerConnect()) {
+	//	DrawString(10, 0,
+	//		"タイトルへ：B",
+	//		0xffffff);
+	//}
+	//else {
+	//	DrawString(10, 0,
+	//		"タイトルへ：SPACE",
+	//		0xffffff);
+	//}
+	//SetFontSize(16);
 }
 
 void ClearScene::Release(void)

@@ -37,18 +37,18 @@ void OverScene::Update(void)
 void OverScene::Draw(void)
 {
 	DrawRotaGraph(App::SCREEN_SIZE_X / 2, App::SCREEN_SIZE_Y / 2, 1, 0, img_, true);
-	SetFontSize(32);
-	if (KEY::GetIns().GetControllerConnect()) {
-		DrawString(10, 0,
-			"タイトルへ：B",
-			0xffffff);
-	}
-	else {
-		DrawString(10, 0,
-			"タイトルへ：SPACE",
-			0xffffff);
-	}
-	SetFontSize(16);
+	//SetFontSize(32);
+	//if (KEY::GetIns().GetControllerConnect()) {
+	//	DrawString(10, 0,
+	//		"タイトルへ：B",
+	//		0xffffff);
+	//}
+	//else {
+	//	DrawString(10, 0,
+	//		"タイトルへ：SPACE",
+	//		0xffffff);
+	//}
+	//SetFontSize(16);
 }
 
 void OverScene::Release(void)
