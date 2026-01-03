@@ -1,136 +1,65 @@
 #include "Block.h"
 #include"BlockManager.h"
-#include<DxLib.h>
 
 #include"../../../Manager/Sound/SoundManager.h"
 
 #include"../../../Scene/Game/GameScene.h"
 
-#include"../../Player/Player.h"
-
-#include"../../Boss/Attack/Stone/Stone.h"
-#include"../../Boss/Attack/Fall/Fall.h"
-#include"../../Boss/Attack/PsychoRock/PsychoRock.h"
-
-Block::Block(void)
+Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int mapZ) :
+	type_(type)
 {
-
-}
-
-void Block::Create(TYPE type, int baseModelId,int textureId, int mapX, int mapY, int mapZ)
-{
-	// ブロックの種類
-	type_ = type;
-
-	// モデルのハンドルID
-	unit_.model_ = MV1DuplicateModel(baseModelId);
-
-	// 
-	textureId_ = textureId;
-
-	// 1ブロックあたりの大きさ
-	const float SIZE_BLOCK = BlockManager::SIZE_BLOCK;
+	// モデルを複製する
+	ModelDuplicate(baseModelId);
+	
+	// ボクセルメッシュ生成に必要な情報を設定する
+	VoxelInfoInit(TAG::STAGE,Vector3(BlockManager::SIZE_BLOCK), textureId, 25.0f, Vector3(), 0.1f);
 
 	// 1ブロックあたりの半分の大きさ
-	const float SIZE_HALF_BLOCK = (SIZE_BLOCK / 2.0f);
+	const float SIZE_HALF_BLOCK = (BlockManager::SIZE_BLOCK / 2.0f);
 
 	// 引数で指定されたマップ座標から座標を計算する
-	// 今回の３Ｄモデルの中心座標は、ブロックの中心に位置する
-	float x = static_cast<float>(mapX);
-	float y = static_cast<float>(mapY);
-	float z = static_cast<float>(mapZ);
+	trans_.pos = Vector3(
+		((float)mapX * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK,
+		((float)mapY * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK,
+		((float)mapZ * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK
+	);
 
 	// 大きさ設定
-	MV1SetScale(unit_.model_, SCALES);
+	trans_.scale = SCALE;
 
-	// 座標設定
-	unit_.pos_ = VGet(
-		x * SIZE_BLOCK + SIZE_HALF_BLOCK,
-		y * SIZE_BLOCK + SIZE_HALF_BLOCK,
-		z * SIZE_BLOCK + SIZE_HALF_BLOCK
-	);;
-	MV1SetPosition(unit_.model_, unit_.pos_);
+	// モデル制御情報を反映する
+	trans_.Attach();
 
-
+	SetDynamicFlg(false);
+	SetGravityFlg(false);
 }
 
-void Block::SubLoad(void)
+void Block::OnCollision(const ColliderBase& collider)
 {
-	unit_.para_.speed = 5.0f;
+	switch (collider.GetTag())
+	{
+	case TAG::SPHERE_DEBUG_OBJECT:
+	case TAG::PLAYER_PUNCH:
+	case TAG::PLAYER_GOUGE:
+	case TAG::PLAYER_THROWING:
+	case TAG::GOLEM_ATTACK_FALL:
+	case TAG::GOLEM_ATTACK_PSYCHOROCK:
+	case TAG::GOLEM_ATTACK_STONE: {
 
-	unit_.para_.colliShape = CollisionShape::AABB;
-	unit_.para_.size = { BlockManager::SIZE_BLOCK ,BlockManager::SIZE_BLOCK ,BlockManager::SIZE_BLOCK };
-	unit_.isAlive_ = true;
+		// ブロックを壊す
+		ApplyBrush(255);
 
-	aliveNeedRatio_ = 0.1f;
+		// 画面を揺らす
+		GameScene::Shake();
 
-	cell_ = 20.0f;
-}
+		// 音を鳴らす
+		Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
 
-void Block::SubInit(void)
-{
-	unit_.isAlive_ = true;
+		break;
+	}
+	default: { break; }	// それ以外は何もしない
+	}
 
-	unit_.para_.size = VScale(unit_.para_.size, 1.3f);
-}
-
-void Block::SubUpdate(void)
-{
-	VECTOR vec = {};
-
-	if (CheckHitKey(KEY_INPUT_0)) { vec.x++; }
-	if (CheckHitKey(KEY_INPUT_9)) { vec.x--; }
-	if (CheckHitKey(KEY_INPUT_6)) { vec.y++; }
-	if (CheckHitKey(KEY_INPUT_7)) { vec.y--; }
-
-	vec = Utility::Normalize(vec);
-
-	unit_.pos_ = VAdd(unit_.pos_, VScale(vec, unit_.para_.speed));
-}
-
-void Block::SubDraw(void)
-{
-//	DrawSphere3D(VAdd(unit_.pos_, unit_.para_.center), 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
-//
-	// //デバッグ用に当たり判定の表示
-	//VECTOR debugPos[8] =
-	//{
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f, -unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f, -unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({ -unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_}))),
-	//	VAdd(unit_.pos_, VTransform({  unit_.para_.size.x / 2.0f,  unit_.para_.size.y / 2.0f,  unit_.para_.size.z / 2.0f },Utility::MatrixAllMultY({unit_.angle_})))
-	//};
-	//for (int i = 0; i < 8; i++) {
-	//	DrawSphere3D(debugPos[i], 3.0f, 30, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
-	//}
-
-	//for (auto& vPos : GetCellCenterPoss()) {
-	//	DrawSphere3D(vPos, GetCellSize() / 2, 4, 0xffffff, 0xffffff, true);
-	//}
-}
-
-void Block::SubRelease(void)
-{
-
-}
-
-void Block::OnCollision(UnitBase* other)
-{
-	auto apply = [&](int amount, bool shake)->void {
-		if (ApplyBrush(other->GetUnit(), (uint8_t)amount)) {
-			if (shake) GameScene::Shake();
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
-		}
-		};
-
-	if (dynamic_cast<PlayerPunch*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<PlayerGouge*>(other)) { apply(255, true); return; }
-	if (dynamic_cast<ThrowObjBase*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<Stone*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<Fall*>(other)) { apply(200, true); return; }
-	if (dynamic_cast<PsychoRock*>(other)) { apply(200, true); return; }
+	// 当たったセルのインデックスをクリアする
+	ColliderSerch<VoxelCollider>().back()->ClearHitCellIdxs();
 }

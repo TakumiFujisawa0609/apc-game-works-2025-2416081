@@ -6,7 +6,9 @@
 #include "BlockManager.h"
 
 BlockManager::BlockManager(void):
-	textureId_(-1)
+	textureId_(-1),
+	models_(),
+	blocks_()
 {
 }
 BlockManager::~BlockManager(void)
@@ -17,48 +19,66 @@ void BlockManager::Load(void)
 {
 	Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
 
-	// 各種ブロックモデルのロード
-	std::string PATH = "Data/Model/StageBlocks/";
-
-	//models_[0] = MV1LoadModel((PATH + "Block_Grass.mv1").c_str());
-	models_[0] = MV1LoadModel((PATH + "Block.mv1").c_str());
-	//models_[1] = MV1LoadModel((PATH + "Block_Metal.mv1").c_str());
-	//models_[1] = MV1LoadModel((PATH + "Block.mv1").c_str());
+	models_[0] = MV1LoadModel("Data/Model/StageBlocks/Block.mv1");
 
 	LoadMapCsvData();
+
+	for (Block*& b : blocks_) { b->Load(); }
+}
+void BlockManager::Init(void)
+{
+	for (Block*& b : blocks_) { b->Init(); }
 }
 void BlockManager::Update(void)
 {
-	for (auto& b : blocks_) { b->Update(); }
+	for (Block*& b : blocks_) { b->Update(); }
 
 }
 void BlockManager::Draw(void)
 {
-	// マップの描画
-	for (auto& b : blocks_) { b->Draw(); }
+	for (Block*& b : blocks_) { b->Draw(); }
+}
+
+void BlockManager::AlphaDraw(void)
+{
+	//for (Block*& b : blocks_) { b->AlphaDraw(); }
 }
 
 void BlockManager::Release(void)
 {
 	// モデルのメモリ解放
-	for (auto& b : blocks_) {
+	for (Block*& b : blocks_) {
 		if (!b) { continue; }
 		b->Release(); 
 		delete b;
 	}
 	blocks_.clear();
 
-	for (auto& b : models_) {
-		if (b.second == -1)continue;
-		MV1DeleteModel(b.second);
+	for (auto& id : models_) {
+		if (id.second == -1)continue;
+		MV1DeleteModel(id.second);
 	}
 
 	DeleteGraph(textureId_);
 }
 
-const std::vector<UnitBase*> BlockManager::GetBlocks(void) const
+std::vector<ColliderBase*> BlockManager::GetCollider(void)const
 {
-	std::vector<UnitBase*> ret = {};
+	std::vector<ColliderBase*> ret = {};
+	ret.reserve(blocks_.size());
+
+	for (Block* const& b : blocks_) {
+		for (ColliderBase*& bCollider : b->GetCollider()) {
+			ret.emplace_back(bCollider);
+		}
+	}
+
+	return ret;
+}
+
+const std::vector<ActorBase*> BlockManager::GetBlocks(void) const
+{
+	std::vector<ActorBase*> ret = {};
 
 	ret.reserve(blocks_.size());
 
@@ -90,25 +110,19 @@ void BlockManager::LoadMapCsvData(void)
 		lineCount++;
 		if (lineCount <= 11) { continue; }
 
-		// １行をカンマ区切りで分割
 		strSplit = Utility::Split(line, ' ');
 
 		int x = std::stoi(strSplit[0]);
 		int z = std::stoi(strSplit[1]);
 		int y = std::stoi(strSplit[2]);
 
-		Block* block = new Block();
-		block->Create((Block::TYPE)0, models_[0], textureId_, x, y, z);
-		block->Load();
-		block->Init();
-
-		blocks_.emplace_back(block);
+		blocks_.emplace_back(new Block((Block::TYPE)0, models_[0], textureId_, x, y, z));
 	}
 }
 
 void BlockManager::SetCamera(Camera* c)
 {
-	for (auto& b : blocks_) { b->SetCamera(c); }
+	for (Block*& b : blocks_) { b->SetCamera(c); }
 }
 
 void BlockManager::StageRevival(void)

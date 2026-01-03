@@ -68,7 +68,7 @@ void FPS::CalcFrameRate(void)
 void FPS::DrawFrameRate(void)
 {
 	DrawFormatString(
-		/*Application::SCREEN_SIZE_X - 9*/10,
+		Application::SCREEN_SIZE_X - 90,
 		Application::SCREEN_SIZE_Y - 20,
 		0xff0000,
 		"FPS[%.2f]",

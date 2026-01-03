@@ -1,7 +1,6 @@
 #pragma once
 #include"../SceneBase.h"
 
-class Camera;
 class SkyDome;
 
 class TitleScene : public SceneBase
@@ -24,6 +23,5 @@ public:
 private:
 	int mainScreen_;
 	int img_;
-	Camera* camera_;
 	SkyDome* skyDome_;
 };

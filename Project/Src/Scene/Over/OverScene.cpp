@@ -28,7 +28,7 @@ void OverScene::Init(void)
 void OverScene::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
-		KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
 		return;
 	}

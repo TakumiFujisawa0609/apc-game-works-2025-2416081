@@ -12,9 +12,24 @@ public:
 	enum class TAG
 	{
 		NON = -1,
+		
 		PLAYER,
+		PLAYER_PUNCH,
+		PLAYER_GOUGE,
+		PLAYER_THROWING,
+
+		BOSS,
+
+		GOLEM_ATTACK_FALL,
+		GOLEM_ATTACK_PSYCHOROCK,
+		GOLEM_ATTACK_STONE,
+		GOLEM_ATTACK_WALL,
+
 		ENEMY,
+
 		STAGE,
+
+		SPHERE_DEBUG_OBJECT,
 	};
 
 	// 形状列挙型定義
@@ -24,7 +39,7 @@ public:
 		LINE,
 		SPHERE,
 		CAPSULE,
-		AABB,
+		BOX,
 		MODEL,
 		VOXEL,
 	};
@@ -33,48 +48,115 @@ public:
 	/// コンストラクタ
 	/// </summary>
 	/// <param name="type">当たり判定タイプ</param>
-	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
 	/// <param name="enoughDistance">判定スキップに十分な距離　-1.0fで未設定とし、距離による判定スキップを行わない（引数省略で-1.0f）</param>
-	ColliderBase(TAG type, Vector3 pos = { 0.0f, 0.0f, 0.0f }, float enoughDistance = -1.0f);
-	virtual ~ColliderBase() = 0;
+	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
+	ColliderBase(TAG type, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
+		trans_(nullptr),
+		pos_(pos),
+		enoughDistance_(enoughDistance),
+		judgeFlg_(true),
+		dynamicFlg_(true),
+		pushFlg_(true),
+		pushWeight_(0),
+		type_(type),
+		shape_(SHAPE::NON),
+		OnCollision(nullptr)
+	{
+	}
+	virtual ~ColliderBase() = default;
 
 	// デバッグ描画
-	void DrawDebug(unsigned int color = 0xffffff);
+	virtual void DrawDebug(unsigned int color = 0xffffff) = 0;
 
 #pragma region 初期設定
 	// モデル制御情報セット
-	void SetTransformPtr(const Transform* ptr) { trans_ = ptr; }
+	void SetTransformPtr(Transform* ptr) { trans_ = ptr; }
 
 	// 当たり判定通知用関数セット
-	void SetOnCollisionFun(std::function<void(TAG type)> OnCollisionFunc) { OnCollision = std::move(OnCollisionFunc); }
+	void SetOnCollisionFunc(std::function<void(const ColliderBase& type)> OnCollisionFunc) { OnCollision = std::move(OnCollisionFunc); }
+
+	// 接地判定通知用関数セット
+	void SetOnGroundedFunc(std::function<void(void)>OnGroundedFunc) { OnGrounded = std::move(OnGroundedFunc); }
 #pragma endregion
 
 #pragma region 各ゲット関数
-	// 座標
-	Vector3 GetPos(void)const { return (trans_->WorldPos() + trans_->VTrans(pos_)); }
+	// コライダー座標（モデル制御情報の座標がそのままコライダーの座標とは限らない為、計算済みの座標を取得する関数を用意）
+	Vector3 GetPos(void)const { return (trans_->pos + trans_->VTrans(pos_)); }
+
+	// 1フレーム前のコライダー座標（モデル制御情報の座標がそのままコライダーの座標とは限らない為、計算済みの座標を取得する関数を用意）
+	Vector3 GetPrevPos(void)const { return (trans_->prevPos + trans_->VTrans(pos_)); }
+
+	// モデル制御情報を直接取得
+	const Transform& GetTransform(void)const { return *trans_; }
+
+	// 動的オブジェクトか否か（true = 動的、false = 静的）
+	bool GetDynamicFlg(void)const { return dynamicFlg_; }
 
 	// 判定スキップに十分な距離
 	float GetEnoughDistance(void)const { return enoughDistance_; }
 
+	// 当たり判定フラグ（true = 「判定する」、false = 「判定しない」）
+	bool GetJudge(void)const { return judgeFlg_; }
+
+	// 押し出しのフラグ
+	bool GetPushFlg(void)const { return pushFlg_; }
+
+	// 押し出しを行う際の重さ（0 ～ 100）
+	unsigned char GetPushWeight(void)const { return pushWeight_; }
+
 	// 当たり判定のタイプ
-	TAG GetType(void)const { return type_; }
+	TAG GetTag(void)const { return type_; }
 
 	// 当たり判定の形状
 	SHAPE GetShape(void)const { return shape_; }
 
 	// 判定通知の呼び出し
-	void CallOnCollision(TAG type) { OnCollision(type); }
+	void CallOnCollision(const ColliderBase& collider) { OnCollision(collider); }
+
+	// 接地判定の呼び出し
+	void CallOnGrounded(void) { OnGrounded(); }
+#pragma endregion
+
+#pragma region 各セット関数
+	// モデル制御情報の座標情報を書き換える
+	void SetTransformPos(const Vector3& pos) { trans_->pos = pos; }
+	void SetTransformPosAdd(const Vector3& vec) { trans_->pos += vec; }
+
+	// 動的オブジェクトか否かを設定する（true = 動的、false = 静的）
+	void SetDynamicFlg(bool flg) { dynamicFlg_ = flg; }
+
+	// 当たり判定フラグセット（true = 「判定する」、false = 「判定しない」）
+	void SetJudgeFlg(bool flg) { judgeFlg_ = flg; }
+
+	// 押し出しを行うかどうかのフラグを設定（true = 「押し出す」、false = 「押し出さない」）
+	void SetPushFlg(bool flg) { pushFlg_ = flg; }
+
+	// 押し出しを行う際の重さ（0 ～ 100 で設定）
+	void SetPushWeight(unsigned char weight) { pushWeight_ = weight; }
 #pragma endregion
 
 private:
 	// モデル制御情報をポインタで受け取って保持
-	const Transform* trans_;
-
+	Transform* trans_;
+	
 	// モデル制御情報の座標からの相対座標
 	Vector3 pos_;
 
 	// 絶対に当たらない距離（判定時早期リターン用）
 	float enoughDistance_;
+
+	// 動的オブジェクトか否か（true = 動的、false = 静的）
+	bool dynamicFlg_;
+
+	// 当たり判定フラグ（true = 「判定する」、false = 「判定しない」）
+	bool judgeFlg_;
+
+	// 判定をする場合、押し出しを行うかどうかのフラグ（true = 「押し出す」、false = 「押し出さず通り抜ける」）
+	bool pushFlg_;
+
+	// 押し出しを行う際の重さ（0 ～ 100 で設定）
+	unsigned char pushWeight_;
+	
 
 	// 当たり判定タイプ（何と当たったかを見分ける用）
 	TAG type_;
@@ -83,7 +165,13 @@ private:
 	SHAPE shape_;
 	
 	// 当たったときに呼び出す関数をポインタで受け取って保持
-	std::function<void(TAG type)>OnCollision;
+	std::function<void(const ColliderBase& type)>OnCollision;
+
+	// 接地したときに呼び出す関数をポインタで受け取って保持
+	std::function<void(void)>OnGrounded;
+
+protected:
+	void SetShape(SHAPE s) { shape_ = s; }
 };
 
 using TAG = ColliderBase::TAG;

@@ -1,0 +1,31 @@
+#include"PlayerPunch.h"
+
+#include"../../../../Manager/Sound/SoundManager.h"
+
+PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
+	ActorBase(),
+	playerPos(playerPos),
+	playerAngle(playerAngle)
+{
+}
+
+void PlayerPunch::Load(void)
+{
+	ColliderCreate(new SphereCollider(TAG::PLAYER_PUNCH, RADIUS, RADIUS));
+}
+
+void PlayerPunch::SubUpdate(void)
+{
+	if (GetJudgeFlg() == false) { return; }
+	trans_.pos = playerPos + LOCAL_POS.TransMat(MGetRotY(playerAngle.y));
+}
+
+void PlayerPunch::OnCollision(const ColliderBase& collider)
+{
+	if (
+		collider.GetTag() == TAG::STAGE ||
+		collider.GetTag() == TAG::GOLEM_ATTACK_WALL
+		) {
+		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+	}
+}

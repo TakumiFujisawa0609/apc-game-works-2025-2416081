@@ -95,7 +95,7 @@ public:
 	static void LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int XSize, int YSize, std::vector<int>& handleArray);
 
 	
-	// 
+#pragma region 各順番の（VECTOR or Vector3）構造体を行列に変換する関数（引数にいくつでも入れられる仕様 左から順に計算される）
 	static MATRIX MatrixAllMultX(const std::initializer_list<VECTOR>& vecs);
 	static MATRIX MatrixAllMultX(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultY(const std::initializer_list<VECTOR>& vecs);
@@ -129,6 +129,7 @@ public:
 	static MATRIX MatrixAllMultZXY(const std::initializer_list<Vector3>& vecs);
 	static MATRIX MatrixAllMultZYX(const std::initializer_list<VECTOR>& vecs);
 	static MATRIX MatrixAllMultZYX(const std::initializer_list<Vector3>& vecs);
+#pragma endregion
 
 
 	static VECTOR Minus(const VECTOR& v) { return { -v.x,-v.y,-v.z }; }
@@ -143,3 +144,7 @@ public:
 	static VECTOR FtoV(float f) { return { f,f,f }; }
 };
 
+static Vector3 VTransform(const Vector3& v, const MATRIX& m) {
+	if (v == 0.0f) { return Vector3(); }
+	return Vector3(VTransform(v.ToVECTOR(), m));
+}

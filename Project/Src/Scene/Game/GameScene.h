@@ -3,12 +3,11 @@
 
 #include"../../Common/Vector2.h"
 
-#include"../../Manager/Collision/Collision.h"
+#include"../../Manager/Collision/CollisionManager.h"
 
 #include<vector>
 
-
-class Camera;
+#include"../../Object/ActorBase.h"
 
 class BlockManager;
 class RockWall;
@@ -55,17 +54,27 @@ public:
 	static void Shake(ShakeKinds kinds = ShakeKinds::DIAG, ShakeSize size = ShakeSize::MEDIUM, int time = 20);
 
 private:
-	Camera* camera_;
-	Collision* collision_;
+	// 当たり判定管理クラス
+	CollisionManager* collision_;
 
-	SkyDome* skyDome_;
+	// オブジェクト格納用の配列
+	std::vector<ActorBase*>objects_;
 
-	BlockManager* blocks_;
+	// 配列の中から特定のオブジェクトを探す
+	template<typename T>
+	std::vector<T*> ObjSerch(void) {
+		std::vector<T*> out;
+		out.reserve(objects_.size());
+		for (auto* obj : objects_) {
+			if (!obj) continue;
+			if (auto* ptr = dynamic_cast<T*>(obj)) {
+				out.push_back(ptr);
+			}
+		}
+		return out;
+	}
 
-	std::vector<RockWall*> rock_;
-	Player* player_;
-	Boss* boss_;
-
+#pragma region 画面演出用
 	// ヒットストップカウンター
 	static int hitStop_;
 
@@ -80,6 +89,7 @@ private:
 	static ShakeSize shakeSize_;
 	Vector2I ShakePoint(void);
 	//---------------------------------
+#pragma endregion
 };
 
 

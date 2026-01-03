@@ -2,46 +2,54 @@
 
 #include "../../Utility/Utility.h"
 #include "../input/KeyManager.h"
+#include "InstantCamera.h"
 
-Camera::Camera(void)
-{
-	// DxLibの初期設定では、
-	// カメラの位置が x = 320.0f, y = 240.0f, z = (画面のサイズによって変化)、
-	// 注視点の位置は x = 320.0f, y = 240.0f, z = 1.0f
-	// カメラの上方向は x = 0.0f, y = 1.0f, z = 0.0f
-	// 右上位置からZ軸のプラス方向を見るようなカメラ
-}
+Camera* Camera::ins = nullptr;
 
-Camera::~Camera(void)
+Camera::Camera(void) :
+
+	mode(MODE::NON),
+
+	modeFuncPtr(),
+	modeApply(),
+
+	pos(),
+	angle(),
+
+	ROT_POWER(0.0f),
+	MOVE_POWER(0.0f),
+
+	lookAt(nullptr),
+	lookAtDiff(),
+
+	lookTarget(nullptr)
 {
 }
 
 void Camera::Init(void)
 {
-	// カメラの初期位置
-	pos_ = DERFAULT_POS;
+#pragma region モード別関数を格納
+	SET_MODE_FUNC(MODE::NON, &Camera::NonModeFunc);
+	SET_APPLY(MODE::NON, &Camera::NonModeFunc);
 
-	// カメラの初期角度
-	angles_ = DERFAULT_ANGLES;
+	SET_MODE_FUNC(MODE::FIXED_POINT, &Camera::FixedPointModeFunc);
+	SET_APPLY(MODE::FIXED_POINT, &Camera::FixedPointApply);
 
-	xAngle_ = Utility::Deg2RadF(30.0f);
-	yAngle_ = 0.0f;
+	SET_MODE_FUNC(MODE::FREE, &Camera::FreeModeFunc);
+	SET_APPLY(MODE::FREE, &Camera::FreeApply);
+
+	SET_MODE_FUNC(MODE::FOLLOW_REMOTE, &Camera::FollowRemoteModeFunc);
+	SET_APPLY(MODE::FOLLOW_REMOTE, &Camera::FollowRemoteApply);
+
+	SET_MODE_FUNC(MODE::FOLLOW_AUTO, &Camera::FollorAutoModeFunc);
+	SET_APPLY(MODE::FOLLOW_AUTO, &Camera::FollowRemoteApply);
+#pragma endregion
 }
 
 void Camera::Update(void)
 {
-	switch (mode_)
-	{
-	case Camera::MODE::FIXED_POINT:
-		SetBeforeDrawFixedPoint();
-		break;
-	case Camera::MODE::FREE:
-		SetBeforeDrawFree();
-		break;
-	case Camera::MODE::FOLLOW:
-		SetBeforeDrawFollow();
-		break;
-	}
+	// モード別関数の呼び出し
+	(this->*modeFuncPtr[(int)mode])();
 }
 
 void Camera::Apply(void)
@@ -49,109 +57,201 @@ void Camera::Apply(void)
 	// クリップ距離を設定する(SetDrawScreenでリセットされる)
 	SetCameraNearFar(VIEW_NEAR, VIEW_FAR);
 
-	// カメラの設定(位置と角度による制御)
-	switch (mode_)
-	{
-	case Camera::MODE::FIXED_POINT:
-		SetCameraPositionAndAngle({ 0.0f,0.0f,0.0f }, 0.0f, 0.0f, 0.0f);
-		break;
-	case Camera::MODE::FREE:
-		SetCameraPositionAndAngle(
-			pos_,
-			angles_.x,
-			angles_.y,
-			angles_.z
-		);
-		break;
-	case Camera::MODE::FOLLOW:
-		if (lookAt_ != nullptr) { SetCameraPositionAndTarget_UpVecY(pos_, *lookAt_); }
-		break;
-	}
+	// モード別関数の呼び出し
+	(this->*modeApply[(int)mode])();
 }
 
-void Camera::SetBeforeDrawFixedPoint(void)
+
+void Camera::ChangeModeFixedPoint(const Vector3& pos, const Vector3& angle)
+{
+	// 状態遷移
+	mode = MODE::FIXED_POINT;
+
+	// 座標を設定
+	this->pos = pos;
+
+	// 角度を設定
+	this->angle = angle;
+}
+
+void Camera::FixedPointModeFunc(void)
 {
 }
 
-void Camera::SetBeforeDrawFree(void)
+void Camera::FixedPointApply(void)
 {
-	// 矢印キーでカメラの角度を変える
-	float rotPow = 1.0f * DX_PI_F / 180.0f;
-
-	if (CheckHitKey(KEY_INPUT_DOWN)) { angles_.x += rotPow; }
-	if (CheckHitKey(KEY_INPUT_UP)) { angles_.x -= rotPow; }
-	if (CheckHitKey(KEY_INPUT_RIGHT)) { angles_.y += rotPow; }
-	if (CheckHitKey(KEY_INPUT_LEFT)) { angles_.y -= rotPow; }
-
-	// WASDでカメラを移動させる
-	const float movePow = 3.0f;
-	VECTOR dir = {};
-
-	if (CheckHitKey(KEY_INPUT_W)) { dir.z++; }
-	if (CheckHitKey(KEY_INPUT_S)) { dir.z--; }
-	if (CheckHitKey(KEY_INPUT_D)) { dir.x++; }
-	if (CheckHitKey(KEY_INPUT_A)) { dir.x--; }
-	if (CheckHitKey(KEY_INPUT_E)) { dir.y++; }
-	if (CheckHitKey(KEY_INPUT_Q)) { dir.y--; }
-
-	if (!Utility::VZERO(dir))
-	{
-		dir = VScale(Utility::Normalize(dir), movePow);
-
-		// XYZの回転行列
-		// XZ平面移動にする場合は、XZの回転を考慮しないようにする
-		MATRIX mat = MGetIdent();
-		//mat = MMult(mat, MGetRotX(angles_.x));
-		mat = MMult(mat, MGetRotY(angles_.y));
-
-		// 回転行列を使用して、ベクトルを回転させる
-		VECTOR moveDir = VTransform(dir, mat);
-
-		// 方向×スピードで移動量を作って、座標に足して移動
-		pos_ = VAdd(pos_, VScale(moveDir, movePow));
-	}
+	// 適用
+	SetCameraPositionAndAngle(pos.ToVECTOR(), angle.x, angle.y, angle.z);
 }
 
-void Camera::SetBeforeDrawFollow(void)
+void Camera::ChangeModeFree(float ROT_POWER, float MOVE_POWER, const Vector3& pos, const Vector3& angle)
 {
-	if (lookAt_ == nullptr) { return; }
-	auto& key = KEY::GetIns();
-	// 追従対象の座標: lookAt_ (VECTOR型)
-	// カメラのY軸回転角度: yAngle_ (float型)
-	VECTOR vec = {};
-	vec = { key.GetRightStickVec().y,key.GetRightStickVec().x,0.0f };
-	if (Utility::VZERO(vec)) {
-		vec = { key.GetMouceMove().y,key.GetMouceMove().x,0.0f };
+	// 状態遷移
+	mode = MODE::FREE;
+
+	// 回転量
+	this->ROT_POWER = ROT_POWER;
+
+	// 移動量
+	this->MOVE_POWER = MOVE_POWER;
+
+	// 初期座標
+	this->pos = pos;
+
+	// 初期角度
+	this->angle = angle;
+}
+
+void Camera::FreeModeFunc(void)
+{
+#pragma region 角度 (コントローラースティック -> マウス -> ボタン の順に確認して入力があったもので回転させる)
+	// コントローラーの右スティックベクトルを代入
+	Vector3 rot = KEY::GetIns().GetRightStickVec().ToVector3YX();
+
+	// コントローラーの右スティックが入力なしならマウスの移動ベクトルを代入
+	if (rot == 0.0f) { rot = KEY::GetIns().GetMouceMove().ToVector3YX(); }
+
+	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
+	if (rot == 0.0f) {
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { rot.x += ROT_POWER; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { rot.x -= ROT_POWER; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { rot.y += ROT_POWER; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { rot.y -= ROT_POWER; }
 	}
-	if (Utility::VZERO(vec)) {
-		if (key.GetInfo(KEY_TYPE::CAMERA_UP).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::CAMERA_DOWN).now) { vec.x--; }
-		if (key.GetInfo(KEY_TYPE::CAMERA_RIGHT).now) { vec.y++; }
-		if (key.GetInfo(KEY_TYPE::CAMERA_LEFT).now) { vec.y--; }
+
+	// 最終的に入力が１つでもあれば回転させる
+	if (rot != 0.0f) {
+
+		angle += rot.Normalized() * ROT_POWER;
+
+		// 回転の数値制御
+		if (angle.x <= Utility::Deg2RadF(0.0f)) { angle.x += Utility::Deg2RadF(360.0f); }
+		if (angle.x >= Utility::Deg2RadF(360.0f)) { angle.x -= Utility::Deg2RadF(360.0f); }
+
+		if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
+		if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
+
+		//if (angle.z >= Utility::Deg2RadF(360.0f)) { angle.z = 0.0f; }
+		// ↑Z軸回転はしない
+	}
+#pragma endregion
+
+
+#pragma region 移動 (コントローラースティック -> ボタン の順に確認して入力があったもので移動させる)
+	// コントローラーの左スティックベクトルを代入
+	Vector3 dir = KEY::GetIns().GetLeftStickVec().ToVector3XZ();
+
+	// コントローラーの左スティックの入力が検出されなかった場合、ボタンでの入力を検出してボタンごとに移動方向を 加算/減算 していく
+	if (dir == 0.0f) {
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_FRONT).now) { dir.z++; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_BACK).now) { dir.z--; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_RIGHT).now) { dir.x++; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_LEFT).now) { dir.x--; }
 	}
 
-	float rotPow = 3.5f * DX_PI_F / 180.0f;
+	// Y軸はボタンのため共通して検出する
+	if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_UP).now) { dir.y++; }
+	if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_DOWN).now) { dir.y--; }
 
-	if (!Utility::VZERO(vec)) {
-		vec = Utility::Normalize(vec);
-		vec = VScale(vec, rotPow);
-		angles_ = VAdd(angles_, vec);
+	// 入力があれば、方向×スピードで移動量を作って、座標に足して移動
+	if (dir != 0.0f) { pos += dir.Normalized().TransMat(MGetRotY(angle.y)) * MOVE_POWER; }
+#pragma endregion
+}
 
-		if (angles_.y >= Utility::Deg2RadF(360.0f)) { angles_.y -= Utility::Deg2RadF(360.0f); }
-		if (angles_.y <= Utility::Deg2RadF(0.0f)) { angles_.y += Utility::Deg2RadF(360.0f); }
-		if (angles_.x < Utility::Deg2RadF(-30.0f)) { angles_.x = Utility::Deg2RadF(-30.0f); }
-		if (angles_.x > Utility::Deg2RadF(60.0f)) { angles_.x = Utility::Deg2RadF(60.0f); }
+void Camera::FreeApply(void)
+{
+	// 適用
+	SetCameraPositionAndAngle(pos.ToVECTOR(), angle.x, angle.y, angle.z);
+}
+
+void Camera::ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff, float ROT_POWER, const Vector3& angle)
+{
+	// 状態遷移
+	mode = MODE::FOLLOW_REMOTE;
+
+	// 追従対象を設定
+	this->lookAt = lookAt;
+
+	// 追従対象とのローカル座標を設定
+	this->lookAtDiff = lookAtDiff;
+
+	// 回転量をセット
+	this->ROT_POWER = ROT_POWER;
+
+	// 角度をセット
+	this->angle = angle;
+
+	// 座標をセット
+	pos = *lookAt + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+}
+
+void Camera::FollowRemoteModeFunc(void)
+{
+	// 追従対象が設定されていなかったら処理をしない(安全)
+	if (lookAt == nullptr) { return; }
+
+	// 回転処理(コントローラー -> マウス-> ボタン の順に入力を確認していく)
+
+	// コントローラーの右スティックベクトルを代入
+	Vector3 vec = KEY::GetIns().GetRightStickVec().ToVector3YX();
+
+	// コントローラーの右スティックが入力なしならマウスの移動ベクトルを代入
+	if (vec == 0.0f) { vec = KEY::GetIns().GetMouceMove().ToVector3YX(); }
+
+	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
+	if (vec == 0.0f) {
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { vec.x++; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { vec.x--; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { vec.y++; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { vec.y--; }
 	}
 
-	MATRIX mat = MGetIdent();
-	mat = MMult(mat, MGetRotX(angles_.x));
-	mat = MMult(mat, MGetRotY(angles_.y));
+	// 最終的に入力が１つでもあれば回転させる
+	if (vec != 0.0f) {
+		angle += vec.Normalized() * ROT_POWER;
 
-	pos_ = VAdd(lookAtMultPos_, VTransform(LOOKAT_DIFF, mat));
+		if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
+		if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
+		if (angle.x < Utility::Deg2RadF(-30.0f)) { angle.x = Utility::Deg2RadF(-30.0f); }
+		if (angle.x > Utility::Deg2RadF(60.0f)) { angle.x = Utility::Deg2RadF(60.0f); }
+	}
 
-	mat = MGetIdent();
-	mat = MMult(mat, MGetRotY(angles_.y));
-	lookAtMultPos_ = VAdd(*lookAt_, VTransform(LOOKAT_DIFF, mat));
+	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
+	pos = *lookAt + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+}
+
+void Camera::FollowRemoteApply(void)
+{
+	// 追従対象が設定されていなかったら処理をしない(安全)
+	if (lookAt == nullptr) { return; }
+
+	// 適用
+	SetCameraPositionAndTarget_UpVecY(pos.ToVECTOR(), lookAt->ToVECTOR());
+}
+
+void Camera::ChangeModeFollowAuto(const Vector3* lookAt, const Vector3* lookTarget, const Vector3& lookAtDiff, const Vector3& angle)
+{
+	// 状態遷移
+	mode = MODE::FOLLOW_AUTO;
+
+	// 追従対象を設定
+	this->lookAt = lookAt;
+
+	// 視野に入れる対象物
+	this->lookTarget = lookTarget;
+
+	// 角度をセット
+	this->angle = angle;
+}
+
+void Camera::FollorAutoModeFunc(void)
+{
+	// 未実装
+}
+
+void Camera::FollowAutoApply(void)
+{
+	// 未実装
 }
 
 void Camera::DrawDebug(void)
@@ -159,36 +259,18 @@ void Camera::DrawDebug(void)
 	DrawFormatString(
 		0, 10, 0xffffff,
 		"カメラ座標　 ：(% .1f, % .1f, % .1f)",
-		pos_.x, pos_.y, pos_.z
+		pos.x, pos.y, pos.z
 	);
 	DrawFormatString(
 		0, 30, 0xffffff,
 		"カメラ角度　 ：(% .1f, % .1f, % .1f)",
-		Utility::Rad2DegF(angles_.x),
-		Utility::Rad2DegF(angles_.y),
-		Utility::Rad2DegF(angles_.z)
+		Utility::Rad2DegF(angle.x),
+		Utility::Rad2DegF(angle.y),
+		Utility::Rad2DegF(angle.z)
 	);
 
 }
 
 void Camera::Release(void)
 {
-}
-
-void Camera::ChangeMode(MODE mode)
-{
-	// カメラモードの変更
-	mode_ = mode;
-
-	// 変更時の初期化処理
-	switch (mode_)
-	{
-	case Camera::MODE::FIXED_POINT:
-		break;
-	case Camera::MODE::FREE:
-		break;
-	case Camera::MODE::FOLLOW:
-		break;
-	}
-
 }

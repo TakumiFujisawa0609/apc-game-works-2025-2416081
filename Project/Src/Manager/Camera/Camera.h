@@ -1,17 +1,23 @@
 #pragma once
-#include <DxLib.h>
+
+#include"../../Common/Vector2.h"
+#include"../../Common/Vector3.h"
 
 class Camera
 {
+private:
+
+	Camera(void);
+	~Camera(void) = default;
+
+	// インスタンス
+	static Camera* ins;
+
 public:
 
-	// カメラの初期座標
-	static constexpr VECTOR DERFAULT_POS = { 0.0f, 200.0f, -500.0f };
-
-	// カメラの初期角度
-	static constexpr VECTOR DERFAULT_ANGLES = {
-	30.0f * DX_PI_F / 180.0f, 0.0f, 0.0f
-	};
+	static void CreateIns(void) { if (ins == nullptr) { ins = new Camera(); ins->Init(); } }
+	static Camera& GetIns(void) { return *ins; }
+	static void DeleteIns(void) { if (ins) { ins->Release(); delete ins; ins = nullptr; } }
 
 	// カメラのクリップ範囲
 	static constexpr float VIEW_NEAR = 10.0f;
@@ -20,22 +26,34 @@ public:
 	// カメラモード
 	enum class MODE
 	{
-		NONE,
-		FIXED_POINT, // 定点カメラ
-		FREE,		// フリーモード
-		FOLLOW,		// 追従カメラ
+		// 未設定
+		NON,
+
+		// 定点
+		FIXED_POINT,
+
+		// フリー
+		FREE,
+
+		// 追従（手動操作）
+		FOLLOW_REMOTE,
+
+		// 追従（自動操作）
+		FOLLOW_AUTO,
+
+		MAX
 	};
 
-
-
-	// コンストラクタ
-	Camera(void);
-
-	// デストラクタ
-	~Camera(void);
-
-	// 初期化
-	void Init(void);
+#pragma region カメラモード切り替え
+	// 定点
+	void ChangeModeFixedPoint(const Vector3& pos, const Vector3& angle);
+	// フリー
+	void ChangeModeFree(float ROT_POWER, float MOVE_POWER, const Vector3& pos = Vector3(), const Vector3& angle = Vector3());
+	// 追従（手動操作）
+	void ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff = Vector3(0, 0, -400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3());
+	// 追従（自動操作）
+	void ChangeModeFollowAuto(const Vector3* lookAt, const Vector3* lookTarget, const Vector3& lookAtDiff = Vector3(0, 0, -400), const Vector3& angle = Vector3());
+#pragma endregion
 
 	// 更新
 	void Update(void);
@@ -46,40 +64,102 @@ public:
 	// デバッグ用描画
 	void DrawDebug(void);
 
-	// 解放
-	void Release(void);
+#pragma region ゲット関数
+	// 座標
+	const Vector3& GetPos(void)const { return pos; }
 
-	// 座標の取得
-	const VECTOR& GetPos(void) const { return pos_; }
-
-	// 角度の取得
-	const VECTOR& GetAngles(void) const { return angles_; }
-
-	// 追従モードのターゲット座標セット
-	void SetLookAtPos(const VECTOR* pos) { lookAt_ = pos; }
-
-
-	// カメラモードの変更
-	void ChangeMode(MODE mode);
+	// 角度
+	const Vector3& GetAngle(void)const { return angle; }
+#pragma endregion
 
 
 private:
-	MODE mode_;
+	// 初期化
+	void Init(void);
+	// 解放
+	void Release(void);
 
+	// モード
+	MODE mode;
+
+	using STATEFUNC = void (Camera::*)(void);
+	STATEFUNC modeFuncPtr[(int)MODE::MAX];
+	STATEFUNC modeApply[(int)MODE::MAX];
+#define SET_MODE_FUNC(mode, func) {modeFuncPtr[(int)(mode)] = static_cast<STATEFUNC>(func);}
+#define SET_APPLY(mode, func) {modeApply[(int)(mode)] = static_cast<STATEFUNC>(func);}
+
+	// 未設定用
+	void NonModeFunc(void) {}
+
+#pragma region 全状態共通
 	// カメラの位置
-	VECTOR pos_;
+	Vector3 pos;
 
 	// カメラの角度
-	VECTOR angles_;
+	Vector3 angle;
+#pragma endregion
 
-	const VECTOR* lookAt_;
-	VECTOR lookAtMultPos_;
-	static constexpr VECTOR LOOKAT_DIFF = { 0.0f, 0.0f, -300.0f };
 
-	float xAngle_;
-	float yAngle_;
+#pragma region FIXED_POINT
+	// 更新処理
+	void FixedPointModeFunc(void);
 
-	void SetBeforeDrawFixedPoint(void);
-	void SetBeforeDrawFree(void);
-	void SetBeforeDrawFollow(void);
+	// 適用
+	void FixedPointApply(void);
+#pragma endregion
+
+
+#pragma region FREE
+	// 更新処理
+	void FreeModeFunc(void);
+
+	// 回転量
+	float ROT_POWER;
+
+	// 移動量
+	float MOVE_POWER;
+
+
+	// 適用
+	void FreeApply(void);
+#pragma endregion
+
+
+#pragma region FOLLOW_REMOTE
+	// 更新処理
+	void FollowRemoteModeFunc(void);
+
+	// 追従対象
+	const Vector3* lookAt;
+
+	// 追従対象からのローカル座標
+	Vector3 lookAtDiff;
+
+	// 回転量
+	//float ROT_POWER;
+	// ↑FREEのものを流用
+
+	// 適用
+	void FollowRemoteApply(void);
+#pragma endregion
+
+
+#pragma region FOLLOW_AUTO
+	// 更新処理
+	void FollorAutoModeFunc(void);
+
+	// 追従対象
+	//const Vector3* lookAt_;
+	// ↑FOLLOW_REMOTEのものを流用
+
+	// 視野に入れる対象物
+	const Vector3* lookTarget;
+
+	// 回転量
+	//float ROT_POWER;
+	// ↑FREEのものを流用
+
+	// 適用
+	void FollowAutoApply(void);
+#pragma endregion
 };

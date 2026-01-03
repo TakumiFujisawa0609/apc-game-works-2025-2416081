@@ -6,8 +6,7 @@ class Block : public VoxelBase
 {
 public:
 	// ブロックモデルの大きさ
-	//static constexpr VECTOR SCALES = { 0.5f, 0.5f, 0.5f };
-	static constexpr VECTOR SCALES = { 1.0f, 1.0f, 1.0f };
+	static constexpr float SCALE = 1.0f;
 
 	// ブロック種別
 	enum class TYPE
@@ -19,25 +18,21 @@ public:
 	};
 
 	// コンストラクタ
-	Block(void);
+	Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int mapZ);
 	// デストラクタ
 	~Block(void)override{}
 
-	// ブロックを生成する
-	void Create(TYPE type, int baseModelId,int textureId, int mapX, int mapY, int mapZ);
-
-	void OnCollision(UnitBase* other)override;
+	void OnCollision(const ColliderBase& collider)override;
 
 private:
 	// ブロック種別
 	TYPE type_;
 
-
-	void SubLoad(void)override;
-	void SubInit(void)override;
-	void SubUpdate(void)override;
-	void SubDraw(void)override;
-	void SubRelease(void)override;
-
+	void SubLoad(void)override{}
+	void SubInit(void)override { SetJudge(true); SetIsDraw(true); }
+	void SubUpdate(void)override{}
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
+	void SubRelease(void)override {}
 };
 

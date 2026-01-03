@@ -16,7 +16,6 @@
 
 TitleScene::TitleScene():
 	img_(-1),
-	camera_(nullptr),
 	skyDome_(nullptr)
 {
 }
@@ -29,9 +28,7 @@ void TitleScene::Load(void)
 {
 	Utility::LoadImg(img_, "Data/Image/Title/Title.png");
 
-	camera_ = new Camera();
-	camera_->Init();
-	camera_->ChangeMode(Camera::MODE::FIXED_POINT);
+	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 
 	skyDome_ = new SkyDome();
 	skyDome_->Load();
@@ -44,7 +41,7 @@ void TitleScene::Init(void)
 }
 void TitleScene::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().PushScene(std::make_shared<EndScene>());
 		return;
 	}
@@ -57,8 +54,6 @@ void TitleScene::Update(void)
 }
 void TitleScene::Draw(void)
 {
-	camera_->Apply();
-
 	skyDome_->Draw();
 
 	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, img_, true);
@@ -86,11 +81,6 @@ void TitleScene::Release(void)
 		skyDome_->Release();
 		delete skyDome_;
 		skyDome_ = nullptr;
-	}
-	if (camera_) {
-		camera_->Release();
-		delete camera_;
-		camera_ = nullptr;
 	}
 	DeleteGraph(img_);
 }

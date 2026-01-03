@@ -1,12 +1,12 @@
 #pragma once
-#include <DxLib.h>
-
 #include<map>
 #include<vector>
 
 class Block;
 
-class BlockManager
+#include"../../ActorBase.h"
+
+class BlockManager : public ActorBase
 {
 public:
 	// ブロック用のモデル種類
@@ -20,12 +20,16 @@ public:
 	// デストラクタ
 	~BlockManager(void);
 
-	void Load(void);
-	void Update(void);
-	void Draw(void);
-	void Release(void);
+	void Load(void)override;
+	void Init(void)override;
+	void Update(void)override;
+	void Draw(void)override;
+	void AlphaDraw(void)override;
+	void Release(void)override;
 
-	const std::vector<UnitBase*>GetBlocks(void)const;
+	std::vector<ColliderBase*> GetCollider(void)const override;
+
+	const std::vector<ActorBase*>GetBlocks(void)const;
 
 	void SetCamera(Camera* c);
 
@@ -41,5 +45,11 @@ private:
 	std::map<int, int>models_;
 
 	void LoadMapCsvData(void);
+
+	void SubInit(void)override {}
+	void SubUpdate(void)override {}
+	void SubDraw(void)override {}
+	void SubAlphaDraw(void)override {}
+	void SubRelease(void)override {}
 };
 
