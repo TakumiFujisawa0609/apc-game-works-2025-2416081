@@ -3,6 +3,7 @@
 #include <DxLib.h>
 
 #include"../Manager/FPS/FPS.h"
+#include"../Manager/Camera/Camera.h"
 #include"../Manager/Input/KeyManager.h"
 #include"../Manager/Sound/SoundManager.h"
 #include"../Scene/SceneManager/SceneManager.h"
@@ -53,6 +54,9 @@ void Application::Init(void)
 	SetUseDirectInputFlag(true);
 	KeyManager::CreateIns();
 
+	// カメラ
+	Camera::CreateIns();
+
 	// シーン管理初期化
 	SceneManager::CreateIns();
 	SceneManager::GetIns().Init();
@@ -72,22 +76,42 @@ void Application::Run(void)
 	// ゲームループ
 	while (ProcessMessage() == 0 && !gameEnd_)
 	{
-		// フレームレート更新
-		// 1/60秒経過していないなら再ループさせる
+		// フレームレート上限まで経過していないなら再ループさせる
 		if (!fps_->UpdateFrameRate()) { continue; }
+
+		// 入力管理クラスの更新
 		KeyManager::GetIns().Update();
-		SceneManager::GetIns().Update();// シーン管理更新
+
+		// シーン管理更新
+		SceneManager::GetIns().Update();
 
 		// デバッグ表示切替
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
 
-		fps_->CalcFrameRate();			// フレームレート計算
+		// フレームレート計算
+		fps_->CalcFrameRate();
 
+		// 背面描画画面をクリア
 		ClearDrawScreen();
 
-		SceneManager::GetIns().Draw();	// シーン管理描画
-		fps_->DrawFrameRate();			// フレームレート描画
+		// カメラ情報を適用
+		Camera::GetIns().Apply();
 
+		// シーン管理描画
+		SceneManager::GetIns().Draw();
+
+#ifdef _DEBUG
+
+		// フレームレートデバッグ描画
+		fps_->DrawFrameRate();
+
+		// カメラデバッグ描画
+		//Camera::GetIns().DrawDebug();
+
+#endif // DEBUG
+
+
+		// 描画が完了した背面画面を表に持ってくる
 		ScreenFlip();
 	}
 }
@@ -104,12 +128,12 @@ void Application::Release(void)
 	SceneManager::GetIns().Release();
 	SceneManager::DeleteIns();
 
+	// カメラ
+	Camera::DeleteIns();
+
 	// フレームレート解放
 	delete fps_;
 
 	// DxLib終了
-	if (DxLib_End() == -1)
-	{
-		isReleaseFail_ = true;
-	}
+	if (DxLib_End() == -1) { isReleaseFail_ = true; }
 }

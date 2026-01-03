@@ -1,6 +1,6 @@
 #include"PlayerPunch.h"
 
-#include"../../../Common/Collider/SphereCollider.h"
+#include"../../../../Manager/Sound/SoundManager.h"
 
 PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
 	ActorBase(),
@@ -22,4 +22,10 @@ void PlayerPunch::SubUpdate(void)
 
 void PlayerPunch::OnCollision(const ColliderBase& collider)
 {
+	if (
+		collider.GetTag() == TAG::STAGE ||
+		collider.GetTag() == TAG::GOLEM_ATTACK_WALL
+		) {
+		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+	}
 }

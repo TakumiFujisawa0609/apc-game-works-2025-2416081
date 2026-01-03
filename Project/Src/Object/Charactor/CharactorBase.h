@@ -46,7 +46,7 @@ protected:
 	int state_;
 	using STATEFUNC = void (CharactorBase::*)(void);
 	std::map<int, STATEFUNC>stateFuncPtr;
-#define SET_STATE(state, func) {stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func);}
+#define CHARACTOR_SET_STATE(state, func) {stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func);}
 
 	// キャラクター固有の処理をここに追加
 	virtual void CharactorInit(void) = 0;

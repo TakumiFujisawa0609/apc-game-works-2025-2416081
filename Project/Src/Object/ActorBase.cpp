@@ -41,6 +41,9 @@ void ActorBase::Update(void)
 
 	// 加速度更新
 	if (dynamicFlg_) { AccelUpdate(); }
+
+	// 接地判定のリセット
+	if (dynamicFlg_) { isGroundMaster_ = false; }
 }
 
 void ActorBase::Draw(void)

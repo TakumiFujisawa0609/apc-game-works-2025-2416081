@@ -2,6 +2,7 @@
 
 #include"../../../Manager/Input/KeyManager.h"
 #include"../../../Manager/Sound/SoundManager.h"
+#include"../../../Manager/Camera/Camera.h"
 
 #include"../../../scene/SceneManager/SceneManager.h"
 
@@ -12,10 +13,8 @@
 
 #include"../Boss/Boss.h"
 
-Player::Player(const Vector3& cameraPos):
+Player::Player():
 	CharactorBase(),
-
-	cameraAngle_(cameraPos),
 
 	hp_(0),
 
@@ -47,16 +46,16 @@ void Player::Load(void)
 	SetPushWeight(50);
 
 #pragma region 関数ポインタ配列へ各関数を格納
-	SET_STATE(STATE::NON, &Player::Non);
-	SET_STATE(STATE::MOVE, &Player::Move);
-	SET_STATE(STATE::ATTACK, &Player::Attack);
-	SET_STATE(STATE::GOUGE, &Player::Gouge);
-	SET_STATE(STATE::CARRY_OBJ, &Player::CarryObj);
-	SET_STATE(STATE::THROWING_OBJ, &Player::ThrowingObj);
-	SET_STATE(STATE::EVASION, &Player::Evasion);
-	SET_STATE(STATE::DAMAGE, &Player::Damage);
-	SET_STATE(STATE::DEATH, &Player::Death);
-	SET_STATE(STATE::END, &Player::End);
+	CHARACTOR_SET_STATE(STATE::NON, &Player::Non);
+	CHARACTOR_SET_STATE(STATE::MOVE, &Player::Move);
+	CHARACTOR_SET_STATE(STATE::ATTACK, &Player::Attack);
+	CHARACTOR_SET_STATE(STATE::GOUGE, &Player::Gouge);
+	CHARACTOR_SET_STATE(STATE::CARRY_OBJ, &Player::CarryObj);
+	CHARACTOR_SET_STATE(STATE::THROWING_OBJ, &Player::ThrowingObj);
+	CHARACTOR_SET_STATE(STATE::EVASION, &Player::Evasion);
+	CHARACTOR_SET_STATE(STATE::DAMAGE, &Player::Damage);
+	CHARACTOR_SET_STATE(STATE::DEATH, &Player::Death);
+	CHARACTOR_SET_STATE(STATE::END, &Player::End);
 #pragma endregion
 
 	// モーションの初期設定と初期モーション再生
@@ -140,8 +139,13 @@ void Player::CharactorAlphaDraw(void)
 
 void Player::UiDraw(void)
 {
-	hpBar_->Draw();
+	//DrawGraph(PREVIEW_POS.x, PREVIEW_POS.y, wholeFrame_, true);
 
+	// プレビュー
+	preview_->Draw(DX_SCREEN_BACK);
+
+	// HPバー描画
+	hpBar_->Draw();
 }
 
 void Player::CharactorRelease(void)
@@ -158,6 +162,8 @@ void Player::CharactorRelease(void)
 
 void Player::OnGrounded()
 {
+	ActorBase::OnGrounded();
+
 	AccelSum.y = 0.0f;
 	for (auto& jump : isJump_) { jump = false; }
 	for (auto& cou : jumpKeyCounter_) { cou = 0; }
@@ -238,11 +244,11 @@ void Player::DoStateMove(void)
 {
 	auto& key = KEY::GetIns();
 
-	if (key.GetInfo(KEY_TYPE::MOVE_UP).down ||
-		key.GetInfo(KEY_TYPE::MOVE_DOWN).down ||
-		key.GetInfo(KEY_TYPE::MOVE_RIGHT).down ||
-		key.GetInfo(KEY_TYPE::MOVE_LEFT).down ||
-		key.GetInfo(KEY_TYPE::JUMP).down
+	if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).down ||
+		key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).down ||
+		key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).down ||
+		key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).down ||
+		key.GetInfo(KEY_TYPE::PLAYER_JUMP).down
 		)
 	{
 		state_ = (int)STATE::MOVE;
@@ -250,7 +256,7 @@ void Player::DoStateMove(void)
 }
 void Player::DoStateAttack(void)
 {
-	if (!KEY::GetIns().GetInfo(KEY_TYPE::ATTACK).down) { return; }
+	if (!KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_ATTACK).down) { return; }
 
 
 	state_ = (int)STATE::ATTACK;
@@ -288,7 +294,7 @@ void Player::DoStateGouge(void)
 {
 	if (isJump_[0]) { return; }
 
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).down) {
 		state_ = (int)STATE::GOUGE;
 		gouge_->On();
 		AnimePlay((int)ANIME_TYPE::GOUPE, false);
@@ -296,14 +302,14 @@ void Player::DoStateGouge(void)
 }
 void Player::DoStateThrowing(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ATTACK).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_ATTACK).down) {
 		state_ = (int)STATE::THROWING_OBJ;
 		AnimePlay((int)ANIME_TYPE::THROW, false);
 	}
 }
 void Player::DoStateEvasion(void)
 {
-	if (!KEY::GetIns().GetInfo(KEY_TYPE::EVASION).down) { return; }
+	if (!KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_EVASION).down) { return; }
 
 	state_ = (int)STATE::EVASION;
 
@@ -352,7 +358,7 @@ void Player::Attack(void)
 }
 void Player::Gouge(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
 		if (GetAnimeRatio() > 0.25f) {
 			if (gouge_->Gouge()) {
 				state_ = (int)STATE::CARRY_OBJ;
@@ -372,7 +378,7 @@ void Player::Gouge(void)
 }
 void Player::CarryObj(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GOUGE).now) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
 		CarryRun();
 	}
 	else {
@@ -441,25 +447,25 @@ void Player::Run(void)
 	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
 	if (vec == 0.0f) {
-		if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
-		if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
-		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
 	}
 
 	if (vec == 0.0f) {
-		if (!isJump_[0]) { AnimePlay((int)ANIME_TYPE::IDLE); }
+		if (isGround) { AnimePlay((int)ANIME_TYPE::IDLE); }
 		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
 	}
 	else {
 		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotY(cameraAngle_.y));
+		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
 		vec.TransMatOwn(mat);
 		vec.Normalize();
 
 		trans_.pos += vec * 10.0f;
 
-		if (!isJump_[0]) {
+		if (isGround) {
 			AnimePlay((int)ANIME_TYPE::RUN);
 			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 150, true);
 		}
@@ -476,28 +482,35 @@ void Player::Jump(void)
 		if (isJump_[i]) { continue; }
 
 		// ダウントリガーでジャンプ開始
-		if (key.GetInfo(KEY_TYPE::JUMP).down) {
+		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
 			isJump_[i] = true; 
 			AnimePlay((int)ANIME_TYPE::JUMP_POST, false);
+
+			jumpKeyCounter_[i]++;
+
+			AccelSum.y = (std::max)(AccelSum.y, (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME));
 		}
 
-		// ジャンプしていなかったらループから抜ける
-		if (!isJump_[i]) { break; }
+		// ループから抜ける
+		break;
+	}
+
+	for (int i = JUMP_NUM - 1; i >= 0; i--) {
+		if (!isJump_[i]) { continue; }
 
 		//ジャンプキーを離したら、ジャンプキー入力判定を終了
-		if (key.GetInfo(KEY_TYPE::JUMP).up) { jumpKeyCounter_[i] = INPUT_JUMPKEY_FRAME; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).up) { jumpKeyCounter_[i] = INPUT_JUMPKEY_FRAME; }
 
 		//入力時間に応じてジャンプ量を変更する
-		if (isJump_[i] && key.GetInfo(KEY_TYPE::JUMP).now && jumpKeyCounter_[i] < INPUT_JUMPKEY_FRAME) {
+		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).now && jumpKeyCounter_[i] < INPUT_JUMPKEY_FRAME) {
 			//ジャンプキーの入力カウンターを増やす
 			jumpKeyCounter_[i]++;
 
 			//ジャンプ力を分配加算する
-			AccelSum.y = (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
-
-			// その回のジャンプ処理をしたのでそれ以降のループに入らないようにする
-			break;
+			AccelSum.y += (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
 		}
+
+		break;
 	}
 
 	// モーション更新
@@ -511,15 +524,15 @@ void Player::AttackMove(void)
 	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
 	if (vec == 0.0f) {
-		if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
-		if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
-		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
 	}
 
 	if (vec != 0.0f) {
 		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotY(cameraAngle_.y));
+		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
 		vec = VTransform(vec, mat);
 		trans_.angle.y = atan2(vec.x, vec.z);
 	}
@@ -532,10 +545,10 @@ void Player::CarryRun(void)
 	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
 	if (vec == 0.0f) {
-		if (key.GetInfo(KEY_TYPE::MOVE_UP).now) { vec.z++; }
-		if (key.GetInfo(KEY_TYPE::MOVE_DOWN).now) { vec.z--; }
-		if (key.GetInfo(KEY_TYPE::MOVE_RIGHT).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::MOVE_LEFT).now) { vec.x--; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
 	}
 
 
@@ -545,7 +558,7 @@ void Player::CarryRun(void)
 	}
 	else {
 		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotY(cameraAngle_.y));
+		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
 		vec.TransMatOwn(mat);
 		vec.Normalize();
 
@@ -568,7 +581,7 @@ void Player::CarryJump(void)
 		if (isJump_[i]) { continue; }
 
 		// ダウントリガーでジャンプ開始
-		if (key.GetInfo(KEY_TYPE::JUMP).down) {
+		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
 			isJump_[i] = true;
 			AnimePlay((int)ANIME_TYPE::JUMP_POST, false);
 		}
@@ -577,10 +590,10 @@ void Player::CarryJump(void)
 		if (!isJump_[i]) { break; }
 
 		//ジャンプキーを離したら、ジャンプキー入力判定を終了
-		if (key.GetInfo(KEY_TYPE::JUMP).up) { jumpKeyCounter_[i] = INPUT_JUMPKEY_FRAME; }
+		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).up) { jumpKeyCounter_[i] = INPUT_JUMPKEY_FRAME; }
 
 		//入力時間に応じてジャンプ量を変更する
-		if (isJump_[i] && key.GetInfo(KEY_TYPE::JUMP).now && jumpKeyCounter_[i] < INPUT_JUMPKEY_FRAME) {
+		if (isJump_[i] && key.GetInfo(KEY_TYPE::PLAYER_JUMP).now && jumpKeyCounter_[i] < INPUT_JUMPKEY_FRAME) {
 			//ジャンプキーの入力カウンターを増やす
 			jumpKeyCounter_[i]++;
 
@@ -609,9 +622,9 @@ void Player::AnimeLoad(void)
 
 	AddAnimation((int)ANIME_TYPE::EVASION, 1.5f, (ANIME_PATH + "Evasion.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::PUNCH_FIRST, 1.7f, (ANIME_PATH + "PunchFirst.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::PUNCH_SECOND, 1.7f, (ANIME_PATH + "PunchSecond.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::PUNCH_THIRD, 2.0f, (ANIME_PATH + "PunchThird.mv1").c_str());
+	AddAnimation((int)ANIME_TYPE::PUNCH_FIRST, 1.5f, (ANIME_PATH + "PunchFirst.mv1").c_str());
+	AddAnimation((int)ANIME_TYPE::PUNCH_SECOND, 1.5f, (ANIME_PATH + "PunchSecond.mv1").c_str());
+	AddAnimation((int)ANIME_TYPE::PUNCH_THIRD, 1.5f, (ANIME_PATH + "PunchThird.mv1").c_str());
 
 	AddAnimation((int)ANIME_TYPE::GOUPE, 0.6f, (ANIME_PATH + "Goupe.mv1").c_str());
 
@@ -658,6 +671,12 @@ void Player::LowerLoad(void)
 	throwing_->Load();
 
 
+	Utility::LoadImg(wholeFrame_, "Data/Image/Game/UI/PlayerWholeFrame.png");
+
+	// プレビュー
+	preview_ = new PlayerPreview(trans_.pos, [this](void) { trans_.Draw(); });
+	preview_->Load();
+
 	// HPバー
 	hpBar_ = new PlayerHpBarManager(hp_, HP_MAX);
 	hpBar_->Load();
@@ -674,6 +693,9 @@ void Player::LowerInit(void)
 	// 特殊攻撃（投げ）
 	throwing_->Init();
 
+	// プレビュー
+	preview_->Init(PREVIEW_POS);
+
 	// HPバー
 	hpBar_->Init(HP_BAR_POS);
 }
@@ -687,6 +709,9 @@ void Player::LowerUpdate(void)
 
 	// 特殊攻撃（投げ）
 	throwing_->Update();
+
+	// プレビュー
+	preview_->Update();
 
 	// HPバー
 	hpBar_->Update();
@@ -734,6 +759,15 @@ void Player::LowerRelease(void)
 		throwing_->Release();
 		delete throwing_;
 		throwing_ = nullptr;
+	}
+
+	DeleteGraph(wholeFrame_);
+
+	// プレビュー
+	if (preview_) {
+		preview_->Release();
+		delete preview_;
+		preview_ = nullptr;
 	}
 
 	// HPバー

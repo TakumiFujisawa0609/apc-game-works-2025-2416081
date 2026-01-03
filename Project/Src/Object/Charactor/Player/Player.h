@@ -9,13 +9,14 @@
 #include"Throwing/Throwing.h"
 
 #include"UI/HpBar/PlayerHpBarManager.h"
+#include"UI/Preview/PlayerPreview.h"
 
 #include"../../../Application/Application.h"
 
 class Player : public CharactorBase
 {
 public:
-	Player(const Vector3& cameraAngle);
+	Player();
 	~Player()override {};
 
 	void Load(void)override;
@@ -47,8 +48,8 @@ public:
 	// ’è”
 	static constexpr float RUN_SPEED = 10.0f;			//ƒvƒŒƒCƒ„[‚Ì‘–‚é‘¬“x
 
-	static constexpr float MAX_JUMP_POWER = 100.0f;		//Å‘åƒWƒƒƒ“ƒv—Í
-	static constexpr int INPUT_JUMPKEY_FRAME = 6;		//ƒWƒƒƒ“ƒvƒL[‚ğó‚¯•t‚¯‚éƒtƒŒ[ƒ€”
+	static constexpr float MAX_JUMP_POWER = 20.0f;		//Å‘åƒWƒƒƒ“ƒv—Í
+	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ƒWƒƒƒ“ƒvƒL[‚ğó‚¯•t‚¯‚éƒtƒŒ[ƒ€”
 	static constexpr int JUMP_NUM = 2;					//ƒWƒƒƒ“ƒv‰Â”\‰ñ”
 	//----------------------------------------------------------------------------------------------
 
@@ -149,8 +150,6 @@ private:
 	void Jump(void);		//ƒWƒƒƒ“ƒvŠÖ”
 
 	// •Ï”
-	const Vector3& cameraAngle_;	//ƒJƒƒ‰‚ÌŠp“x
-
 	bool isJump_[JUMP_NUM];	//ƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚é‚©‚Ì•Ï”
 	int jumpKeyCounter_[JUMP_NUM];
 	//---------------------------------------
@@ -174,12 +173,22 @@ private:
 	Throwing* throwing_;
 
 	// ŠÖ”
-	void CarryRun(void);			//‰¡ˆÚ“®ŠÖ”
+	void CarryRun(void);		//‰¡ˆÚ“®ŠÖ”
 	void CarryJump(void);		//ƒWƒƒƒ“ƒvŠÖ”
 	//````````````````
 
 
 	Vector3 knockBackVec_;
+
+	int wholeFrame_;
+
+	// ƒvƒŒƒCƒ„[ƒ‚ƒfƒ‹ƒvƒŒƒrƒ…[```
+	PlayerPreview* preview_;
+
+	// À•W
+	const Vector2 PREVIEW_POS = Vector2(10, App::SCREEN_SIZE_Y - PlayerPreview::SIZE - 10);
+	//````````````````
+	
 
 	// HPƒo[````````````
 
@@ -187,7 +196,7 @@ private:
 	PlayerHpBarManager* hpBar_;
 
 	// À•W
-	Vector2 HP_BAR_POS = Vector2(150.0f, App::SCREEN_SIZE_Y - PlayerHpBarManager::HP_BAR_WHOLE_SIZE_Y - 10.0);
+	const Vector2 HP_BAR_POS = Vector2(PREVIEW_POS.x + PlayerPreview::SIZE, PREVIEW_POS.y + (PlayerPreview::SIZE / 2));
 
 	//````````````````
 

@@ -28,7 +28,7 @@ void PlayerHpBarManager::Load(void)
 {
 	Utility::LoadImg(hpBarFrameImageHandle, "Data/Image/Game/UI/PlayerHpBarFrame.png");
 
-	for (unsigned char i = 0; i < HP_BAR_DIVISIONS_NUM; i++) {
+	for (unsigned char i = 0; i < HP_BAR_DIVISION_NUM; i++) {
 		hpBar[i] = new PlayerHpBar(position, HP_BAR_ONE_DIVISION_SIZE);
 	}
 }
@@ -39,17 +39,21 @@ void PlayerHpBarManager::Init(const Vector2& position)
 
 	prevHP = HP;
 
-	totalHpBarNum = aliveHpBarNum = HP_BAR_DIVISIONS_NUM;
+	totalHpBarNum = aliveHpBarNum = HP_BAR_DIVISION_NUM;
 
 	hpBarDropIntervalCounter = 0;
 
 	unsigned char num = 0;
 	Vector2 hpBarAlivePos = HP_BAR_FIRST_POS;
 
+
+	unsigned int color = 0x00ff00;
+
 	for (PlayerHpBar*& h : hpBar) {
 		num++;
 
-		h->Init(hpBarAlivePos, GetColor(num, 255, num));
+		h->Init(hpBarAlivePos, num, HP_BAR_DIVISION_NUM);
+		h->SetDefaultColor(0, 255, 0);
 
 		hpBarAlivePos += ((num % HP_BAR_DIVISION_NUM_Y) == 0) ? HP_BAR_NEXT_POS_UNIQUE : HP_BAR_NEXT_POS_USUALLY;
 	}
@@ -67,7 +71,7 @@ void PlayerHpBarManager::Update(void)
 		const float hpRatio = (float)HP / (float)HP_MAX;
 
 		// 生きているHPバーブロックの数を算出
-		const unsigned char newAliveHpBarNum = (unsigned char)(hpRatio * (float)HP_BAR_DIVISIONS_NUM);
+		const unsigned char newAliveHpBarNum = (unsigned char)(hpRatio * (float)HP_BAR_DIVISION_NUM);
 
 		// 死んだHPバーブロックの処理
 		for (unsigned char i = newAliveHpBarNum; i < aliveHpBarNum; i++) { hpBar[i]->SetLostIdle(); }

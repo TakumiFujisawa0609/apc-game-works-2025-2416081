@@ -22,7 +22,7 @@ Explanat::~Explanat()
 
 void Explanat::Load(void)
 {
-	img_ = Utility::LoadImg("Data/Image/Title/Start/Illustrate.png");
+	//img_ = Utility::LoadImg("Data/Image/Title/Start/Illustrate.png");
 	bottonImg_[0] = Utility::LoadImg("Data/Image/Title/Start/SpaceKey.png");
 	bottonImg_[1] = Utility::LoadImg("Data/Image/Title/Start/Abutton.png");
 }
@@ -38,7 +38,7 @@ void Explanat::Update(void)
 		SceneManager::GetIns().PopScene();
 		return;
 	}
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().JumpScene(SCENE_ID::TITLE);
 		return;
 	}

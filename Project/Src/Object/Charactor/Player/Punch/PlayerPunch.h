@@ -15,7 +15,7 @@ public:
 
 	void OnCollision(const ColliderBase& collider)override;
 
-	void On(void) { SetJudge(true); SetIsDraw(true); }
+	void On(void) { SetJudge(true); SetIsDraw(true); SubUpdate(); }
 	void Off(void) { SetJudge(false); SetIsDraw(false); }
 
 private:

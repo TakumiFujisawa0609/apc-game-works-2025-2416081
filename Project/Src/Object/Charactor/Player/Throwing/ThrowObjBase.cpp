@@ -67,7 +67,13 @@ void ThrowObjBase::SubUpdate(void)
 void ThrowObjBase::OnCollision(const ColliderBase& collider)
 {
 	TAG tag = collider.GetTag();
-	if (tag == TAG::BOSS || tag == TAG::GOLEM_ATTACK_STONE) { state_ == STATE::DROP; }
+	if (
+		tag != TAG::BOSS &&
+		tag != TAG::GOLEM_ATTACK_STONE
+		) 
+	{
+		return;
+	}
 
 	switch (state_)
 	{

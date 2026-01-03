@@ -5,7 +5,7 @@
 class BossHpBarManager
 {
 public:
-	BossHpBarManager(const unsigned short& HP, const unsigned short HP_MAX,unsigned char number);
+	BossHpBarManager(const unsigned short& HP, const unsigned short HP_MAX, const unsigned char& LIFE, unsigned char number);
 	~BossHpBarManager() {}
 
 	void Load(void);
@@ -62,6 +62,9 @@ private:
 
 	// ボスの最大HP
 	const unsigned short HP_MAX;
+
+	// ボスの現在のライフの参照
+	const unsigned char& LIFE;
 
 	// 生存している（表示する）HPバーブロックの数
 	unsigned short aliveHpBarNum;

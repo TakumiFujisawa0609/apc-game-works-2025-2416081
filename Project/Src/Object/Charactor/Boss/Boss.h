@@ -8,6 +8,7 @@
 #include"Attack/RockWall/RockWallShooter.h"
 
 #include"UI/HpBar/BossHpBarManager.h"
+#include"UI/Preview/BossPreview.h"
 
 #include"../../../Application/Application.h"
 
@@ -104,7 +105,13 @@ private:
 	unsigned short hp_;
 
 	// マスターライフ数
-	int masterLife_;
+	unsigned char masterLife_;
+
+	// プレビュー
+	BossPreview* preview;
+
+	// プレビュー座標
+	const Vector2 PREVIEW_POS = Vector2(App::SCREEN_SIZE_X - BossPreview::SIZE - 10, 10);
 
 	// HPバー管理クラス
 	BossHpBarManager* hpBar_[MASTER_LIFE];
@@ -112,12 +119,12 @@ private:
 	// HPバーの色
 	const unsigned int HP_BAR_COLOR[MASTER_LIFE] =
 	{
-		0xffff00,//2回目
+		0xeeee00,//2回目
 		0x0000ff,//1回目
 	};
 
 	// HPバーの座標
-	const Vector2 HP_BAR_POS = Vector2(App::SCREEN_SIZE_X - BossHpBarManager::HP_BAR_WHOLE_SIZE_X - 100.0f, 10.0f);
+	const Vector2 HP_BAR_POS = Vector2(PREVIEW_POS.x - BossHpBarManager::HP_BAR_WHOLE_SIZE_X, 10.0f);
 
 	void HpSharpen(int damage);
 	void LifeSharpen(void);

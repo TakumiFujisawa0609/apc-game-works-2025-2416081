@@ -19,34 +19,60 @@ public:
 
 	enum class KEY_TYPE
 	{
-		NON=-1,
-		
-		// プレイヤー操作
-		MOVE_UP,
-		MOVE_DOWN,
-		MOVE_RIGHT,
-		MOVE_LEFT,
-		ATTACK,
-		GOUGE,
-		JUMP,
-		EVASION,
+		NON = -1,
 
-		// カメラ操作
-		CAMERA_UP,
-		CAMERA_DOWN,
-		CAMERA_RIGHT,
-		CAMERA_LEFT,
+#pragma region プレイヤー操作
+		// 移動
+		PLAYER_MOVE_FRONT,
+		PLAYER_MOVE_BACK,
+		PLAYER_MOVE_RIGHT,
+		PLAYER_MOVE_LEFT,
 
-		// システム操作
-		GAME_END,
+		// ジャンプ
+		PLAYER_JUMP,
 
+		// 回避
+		PLAYER_EVASION,
+
+		// 通常攻撃（パンチ）
+		PLAYER_ATTACK,
+
+		// 特殊行動（えぐり取り）
+		PLAYER_GOUGE,
+#pragma endregion
+
+#pragma region カメラ操作
+		// 移動
+		CAMERA_MOVE_FRONT,
+		CAMERA_MOVE_BACK,
+		CAMERA_MOVE_RIGHT,
+		CAMERA_MOVE_LEFT,
+		CAMERA_MOVE_UP,
+		CAMERA_MOVE_DOWN,
+
+		// 回転
+		CAMERA_ROT_FRONT,
+		CAMERA_ROT_BACK,
+		CAMERA_ROT_RIGHT,
+		CAMERA_ROT_LEFT,
+#pragma endregion
+
+#pragma region システム操作
+		// 汎用（ポーズ/終了）キー
+		PAUSE,
+
+		// 汎用決定キー
 		ENTER,
 
+		// 汎用方向キー
 		UP,
 		DOWN,
 		LEFT,
 		RIGHT,
+#pragma endregion
 
+#pragma region デバッグキー
+		// デバッグオブジェクト操作
 		DEBUG_OBJECT_FRONT,
 		DEBUG_OBJECT_BACK,
 		DEBUG_OBJECT_RIGHT,
@@ -54,8 +80,9 @@ public:
 		DEBUG_OBJECT_UP,
 		DEBUG_OBJECT_DOWN,
 
-		// デバッグキー
+		// デバッグ描画スイッチ
 		DEBUG_DRAW_SWITCH,
+#pragma endregion
 
 		MAX,
 	};

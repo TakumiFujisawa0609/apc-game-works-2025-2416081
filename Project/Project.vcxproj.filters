@@ -18,9 +18,6 @@
     <ClCompile Include="Src\Application\Application.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Common\Vector2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Object\Common\AnimationController\AnimationController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -138,7 +135,25 @@
     <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarMamager.cpp">
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Charactor\Player\UI\Preview\PlayerPreview.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Common\Vector2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Manager\Camera\InstantCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -296,7 +311,22 @@
     <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarMamager.h">
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Charactor\Player\UI\Preview\PlayerPreview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Manager\Camera\InstantCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

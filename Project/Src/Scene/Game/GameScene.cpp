@@ -34,7 +34,6 @@ ShakeKinds GameScene::shakeKinds_ = ShakeKinds::DIAG;
 ShakeSize GameScene::shakeSize_ = ShakeSize::MEDIUM;
 
 GameScene::GameScene():
-	camera_(nullptr),
 	collision_(nullptr),
 
 	objects_(),
@@ -52,12 +51,8 @@ void GameScene::Load(void)
 	// 画面演出用
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
-	// カメラを生成
-	camera_ = new Camera();
-
 	// 当たり判定管理クラスを生成
 	collision_ = new CollisionManager();
-
 
 	// オブジェクト配列の上限設定(追加時、無駄なメモリ探索をしないように)
 	objects_.reserve(10);
@@ -76,12 +71,9 @@ void GameScene::Load(void)
 	// オブジェクト生成（生成の順番がそのまま(更新/描画)順）
 	ObjAdd(new SkyDome());
 	ObjAdd(new BlockManager());
-	ObjAdd(new Player(camera_->GetAngles()));
+	ObjAdd(new Player());
 	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
 	//ObjAdd(new SphereDebugObject(camera_->GetAngles()));
-
-	// ステージにカメラを渡す
-	ObjSerch<BlockManager>().back()->SetCamera(camera_);
 
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
@@ -93,17 +85,14 @@ void GameScene::Load(void)
 
 void GameScene::Init(void)
 {
+	// マウスを中心に固定
+	KEY::GetIns().SetMouceFixed(true);
+
 	// オブジェクト全ての初期化処理
 	for (ActorBase*& obj : objects_) { obj->Init(); }
 
-	// カメラ初期化～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
-	camera_->ChangeMode(Camera::MODE::FOLLOW);
-	camera_->SetLookAtPos(&(ObjSerch<Player>().back()->GetTrans().pos));
-	camera_->Init();
-	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
-
-	// マウスを中心に固定
-	KEY::GetIns().SetMouceFixed(true);
+	// カメラ設定
+	Camera::GetIns().ChangeModeFollowRemote(&(ObjSerch<Player>().back()->GetTrans().pos));
 
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
@@ -127,11 +116,11 @@ void GameScene::Update(void)
 	collision_->Check();
 
 	// カメラ更新
-	camera_->Update();
+	Camera::GetIns().Update();
 
 #pragma region 遷移判定（ポーズも含む）
 	// ポーズ判定
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().PushScene(std::make_shared<GamePause>());
 		return;
 	}
@@ -160,13 +149,13 @@ void GameScene::Draw(void)
 	ClearDrawScreen();
 
 	// カメラ適用
-	camera_->Apply();
+	Camera::GetIns().Apply();
 #pragma endregion
 
 #pragma region 描画処理（メイン）
 	// オブジェクト全ての描画処理
 	for (ActorBase*& obj : objects_) { obj->Draw(); }
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
 	for (ActorBase*& obj : objects_) { obj->AlphaDraw(); }
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 #pragma endregion
@@ -187,17 +176,16 @@ void GameScene::Draw(void)
 	// オブジェクト全てのUI描画処理
 	for (ActorBase*& obj : objects_) { obj->UiDraw(); }
 
-	if (KEY::GetIns().GetControllerConnect()) {
-		DrawString(10, 0, 
-			"\nコントローラー操作方法\n\n移動：左スティック or 十字ボタン\n\nジャンプ：A\n\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\n回避：LT or B\n\nカメラ操作：右スティック\n\nポーズ：START",
-			0xffffff);
-	}
-	else {
-		DrawString(10, 0,
-			"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：左クリック or J\n\nつかむ：右クリック or K  長押し\n\n投げる：左クリック or J\n\n回避：左Shift or H\n\nカメラ操作：マウス or 十字キー\n\nポーズ：ESC",
-			0xffffff);
-	}
-
+	//if (KEY::GetIns().GetControllerConnect()) {
+	//	DrawString(10, 0, 
+	//		"\nコントローラー操作方法\n\n移動：左スティック or 十字ボタン\n\nジャンプ：A\n\nパンチ：X or RT\n\nつかむ：RB or Y長押し\n\n投げる：X or RT\n\n回避：LT or B\n\nカメラ操作：右スティック\n\nポーズ：START",
+	//		0xffffff);
+	//}
+	//else {
+	//	DrawString(10, 0,
+	//		"\nキーボード操作方法\n\n移動：WASD\n\nジャンプ：SPACE\n\nパンチ：左クリック or J\n\nつかむ：右クリック or K  長押し\n\n投げる：左クリック or J\n\n回避：左Shift or H\n\nカメラ操作：マウス or 十字キー\n\nポーズ：ESC",
+	//		0xffffff);
+	//}
 #pragma endregion
 }
 
@@ -214,10 +202,6 @@ void GameScene::Release(void)
 
 	// オブジェクト全ての解放処理
 	for (ActorBase*& obj : objects_) { obj->Release(); }
-
-	// カメラを解放
-	delete camera_;
-	camera_ = nullptr;
 
 	// 画面演出用のメインスクリーンを解放
 	DeleteGraph(mainScreen_);

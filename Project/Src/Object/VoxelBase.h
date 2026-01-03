@@ -66,10 +66,10 @@ public:
 	Vector3 IdxReverse(int idx, int Nx, int Ny) const {
 		Vector3 out;
 		int layer = Nx * Ny;
-		out.z = idx / layer;
+		out.z = (float)idx / (float)layer;
 		int rem = idx % layer;
-		out.y = rem / Nx;
-		out.x = rem % Nx;
+		out.y = (float)rem / (float)Nx;
+		out.x = (float)(rem % Nx);
 		return out;
 	}
 	Vector3 IdxReverse(int idx) const { return IdxReverse(idx, Nx_, Ny_); }

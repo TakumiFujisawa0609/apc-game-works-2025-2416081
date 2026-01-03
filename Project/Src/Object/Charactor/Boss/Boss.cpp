@@ -24,6 +24,9 @@ Boss::Boss(const Vector3& playerPos):
 
 	masterLife_(0),
 
+	preview(nullptr),
+	hpBar_(nullptr),
+
 	playerPos(playerPos)
 {
 }
@@ -50,14 +53,14 @@ void Boss::Load(void)
 
 #pragma region 関数ポインタ配列へ各関数を格納
 
-	SET_STATE(STATE::NON, &Boss::Non);
-	SET_STATE(STATE::IDLE, &Boss::Idle);
-	SET_STATE(STATE::ATTACK, &Boss::Attack);
-	SET_STATE(STATE::DAMAGE, &Boss::Damage);
-	SET_STATE(STATE::STAN, &Boss::Stan);
-	SET_STATE(STATE::BIG_DAMAGE, &Boss::BigDamage);
-	SET_STATE(STATE::DEATH, &Boss::Death);
-	SET_STATE(STATE::END, &Boss::End);
+	CHARACTOR_SET_STATE(STATE::NON, &Boss::Non);
+	CHARACTOR_SET_STATE(STATE::IDLE, &Boss::Idle);
+	CHARACTOR_SET_STATE(STATE::ATTACK, &Boss::Attack);
+	CHARACTOR_SET_STATE(STATE::DAMAGE, &Boss::Damage);
+	CHARACTOR_SET_STATE(STATE::STAN, &Boss::Stan);
+	CHARACTOR_SET_STATE(STATE::BIG_DAMAGE, &Boss::BigDamage);
+	CHARACTOR_SET_STATE(STATE::DEATH, &Boss::Death);
+	CHARACTOR_SET_STATE(STATE::END, &Boss::End);
 	
 #pragma endregion
 
@@ -115,26 +118,7 @@ void Boss::CharactorAlphaDraw(void)
 
 void Boss::UiDraw(void)
 {
-	//auto drawHpBar = [&](Vector2 sPos, Vector2 size, int color)->void {
-	//	DrawBoxAA(sPos.x, sPos.y, sPos.x + size.x, sPos.y + size.y, color, true);
-	//	};
-
-	//float dif = 20.0f;
-
-	//Vector2 size = { Application::SCREEN_SIZE_X * 0.65,60.0f };
-	//Vector2 sPos = { Application::SCREEN_SIZE_X - dif - size.x,dif };
-
-	//drawHpBar(sPos, size, 0xffffff);
-
-	//dif = 3.0f;
-	//sPos += dif;
-	//size -= dif * 2;
-
-	//drawHpBar(sPos, size, 0x000000);
-
-	//size.x *= ((float)hp_ / (float)HP_MAX);
-	//drawHpBar(sPos, size, 0xff0000);
-
+	preview->Draw(DX_SCREEN_BACK);
 	for (unsigned char i = 0; i < masterLife_; i++) { hpBar_[i]->Draw(); }
 
 	if (state_ == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
@@ -142,8 +126,6 @@ void Boss::UiDraw(void)
 		DrawString(App::SCREEN_SIZE_X/2, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
 		SetFontSize(16);
 	}
-
-	DrawFormatString(0, 500, 0xffffff, "ボス座標：X：%.2f,Y：%.2f,Z：%.2f", trans_.pos.x, trans_.pos.y, trans_.pos.z);
 }
 
 void Boss::CharactorRelease(void)
@@ -171,11 +153,11 @@ void Boss::OnCollision(const ColliderBase& collider)
 		return;
 	}
 
-	if(collider.GetTag()==TAG::PLAYER_PUNCH){
+	if (collider.GetTag() == TAG::PLAYER_PUNCH) {
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
-		HpSharpen(1);
-		SetInviCounter(0);
+		HpSharpen(5);
+		SetInviCounter(20);
 		return;
 	}
 }
@@ -367,9 +349,13 @@ void Boss::LowerLoad(void)
 	rockWall_ = new RockWallShooter(trans_.pos, trans_.angle);
 	rockWall_->Load();
 
+	// プレビュー
+	preview = new BossPreview(trans_.pos, [this](void) {trans_.Draw(); });
+	preview->Load();
+
 	// HPバー
 	for (unsigned char i = 0; i < MASTER_LIFE; i++) {
-		hpBar_[i] = new BossHpBarManager(hp_, HP_MAX, i);
+		hpBar_[i] = new BossHpBarManager(hp_, HP_MAX, masterLife_, i);
 		hpBar_[i]->Load();
 	}
 }
@@ -380,6 +366,8 @@ void Boss::LowerInit(void)
 	psycho_->Init();
 	rockWall_->Init();
 	
+	preview->Init(PREVIEW_POS);
+
 	for (unsigned char i = 0; i < MASTER_LIFE; i++) {
 		hpBar_[i]->Init(HP_BAR_POS, HP_BAR_COLOR[i]);
 	}
@@ -390,8 +378,10 @@ void Boss::LowerUpdate(void)
 	stone_->Update();
 	psycho_->Update();
 	rockWall_->Update();
+
+	preview->Update();
 	
-	if (masterLife_ > 0) { hpBar_[masterLife_ - 1]->Update(); }
+	for (BossHpBarManager*& h : hpBar_) { h->Update(); }
 }
 void Boss::LowerDraw(void)
 {
@@ -428,6 +418,12 @@ void Boss::LowerRelease(void)
 		psycho_->Release();
 		delete psycho_;
 		psycho_ = nullptr;
+	}
+
+	if (preview) {
+		preview->Release();
+		delete preview;
+		preview = nullptr;
 	}
 
 	for (BossHpBarManager*& h : hpBar_) {
@@ -478,6 +474,8 @@ void Boss::LifeSharpen(void)
 	}
 
 	hp_ = HP_MAX;
+
+	SetInviCounter(60);
 
 	GameScene::Slow(20);
 	GameScene::Shake();

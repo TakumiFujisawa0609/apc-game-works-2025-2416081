@@ -9,9 +9,6 @@
 
 #include"../../Object/ActorBase.h"
 
-
-class Camera;
-
 class BlockManager;
 class RockWall;
 class Player;
@@ -57,9 +54,6 @@ public:
 	static void Shake(ShakeKinds kinds = ShakeKinds::DIAG, ShakeSize size = ShakeSize::MEDIUM, int time = 20);
 
 private:
-	// ƒJƒƒ‰
-	Camera* camera_;
-
 	// “–‚½‚è”»’èŠÇ—ƒNƒ‰ƒX
 	CollisionManager* collision_;
 

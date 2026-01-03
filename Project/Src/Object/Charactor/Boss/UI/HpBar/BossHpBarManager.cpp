@@ -1,11 +1,15 @@
 #include"BossHpBarManager.h"
 
+#include<string>
+
 #include"../../../../../Utility/Utility.h"
 
-BossHpBarManager::BossHpBarManager(const unsigned short& HP, const unsigned short HP_MAX, unsigned char number) :
+BossHpBarManager::BossHpBarManager(const unsigned short& HP, const unsigned short HP_MAX, const unsigned char& LIFE, unsigned char number) :
 	HP(HP),
 	prevHP(this->HP),
 	HP_MAX(HP_MAX),
+
+	LIFE(LIFE),
 
 	NUMBER(number),
 
@@ -47,7 +51,10 @@ void BossHpBarManager::Init(const Vector2& position, unsigned int color)
 	for (BossHpBar*& h : hpBar) {
 		num++;
 
-		h->Init(hpBarAlivePos, color);
+		unsigned char colorAround = num / 4;
+
+		h->Init(hpBarAlivePos, num, HP_BAR_DIVISIONS_NUM);
+		h->SetDefaultColor(color);
 
 		hpBarAlivePos += ((num % HP_BAR_DIVISION_NUM_Y) == 0) ? HP_BAR_NEXT_POS_UNIQUE : HP_BAR_NEXT_POS_USUALLY;
 	}
@@ -55,30 +62,33 @@ void BossHpBarManager::Init(const Vector2& position, unsigned int color)
 
 void BossHpBarManager::Update(void)
 {
-	// HPが変化したかどうか
-	if (HP != prevHP) {
 
-		// 変化した数値を保持
-		prevHP = HP;
+	if (LIFE - 1 == NUMBER) {
+		// HPが変化したかどうか
+		if (HP != prevHP) {
 
-		// 最大HPに対する現在のHPの割合を算出
-		const float hpRatio = (float)HP / (float)HP_MAX;
+			// 変化した数値を保持
+			prevHP = HP;
 
-		// 生きているHPバーブロックの数を算出
-		const unsigned short newAliveHpBarNum = (unsigned short)(hpRatio * (float)HP_BAR_DIVISIONS_NUM);
+			// 最大HPに対する現在のHPの割合を算出
+			const float hpRatio = (float)HP / (float)HP_MAX;
 
-		// 死んだHPバーブロックの処理
-		for (unsigned short i = newAliveHpBarNum; i < aliveHpBarNum; i++) { hpBar[i]->SetLostIdle(); }
+			// 生きているHPバーブロックの数を算出
+			const unsigned short newAliveHpBarNum = (unsigned short)(hpRatio * (float)HP_BAR_DIVISIONS_NUM);
 
-		// 変化した数値を保持
-		aliveHpBarNum = newAliveHpBarNum;
-	}
+			// 死んだHPバーブロックの処理
+			for (unsigned short i = newAliveHpBarNum; i < aliveHpBarNum; i++) { hpBar[i]->SetLostIdle(); }
 
-	if (totalHpBarNum > aliveHpBarNum) {
-		if (++hpBarDropIntervalCounter >= HP_BAR_DROP_INTERVAL) {
-			hpBarDropIntervalCounter = 0;
-			hpBar[totalHpBarNum - 1]->SetLostDrop();
-			totalHpBarNum--;
+			// 変化した数値を保持
+			aliveHpBarNum = newAliveHpBarNum;
+		}
+
+		if (totalHpBarNum > aliveHpBarNum) {
+			if (++hpBarDropIntervalCounter >= HP_BAR_DROP_INTERVAL) {
+				hpBarDropIntervalCounter = 0;
+				hpBar[totalHpBarNum - 1]->SetLostDrop();
+				totalHpBarNum--;
+			}
 		}
 	}
 

@@ -1,6 +1,5 @@
 #include "Block.h"
 #include"BlockManager.h"
-#include<DxLib.h>
 
 #include"../../../Manager/Sound/SoundManager.h"
 
@@ -37,10 +36,6 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 
 void Block::OnCollision(const ColliderBase& collider)
 {
-	if (collider.GetTag() == TAG::GOLEM_ATTACK_PSYCHOROCK) {
-		char aaa = 0;
-	}
-
 	switch (collider.GetTag())
 	{
 	case TAG::SPHERE_DEBUG_OBJECT:
@@ -58,7 +53,7 @@ void Block::OnCollision(const ColliderBase& collider)
 		GameScene::Shake();
 
 		// ‰¹‚ð–Â‚ç‚·
-		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+		Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
 
 		break;
 	}

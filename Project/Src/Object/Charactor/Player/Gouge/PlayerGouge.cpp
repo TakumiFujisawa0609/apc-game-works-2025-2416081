@@ -1,9 +1,6 @@
 #include"PlayerGouge.h"
 
-#include"../../../Common/Collider/SphereCollider.h"
-
-#include"../../../Stage/Block/Block.h"
-#include"../../Boss/Attack/RockWall/RockWall.h"
+#include"../../../../Manager/Sound/SoundManager.h"
 
 PlayerGouge::PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle) :
 	ActorBase(),
@@ -82,7 +79,11 @@ void PlayerGouge::OnCollision(const ColliderBase& collider)
 		searchHit_ = true;
 		return;
 	case PlayerGouge::STATE::GOUGE:
-		gougeHit_ = true;
+
+		if (!gougeHit_) {
+			gougeHit_ = true;
+			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+		}
 		return;
 	}
 }

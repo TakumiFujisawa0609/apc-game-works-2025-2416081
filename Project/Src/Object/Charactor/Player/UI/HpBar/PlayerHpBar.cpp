@@ -16,7 +16,11 @@ PlayerHpBar::PlayerHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE
 	idleTimer(0),
 	idleShakeSign(1),
 
-	ALIVE_COLOR(0x00ff00)
+	ALIVE_DEFAULT_R(0),
+	ALIVE_DEFAULT_G(0),
+	ALIVE_DEFAULT_B(0),
+
+	HP_BAR_DIVISION_NUM(0)
 {
 }
 
@@ -24,16 +28,16 @@ PlayerHpBar::~PlayerHpBar()
 {
 }
 
-void PlayerHpBar::Init(const Vector2& localAlivePosition, unsigned int aliveColor)
+void PlayerHpBar::Init(const Vector2& localAlivePosition, unsigned short num, unsigned char HP_BAR_DIVISIONS_NUM)
 {
 	localPosition = localAlivePosition;
 
-	ALIVE_COLOR = aliveColor;
-
 	angle = 0.0f;
 
-	idleTimer = 0;
-	
+	idleTimer = num;
+
+	this->HP_BAR_DIVISION_NUM = HP_BAR_DIVISIONS_NUM;
+
 	state = STATE::ALIVE;
 
 	stateFuncPtr[(int)STATE::NON] = &PlayerHpBar::Non;
@@ -53,20 +57,34 @@ void PlayerHpBar::Draw(void)
 
 	auto drawPoss = DrawPositionVertexs();
 
+	unsigned int aliveColor =
+		GetColor(
+			std::clamp((unsigned int)ALIVE_DEFAULT_R + idleTimer, 0u, 255u),
+			std::clamp((unsigned int)ALIVE_DEFAULT_G + idleTimer, 0u, 255u),
+			std::clamp((unsigned int)ALIVE_DEFAULT_B + idleTimer, 0u, 255u)
+		);
+
 	DrawQuadrangleAA(
 		drawPoss.topLeft.x, drawPoss.topLeft.y,
 		drawPoss.topRight.x, drawPoss.topRight.y,
 		drawPoss.bottomRight.x, drawPoss.bottomRight.y,
 		drawPoss.bottomLeft.x, drawPoss.bottomLeft.y,
-		(state == STATE::ALIVE) ? ALIVE_COLOR : 0xff0000,
+		(state == STATE::ALIVE) ? aliveColor : 0xff0000,
 		true
 	);
 }
 
+void PlayerHpBar::Alive(void)
+{
+	idleTimer += idleShakeSign;
+	if (idleTimer > HP_BAR_DIVISION_NUM || idleTimer <= 0) { idleShakeSign *= -1; }
+}
 
 void PlayerHpBar::SetLostIdle(void)
 {
 	state = STATE::LOST_IDLE;
+
+	idleTimer = 0;
 
 	localPosition += (float)idleShakeSign * 0.5f;
 	idleShakeSign *= -1;

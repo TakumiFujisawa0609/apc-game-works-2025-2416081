@@ -171,13 +171,13 @@ void CollisionManager::Matching(std::vector<ColliderBase*>& as, std::vector<Coll
 
 void CollisionManager::Matching(std::vector<ColliderBase*>& s)
 {
-	signed int size = s.size();
+	unsigned short size = (unsigned short)s.size();
 
-	for (int a = 0; a < (size - 1); a++) {
+	for (unsigned short a = 0; a < (size - 1); a++) {
 		if (!s[a]) { continue; }
 		if (!s[a]->GetJudge()) { continue; }
 
-		for (int b = a + 1; b < size; b++) {
+		for (unsigned short b = a + 1; b < size; b++) {
 			if (!s[b]) { continue; }
 			if (!s[b]->GetJudge()) { continue; }
 

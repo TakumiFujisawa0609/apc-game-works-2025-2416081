@@ -53,10 +53,10 @@ void RockWall::On(const Vector3& pos)
 void RockWall::SubLoad(void)
 {
 #pragma region 関数ポインタ配列へ各関数を格納
-#define SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
-    SET_STATE(STATE::NON, &RockWall::Non);
-    SET_STATE(STATE::MOVE, &RockWall::Move);
-    SET_STATE(STATE::BE, &RockWall::Be);
+#define ROCK_WALL_SET_STATE(state, func) stateFuncPtr[(int)(state)] = static_cast<STATEFUNC>(func)
+    ROCK_WALL_SET_STATE(STATE::NON, &RockWall::Non);
+    ROCK_WALL_SET_STATE(STATE::MOVE, &RockWall::Move);
+    ROCK_WALL_SET_STATE(STATE::BE, &RockWall::Be);
 #pragma endregion
 }
 
@@ -107,7 +107,7 @@ void RockWall::OnCollision(const ColliderBase& collider)
     case TAG::GOLEM_ATTACK_PSYCHOROCK: {
         ApplyBrush(255);
         GameScene::Shake();
-        Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+        Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
         return;
     }
     default: { return; }

@@ -34,6 +34,7 @@ public:
 		if (dynamicFlg_) {
 			AccelSum.y = 0.0f;
 		}
+		isGroundMaster_ = true;
 	}
 
 	/// <summary>

@@ -277,7 +277,7 @@ void VoxelBase::SolidFill(std::vector<unsigned char>& density, int Nx, int Ny, i
         int z = i / (Nx * Ny);
         int y = (i - z * Nx * Ny) / Nx;
         int x = i % Nx;
-        for (int k = 0; k < 6; ++k) { pushIf(x + kDirNrm[k].x, y + kDirNrm[k].y, z + kDirNrm[k].z); }
+        for (int k = 0; k < 6; ++k) { pushIf(x + (int)kDirNrm[k].x, y + (int)kDirNrm[k].y, z + (int)kDirNrm[k].z); }
     }
 
     // まずカウント（上書き前に数える）

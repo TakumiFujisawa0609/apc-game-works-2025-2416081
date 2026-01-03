@@ -8,7 +8,13 @@ public:
 	PlayerHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
 	~PlayerHpBar();
 
-	void Init(const Vector2& localAlivePosition,unsigned int aliveColor);
+	void Init(const Vector2& localAlivePosition, unsigned short num, unsigned char HP_BAR_DIVISION_NUM);
+	void SetDefaultColor(unsigned char r, unsigned char g, unsigned char b) { ALIVE_DEFAULT_R = r; ALIVE_DEFAULT_G = g; ALIVE_DEFAULT_B = b; }
+	void SetDefaultColor(unsigned int color) {
+		ALIVE_DEFAULT_R = (color >> 16) & 0xFF;
+		ALIVE_DEFAULT_G = (color >> 8) & 0xFF;
+		ALIVE_DEFAULT_B = color & 0xFF;
+	}
 	void Update(void);
 	void Draw(void);
 
@@ -62,7 +68,10 @@ private:
 	}
 
 	// 生存時の色
-	unsigned int ALIVE_COLOR;
+	unsigned char ALIVE_DEFAULT_R, ALIVE_DEFAULT_G, ALIVE_DEFAULT_B;
+
+	// 全体の分割数
+	unsigned char HP_BAR_DIVISION_NUM;
 
 	// 落下させるときの重力加速度
 	const float DROP_GRAVITY = 0.4f;
@@ -84,7 +93,7 @@ private:
 
 	// 状態別更新処理
 	void Non(void) {}
-	void Alive(void) {}
+	void Alive(void);
 	void LostIdle(void);
 	void LostDrop(void);
 

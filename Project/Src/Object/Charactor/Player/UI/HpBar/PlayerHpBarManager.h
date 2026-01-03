@@ -28,7 +28,7 @@ private:
 	// HPバーの分割数
 	static constexpr unsigned char HP_BAR_DIVISION_NUM_X = 46;
 	static constexpr unsigned char HP_BAR_DIVISION_NUM_Y = 3;
-	static constexpr unsigned char HP_BAR_DIVISIONS_NUM = HP_BAR_DIVISION_NUM_X * HP_BAR_DIVISION_NUM_Y;
+	static constexpr unsigned char HP_BAR_DIVISION_NUM = HP_BAR_DIVISION_NUM_X * HP_BAR_DIVISION_NUM_Y;
 
 	// HPバーの1分割あたりの大きさ（縦、横 同一）
 	const float HP_BAR_ONE_DIVISION_SIZE = 10.0f;
@@ -47,7 +47,7 @@ private:
 #pragma endregion
 
 	// HPバーオブジェクト
-	PlayerHpBar* hpBar[HP_BAR_DIVISIONS_NUM];
+	PlayerHpBar* hpBar[HP_BAR_DIVISION_NUM];
 
 	// フレームの画像ハンドル
 	int hpBarFrameImageHandle;

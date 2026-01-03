@@ -53,7 +53,7 @@ void EndScene::Update(void)
 		}
 		break;
 	}
-	if (KEY::GetIns().GetInfo(KEY_TYPE::GAME_END).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SoundManager::GetIns().PausePlay();
 		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true);
 		SceneManager::GetIns().PopScene();

@@ -48,7 +48,6 @@ struct Vector3
 	static Vector3 YZonly(float y, float z) { return Vector3(0.0f, y, z); }
 #pragma endregion
 
-
 	// VECTOR(Dxlib)‚É•ÏŠ·
 	VECTOR ToVECTOR(void)const { return VGet(x, y, z); }
 
@@ -116,7 +115,7 @@ struct Vector3
 	bool operator>=(const VECTOR& value)const { return (x >= value.x && y >= value.y && z >= value.z); }
 	bool operator>=(float value)const { return (x >= value && y >= value && z >= value); }
 
-
+	// ‘ã“ü
 	void operator=(float value) { x = value; y = value; z = value; }
 	void operator=(const Vector3& value) { x = value.x; y = value.y; z = value.z; }
 	void operator=(const VECTOR& value) { x = value.x; y = value.y; z = value.z; }

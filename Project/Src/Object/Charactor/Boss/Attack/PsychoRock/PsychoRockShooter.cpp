@@ -84,7 +84,7 @@ void PsychoRockShooter::On(void)
 void PsychoRockShooter::RandPos(float& x, float& z)
 {
 	float angle = (float)GetRand(360);
-	float radius = (float)GetRand(RANDAM_RADIUS_MAX);
+	float radius = (float)GetRand((int)RANDAM_RADIUS_MAX);
 
 	Vector3 work =
 		Vector3(0.0f, 0.0f, CONST_RADIUS_SUB).TransMat(MGetRotY(angle)) +
