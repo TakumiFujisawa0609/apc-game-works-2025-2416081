@@ -1,7 +1,6 @@
 #pragma once
 
-#include"../../Common/Vector2.h"
-#include"../../Common/Vector3.h"
+#include"../../Object/Common/Transform.h"
 
 class Camera
 {
@@ -45,14 +44,16 @@ public:
 	};
 
 #pragma region カメラモード切り替え
-	// 定点
-	void ChangeModeFixedPoint(const Vector3& pos, const Vector3& angle);
-	// フリー
-	void ChangeModeFree(float ROT_POWER, float MOVE_POWER, const Vector3& pos = Vector3(), const Vector3& angle = Vector3());
-	// 追従（手動操作）
-	void ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff = Vector3(0, 0, -400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3());
-	// 追従（自動操作）
-	void ChangeModeFollowAuto(const Vector3* lookAt, const Vector3* lookTarget, const Vector3& lookAtDiff = Vector3(0, 0, -400), const Vector3& angle = Vector3());
+	// 定点モードに変更
+	void ChangeModeFixedPoint(const Vector3& pos, const Vector3& angle, float fov = (60.0f * (DX_PI_F / 180.0f)));
+	// フリーモードに変更
+	void ChangeModeFree(float ROT_POWER, float MOVE_POWER, const Vector3& pos = Vector3(), const Vector3& angle = Vector3(), float fov = (60.0f * (DX_PI_F / 180.0f)));
+	// 追従（手動操作）モードに変更
+	void ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff = Vector3(0, 0, -400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3(), float fov = (60.0f * (DX_PI_F / 180.0f)));
+	// 追従（自動操作）モードに変更（引数省略バージョン）
+	void ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float fov = (80.0f * (DX_PI_F / 180.0f)));
+	// 追従（自動操作）モードに変更（引数非省略バージョン）
+	void ChangeModeFollowAuto(const Vector3* lookAt,const float* lookAtYangle, const Vector3* lookTarget, float fov = (80.0f * (DX_PI_F / 180.0f)));
 #pragma endregion
 
 	// 更新
@@ -70,6 +71,35 @@ public:
 
 	// 角度
 	const Vector3& GetAngle(void)const { return angle; }
+#pragma endregion
+
+#pragma region セット関数
+	// 座標を設定（追従モード時を除く。追従モード = FOLLOW_REMOTE / FOLLOW_AUTO）
+	void SetPos(const Vector3& pos) {
+		// 追従状態のときは処理をしない
+		if (mode == MODE::FOLLOW_REMOTE || mode == MODE::FOLLOW_AUTO) { return; }
+		// 指定の座標を代入
+		this->pos = pos;
+	}
+
+	// 角度を設定（追従(自動操作)モード時を除く。追従(自動操作)モード = FOLLOW_AUTO）
+	void SetAngle(const Vector3& angle) {
+		// 追従（自動操作）のときは処理をしない
+		if (mode == MODE::FOLLOW_AUTO) { return; }
+		// 指定の角度を代入
+		this->angle = angle;
+	}
+
+	// 追従モードのときの追従対象を途中で変更する。追従モード = FOLLOW_REMOTE / FOLLOW_AUTO
+	void FollowToLookAtChange(const Transform& trans) {
+		if (mode != MODE::FOLLOW_REMOTE && mode != MODE::FOLLOW_AUTO) { return; }
+		lookAt = &trans.pos;
+		if (mode == MODE::FOLLOW_AUTO) { lookAtYangle = &trans.angle.y; }
+	}
+
+	// 追従(自動操作)モードのときの視野に含める対象物を途中で変更する。追従(自動操作)モード = FOLLOW_AUTO
+	void FollowAutoToLookTargetChange(const Vector3* lookTarget) { if (mode == MODE::FOLLOW_AUTO) { this->lookTarget = lookTarget; } }
+
 #pragma endregion
 
 
@@ -97,6 +127,10 @@ private:
 
 	// カメラの角度
 	Vector3 angle;
+
+	// 視野角
+	float fov;
+
 #pragma endregion
 
 
@@ -146,18 +180,17 @@ private:
 
 #pragma region FOLLOW_AUTO
 	// 更新処理
-	void FollorAutoModeFunc(void);
+	void FollowAutoModeFunc(void);
 
 	// 追従対象
 	//const Vector3* lookAt_;
 	// ↑FOLLOW_REMOTEのものを流用
 
+	// 追従対象の向き
+	const float* lookAtYangle;
+
 	// 視野に入れる対象物
 	const Vector3* lookTarget;
-
-	// 回転量
-	//float ROT_POWER;
-	// ↑FREEのものを流用
 
 	// 適用
 	void FollowAutoApply(void);
