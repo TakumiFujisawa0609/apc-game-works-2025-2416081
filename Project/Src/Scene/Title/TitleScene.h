@@ -23,5 +23,9 @@ public:
 private:
 	int mainScreen_;
 	int img_;
+	int pushToImg;
+
+	unsigned char blinkingCounter;
+	unsigned char blinkingSigned;
 	SkyDome* skyDome_;
 };

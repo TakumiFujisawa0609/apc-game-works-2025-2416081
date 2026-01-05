@@ -16,6 +16,11 @@
 
 TitleScene::TitleScene():
 	img_(-1),
+	pushToImg(-1),
+
+	blinkingCounter(0),
+	blinkingSigned(5),
+
 	skyDome_(nullptr)
 {
 }
@@ -27,6 +32,7 @@ TitleScene::~TitleScene()
 void TitleScene::Load(void)
 {
 	Utility::LoadImg(img_, "Data/Image/Title/Title.png");
+	Utility::LoadImg(pushToImg, "Data/Image/Title/PushToStart.png");
 
 	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 
@@ -38,6 +44,7 @@ void TitleScene::Load(void)
 }
 void TitleScene::Init(void)
 {
+	blinkingCounter = 100;
 }
 void TitleScene::Update(void)
 {
@@ -51,6 +58,9 @@ void TitleScene::Update(void)
 		return;
 	}
 	skyDome_->Update();
+
+	blinkingCounter += blinkingSigned;
+	if (blinkingCounter <= 50 || blinkingCounter > 240) { blinkingSigned *= -1; }
 }
 void TitleScene::Draw(void)
 {
@@ -58,22 +68,21 @@ void TitleScene::Draw(void)
 
 	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, img_, true);
 
-#if _DEBUG
-	if (App::GetIns().IsDrawDebug()) {
-		SetFontSize(32);
-		if (KEY::GetIns().GetControllerConnect()) {
-			DrawString(10, 0,
-				"ゲームスタート：B\n\nゲーム終了：START",
-				0xffffff);
-		}
-		else {
-			DrawString(10, 0,
-				"ゲームスタート：SPACE\n\nゲーム終了：ESC",
-				0xffffff);
-		}
-		SetFontSize(16);
-	}
-#endif
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, blinkingCounter);
+	DrawRotaGraph(App::SCREEN_SIZE_X / 2, (int)(App::SCREEN_SIZE_Y * 0.92f), 1, 0, pushToImg, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	//SetFontSize(32);
+	//if (KEY::GetIns().GetControllerConnect()) {
+	//	DrawString(10, 0, 
+	//		"ゲームスタート：B\n\nゲーム終了：START",
+	//		0xffffff);
+	//} else {
+	//	DrawString(10, 0,
+	//		"ゲームスタート：SPACE\n\nゲーム終了：ESC",
+	//		0xffffff);
+	//}
+	//SetFontSize(16);
 }
 void TitleScene::Release(void)
 {
@@ -82,5 +91,6 @@ void TitleScene::Release(void)
 		delete skyDome_;
 		skyDome_ = nullptr;
 	}
+	DeleteGraph(pushToImg);
 	DeleteGraph(img_);
 }

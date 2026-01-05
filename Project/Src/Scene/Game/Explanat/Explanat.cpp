@@ -22,9 +22,9 @@ Explanat::~Explanat()
 
 void Explanat::Load(void)
 {
-	//img_ = Utility::LoadImg("Data/Image/Title/Start/Illustrate.png");
-	bottonImg_[0] = Utility::LoadImg("Data/Image/Title/Start/SpaceKey.png");
-	bottonImg_[1] = Utility::LoadImg("Data/Image/Title/Start/Abutton.png");
+	img_ = Utility::LoadImg("Data/Image/Game/Start/Illustrate.png");
+	bottonImg_[0] = Utility::LoadImg("Data/Image/Game/Start/SpaceKey.png");
+	bottonImg_[1] = Utility::LoadImg("Data/Image/Game/Start/Abutton.png");
 }
 
 void Explanat::Init(void)
@@ -43,7 +43,6 @@ void Explanat::Update(void)
 		return;
 	}
 
-
 	s_ += 0.1f;
 }
 
@@ -54,13 +53,13 @@ void Explanat::Draw(void)
 	int x = xx / 2;
 	int y = yy / 2;
 
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-	DrawBox(0, 0, xx, yy, 0x000000, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+	DrawBox(0, 0, xx, yy, 0xffffff, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND,0);
 
 	DrawExtendGraph(x / 2, y / 2, x + (x / 2), y + (y / 2), img_, true);
 	DrawRotaGraph(x, y, 1, 0, img_, true);
-	DrawRotaGraph(x + (x / 2), y + (y / 2), abs(sinf(s_)) * 0.1f + 0.3f, 0, bottonImg_[(KEY::GetIns().GetControllerConnect()) ? 1 : 0], true);
+	DrawRotaGraphF(BUTTON_POS.x, BUTTON_POS.y, GetButtonExrate(), 0, bottonImg_[(KEY::GetIns().GetControllerConnect()) ? 1 : 0], true);
 }
 
 void Explanat::Release(void)

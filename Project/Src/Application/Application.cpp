@@ -40,12 +40,7 @@ void Application::Init(void)
 
 	// DxLib‚Ì‰Šú‰»
 	isInitFail_ = false;
-	if (DxLib_Init() == -1)
-	{
-		// ‰Šú‰»¸”s
-		isInitFail_ = true;
-		return;
-	}
+	if (DxLib_Init() == -1) { isInitFail_ = true; return; }
 
 	// •`‰ææ‰æ–Ê‚ğ— ‚É‚·‚é
 	SetDrawScreen(DX_SCREEN_BACK);

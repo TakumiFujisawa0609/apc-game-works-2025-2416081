@@ -43,7 +43,7 @@ private:
 
 
 	// HPバーブロックが１つ落ちてから、次のHPバーブロックが落ちるまでのフレーム数
-	const unsigned char HP_BAR_DROP_INTERVAL = 3;
+	const unsigned char HP_BAR_DROP_INTERVAL = 1;
 #pragma endregion
 
 	// HPバーオブジェクト
