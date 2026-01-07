@@ -10,7 +10,9 @@ KeyManager::KeyManager():
 	keyboardFormat(),
 	mouceButtonFormat(),
 	controllerButtonFormat(),
-	mouceFixed_(false)
+	mouceFixed_(false),
+
+	lastInputKinds(false)
 {
 }
 
@@ -116,6 +118,7 @@ void KeyManager::Init(void)
 	SET_KEYBOARD(KEY_TYPE::ENTER, KEY_INPUT_SPACE);
 	SET_KEYBOARD(KEY_TYPE::ENTER, KEY_INPUT_RETURN);
 	SET_C_BUTTON(KEY_TYPE::ENTER, XINPUT_BUTTON_B);
+	SET_C_BUTTON(KEY_TYPE::ENTER, XINPUT_BUTTON_X);
 
 	// îƒópï˚å¸ÉLÅ[
 	SET_KEYBOARD(KEY_TYPE::UP, KEY_INPUT_W);
@@ -182,7 +185,7 @@ void KeyManager::KeyUpdate(void)
 		for (auto& input : keyboardFormat[i]) {
 			if (b) { break; }
 
-			if (CheckHitKey(input) != 0) { b = true; }
+			if (CheckHitKey(input) != 0) { b = true; lastInputKinds = false; }
 		}
 		for (auto& input : controllerButtonFormat[i]) {
 			if (b) { break; }
@@ -190,16 +193,15 @@ void KeyManager::KeyUpdate(void)
 			XINPUT_STATE state = {};
 			if (GetJoypadXInputState(DX_INPUT_PAD1, &state) != 0) { state = {}; }
 
-			if (state.Buttons[input] != 0) { b = true; }
+			if (state.Buttons[input] != 0) { b = true; lastInputKinds = true; }
 		}
 		for (auto& input : mouceButtonFormat[i]) {
 			if (b) { break; }
-			if (GetMouseInput() & input) { b = true; }
+			if (GetMouseInput() & input) { b = true; lastInputKinds = false; }
 		}
 		for (CONTROLLER_OTHERS input : controllerOthersFormat[i]) {
 			if (b) { break; }
-
-			b = ControllerOthersInput(input);
+			if (ControllerOthersInput(input)) { b = true; lastInputKinds = true; }
 		}
 
 		keyInfo[i].now = b;

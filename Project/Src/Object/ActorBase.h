@@ -32,7 +32,7 @@ public:
 	// Ú’n”»’è‚Ì’Ê’m
 	virtual void OnGrounded() {
 		if (dynamicFlg_) {
-			AccelSum.y = 0.0f;
+			AccelSum.y = (AccelSum.y < 0.0f) ? 0.0f : AccelSum.y;
 		}
 		isGroundMaster_ = true;
 	}

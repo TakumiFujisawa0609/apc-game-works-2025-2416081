@@ -13,7 +13,7 @@
 
 #include"../Boss/Boss.h"
 
-Player::Player():
+Player::Player() :
 	CharactorBase(),
 
 	hp_(0),
@@ -28,8 +28,12 @@ Player::Player():
 
 	gouge_(nullptr),
 	throwing_(nullptr),
-	
-	knockBackVec_()
+
+	knockBackVec_(),
+
+	preview(nullptr),
+	hpBar(nullptr),
+	operationUi(nullptr)
 {
 }
 
@@ -139,13 +143,14 @@ void Player::CharactorAlphaDraw(void)
 
 void Player::UiDraw(void)
 {
-	//DrawGraph(PREVIEW_POS.x, PREVIEW_POS.y, wholeFrame_, true);
-
 	// プレビュー
-	preview_->Draw(DX_SCREEN_BACK);
+	preview->Draw(DX_SCREEN_BACK);
 
 	// HPバー描画
-	hpBar_->Draw();
+	hpBar->Draw();
+
+	// 操作説明
+	operationUi->Draw();
 }
 
 void Player::CharactorRelease(void)
@@ -164,7 +169,6 @@ void Player::OnGrounded()
 {
 	ActorBase::OnGrounded();
 
-	AccelSum.y = 0.0f;
 	for (auto& jump : isJump_) { jump = false; }
 	for (auto& cou : jumpKeyCounter_) { cou = 0; }
 }
@@ -670,16 +674,19 @@ void Player::LowerLoad(void)
 	throwing_ = new Throwing(trans_.pos, trans_.angle);
 	throwing_->Load();
 
-
-	Utility::LoadImg(wholeFrame_, "Data/Image/Game/UI/PlayerWholeFrame.png");
-
+#pragma region UI
 	// プレビュー
-	preview_ = new PlayerPreview(trans_.pos, [this](void) { trans_.Draw(); });
-	preview_->Load();
+	preview = new PlayerPreview(trans_.pos, [this](void) { trans_.Draw(); });
+	preview->Load();
 
 	// HPバー
-	hpBar_ = new PlayerHpBarManager(hp_, HP_MAX);
-	hpBar_->Load();
+	hpBar = new PlayerHpBarManager(hp_, HP_MAX);
+	hpBar->Load();
+
+	// 操作説明
+	operationUi = new PlayerOperationUI(state_);
+	operationUi->Load();
+#pragma endregion
 
 }
 void Player::LowerInit(void)
@@ -693,11 +700,16 @@ void Player::LowerInit(void)
 	// 特殊攻撃（投げ）
 	throwing_->Init();
 
+#pragma region UI
 	// プレビュー
-	preview_->Init(PREVIEW_POS);
+	preview->Init(PREVIEW_POS);
 
 	// HPバー
-	hpBar_->Init(HP_BAR_POS);
+	hpBar->Init(HP_BAR_POS);
+
+	// 操作説明
+	operationUi->Init(OPERATION_UI_POS);
+#pragma endregion
 }
 void Player::LowerUpdate(void)
 {
@@ -710,11 +722,16 @@ void Player::LowerUpdate(void)
 	// 特殊攻撃（投げ）
 	throwing_->Update();
 
+#pragma region UI
 	// プレビュー
-	preview_->Update();
+	preview->Update();
 
 	// HPバー
-	hpBar_->Update();
+	hpBar->Update();
+
+	// 操作説明
+	operationUi->Update();
+#pragma endregion
 }
 void Player::LowerDraw(void)
 {
@@ -761,19 +778,26 @@ void Player::LowerRelease(void)
 		throwing_ = nullptr;
 	}
 
-	DeleteGraph(wholeFrame_);
-
+#pragma region UI
 	// プレビュー
-	if (preview_) {
-		preview_->Release();
-		delete preview_;
-		preview_ = nullptr;
+	if (preview) {
+		preview->Release();
+		delete preview;
+		preview = nullptr;
 	}
 
 	// HPバー
-	if (hpBar_) {
-		hpBar_->Release();
-		delete hpBar_;
-		hpBar_ = nullptr;
+	if (hpBar) {
+		hpBar->Release();
+		delete hpBar;
+		hpBar = nullptr;
 	}
+
+	// 操作説明
+	if (operationUi) {
+		operationUi->Release();
+		delete operationUi;
+		operationUi = nullptr;
+	}
+#pragma endregion
 }

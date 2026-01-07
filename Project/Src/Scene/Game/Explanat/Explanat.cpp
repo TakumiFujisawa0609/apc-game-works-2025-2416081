@@ -24,7 +24,7 @@ void Explanat::Load(void)
 {
 	img_ = Utility::LoadImg("Data/Image/Game/Start/Illustrate.png");
 	bottonImg_[0] = Utility::LoadImg("Data/Image/Game/Start/SpaceKey.png");
-	bottonImg_[1] = Utility::LoadImg("Data/Image/Game/Start/Abutton.png");
+	bottonImg_[1] = Utility::LoadImg("Data/Image/Game/Start/X.png");
 }
 
 void Explanat::Init(void)
@@ -57,9 +57,8 @@ void Explanat::Draw(void)
 	DrawBox(0, 0, xx, yy, 0xffffff, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND,0);
 
-	DrawExtendGraph(x / 2, y / 2, x + (x / 2), y + (y / 2), img_, true);
 	DrawRotaGraph(x, y, 1, 0, img_, true);
-	DrawRotaGraphF(BUTTON_POS.x, BUTTON_POS.y, GetButtonExrate(), 0, bottonImg_[(KEY::GetIns().GetControllerConnect()) ? 1 : 0], true);
+	DrawRotaGraphF(BUTTON_POS.x, BUTTON_POS.y, GetButtonExrate(), 0, bottonImg_[(KEY::GetIns().LastInputKinds()) ? 1 : 0], true);
 }
 
 void Explanat::Release(void)

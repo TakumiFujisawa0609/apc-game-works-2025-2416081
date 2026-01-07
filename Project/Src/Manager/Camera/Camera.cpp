@@ -252,7 +252,7 @@ void Camera::FollowRemoteApply(void)
 	SetCameraPositionAndTarget_UpVecY(pos.ToVECTOR(), lookAt->ToVECTOR());
 }
 
-void Camera::ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float fov)
+void Camera::ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float FOLLOW_AUTO_MIN_DISTANCE, float FOLLOW_AUTO_MAX_DISTANCE, float fov)
 {
 	// Œ»İ‚Ìî•ñ‚ğ”jŠü
 	Release();
@@ -268,6 +268,12 @@ void Camera::ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTa
 
 	// ‹–ì‚É“ü‚ê‚é‘ÎÛ•¨
 	this->lookTarget = lookTarget;
+
+	// Å’á‹——£
+	this->FOLLOW_AUTO_MIN_DISTANCE = FOLLOW_AUTO_MIN_DISTANCE;
+
+	// Å‘å‹——£
+	this->FOLLOW_AUTO_MAX_DISTANCE = FOLLOW_AUTO_MAX_DISTANCE;
 
 	// ‹–ìŠp‚ğİ’è
 	this->fov = fov;
@@ -288,10 +294,9 @@ void Camera::ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTa
 	angle = ((*this->lookAt + *this->lookTarget) * 0.5f) - pos;
 	angle = Vector3::Yonly(atan2f(angle.x, angle.z));
 #pragma endregion
-
 }
 
-void Camera::ChangeModeFollowAuto(const Vector3* lookAt, const float* lookAtYangle, const Vector3* lookTarget, float fov)
+void Camera::ChangeModeFollowAuto(const Vector3* lookAt, const float* lookAtYangle, const Vector3* lookTarget, float FOLLOW_AUTO_MIN_DISTANCE, float FOLLOW_AUTO_MAX_DISTANCE, float fov)
 {
 	// Œ»İ‚Ìî•ñ‚ğ”jŠü
 	Release();
@@ -307,6 +312,12 @@ void Camera::ChangeModeFollowAuto(const Vector3* lookAt, const float* lookAtYang
 
 	// ‹–ì‚É“ü‚ê‚é‘ÎÛ•¨
 	this->lookTarget = lookTarget;
+
+	// Å’á‹——£
+	this->FOLLOW_AUTO_MIN_DISTANCE = FOLLOW_AUTO_MIN_DISTANCE;
+
+	// Å‘å‹——£
+	this->FOLLOW_AUTO_MAX_DISTANCE = FOLLOW_AUTO_MAX_DISTANCE;
 
 	// ‹–ìŠp‚ğİ’è
 	this->fov = fov;
@@ -338,7 +349,7 @@ void Camera::FollowAutoModeFunc(void)
 	Vector3 atToTarget = *lookAt - *lookTarget;
 
 	// fov‚©‚ç•K—v‹——£‚ğŒvZicfovŠî€j
-	float needDist = (atToTarget.Length() * 0.5f) / tanf(fov * 0.5f);
+	float needDist = std::clamp((atToTarget.Length() * 0.5f) / tanf(fov * 0.5f), FOLLOW_AUTO_MIN_DISTANCE, FOLLOW_AUTO_MAX_DISTANCE);
 
 	// lookTarget‚©‚ç‚İ‚ÄlookAt‚Ì‚»‚Ì‚³‚ç‚Éæ‚ÉƒJƒƒ‰‚ğ‚¨‚«‚½‚¢‚Ì‚Å‚»‚Ì•ûŒü‚ğæ“¾‚·‚é
 	Vector3 backDir = atToTarget.Normalized();
@@ -347,7 +358,7 @@ void Camera::FollowAutoModeFunc(void)
 	Vector3 desiredPos = *lookAt + backDir * needDist;
 
 	// ‚‚³•â³
-	desiredPos.y += (*lookAt - ((*lookAt + *lookTarget) * 0.5f)).Length();
+	desiredPos.y += ((*lookAt - *lookTarget) * 0.5f).Length();
 
 	// •âŠÔiƒKƒ^‚Â‚«–h~j
 	const float smooth = 0.1f;

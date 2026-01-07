@@ -10,6 +10,7 @@
 
 #include"UI/HpBar/PlayerHpBarManager.h"
 #include"UI/Preview/PlayerPreview.h"
+#include"UI/OperationUI/PlayerOperationUI.h"
 
 #include"../../../Application/Application.h"
 
@@ -89,10 +90,10 @@ private:
 	// ƒ‚ƒfƒ‹‚ÌŠp“x‚ÌƒYƒŒ
 	const Vector3 LOCAL_ROT = Vector3(0.0f, Utility::Deg2RadF(180.0f), 0.0f);
 
-	const float RADIUS = SIZE.z;
+	const float RADIUS = SIZE.z / 2;
 
-	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3(0.0f, SIZE.y / 2 - RADIUS, 0.0f);
-	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3();
+	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3::Yonly(SIZE.y / 2 - RADIUS);
+	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3::Yonly(RADIUS);
 
 	const Vector3 LINE_COLLIDER_START_POS = Vector3();
 	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y * 0.5f, 0.0f);
@@ -135,8 +136,7 @@ private:
 
 #pragma endregion
 
-	//const VECTOR LOCAL_ROT = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
-
+	// ƒqƒbƒgƒ|ƒCƒ“ƒg
 	unsigned char hp_;
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
@@ -154,20 +154,23 @@ private:
 	int jumpKeyCounter_[JUMP_NUM];
 	//---------------------------------------
 
-	// UŒ‚ó‘ÔŠÖŒW``````````
-
+	// ƒpƒ“ƒ`````````````
 	// ŠÖ”
 	void AttackMove(void);
 
 	// ƒCƒ“ƒXƒ^ƒ“ƒX
 	PlayerPunch* punch_;
+
 	// UŒ‚‚Ì’i”
 	ATTACK_STAGE attackStage_;
 	bool isAttack_[(int)ATTACK_STAGE::MAX];
 	int attackStageCounter_;
-	//```````````````
+	// ```````````````
 
+	// ‚¦‚®‚èæ‚é``````````
+	// ƒCƒ“ƒXƒ^ƒ“ƒX
 	PlayerGouge* gouge_;
+	//````````````````
 
 	// “Š‚°``````````````
 	Throwing* throwing_;
@@ -180,26 +183,34 @@ private:
 
 	Vector3 knockBackVec_;
 
-	int wholeFrame_;
 
-	// ƒvƒŒƒCƒ„[ƒ‚ƒfƒ‹ƒvƒŒƒrƒ…[```
-	PlayerPreview* preview_;
+
+#pragma endregion
+
+#pragma region UI
+	// ƒvƒŒƒCƒ„[ƒvƒŒƒrƒ…[``````
+	// ƒCƒ“ƒXƒ^ƒ“ƒX
+	PlayerPreview* preview;
 
 	// À•W
 	const Vector2 PREVIEW_POS = Vector2(10, App::SCREEN_SIZE_Y - PlayerPreview::SIZE - 10);
-	//````````````````
-	
+	// ````````````````
 
 	// HPƒo[````````````
-
-	// HPƒo[ŠÇ—ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
-	PlayerHpBarManager* hpBar_;
+	// ƒCƒ“ƒXƒ^ƒ“ƒX
+	PlayerHpBarManager* hpBar;
 
 	// À•W
 	const Vector2 HP_BAR_POS = Vector2(PREVIEW_POS.x + PlayerPreview::SIZE, PREVIEW_POS.y + (PlayerPreview::SIZE / 2));
+	// ```````````````
 
-	//````````````````
+	// ‘€ìà–¾`````````````
+	// ƒCƒ“ƒXƒ^ƒ“ƒX
+	PlayerOperationUI* operationUi;
 
+	// À•W
+	const Vector2 OPERATION_UI_POS = Vector2(HP_BAR_POS.x + 10, HP_BAR_POS.y - PlayerOperationUI::WHOLE_SIZE_Y);
+	// `````````````````
 #pragma endregion
 
 #pragma region ƒ‚[ƒVƒ‡ƒ“

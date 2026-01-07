@@ -23,6 +23,6 @@ private:
 
 	const Vector2 BUTTON_POS = Vector2(1140.0f, 680.0f);
 
-	float GetButtonExrate(void) { return abs(sinf(s_)) * 0.1f + 0.3f; }
+	float GetButtonExrate(void) { return abs(sinf(s_)) * 0.1f + 0.75f; }
 };
 
