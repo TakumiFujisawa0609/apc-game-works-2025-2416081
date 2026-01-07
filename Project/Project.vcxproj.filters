@@ -156,6 +156,9 @@
     <ClCompile Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Object\Charactor\Player\UI\OperationUI\PlayerOperationUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">
@@ -327,6 +330,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Charactor\Player\UI\OperationUI\PlayerOperationUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

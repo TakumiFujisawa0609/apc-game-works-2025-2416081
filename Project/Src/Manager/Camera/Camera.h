@@ -51,9 +51,9 @@ public:
 	// 追従（手動操作）モードに変更
 	void ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff = Vector3(0, 0, -400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3(), float fov = (60.0f * (DX_PI_F / 180.0f)));
 	// 追従（自動操作）モードに変更（引数省略バージョン）
-	void ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float fov = (80.0f * (DX_PI_F / 180.0f)));
+	void ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float FOLLOW_AUTO_MIN_DISTANCE = 400.0f, float FOLLOW_AUTO_MAX_DISTANCE = 500.0f, float fov = (80.0f * (DX_PI_F / 180.0f)));
 	// 追従（自動操作）モードに変更（引数非省略バージョン）
-	void ChangeModeFollowAuto(const Vector3* lookAt,const float* lookAtYangle, const Vector3* lookTarget, float fov = (80.0f * (DX_PI_F / 180.0f)));
+	void ChangeModeFollowAuto(const Vector3* lookAt,const float* lookAtYangle, const Vector3* lookTarget, float FOLLOW_AUTO_MIN_DISTANCE = 400.0f, float FOLLOW_AUTO_MAX_DISTANCE = 500.0f, float fov = (80.0f * (DX_PI_F / 180.0f)));
 #pragma endregion
 
 	// 更新
@@ -191,6 +191,12 @@ private:
 
 	// 視野に入れる対象物
 	const Vector3* lookTarget;
+
+	// 最低距離
+	float FOLLOW_AUTO_MIN_DISTANCE;
+
+	// 最大距離
+	float FOLLOW_AUTO_MAX_DISTANCE;
 
 	// 適用
 	void FollowAutoApply(void);
