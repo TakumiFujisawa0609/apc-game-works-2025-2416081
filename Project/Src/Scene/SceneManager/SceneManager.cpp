@@ -68,16 +68,14 @@ void SceneManager::Update(void)
 void SceneManager::Draw(void)
 {
 	// ロード中ならロード画面を描画
-	if (Loading::GetInstance()->IsLoading())
-	{
+	if (Loading::GetInstance()->IsLoading()) {
 		// ロードの描画
 		Loading::GetInstance()->Draw();
 	}
 	// 通常の更新
-	else
-	{
+	else {
 		// 積まれているもの全てを描画する
-		for (auto& scene : scenes_) 
+		for (auto& scene : scenes_)
 		{
 			scene->Draw();
 		}
@@ -88,10 +86,7 @@ void SceneManager::Draw(void)
 void SceneManager::Release(void)
 {
 	//全てのシーンの解放・削除
-	for (auto& scene : scenes_)
-	{
-		scene->Release();
-	}
+	for (auto& scene : scenes_) { scene->Release(); }
 	scenes_.clear();
 
 	// ロード画面の削除
@@ -101,15 +96,13 @@ void SceneManager::Release(void)
 
 // 状態遷移関数
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase>scene)
-{	
+{
 	// シーンが空か？
-	if (scenes_.empty()) 
-	{
+	if (scenes_.empty()) {
 		//空なので新しく入れる
 		scenes_.push_back(scene);
 	}
-	else 
-	{
+	else {
 		//末尾のものを新しい物に入れ替える
 		scenes_.back()->Release();
 		scenes_.back() = scene;

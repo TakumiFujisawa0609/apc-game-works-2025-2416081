@@ -73,7 +73,7 @@ void GameScene::Load(void)
 	ObjAdd(new BlockManager());
 	ObjAdd(new Player());
 	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
-	//ObjAdd(new SphereDebugObject(camera_->GetAngles()));
+	//ObjAdd(new SphereDebugObject());
 
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
@@ -114,9 +114,6 @@ void GameScene::Update(void)
 
 	// 当たり判定
 	collision_->Check();
-
-	// カメラ更新
-	Camera::GetIns().Update();
 
 #pragma region 遷移判定（ポーズも含む）
 	// ポーズ判定
