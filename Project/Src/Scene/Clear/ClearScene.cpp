@@ -3,6 +3,7 @@
 #include"../../Utility/Utility.h"
 
 #include"../../Manager/Input/KeyManager.h"
+#include"../../Manager/Camera/Camera.h"
 
 #include"../../Application/Application.h"
 #include"../SceneManager/SceneManager.h"
@@ -30,6 +31,7 @@ void ClearScene::Load(void)
 
 void ClearScene::Init(void)
 {
+	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 }
 
 void ClearScene::Update(void)

@@ -3,12 +3,12 @@
 #include"../ActorBase.h"
 
 #include"../../Manager/Input/KeyManager.h"
+#include"../../Manager/Camera/Camera.h"
 
 class SphereDebugObject : public ActorBase
 {
 public:
-	SphereDebugObject(const Vector3& cameraAngle) :ActorBase(),
-		cameraAngle(cameraAngle)
+	SphereDebugObject() : ActorBase()
 	{
 	}
 	~SphereDebugObject()override = default;
@@ -29,7 +29,7 @@ private:
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_UP).now) { vec.y++; }
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_DOWN).now) { vec.y--; }
 
-		if (vec != 0.0f) { trans_.pos += vec.TransMat(MGetRotY(cameraAngle.y)).Normalized() * 10.0f; }
+		if (vec != 0.0f) { trans_.pos += vec.TransMat(MGetRotY(Camera::GetIns().GetAngle().y)).Normalized() * 10.0f; }
 	};
 	void SubDraw(void)override {
 		DrawSphere3D(trans_.pos.ToVECTOR(), 50.0f, 12, 0xffffff, 0xffffff, true);
@@ -39,6 +39,4 @@ private:
 	};
 	void SubAlphaDraw(void)override {};
 	void SubRelease(void)override {};
-
-	const Vector3& cameraAngle;
 };

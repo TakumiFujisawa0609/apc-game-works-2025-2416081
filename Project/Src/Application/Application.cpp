@@ -80,6 +80,9 @@ void Application::Run(void)
 		// シーン管理更新
 		SceneManager::GetIns().Update();
 
+		// カメラ更新
+		Camera::GetIns().Update();
+
 		// デバッグ表示切替
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
 

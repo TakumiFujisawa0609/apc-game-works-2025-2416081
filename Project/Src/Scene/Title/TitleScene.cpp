@@ -34,8 +34,6 @@ void TitleScene::Load(void)
 	Utility::LoadImg(img_, "Data/Image/Title/Title.png");
 	Utility::LoadImg(pushToImg, "Data/Image/Title/PushToStart.png");
 
-	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
-
 	skyDome_ = new SkyDome();
 	skyDome_->Load();
 	skyDome_->SetPos({0.0f,0.0f,0.0f});
@@ -44,6 +42,8 @@ void TitleScene::Load(void)
 }
 void TitleScene::Init(void)
 {
+	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
+
 	blinkingCounter = 100;
 }
 void TitleScene::Update(void)
