@@ -86,8 +86,10 @@ void Player::CharactorInit(void)
 	SetIsDraw(true);
 	SetJudge(true);;
 
-	trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);;
+	trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);
 	trans_.centerDiff = CENTER_DIFF;
+
+	AccelSum.x = 10.0f; AccelSum.z = 10.0f;
 
 	trans_.angle = {};
 	trans_.localAngle = LOCAL_ROT;
