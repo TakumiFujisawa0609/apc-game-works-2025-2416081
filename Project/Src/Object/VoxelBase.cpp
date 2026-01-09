@@ -25,7 +25,9 @@ VoxelBase::VoxelBase() :
     aliveNeedRatio_(0.0f),
     cellCenterPoss_(),
 
-    nowFrameRemesh_(false)
+    nowFrameRemesh_(false),
+
+    effect(nullptr)
 {
 }
 
@@ -52,6 +54,9 @@ void VoxelBase::Load(void)
 
         // モデルはもう使わないので解放
         trans_.Release();
+
+        effect = new VoxelBreakEffectManager(textureId_);
+        effect->Load();
     }
 }
 
@@ -64,6 +69,8 @@ void VoxelBase::Init(void)
     regeneration_ = false;
     nowFrameRemesh_ = false;
 
+    effect->Init();
+
     ActorBase::Init();
 }
 
@@ -71,6 +78,8 @@ void VoxelBase::Init(void)
 void VoxelBase::Update(void)
 {
     ActorBase::Update();
+
+    effect->Update();
 
     // 実質的な生存判定
     if (!GetJudgeFlg()) { return; }
@@ -104,6 +113,9 @@ void VoxelBase::Draw(void)
 	// 派生先の描画処理
     SubDraw();
 
+    // エフェクトの描画
+    effect->Draw();
+
     // 描画判定
     if (!GetIsDraw()) { return; }
     
@@ -121,7 +133,7 @@ void VoxelBase::Draw(void)
                 b.v.empty() ? b.v.data() : b.v.data(),
                 (int)(b.v.empty() ? b.v.size() : b.v.size()),
                 b.i.data(), (int)(b.i.size() / 3),
-                (textureId_ != -1) ? textureId_ : textureId_, true
+                (textureId_ != -1) ? textureId_ : DX_NONE_GRAPH, true
             );
         }
 
@@ -181,6 +193,13 @@ void VoxelBase::Release(void)
 
     // テクスチャを解放（読み込まれていた場合）
     if (textureId_ != -1) { DeleteGraph(textureId_); }
+
+    // エフェクト管理クラスの破棄
+    if (effect) {
+        effect->Release();
+        delete effect;
+        effect = nullptr;
+    }
 
     ActorBase::Release();
 }
@@ -530,6 +549,27 @@ void VoxelBase::ApplyBrush(unsigned char amount)
     for (int idx : ColliderSerch<VoxelCollider>().back()->GetHitCellIdxs()) {
         density_.at(idx) = (std::max)(density_.at(idx) - amount, 0);
         regeneration_ = true;
+    }
+}
+
+void VoxelBase::BreakEffect(const Vector3& breakerPos)
+{
+    // 衝突情報群を取得して、該当セルの密度を、引数指定分減少させる
+    for (int idx : ColliderSerch<VoxelCollider>().back()->GetHitCellIdxs()) {
+        if (density_.at(idx) > 0) { continue; }
+
+        Vector3 p = IdxReverse(idx);
+        p = Vector3(
+            (p.x - Nx_ / 2) * cell_ + (cell_ * 0.5f),
+            (p.y - Ny_ / 2) * cell_ + (cell_ * 0.5f),
+            (p.z - Nz_ / 2) * cell_ + (cell_ * 0.5f)
+        );
+        p += trans_.pos;
+
+        float velPower = 5.0f;
+        Vector3 velocity = (p - breakerPos).Normalized() * velPower;
+        velocity.y = velPower;
+        effect->Spawn(p, cell_, velocity);
     }
 }
 

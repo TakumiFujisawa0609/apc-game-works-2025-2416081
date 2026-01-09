@@ -6,6 +6,8 @@
 
 #include"Common/Collider/VoxelCollider.h"
 
+#include"Common/Effect/VoxelBreakEffect/VoxelBreakEffectManager.h"
+
 class Camera;
 
 class VoxelBase : public ActorBase
@@ -66,9 +68,9 @@ public:
 	Vector3 IdxReverse(int idx, int Nx, int Ny) const {
 		Vector3 out;
 		int layer = Nx * Ny;
-		out.z = (float)idx / (float)layer;
+		out.z = (float)(idx / layer);
 		int rem = idx % layer;
-		out.y = (float)rem / (float)Nx;
+		out.y = (float)(rem / Nx);
 		out.x = (float)(rem % Nx);
 		return out;
 	}
@@ -239,6 +241,11 @@ protected:
 	// そのフレーム密度情報の更新があったか（true = 更新があった、false = まだ更新がない）
 	bool nowFrameRemesh_;
 #pragma endregion
+
+	// エフェクト
+	VoxelBreakEffectManager* effect;
+
+	void BreakEffect(const Vector3& breakerPos);
 };
 
 using MeshBatch = VoxelBase::MeshBatch;

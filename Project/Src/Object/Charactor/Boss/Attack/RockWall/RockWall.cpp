@@ -106,6 +106,7 @@ void RockWall::OnCollision(const ColliderBase& collider)
     case TAG::GOLEM_ATTACK_FALL:
     case TAG::GOLEM_ATTACK_PSYCHOROCK: {
         ApplyBrush(255);
+        BreakEffect(collider.GetPos());
         GameScene::Shake();
         Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
         return;

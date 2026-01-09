@@ -1,6 +1,8 @@
 #include"VoxelBreakEffectManager.h"
 
-VoxelBreakEffectManager::VoxelBreakEffectManager() :
+VoxelBreakEffectManager::VoxelBreakEffectManager(const int texture) :
+	texture(texture),
+
 	voxels()
 {
 }
@@ -8,7 +10,7 @@ VoxelBreakEffectManager::VoxelBreakEffectManager() :
 void VoxelBreakEffectManager::Load(void)
 {
 	for (VoxelBreakEffect*& voxel : voxels) {
-		voxel = new VoxelBreakEffect(); 
+		voxel = new VoxelBreakEffect(texture); 
 		voxel->Load();
 	}
 }
@@ -35,5 +37,16 @@ void VoxelBreakEffectManager::Release(void)
 		voxel->Release();
 		delete voxel;
 		voxel = nullptr;
+	}
+}
+
+void VoxelBreakEffectManager::Spawn(const Vector3& pos, float cellSize, const Vector3& vel)
+{
+	for (VoxelBreakEffect*& voxel : voxels) {
+		if (voxel->IsActive()) { continue; }
+
+		voxel->Spawn(pos, cellSize, vel);
+
+		break;
 	}
 }

@@ -48,6 +48,8 @@ void Block::OnCollision(const ColliderBase& collider)
 
 		// ブロックを壊す
 		ApplyBrush(255);
+		// エフェクトを出す
+		BreakEffect(collider.GetPos());
 
 		// 画面を揺らす
 		GameScene::Shake();
