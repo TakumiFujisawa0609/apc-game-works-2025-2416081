@@ -9,10 +9,7 @@ VoxelBreakEffectManager::VoxelBreakEffectManager(const int texture) :
 
 void VoxelBreakEffectManager::Load(void)
 {
-	for (VoxelBreakEffect*& voxel : voxels) {
-		voxel = new VoxelBreakEffect(texture); 
-		voxel->Load();
-	}
+	for (VoxelBreakEffect*& voxel : voxels) { voxel = new VoxelBreakEffect(texture); }
 }
 
 void VoxelBreakEffectManager::Init(void)
@@ -34,7 +31,6 @@ void VoxelBreakEffectManager::Release(void)
 {
 	for (VoxelBreakEffect*& voxel : voxels) {
 		if (!voxel) { continue; }
-		voxel->Release();
 		delete voxel;
 		voxel = nullptr;
 	}

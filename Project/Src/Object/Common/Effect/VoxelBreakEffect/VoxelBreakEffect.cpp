@@ -15,11 +15,6 @@ VoxelBreakEffect::VoxelBreakEffect(const int texture) :
 {
 }
 
-void VoxelBreakEffect::Load(void)
-{
-
-}
-
 void VoxelBreakEffect::Init(void)
 {
 	for (VERTEX3D& v : vertex) { v.dif = GetColorU8(255, 255, 255, 255); v.spc = GetColorU8(0, 0, 0, 0); }
@@ -54,9 +49,4 @@ void VoxelBreakEffect::Draw(void)
 {
 	if (!isActive) { return; }
 	DrawPolygonIndexed3D(vertex, VERTEX_NUM, INDEX, POLYGON_NUM, texture, true);
-}
-
-void VoxelBreakEffect::Release(void)
-{
-
 }

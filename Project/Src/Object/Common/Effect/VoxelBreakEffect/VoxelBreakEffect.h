@@ -8,11 +8,9 @@ public:
 	VoxelBreakEffect(const int texture);
 	~VoxelBreakEffect() = default;
 
-	void Load(void);
 	void Init(void);
 	void Update(void);
 	void Draw(void);
-	void Release(void);
 
 	// ê∂ë∂îªíËÇÃÉQÉbÉgä÷êî
 	bool IsActive(void)const { return isActive; }
