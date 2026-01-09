@@ -168,6 +168,8 @@
     <ClCompile Include="Src\Object\Charactor\Player\Throwing\Throwing.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Throwing\ThrowObjBase.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWall.cpp" />
+    <ClCompile Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffect.cpp" />
+    <ClCompile Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffectManager.cpp" />
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\Block.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\BlockManager.cpp" />
@@ -218,6 +220,8 @@
     <ClInclude Include="Src\Object\Common\Collider\ModelCollider.h" />
     <ClInclude Include="Src\Object\Common\Collider\SphereCollider.h" />
     <ClInclude Include="Src\Object\Common\Collider\VoxelCollider.h" />
+    <ClInclude Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffect.h" />
+    <ClInclude Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffectManager.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Gouge\PlayerGouge.h" />
     <ClInclude Include="Src\Object\Charactor\Player\Player.h" />

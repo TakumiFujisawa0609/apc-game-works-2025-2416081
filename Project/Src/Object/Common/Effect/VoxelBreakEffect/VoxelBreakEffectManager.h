@@ -1,0 +1,26 @@
+#pragma once
+
+#include"VoxelBreakEffect.h"
+
+class VoxelBreakEffectManager
+{
+public:
+	VoxelBreakEffectManager();
+	~VoxelBreakEffectManager() = default;
+
+	void Load(void);
+	void Init(void);
+	void Update(void);
+	void Draw(void);
+	void Release(void);
+
+private:
+	
+	// ç≈ëÂêî
+	static constexpr unsigned char VOXEL_MAX = 20;
+
+	// ÉZÉãåQ
+	VoxelBreakEffect* voxels[VOXEL_MAX];
+
+
+};
