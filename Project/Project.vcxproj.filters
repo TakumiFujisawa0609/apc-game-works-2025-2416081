@@ -347,5 +347,8 @@
     <ClInclude Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Scene\Debug\GameDebugScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

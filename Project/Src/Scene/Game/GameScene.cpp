@@ -22,6 +22,7 @@
 #include"../../Object/Charactor/Boss/Boss.h"
 
 #include"../../Object/DebugObject/SphereDebugObject.h"
+#include"../Debug/GameDebugScene.h"
 
 
 int GameScene::hitStop_ = 0;
@@ -131,6 +132,17 @@ void GameScene::Update(void)
 	// ゲームオーバー判定
 	if (ObjSerch<Player>().back()->GetState() == (int)Player::STATE::END) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::OVER);
+		return;
+	}
+
+	// デバッグモード突入
+	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down) {
+		SceneManager::GetIns().PushScene(
+			std::make_shared<GameDebugScene>(
+				[this](void) { Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>().back()->GetTrans(), &(ObjSerch<Boss>().back()->GetTrans().pos)); },
+				[this](void) { this->Update(); }
+			)
+		);
 		return;
 	}
 #pragma endregion

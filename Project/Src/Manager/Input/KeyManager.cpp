@@ -158,6 +158,12 @@ void KeyManager::Init(void)
 
 	// デバッグ描画スイッチ
 	SET_KEYBOARD(KEY_TYPE::DEBUG_DRAW_SWITCH, KEY_INPUT_8);
+
+	// デバッグシーンの切り替え
+	SET_KEYBOARD(KEY_TYPE::DEBUG_MODE_SWITCH, KEY_INPUT_9);
+
+	// デバッグモード時元のシーンの更新
+	SET_KEYBOARD(KEY_TYPE::DEBUG_MODE_TOPUPDATE, KEY_INPUT_0);
 #pragma endregion
 }
 

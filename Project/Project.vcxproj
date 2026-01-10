@@ -238,6 +238,7 @@
     <ClInclude Include="Src\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Src\Scene\Game\Explanat\Explanat.h" />
     <ClInclude Include="Src\Scene\Game\GameScene.h" />
+    <ClInclude Include="Src\Scene\Debug\GameDebugScene.h" />
     <ClInclude Include="Src\Scene\Game\Pause\GamePauseh.h" />
     <ClInclude Include="Src\Scene\Over\OverScene.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />

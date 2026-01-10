@@ -397,9 +397,6 @@ void Camera::DrawDebug(void)
 
 void Camera::Release(void)
 {
-	pos = {};
-	angle = {};
-
 	switch (mode)
 	{
 	case Camera::MODE::NON: { break; }

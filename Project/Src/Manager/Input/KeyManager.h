@@ -82,6 +82,12 @@ public:
 
 		// デバッグ描画スイッチ
 		DEBUG_DRAW_SWITCH,
+
+		// デバッグシーンの切り替え
+		DEBUG_MODE_SWITCH,
+
+		// デバッグモード時元のシーンの更新
+		DEBUG_MODE_TOPUPDATE,
 #pragma endregion
 
 		MAX,
