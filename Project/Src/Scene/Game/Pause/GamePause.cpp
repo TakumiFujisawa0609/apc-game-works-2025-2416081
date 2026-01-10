@@ -7,7 +7,9 @@
 #include"../../../Manager/Input/KeyManager.h"
 #include"../../../Manager/Sound/SoundManager.h"
 
-GamePause::GamePause()
+GamePause::GamePause() :
+	img_(),
+	nowSelect_(SELECT::YES)
 {
 }
 

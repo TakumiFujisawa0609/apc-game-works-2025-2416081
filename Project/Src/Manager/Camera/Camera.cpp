@@ -24,7 +24,9 @@ Camera::Camera(void) :
 	lookAtDiff(),
 
 	lookAtYangle(nullptr),
-	lookTarget(nullptr)
+	lookTarget(nullptr),
+	FOLLOW_AUTO_MIN_DISTANCE(),
+	FOLLOW_AUTO_MAX_DISTANCE()
 {
 }
 
@@ -358,7 +360,7 @@ void Camera::FollowAutoModeFunc(void)
 	Vector3 desiredPos = *lookAt + backDir * needDist;
 
 	// çÇÇ≥ï‚ê≥
-	desiredPos.y += ((*lookAt - *lookTarget) * 0.5f).Length();
+	desiredPos.y += std::clamp(((*lookAt - *lookTarget) * 0.5f).Length(), 250.0f, 400.0f);
 
 	// ï‚ä‘ÅiÉKÉ^Ç¬Ç´ñhé~Åj
 	const float smooth = 0.1f;
