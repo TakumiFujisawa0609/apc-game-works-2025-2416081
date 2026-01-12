@@ -922,7 +922,7 @@ bool CollisionManager::LineToVoxel(LineCollider* line, VoxelCollider* voxel)
 #pragma endregion
 
 #pragma region 必要に応じて押し出し処理
-	if (NeedPush(line, voxel)) {
+	if (NeedPush(line, voxel) && pushDir.Dot(line->GetTransform().Velocity().Normalized()) <= 0.0f) {
 		// セル面までの距離を計算
 		Vector3 toCell = bestHitPoint - bestCellCenter;
 
