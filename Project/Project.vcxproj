@@ -137,6 +137,8 @@
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Manager\Camera\InstantCamera.cpp" />
+    <ClCompile Include="Src\Manager\Score\Ranking.cpp" />
+    <ClCompile Include="Src\Manager\Score\Score.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.cpp" />
@@ -173,6 +175,7 @@
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\Block.cpp" />
     <ClCompile Include="Src\Object\Stage\Block\BlockManager.cpp" />
+    <ClCompile Include="Src\Object\UI\Score\ScoreUI.cpp" />
     <ClCompile Include="Src\Object\VoxelBase.cpp" />
     <ClCompile Include="Src\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Explanat\Explanat.cpp" />
@@ -189,6 +192,8 @@
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\Common\Vector3.h" />
     <ClInclude Include="Src\Manager\Camera\InstantCamera.h" />
+    <ClInclude Include="Src\Manager\Score\Ranking.h" />
+    <ClInclude Include="Src\Manager\Score\Score.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.h" />
@@ -234,6 +239,7 @@
     <ClInclude Include="Src\Object\SkyDome\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage\Block\Block.h" />
     <ClInclude Include="Src\Object\Stage\Block\BlockManager.h" />
+    <ClInclude Include="Src\Object\UI\Score\ScoreUI.h" />
     <ClInclude Include="Src\Object\VoxelBase.h" />
     <ClInclude Include="Src\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Src\Scene\Game\Explanat\Explanat.h" />

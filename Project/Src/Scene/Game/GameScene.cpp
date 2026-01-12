@@ -9,6 +9,7 @@
 #include"../../Manager/Camera/Camera.h"
 #include"../../Manager/Input/KeyManager.h"
 #include"../../Manager/Sound/SoundManager.h"
+#include"../../Manager/Score/Score.h"
 
 #include"../../Utility/Utility.h"
 
@@ -17,6 +18,7 @@
 #include"Pause/GamePauseh.h"
 
 #include"../../Object/SkyDome/SkyDome.h"
+#include"../../Object/UI/Score/ScoreUI.h"
 #include"../../Object/Stage/Block/BlockManager.h"
 #include"../../Object/Charactor/Player/Player.h"
 #include"../../Object/Charactor/Boss/Boss.h"
@@ -74,6 +76,7 @@ void GameScene::Load(void)
 	ObjAdd(new BlockManager());
 	ObjAdd(new Player());
 	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
+	ObjAdd(new ScoreUI());
 	//ObjAdd(new SphereDebugObject());
 
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
@@ -115,6 +118,9 @@ void GameScene::Update(void)
 
 	// 当たり判定
 	collision_->Check();
+
+	// スコアの更新
+	Score::GetIns().Update();
 
 #pragma region 遷移判定（ポーズも含む）
 	// ポーズ判定
@@ -198,7 +204,12 @@ void GameScene::Release(void)
 	}
 
 	// オブジェクト全ての解放処理
-	for (ActorBase*& obj : objects_) { obj->Release(); }
+	for (ActorBase*& obj : objects_) {
+		if (!obj) { continue; }
+		obj->Release();
+		delete obj;
+		obj = nullptr;
+	}
 
 	// 画面演出用のメインスクリーンを解放
 	DeleteGraph(mainScreen_);

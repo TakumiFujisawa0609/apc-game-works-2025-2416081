@@ -6,7 +6,9 @@
 #include"../Manager/Camera/Camera.h"
 #include"../Manager/Input/KeyManager.h"
 #include"../Manager/Sound/SoundManager.h"
+#include"../Manager/Score/Score.h"
 #include"../Scene/SceneManager/SceneManager.h"
+
 
 Application* Application::ins_ = nullptr;
 
@@ -59,6 +61,9 @@ void Application::Init(void)
 	Smng::CreateIns();
 	Smng::GetIns().Load(SOUND::SE_SYSTEM_BUTTON);
 	Smng::GetIns().Load(SOUND::SE_SYSTEM_SELECT);
+
+	// スコア管理クラスの生成/初期化処理
+	Score::CreateIns();
 
 	// FPS初期化
 	fps_ = new FPS;
@@ -119,6 +124,9 @@ void Application::Release(void)
 {
 	// 入力制御削除
 	KeyManager::DeleteIns();
+
+	// スコア管理クラスの終了処理/消去
+	Score::DeleteIns();
 
 	Smng::DeleteIns();
 
