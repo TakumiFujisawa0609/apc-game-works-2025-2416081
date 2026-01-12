@@ -13,7 +13,6 @@ class Camera;
 class VoxelBase : public ActorBase
 {
 public:
-	const Vector3 kDirNrm[6] = { {+1,0,0},{-1,0,0},{0,+1,0},{0,-1,0},{0,0,+1},{0,0,-1} };
 
 	VoxelBase();
 	virtual ~VoxelBase()override {};
@@ -25,8 +24,6 @@ public:
 	void AlphaDraw(void)override;
 	void Release(void)override;
 
-	void SetCamera(Camera* c) { camera_ = c; }
-
 	struct MeshBatch {
 		// 頂点配列
 		std::vector<VERTEX3D> v;
@@ -34,38 +31,23 @@ public:
 		// インデックス配列
 		std::vector<unsigned short> i;
 
-		std::array<std::vector<unsigned short>, 6> iDir;
-
 		// 最小座標
 		Vector3 bmin{ 1e9f, 1e9f, 1e9f };
 
 		// 最大座標
 		Vector3 bmax{ -1e9f,-1e9f,-1e9f };
-
-		// ローカル中心座標
-		Vector3 centerLocal{ 0,0,0 };
 	};
-
-	// メッシュバッチ群を取得
-	std::vector<MeshBatch> GetBatches(void)const { return batches_; }
-
-	// 生存しているセルの中心座標を配列で取得
-	std::map<int,Vector3> GetCellCenterPoss(void) const { return cellCenterPoss_; };
-	std::map<int,Vector3> GetCellCenterWorldPoss(void) const { return cellCenterWorldPoss_; };
-
-	// セルサイズを取得(float版)
-	float GetCellSize(void)const { return cell_; }
-	// セルサイズを取得(VECTOR版)
-	Vector3 GetCellSizeVECTOR(void) const { return Vector3(cell_, cell_, cell_); }
 
 	// 全セルを復活させる
 	void ReVival(void);
 
+private:
+
 #pragma region ユーティリティ
 	int Idx(int x, int y, int z, int Nx, int Ny)const { return (z * Ny + y) * Nx + x; }
-	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx_, Ny_); }
+	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx, Ny); }
 
-	Vector3 IdxReverse(int idx, int Nx, int Ny) const {
+	Vector3 IdxReverse(int idx, int Nx, int Ny)const {
 		Vector3 out;
 		int layer = Nx * Ny;
 		out.z = (float)(idx / layer);
@@ -74,55 +56,81 @@ public:
 		out.x = (float)(rem % Nx);
 		return out;
 	}
-	Vector3 IdxReverse(int idx) const { return IdxReverse(idx, Nx_, Ny_); }
+	Vector3 IdxReverse(int idx)const { return IdxReverse(idx, Nx, Ny); }
 
-	bool Inb(int x, int y, int z, int Nx, int Ny, int Nz) { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; }
-	bool Inb(int x, int y, int z) { return Inb(x, y, z, Nx_, Ny_, Nz_); }
+	bool Inb(int x, int y, int z, int Nx, int Ny, int Nz)const { return 0 <= x && x < Nx && 0 <= y && y < Ny && 0 <= z && z < Nz; }
+	bool Inb(int x, int y, int z)const { return Inb(x, y, z, Nx, Ny, Nz); }
+
+	// セルインデックスからローカル座標を算出する
+	Vector3 IdxToLocalPos(int idx)const {
+		Vector3 p = IdxReverse(idx);
+		return Vector3(
+			(p.x - Nx / 2) * cellSize + (cellSize * 0.5f),
+			(p.y - Ny / 2) * cellSize + (cellSize * 0.5f),
+			(p.z - Nz / 2) * cellSize + (cellSize * 0.5f)
+		);
+	}
+
+	// セルインデックスから座標を算出する
+	Vector3 IdxToPos(int idx)const { return (trans_.pos + IdxToLocalPos(idx)); }
+
+	// セル番地からローカル座標を算出する
+	Vector3 IdxToLocalPos(int x, int y, int z)const {
+		return Vector3(
+			(x - Nx / 2) * cellSize + (cellSize * 0.5f),
+			(y - Ny / 2) * cellSize + (cellSize * 0.5f),
+			(z - Nz / 2) * cellSize + (cellSize * 0.5f)
+		);
+	}
+
+	// セル番地から座標を算出する
+	Vector3 IdxToPos(int x, int y, int z)const { return (trans_.pos + IdxToLocalPos(x, y, z)); }
 #pragma endregion
 
-private:
+	// 定数定義
+
+	const Vector3 kDirNrm[6] = { {+1,0,0},{-1,0,0},{0,+1,0},{0,-1,0},{0,0,+1},{0,0,-1} };
+
 #pragma region ボクセルメッシュを構成するメンバ変数
 	// 密度情報
-	std::vector<unsigned char> density_;
+	std::vector<unsigned char> density;
 	// 初期密度情報(破壊されたあと復活させるとき用)
-	std::vector<unsigned char> densityInit_;
+	std::vector<unsigned char> densityInit;
 
 	// グリッド数
-	int Nx_, Ny_, Nz_;
+	int Nx, Ny, Nz;
 
 	// 大まかに全体を囲めるサイズ
-	Vector3 roughSize_;
+	Vector3 roughSize;
 
 	// セルサイズ
-	float cell_;
+	float cellSize;
 
-	// セル中心位置群
-	std::map<int,Vector3>cellCenterPoss_;
-	std::map<int,Vector3>cellCenterWorldPoss_;
+	// セル中心位置群(ローカル/ワールド)
+	std::map<int,Vector3>cellCenterLocalPoss;
+	std::map<int,Vector3>cellCenterPoss;
 
 	// 再生成フラグ(壊されて形状が変化した時など)
-	bool regeneration_;
+	bool regeneration;
 
 	// 生存に必要な密度比率(density_が１以上で生存扱い)
-	float aliveNeedRatio_;
+	float aliveNeedRatio;
 
 	// メッシュバッチ群
-	std::vector<MeshBatch> batches_;
+	std::vector<MeshBatch> batches;
 
 	// グリッド中心位置(モデルによる中心座標のズレの補完用)
-	Vector3 gridCenter_;
-
-	// マーキング情報
-	int marked;
-	// ソリッドフィルフラグ
-	int solid;
-#pragma endregion
+	Vector3 gridCenter;
 
 	// テクスチャID
-	int textureId_;
+	int texture;
 
-	// カメラポインタ
-	Camera* camera_;
+	// その瞬間破壊されたセルのインデックスを格納する配列
+	std::vector<int>breakCellIdx;
+#pragma endregion
+
+	// breakCellIdx(その瞬間破壊されたセルのインデックスを格納する配列)の情報を破棄＋最大配列数を生存セル数で固定
+	void BreakCellIdxClear(void) { breakCellIdx.clear(); breakCellIdx.reserve(cellCenterPoss.size()); }
 
 #pragma region メッシュ生成
 	// 初期化時～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
@@ -203,17 +211,17 @@ protected:
 	/// </summary>
 	/// <param name="roughSize">大まかに全体を囲めるサイズ</param>
 	/// <param name="texturePath">テクスチャパス（「指定なし」または「""」で頂点カラーによる描画）</param>
-	/// <param name="cell">セルサイズ（標準は２０）</param>
+	/// <param name="cellSize">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
-	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, std::string texturePath = "", float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
-		roughSize_ = roughSize;
-		textureId_ = (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1;
-		cell_ = cell;
-		gridCenter_ = gridCenter;
-		aliveNeedRatio_ = aliveNeedRatio;
+	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, std::string texturePath = "", float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+		this->roughSize = roughSize;
+		this->texture = (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1;
+		this->cellSize = cellSize;
+		this->gridCenter = gridCenter;
+		this->aliveNeedRatio = aliveNeedRatio;
 		// ボクセルオブジェクト専用のコライダーを生成
-		ColliderCreate(new VoxelCollider(colliderTag, roughSize_, cell_, cellCenterWorldPoss_, (roughSize_ / 2).Length()));
+		ColliderCreate(new VoxelCollider(colliderTag, this->roughSize, this->cellSize, cellCenterPoss, (this->roughSize / 2).Length()));
 	}
 
 	/// <summary>
@@ -221,25 +229,25 @@ protected:
 	/// </summary>
 	/// <param name="roughSize">大まかに全体を囲めるサイズ</param>
 	/// <param name="texturePath">テクスチャId（すでに読み込まれているものを代入）（「指定なし」または「-１」で頂点カラーによる描画）</param>
-	/// <param name="cell">セルサイズ（標準は２０）</param>
+	/// <param name="cellSize">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
-	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, int texture = -1, float cell = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
-		roughSize_ = roughSize;
-		textureId_ = texture;
-		cell_ = cell;
-		gridCenter_ = gridCenter;
-		aliveNeedRatio_ = aliveNeedRatio;
+	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, int texture = -1, float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+		this->roughSize = roughSize;
+		this->texture = texture;
+		this->cellSize = cellSize;
+		this->gridCenter = gridCenter;
+		this->aliveNeedRatio = aliveNeedRatio;
 		// ボクセルオブジェクト専用のコライダーを生成
-		ColliderCreate(new VoxelCollider(colliderTag, roughSize_, cell_, cellCenterWorldPoss_, (roughSize_ / 2).Length()));
+		ColliderCreate(new VoxelCollider(colliderTag, this->roughSize, this->cellSize, cellCenterPoss, (this->roughSize / 2).Length()));
 	}
 
 #pragma region 削る
-	// 振り分け
+	// 衝突情報群を取得して、該当セルの密度を引数指定分減少させる
 	void ApplyBrush(unsigned char amount);
-	
-	// そのフレーム密度情報の更新があったか（true = 更新があった、false = まだ更新がない）
-	bool nowFrameRemesh_;
+
+	// 破壊セルのインデックス群を取得
+	const std::vector<int>BreakCellIdx(void)const { return breakCellIdx; }
 #pragma endregion
 
 	// エフェクト

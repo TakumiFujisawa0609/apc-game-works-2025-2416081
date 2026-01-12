@@ -120,11 +120,6 @@ void BlockManager::LoadMapCsvData(void)
 	}
 }
 
-void BlockManager::SetCamera(Camera* c)
-{
-	for (Block*& b : blocks_) { b->SetCamera(c); }
-}
-
 void BlockManager::StageRevival(void)
 {
 	blocks_.at(382)->ReVival();

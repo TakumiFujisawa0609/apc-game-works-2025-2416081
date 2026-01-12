@@ -31,8 +31,6 @@ public:
 
 	const std::vector<ActorBase*>GetBlocks(void)const;
 
-	void SetCamera(Camera* c);
-
 	void StageRevival(void);
 
 

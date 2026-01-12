@@ -10,22 +10,20 @@
 
 VoxelBase::VoxelBase() :
 
-    camera_(nullptr),
+    texture(-1),
+    batches(),
+    Nx(0), Ny(0), Nz(0),
+    cellSize(0.0f),
+    gridCenter(0.0f, 0.0f, 0.0f),
+    density(),
+    densityInit(),
+    regeneration(false),
 
-    textureId_(-1),
-    batches_(),
-    marked(0), solid(0),
-    Nx_(0), Ny_(0), Nz_(0),
-    cell_(0.0f),
-    gridCenter_(0.0f, 0.0f, 0.0f),
-    density_(),
-    densityInit_(),
-    regeneration_(false),
+    aliveNeedRatio(0.0f),
+    cellCenterLocalPoss(),
+    cellCenterPoss(),
 
-    aliveNeedRatio_(0.0f),
-    cellCenterPoss_(),
-
-    nowFrameRemesh_(false),
+    breakCellIdx(),
 
     effect(nullptr)
 {
@@ -46,16 +44,16 @@ void VoxelBase::Load(void)
 		// ƒƒbƒVƒ…¶¬Às
         BuildVoxelMeshFromMV1Handle(
             trans_.model,
-            cell_,
-            trans_.pos + gridCenter_,
-            roughSize_,
-            batches_
+            cellSize,
+            trans_.pos + gridCenter,
+            roughSize,
+            batches
         );
 
         // ƒ‚ƒfƒ‹‚Í‚à‚¤g‚í‚È‚¢‚Ì‚Å‰ğ•ú
         trans_.Release();
 
-        effect = new VoxelBreakEffectManager(textureId_);
+        effect = new VoxelBreakEffectManager(texture);
         effect->Load();
     }
 }
@@ -66,8 +64,10 @@ void VoxelBase::Init(void)
 	// ƒtƒ‰ƒO‰Šú‰»
     SetJudge(true);
     SetIsDraw(true);
-    regeneration_ = false;
-    nowFrameRemesh_ = false;
+    regeneration = false;
+
+    // ”j‰óƒZƒ‹ƒCƒ“ƒfƒbƒNƒXŒQ‚Ì‰Šú‰»
+    BreakCellIdxClear();
 
     effect->Init();
 
@@ -87,23 +87,18 @@ void VoxelBase::Update(void)
 	// “®“IƒIƒuƒWƒFƒNƒg‚Ìê‡AˆÚ“®‚µ‚Ä‚¢‚½‚çƒZƒ‹’†SˆÊ’uŒQ‚ğXV‚·‚é
     if (GetDynamicFlg()) {
         if (trans_.Velocity() != 0.0f) {
-            cellCenterWorldPoss_.clear();
-            for (std::pair<const int, Vector3>cellPosLocal : cellCenterPoss_) {
-                cellCenterWorldPoss_[cellPosLocal.first] = trans_.pos + cellPosLocal.second;
-            }
+            cellCenterPoss.clear();
+            for (std::pair<const int, Vector3>p : cellCenterLocalPoss) { cellCenterPoss[p.first] = trans_.pos + p.second; }
         }
     }
 
-    // ƒtƒ‰ƒOƒŠƒZƒbƒgiŒ`ó•Ï‰»j
-    nowFrameRemesh_ = false;
-
     // ‘OƒtƒŒ[ƒ€AŒ`ó•Ï‰»‚ª‹N‚±‚Á‚Ä‚¢‚½‚çiƒtƒ‰ƒO‚ª‚½‚Á‚Ä‚¢‚½‚çjƒƒbƒVƒ…‚ğÄ¶¬
-    if (regeneration_) {
+    if (regeneration) {
 	    // ƒƒbƒVƒ…Ä¶¬ˆ—
-        BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches_);
+        BuildGreedyMesh(density, Nx, Ny, Nz, cellSize, batches);
 
 		// ƒtƒ‰ƒOƒŠƒZƒbƒgiƒƒbƒVƒ…Ä¶¬ˆ—j
-        regeneration_ = false;
+        regeneration = false;
     }
 }
 
@@ -127,13 +122,13 @@ void VoxelBase::Draw(void)
         SetTransformToWorld(&M);
 
         // ƒƒbƒVƒ…•`‰æ
-        for (auto& b : batches_) {
+        for (auto& b : batches) {
             if (b.i.empty()) { continue; }
             DrawPolygonIndexed3D(
                 b.v.empty() ? b.v.data() : b.v.data(),
                 (int)(b.v.empty() ? b.v.size() : b.v.size()),
                 b.i.data(), (int)(b.i.size() / 3),
-                (textureId_ != -1) ? textureId_ : DX_NONE_GRAPH, true
+                (texture != -1) ? texture : DX_NONE_GRAPH, true
             );
         }
 
@@ -159,13 +154,13 @@ void VoxelBase::AlphaDraw(void)
         SetTransformToWorld(&M);
 
         // ƒƒbƒVƒ…•`‰æ
-        for (auto& b : batches_) {
+        for (auto& b : batches) {
             if (b.i.empty()) { continue; }
             DrawPolygonIndexed3D(
                 b.v.empty() ? b.v.data() : b.v.data(),
                 (int)(b.v.empty() ? b.v.size() : b.v.size()),
                 b.i.data(), (int)(b.i.size() / 3),
-                (textureId_ != -1) ? textureId_ : textureId_, true
+                (texture != -1) ? texture : texture, true
             );
         }
 
@@ -185,14 +180,14 @@ void VoxelBase::AlphaDraw(void)
 void VoxelBase::Release(void)
 {
     // ƒƒbƒVƒ…î•ñŒQ‚ğ‘S‚Ä”jŠü
-    for (auto& b : batches_) {
+    for (auto& b : batches) {
         b.i.clear();
         b.v.clear();
     }
-    batches_.clear();
+    batches.clear();
 
     // ƒeƒNƒXƒ`ƒƒ‚ğ‰ğ•úi“Ç‚İ‚Ü‚ê‚Ä‚¢‚½ê‡j
-    if (textureId_ != -1) { DeleteGraph(textureId_); }
+    if (texture != -1) { DeleteGraph(texture); }
 
     // ƒGƒtƒFƒNƒgŠÇ—ƒNƒ‰ƒX‚Ì”jŠü
     if (effect) {
@@ -210,24 +205,24 @@ void VoxelBase::Release(void)
 void VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& roughSize, std::vector<MeshBatch>& batches)
 {
     // ‡@ƒZƒ‹”‚ğZo````````````````
-    Nx_ = (int)std::ceil(roughSize.x / cell);
-    Ny_ = (int)std::ceil(roughSize.y / cell);
-    Nz_ = (int)std::ceil(roughSize.z / cell);
+    Nx = (int)std::ceil(roughSize.x / cell);
+    Ny = (int)std::ceil(roughSize.y / cell);
+    Nz = (int)std::ceil(roughSize.z / cell);
     // `````````````````````````
 
     // ‡A•\–Ê‚ğƒ}[ƒLƒ“ƒO```````````````````````
-    MarkSurface(mv1, cell, center, roughSize, Nx_, Ny_, Nz_, density_);
+    MarkSurface(mv1, cell, center, roughSize, Nx, Ny, Nz, density);
     // ````````````````````````````````
 
     // ‡B“à•”[“U```````````````````
-    SolidFill(density_, Nx_, Ny_, Nz_);
+    SolidFill(density, Nx, Ny, Nz);
 
     // ‰Šú–§“xî•ñ‚ğ•Û‚µ‚ÄŠÈ’P‚É–ß‚¹‚é‚æ‚¤‚É‚µ‚Ä‚¨‚­
-    densityInit_ = density_;
+    densityInit = density;
     // ````````````````````````
 
     // ‡CƒƒbƒVƒ…‰»`````````````````````
-    BuildGreedyMesh(density_, Nx_, Ny_, Nz_, cell_, batches);
+    BuildGreedyMesh(density, Nx, Ny, Nz, cellSize, batches);
 
     // ƒƒbƒVƒ…¶¬‚ª³í‚És‚í‚ê‚½‚©”Û‚©i¸”s‚ª‚ ‚ê‚Î’Ê’m‚µ‚Ä‚¨‚­j
     if (batches.empty()) { printfDx("ƒ{ƒNƒZƒ‹ƒƒbƒVƒ…¶¬‚É¸”s‚µ‚Ü‚µ‚½"); }
@@ -237,7 +232,7 @@ void VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& 
 void VoxelBase::MarkSurface(int mv1, float cell, const Vector3& center, const Vector3& roughSize, int Nx, int Ny, int Nz, std::vector<unsigned char>& density)
 {
     // –§“xî•ñŒQ‚Ì”z—ñ”‚ğƒOƒŠƒbƒh”•ªŠm•Ûi‚O‚Å‰Šú‰»j
-    density.resize(Nx_ * Ny_ * Nz_, 0);
+    density.resize(Nx * Ny * Nz, 0);
 
     // ƒ‚ƒfƒ‹‚ÌƒƒbƒVƒ…‚Ì“–‚½‚è”»’è‚ÌƒZƒbƒgƒAƒbƒv
     MV1SetupCollInfo(mv1, -1);
@@ -299,12 +294,6 @@ void VoxelBase::SolidFill(std::vector<unsigned char>& density, int Nx, int Ny, i
         for (int k = 0; k < 6; ++k) { pushIf(x + (int)kDirNrm[k].x, y + (int)kDirNrm[k].y, z + (int)kDirNrm[k].z); }
     }
 
-    // ‚Ü‚¸ƒJƒEƒ“ƒgiã‘‚«‘O‚É”‚¦‚éj
-    for (int i = 0; i < total; ++i) {
-        if (density[i] == 200) { ++marked; }    // •\–Êƒtƒ‰ƒO
-        if (!ext[i]) { ++solid; }               // “à•”—Ìˆæ
-    }
-
     // ŠO‚Í0‚Ì‚Ü‚ÜA“à•”‚Æ•\–Ê‚ğ255‚Ö
     for (int i = 0; i < total; ++i) {
         if (!ext[i]) { density[i] = 255; }                  // “à•”
@@ -340,11 +329,6 @@ void VoxelBase::BuildGreedyMesh(
     static const size_t kMaxVerts = 65000;
     auto flush = [&]() {
         if (!cur.v.empty()) {
-            cur.centerLocal = Vector3(
-                (cur.bmin.x + cur.bmax.x) * 0.5f,
-                (cur.bmin.y + cur.bmax.y) * 0.5f,
-                (cur.bmin.z + cur.bmax.z) * 0.5f
-            );
             batches.push_back(std::move(cur));
             cur = MeshBatch{};
             cur.bmin = Vector3(+INF, +INF, +INF);
@@ -511,24 +495,20 @@ void VoxelBase::BuildGreedyMesh(
     flush();
 
 	// ¶‘¶‚µ‚Ä‚¢‚éƒZƒ‹’†SˆÊ’uƒŠƒXƒg‚ğì¬
-    cellCenterPoss_.clear();
-    cellCenterWorldPoss_.clear();
+    cellCenterLocalPoss.clear();
+    cellCenterPoss.clear();
     for (int z = 0; z < Nz; ++z)
         for (int y = 0; y < Ny; ++y)
             for (int x = 0; x < Nx; ++x) {
-                if (density[Idx(x, y, z)] == 0) continue;
-                Vector3 lp = {
-                    (x - Nx / 2) * cell + (cell * 0.5f),
-                    (y - Ny / 2) * cell + (cell * 0.5f),
-                    (z - Nz / 2) * cell + (cell * 0.5f)
-                };
-                cellCenterPoss_[Idx(x, y, z)] = lp;
-                cellCenterWorldPoss_[Idx(x, y, z)] = trans_.pos + lp;
+                if (density[Idx(x, y, z)] == 0) { continue; }
+                Vector3 lp = IdxToLocalPos(x, y, z);
+                cellCenterLocalPoss[Idx(x, y, z)] = lp;
+                cellCenterPoss[Idx(x, y, z)] = trans_.pos + lp;
             }
 
 	// ¶‘¶”ä—¦‚ğŒvZ‚µ‚ÄAˆê’èˆÈ‰º‚È‚ç€–Åˆµ‚¢‚É‚·‚é
 	const int totalCells = Nx * Ny * Nz;
-    if (((float)cellCenterPoss_.size() / (float)totalCells) < aliveNeedRatio_) { SetJudge(false); SetIsDraw(false); }
+    if (((float)cellCenterPoss.size() / (float)totalCells) < aliveNeedRatio) { SetJudge(false); SetIsDraw(false); }
 }
 #pragma endregion
 
@@ -536,47 +516,44 @@ void VoxelBase::BuildGreedyMesh(
 void VoxelBase::ApplyBrush(unsigned char amount)
 {
 	// ¡ƒtƒŒ[ƒ€‚·‚Å‚ÉƒŠƒƒbƒVƒ…‚µ‚Ä‚¢‚½‚ç‰½‚à‚µ‚È‚¢(Œy—Ê‰» ‘Ã‹¦)
-    if (nowFrameRemesh_) { return; }
-    else { nowFrameRemesh_ = true; }
+    if (regeneration) { return; }
 
 	// Œ¸­—Ê‚ª0ˆÈ‰º‚È‚ç‰½‚à‚µ‚È‚¢
     if (amount <= 0) { return; }
 
 	// Œ»İƒZƒ‹î•ñŒQ‚ª‹ó‚È‚ç‰½‚à‚µ‚È‚¢
-    if (density_.empty()) { return; }
+    if (density.empty()) { return; }
 
-	// Õ“Ëî•ñŒQ‚ğæ“¾‚µ‚ÄAŠY“–ƒZƒ‹‚Ì–§“x‚ğAˆø”w’è•ªŒ¸­‚³‚¹‚é
+    // ”j‰óƒZƒ‹ƒCƒ“ƒfƒbƒNƒXŒQ‚Ì‰Šú‰»
+    BreakCellIdxClear();
+
+	// Õ“Ëî•ñŒQ‚ğæ“¾‚µ‚ÄAŠY“–ƒZƒ‹‚Ì–§“x‚ğˆø”w’è•ªŒ¸­‚³‚¹‚é
     for (int idx : ColliderSerch<VoxelCollider>().back()->GetHitCellIdxs()) {
-        density_.at(idx) = (std::max)(density_.at(idx) - amount, 0);
-        regeneration_ = true;
+        density.at(idx) = (std::max)(density.at(idx) - amount, 0);
+        if (density.at(idx) <= 0) {
+            breakCellIdx.emplace_back(idx);
+            regeneration = true; 
+        }
     }
 }
 
 void VoxelBase::BreakEffect(const Vector3& breakerPos)
 {
-    // Õ“Ëî•ñŒQ‚ğæ“¾‚µ‚ÄAŠY“–ƒZƒ‹‚Ì–§“x‚ğAˆø”w’è•ªŒ¸­‚³‚¹‚é
-    for (int idx : ColliderSerch<VoxelCollider>().back()->GetHitCellIdxs()) {
-        if (density_.at(idx) > 0) { continue; }
-
-        Vector3 p = IdxReverse(idx);
-        p = Vector3(
-            (p.x - Nx_ / 2) * cell_ + (cell_ * 0.5f),
-            (p.y - Ny_ / 2) * cell_ + (cell_ * 0.5f),
-            (p.z - Nz_ / 2) * cell_ + (cell_ * 0.5f)
-        );
-        p += trans_.pos;
+    // ”j‰óƒZƒ‹‚ğæ“¾‚µ‚ÄAƒGƒtƒFƒNƒg‚ğ”­¶‚³‚¹‚é
+    for (int idx : breakCellIdx) {
+        Vector3 p = IdxToPos(idx);
 
         float velPower = 5.0f;
         Vector3 velocity = (p - breakerPos).Normalized() * velPower;
         velocity.y = velPower;
-        effect->Spawn(p, cell_, velocity);
+        effect->Spawn(p, cellSize, velocity);
     }
 }
 
 void VoxelBase::ReVival(void)
 {
-    density_ = densityInit_;
-    regeneration_ = true;
+    density = densityInit;
+    regeneration = true;
 
     SetJudge(true);
     SetIsDraw(true);
