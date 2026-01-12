@@ -52,9 +52,9 @@ void Block::OnCollision(const ColliderBase& collider)
 		// エフェクトを出す
 		BreakEffect(collider.GetPos());
 		// スコア加算
-		if (collider.GetTag() == TAG::PLAYER_GOUGE) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 50); }
-		if (collider.GetTag() == TAG::PLAYER_PUNCH) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 100); }
-		if (collider.GetTag() == TAG::PLAYER_THROWING) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 800); }
+		if (collider.GetTag() == TAG::PLAYER_PUNCH) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 10); }
+		if (collider.GetTag() == TAG::PLAYER_GOUGE) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 10); }
+		if (collider.GetTag() == TAG::PLAYER_THROWING) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 10); }
 
 		// 画面を揺らす
 		GameScene::Shake();

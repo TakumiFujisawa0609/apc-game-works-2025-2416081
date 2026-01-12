@@ -98,6 +98,9 @@ void GameScene::Init(void)
 	// カメラ設定
 	Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>().back()->GetTrans(), &(ObjSerch<Boss>().back()->GetTrans().pos));
 
+	// スコアを初期化
+	Score::GetIns().Reset();
+
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 }

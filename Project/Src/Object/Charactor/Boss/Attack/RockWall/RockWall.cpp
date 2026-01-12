@@ -6,6 +6,8 @@
 
 #include"../../../../../Manager/Sound/SoundManager.h"
 
+#include"../../../../../Manager/Score/Score.h"
+
 #include"../../../../../Scene/Game/GameScene.h"
 
 #include"../../../Boss/Boss.h"
@@ -107,6 +109,9 @@ void RockWall::OnCollision(const ColliderBase& collider)
     case TAG::GOLEM_ATTACK_PSYCHOROCK: {
         ApplyBrush(255);
         BreakEffect(collider.GetPos());
+        if (collider.GetTag() == TAG::PLAYER_PUNCH) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 10); }
+        if (collider.GetTag() == TAG::PLAYER_GOUGE) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 10); }
+        if (collider.GetTag() == TAG::PLAYER_THROWING) { Score::GetIns().ScoreAddBreak((int)BreakCellIdx().size() * 10); }
         GameScene::Shake();
         Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
         return;

@@ -35,7 +35,7 @@ public:
 	int TotalScore(void)const { return totalScore; }
 
 	// ダメージコンボ数の取得
-	unsigned char DamageCombo(void)const { return damageCombo; }
+	unsigned char DamageCombo(void)const { return attackCombo; }
 
 	// 破壊コンボ数の取得
 	unsigned char BreakCombo(void)const { return breakCombo; }
@@ -44,42 +44,17 @@ public:
 
 #pragma region スコア加算
 	// 加算予定スコアに追加（コンボなし）
-	void ScoreAddOther(int add) {
-		if (add <= 0) { return; }
-		addScore.emplace_back((int)((float)add * Rate()));
-	}
+	bool ScoreAddOther(int add);
 
 	// 加算予定スコアに追加（ダメージコンボ）
-	void ScoreAddDamage(int add) {
-		ScoreAddOther(add);
-		damageComboTime = 0;
-		if (++damageCombo > DAMAGE_COMBO_MAX) { damageCombo = DAMAGE_COMBO_MAX; }
-	}
+	void ScoreAddAttack(int add);
 
 	// 加算予定スコアに追加（破壊コンボ）
-	void ScoreAddBreak(int add) {
-		ScoreAddOther(add);
-		breakComboTime = 0;
-		if (++breakCombo > BREAK_COMBO_MAX) { breakCombo = BREAK_COMBO_MAX; }
-	}
+	void ScoreAddBreak(int add);
 
 	// 加算予定スコアを１つ適用するとともに加算量を取得する
-	int AddScoreApplyAndGet(void) {
-		// 加算予定スコアがない場合は０を返して終了
-		if (addScore.empty()) { return 0; }
-
-		// 加算予定スコアのリストの先頭の数値を 取得/破棄
-		int addAmount = addScore.front();
-		addScore.pop_front();
-
-		// 現在のスコアに加算
-		totalScore += addAmount;
-
-		// 加算量を返す
-		return addAmount;
-	}
+	int AddScoreApplyAndGet(void);
 #pragma endregion
-
 
 private:
 
@@ -91,27 +66,33 @@ private:
 
 #pragma region コンボ数 / スコア補正倍率
 
-	// ダメージコンボ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
+	// アタックコンボ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
-	// ダメージコンボ最大数（定数）
-	const unsigned char DAMAGE_COMBO_MAX = 99;
+	// アタックコンボ最大数（定数）
+	const unsigned char ATTACK_COMBO_MAX = 99;
 
-	// ダメージコンボの最大補正倍率（定数）
-	const float DAMAGE_COMBO_RATE_MAX = 0.5f;
+	// アタックコンボの最大補正倍率（定数）
+	const float ATTACK_COMBO_RATE_MAX = 1.25f;
 
-	// ダメージコンボ１に対しての補正倍率（定数）
-	const float DAMAGE_COMBO_RATE = DAMAGE_COMBO_RATE_MAX / (float)DAMAGE_COMBO_MAX;
+	// アタックコンボ１に対しての補正倍率（定数）
+	const float ATTACK_COMBO_RATE = ATTACK_COMBO_RATE_MAX / (float)ATTACK_COMBO_MAX;
 
-	// ダメージコンボ継続時間(フレーム数)（定数）
-	const unsigned char DAMAGE_COMBO_TIME = 250;
+	// アタックコンボ継続時間(フレーム数)（定数）
+	const unsigned char ATTACK_COMBO_TIME = 250;
 
-	// ダメージコンボ数（変数）
-	unsigned char damageCombo;
+	// アタックコンボ加算インターバル（定数）
+	const unsigned char ATTACK_COMBO_INTERVAL = 10;
 
-	// 最終ダメージコンボからの時間(フレーム数)（変数）
-	unsigned char damageComboTime;
+	// アタックコンボ数（変数）
+	unsigned char attackCombo;
 
-	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～ダメージコンボ
+	// 最終アタックコンボからの時間(フレーム数)（変数）
+	unsigned char attackComboTime;
+
+	// アタックコンボ加算インターバル（変数）
+	unsigned char attackComboInterval;
+
+	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～アタックコンボ
 	
 	// 破壊コンボ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
@@ -119,7 +100,7 @@ private:
 	const unsigned char BREAK_COMBO_MAX = 99;
 
 	// 破壊コンボの最大補正倍率（定数）
-	const float BREAK_COMBO_RATE_MAX = 1.0f;
+	const float BREAK_COMBO_RATE_MAX = 0.75f;
 
 	// 破壊コンボ１に対しての補正倍率（定数）
 	const float BREAK_COMBO_RATE = BREAK_COMBO_RATE_MAX / (float)BREAK_COMBO_MAX;
@@ -127,11 +108,17 @@ private:
 	// 破壊コンボ継続時間(フレーム数)（定数）
 	const unsigned char BREAK_COMBO_TIME = 250;
 
+	// 破壊コンボ加算インターバル（定数）
+	const unsigned char BREAK_COMBO_INTERVAL = 10;
+
 	// 破壊コンボ数（変数）
 	unsigned char breakCombo;
 
 	// 最終破壊コンボからの時間(フレーム数)（変数）
 	unsigned char breakComboTime;
+
+	// 破壊コンボ加算インターバル（変数）
+	unsigned char breakComboInterval;
 
 	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～破壊コンボ
 
@@ -144,12 +131,13 @@ private:
 		float ret = DEFAULT_RATE;
 
 		// ダメージコンボの補正倍率を加算
-		ret += DAMAGE_COMBO_RATE * (float)damageCombo;
+		ret += ATTACK_COMBO_RATE * (float)attackCombo;
 
 		// 破壊コンボの補正倍率を加算
 		ret += BREAK_COMBO_RATE * (float)breakCombo;
 
 		return ret;
 	}
+
 #pragma endregion
 };

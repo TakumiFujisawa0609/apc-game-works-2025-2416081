@@ -7,7 +7,7 @@
 class ScoreUI : public ActorBase
 {
 public:
-	ScoreUI(const Vector2& SCORE_POS = { 30.0f,30.0f });
+	ScoreUI(const Vector2& SCORE_POS = { 20.0f,30.0f });
 	~ScoreUI() = default;
 
 	void Load(void)override;
@@ -53,19 +53,25 @@ private:
 		Vector2 pos;
 
 		// 生存時間の更新
-		bool AliveUpdate(void) {
-			if (--aliveTime <= 0) { return false; }
+		bool AliveUpdate(int value = 1) {
+			if (aliveTime < value) { return false; }
+			aliveTime -= value;
+			if (aliveTime <= 0) { return false; }
 			return true;
 		}
 
 		// 描画
-		void Draw(void)const { DrawFormatStringF(pos.x, pos.y - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.3f), 0xffffff, "+%d", addScore); }
+		void Draw(void)const { DrawFormatStringF(pos.x, (pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f), 0xffffff, "+%d", addScore); }
 	};
 
 	// 加算スコア
 	std::list<AddScoreInfo>addScore;
 
-	// １フレーム内で加算予定スコアを適用させる最大数
-	const unsigned char MAX_ADD_SCORE_NUM = 10;
+	// １度に適用させる最大数（無限ループ防止）
+	const unsigned char MAX_ADD_SCORE_NUM = 1000;
 
+	// 加算予定スコアを適用させるインターバル（フレーム数）
+	const unsigned char SCORE_ADD_INTERVAL = 10;
+
+	unsigned char scoreAddInterval;
 };

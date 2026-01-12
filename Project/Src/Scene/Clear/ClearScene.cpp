@@ -2,11 +2,12 @@
 
 #include"../../Utility/Utility.h"
 
+#include"../../Application/Application.h"
+
+#include"../SceneManager/SceneManager.h"
 #include"../../Manager/Input/KeyManager.h"
 #include"../../Manager/Camera/Camera.h"
-
-#include"../../Application/Application.h"
-#include"../SceneManager/SceneManager.h"
+#include"../../Manager/Score/Score.h"
 
 #include"../../Object/SkyDome/SkyDome.h"
 
@@ -52,18 +53,11 @@ void ClearScene::Draw(void)
 	skyDome_->Draw();
 	DrawExtendGraph(0, 0, x, y, img_, true);
 
-	//SetFontSize(32);
-	//if (KEY::GetIns().GetControllerConnect()) {
-	//	DrawString(10, 0,
-	//		"タイトルへ：B",
-	//		0xffffff);
-	//}
-	//else {
-	//	DrawString(10, 0,
-	//		"タイトルへ：SPACE",
-	//		0xffffff);
-	//}
-	//SetFontSize(16);
+	SetFontSize(64);
+
+	DrawFormatStringF(x / 2.0f - 300.0f, y / 2.0f + 325.0f, 0xffffff, "SCORE : %08d", Score::GetIns().TotalScore());
+
+	SetFontSize(16);
 }
 
 void ClearScene::Release(void)

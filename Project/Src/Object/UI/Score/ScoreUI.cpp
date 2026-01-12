@@ -1,10 +1,16 @@
 #include"ScoreUI.h"
 
+#include"../../../Application/Application.h"
+
 #include"../../../Manager/Score/Score.h"
 
 ScoreUI::ScoreUI(const Vector2& SCORE_POS) :
 	SCORE_POS(SCORE_POS),
-	displayScore(0)
+	displayScore(0),
+
+	addScore(),
+
+	scoreAddInterval(0)
 {
 }
 
@@ -21,10 +27,20 @@ void ScoreUI::Init(void)
 void ScoreUI::Update(void)
 {
 	// 加算予定スコアの適用と加算スコアの取得
-	for (int loop = 0; loop < MAX_ADD_SCORE_NUM; loop++) {
-		int add = Score::GetIns().AddScoreApplyAndGet();
-		if (add == 0) { break; }
-		addScore.emplace_back(AddScoreInfo(add, SCORE_POS));
+	if (++scoreAddInterval > SCORE_ADD_INTERVAL) {
+		scoreAddInterval = SCORE_ADD_INTERVAL;
+
+		int add = 0;
+		for (int loop = 0; loop < MAX_ADD_SCORE_NUM; loop++) {
+			int a = Score::GetIns().AddScoreApplyAndGet();
+			if (a == 0) { break; }
+			add += a;
+		}
+		if (add > 0) {
+			scoreAddInterval = 0;
+			if (!addScore.empty()) { addScore.back().pos.y -= 15.0f; }
+			addScore.emplace_back(AddScoreInfo(add, SCORE_POS));
+		}
 	}
 
 	// 加算スコアの更新
@@ -40,14 +56,20 @@ void ScoreUI::Update(void)
 
 void ScoreUI::UiDraw(void)
 {
-	// スコア表示
 	SetFontSize(48);
+
+	// スコア表示
 	DrawFormatStringF(SCORE_POS.x, SCORE_POS.y, 0xffffff, "SCORE : %08d", displayScore);
 
-	// 加算スコアを表示
 	SetFontSize(32);
+
+	// 加算スコアを表示
 	for (AddScoreInfo& add : addScore) { add.Draw(); }
 
+	// コンボ数表示
+	DrawFormatStringF(5.0f, App::SCREEN_SIZE_Y * 0.5f - 16, 0xffffff, "AtCombo：%02d", Score::GetIns().DamageCombo());
+	DrawFormatStringF(5.0f, App::SCREEN_SIZE_Y * 0.5f + 16, 0xffffff, "BrCombo：%02d", Score::GetIns().BreakCombo());
+	
 	SetFontSize(16);
 }
 
