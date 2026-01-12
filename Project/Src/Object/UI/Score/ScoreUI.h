@@ -68,7 +68,7 @@ private:
 	std::list<AddScoreInfo>addScore;
 
 	// １度に適用させる最大数（無限ループ防止）
-	const unsigned char MAX_ADD_SCORE_NUM = 1000;
+	const unsigned char MAX_ADD_SCORE_NUM = 255;
 
 	// 加算予定スコアを適用させるインターバル（フレーム数）
 	const unsigned char SCORE_ADD_INTERVAL = 10;
