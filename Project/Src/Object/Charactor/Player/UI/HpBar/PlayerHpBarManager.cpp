@@ -93,7 +93,7 @@ void PlayerHpBarManager::Update(void)
 
 void PlayerHpBarManager::Draw(void)
 {
-	DrawGraphF(position.x, position.y, hpBarFrameImageHandle, true);
+	DrawGraph((int)position.x, (int)position.y, hpBarFrameImageHandle, true);
 
 	for (PlayerHpBar*& h : hpBar) { h->Draw(); }
 }

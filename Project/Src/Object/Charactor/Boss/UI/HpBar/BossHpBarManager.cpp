@@ -97,7 +97,7 @@ void BossHpBarManager::Update(void)
 
 void BossHpBarManager::Draw(void)
 {
-	if (NUMBER == 0) { DrawGraphF(position.x, position.y, hpBarFrameImageHandle, true); }
+	if (NUMBER == 0) { DrawGraph((int)position.x, (int)position.y, hpBarFrameImageHandle, true); }
 
 	for (BossHpBar*& h : hpBar) { h->Draw(); }
 }

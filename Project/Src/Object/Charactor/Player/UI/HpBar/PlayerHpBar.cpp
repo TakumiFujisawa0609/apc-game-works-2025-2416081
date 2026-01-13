@@ -64,7 +64,7 @@ void PlayerHpBar::Draw(void)
 			std::clamp((unsigned int)ALIVE_DEFAULT_B + idleTimer, 0u, 255u)
 		);
 
-	DrawQuadrangleAA(
+	DrawQuadrangle(
 		drawPoss.topLeft.x, drawPoss.topLeft.y,
 		drawPoss.topRight.x, drawPoss.topRight.y,
 		drawPoss.bottomRight.x, drawPoss.bottomRight.y,

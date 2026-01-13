@@ -54,12 +54,13 @@ void ScoreUI::Update(void)
 	displayScore += (smoothScoreSub > 0) ? smoothScoreSub : Score::GetIns().TotalScore() - displayScore;
 }
 
+
 void ScoreUI::UiDraw(void)
 {
 	SetFontSize(48);
 
 	// スコア表示
-	DrawFormatStringF(SCORE_POS.x, SCORE_POS.y, 0xffffff, "SCORE : %08d", displayScore);
+	DrawFormatString((int)SCORE_POS.x, (int)SCORE_POS.y, 0xffffff, "SCORE : %08d", displayScore);
 
 	SetFontSize(32);
 
@@ -67,10 +68,8 @@ void ScoreUI::UiDraw(void)
 	for (AddScoreInfo& add : addScore) { add.Draw(); }
 
 	// コンボ数表示
-	DrawFormatStringF(5.0f, App::SCREEN_SIZE_Y * 0.5f - 16, 0xffffff, "AtCombo：%02d", Score::GetIns().DamageCombo());
-	DrawFormatStringF(5.0f, App::SCREEN_SIZE_Y * 0.5f + 16, 0xffffff, "BrCombo：%02d", Score::GetIns().BreakCombo());
-	
-	SetFontSize(16);
+	DrawFormatString(5, (int)(App::SCREEN_SIZE_Y * 0.5f - 16), 0xffffff, "AtCombo：%02d", Score::GetIns().DamageCombo());
+	DrawFormatString(5, (int)(App::SCREEN_SIZE_Y * 0.5f + 16), 0xffffff, "BrCombo：%02d", Score::GetIns().BreakCombo());
 }
 
 void ScoreUI::Release(void)

@@ -20,7 +20,7 @@ public:
 private:
 	
 	// Å‘å”
-	static constexpr unsigned char VOXEL_MAX = 20;
+	static constexpr unsigned char VOXEL_MAX = 5;
 
 	// ƒZƒ‹ŒQ
 	VoxelBreakEffect* voxels[VOXEL_MAX];

@@ -28,6 +28,8 @@ private:
 	// HPバーの分割数
 	static constexpr unsigned char HP_BAR_DIVISION_NUM_X = 63;
 	static constexpr unsigned char HP_BAR_DIVISION_NUM_Y = 6;
+	//static constexpr unsigned char HP_BAR_DIVISION_NUM_X = 30;
+	//static constexpr unsigned char HP_BAR_DIVISION_NUM_Y = 3;
 	static constexpr unsigned short HP_BAR_DIVISIONS_NUM = HP_BAR_DIVISION_NUM_X * HP_BAR_DIVISION_NUM_Y;
 
 	// HPバーの1分割あたりの大きさ（縦、横 同一）

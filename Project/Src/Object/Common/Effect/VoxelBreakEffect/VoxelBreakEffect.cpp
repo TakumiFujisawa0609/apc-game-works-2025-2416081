@@ -31,8 +31,7 @@ void VoxelBreakEffect::Update(void)
 	vel.y -= 0.5f;
 
 	// ’¸“_
-	for (unsigned char i = 0; i < VERTEX_NUM; i++)
-	{
+	for (unsigned char i = 0; i < VERTEX_NUM; i++) {
 		Vector3 local = kDir[i] * (cellSize * 0.5f);
 
 		vertex[i].pos = (pos + local).ToVECTOR();

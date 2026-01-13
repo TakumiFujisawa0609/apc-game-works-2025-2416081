@@ -120,7 +120,8 @@ void Player::CharactorUpdate(void)
 	if (trans_.pos.y < -500.0f) {
 		trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);
 		AccelSum.y = 0.0f;
-		
+		AccelSum.x = 10.0f; AccelSum.z = 10.0f;
+
 		SetInviCounter(100);
 		HpSharpen(30);
 		knockBackVec_ = {};

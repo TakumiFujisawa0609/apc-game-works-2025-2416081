@@ -104,9 +104,9 @@ void Application::Run(void)
 		SceneManager::GetIns().Draw();
 
 #ifdef _DEBUG
+		fps_->DrawFrameRate();
 
 		// フレームレートデバッグ描画
-		fps_->DrawFrameRate();
 
 		// カメラデバッグ描画
 		//Camera::GetIns().DrawDebug();

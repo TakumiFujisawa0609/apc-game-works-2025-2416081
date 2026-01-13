@@ -60,11 +60,11 @@ void BossHpBar::Draw(void)
 			std::clamp((unsigned int)ALIVE_DEFAULT_B + (idleTimer / 2), 0u, 255u)
 		);
 
-	DrawQuadrangleAA(
-		drawPoss.topLeft.x, drawPoss.topLeft.y,
-		drawPoss.topRight.x, drawPoss.topRight.y,
-		drawPoss.bottomRight.x, drawPoss.bottomRight.y,
-		drawPoss.bottomLeft.x, drawPoss.bottomLeft.y,
+	DrawQuadrangle(
+		(int)drawPoss.topLeft.x, (int)drawPoss.topLeft.y,
+		(int)drawPoss.topRight.x, (int)drawPoss.topRight.y,
+		(int)drawPoss.bottomRight.x, (int)drawPoss.bottomRight.y,
+		(int)drawPoss.bottomLeft.x, (int)drawPoss.bottomLeft.y,
 		(state == STATE::ALIVE) ? aliveColor : 0xff0000,
 		true
 	);

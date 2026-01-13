@@ -61,7 +61,7 @@ private:
 		}
 
 		// ï`âÊ
-		void Draw(void)const { DrawFormatStringF(pos.x, (pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f), 0xffffff, "+%d", addScore); }
+		void Draw(void)const { DrawFormatString((int)pos.x, (int)((pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f)), 0xffffff, "+%d", addScore); }
 	};
 
 	// â¡éZÉXÉRÉA
