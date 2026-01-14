@@ -472,7 +472,8 @@ void Boss::LifeSharpen(void)
 		state_ = (int)STATE::DEATH;
 		AnimePlay((int)ANIME_TYPE::DEATH, false);
 
-		GameScene::Slow(100, 10);
+		GameScene::HitStop(40);
+		GameScene::Slow(20);
 		GameScene::Shake(ShakeKinds::WID, ShakeSize::BIG, 100);
 		return;
 	}

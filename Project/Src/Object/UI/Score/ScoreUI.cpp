@@ -57,12 +57,12 @@ void ScoreUI::Update(void)
 
 void ScoreUI::UiDraw(void)
 {
-	SetFontSize(48);
+	//SetFontSize(48);
 
 	// スコア表示
 	DrawFormatString((int)SCORE_POS.x, (int)SCORE_POS.y, 0xffffff, "SCORE : %08d", displayScore);
 
-	SetFontSize(32);
+	//SetFontSize(32);
 
 	// 加算スコアを表示
 	for (AddScoreInfo& add : addScore) { add.Draw(); }

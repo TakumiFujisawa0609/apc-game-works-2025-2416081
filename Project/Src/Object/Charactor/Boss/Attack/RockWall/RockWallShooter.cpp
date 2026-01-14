@@ -48,6 +48,8 @@ void RockWallShooter::Release(void)
 		delete wall;
 		wall = nullptr;
 	}
+	DeleteGraph(textureId_);
+	MV1DeleteModel(modelId_);
 }
 
 void RockWallShooter::On(void)
