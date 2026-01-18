@@ -8,6 +8,7 @@
 #include"../../Manager/Input/KeyManager.h"
 #include"../../Manager/Camera/Camera.h"
 #include"../../Manager/Score/Score.h"
+#include"../../Manager/Score/Ranking.h"
 
 #include"../../Object/SkyDome/SkyDome.h"
 
@@ -33,6 +34,8 @@ void ClearScene::Load(void)
 void ClearScene::Init(void)
 {
 	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
+
+	Ranking::GetIns().AddScore(Score::GetIns().TotalScore());
 }
 
 void ClearScene::Update(void)

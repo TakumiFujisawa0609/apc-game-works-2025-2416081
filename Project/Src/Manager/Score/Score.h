@@ -14,13 +14,17 @@ private:
 
 public:
 
-#pragma region シングルトン
+#pragma region シングルトン定義
 	// 生成/初期化処理
 	static void CreateIns(void) { if (ins == nullptr) { ins = new Score(); ins->Reset(); } }
 	// 取得
 	static Score& GetIns(void) { return *ins; }
 	// 終了処理/消去
 	static void DeleteIns(void) { if (ins != nullptr) { ins->Reset(); delete ins; ins = nullptr; } }
+
+	//　コピーコンストラクタ・代入演算子禁止
+	Score(const Score&) = delete;
+	Score& operator=(const Score&) = delete;
 #pragma endregion
 
 	// リセット
@@ -39,6 +43,9 @@ public:
 
 	// 破壊コンボ数の取得
 	unsigned char BreakCombo(void)const { return breakCombo; }
+
+	// 合計コンボ数の取得
+	unsigned char TotalCombo(void)const { return attackCombo + breakCombo; }
 
 #pragma endregion
 

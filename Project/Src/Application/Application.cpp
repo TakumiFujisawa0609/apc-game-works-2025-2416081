@@ -7,6 +7,7 @@
 #include"../Manager/Input/KeyManager.h"
 #include"../Manager/Sound/SoundManager.h"
 #include"../Manager/Score/Score.h"
+#include"../Manager/Score/Ranking.h"
 #include"../Scene/SceneManager/SceneManager.h"
 
 
@@ -54,6 +55,9 @@ void Application::Init(void)
 	// カメラ
 	Camera::CreateIns();
 
+	// ランキング管理クラスの生成/初期化処理
+	Ranking::CreateIns();
+
 	// シーン管理初期化
 	SceneManager::CreateIns();
 	SceneManager::GetIns().Init();
@@ -89,7 +93,7 @@ void Application::Run(void)
 		Camera::GetIns().Update();
 
 		// デバッグ表示切替
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); Ranking::GetIns().AllDeleteRankingList(); }
 
 		// フレームレート計算
 		fps_->CalcFrameRate();
@@ -128,6 +132,10 @@ void Application::Release(void)
 	// スコア管理クラスの終了処理/消去
 	Score::DeleteIns();
 
+	// ランキング管理クラスの終了処理/消去
+	Ranking::DeleteIns();
+
+	// サウンド管理解放・削除
 	Smng::DeleteIns();
 
 	// シーン管理解放・削除	

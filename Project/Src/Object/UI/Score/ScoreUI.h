@@ -32,16 +32,23 @@ private:
 	// 加算スコアを表示させる時間(フレーム数)
 	static const unsigned char ADD_SCORE_ALIVE_TIME = 100;
 
+	// メインのスコア表示座標からの相対座標で加算スコアを表示させる位置
+	static const Vector2 ADD_SCORE_OFFSET_POS;
+
 	struct AddScoreInfo {
 
 		// 生成
-		AddScoreInfo(int addScore, const Vector2& SCORE_POS) :
+		AddScoreInfo(int addScore, const Vector2& SCORE_POS, const int& addScoreFont) :
 			addScore(addScore),
 			aliveTime(ADD_SCORE_ALIVE_TIME),
-			pos(SCORE_POS)
+			pos(SCORE_POS),
+			addScoreFont(addScoreFont)
 		{
-			pos.x += 400.0f;
+			pos += ADD_SCORE_OFFSET_POS;
 		}
+
+		// 表示用フォントハンドル
+		const int& addScoreFont;
 
 		// 加算スコアの数値
 		int addScore = 0;
@@ -61,7 +68,13 @@ private:
 		}
 
 		// 描画
-		void Draw(void)const { DrawFormatString((int)pos.x, (int)((pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f)), 0xffffff, "+%d", addScore); }
+		void Draw(void)const {
+			DrawFormatStringToHandle(
+				(int)pos.x, (int)((pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f)),
+				0xffff00, addScoreFont,
+				"+%d", addScore
+			);
+		}
 	};
 
 	// 加算スコア
@@ -72,6 +85,35 @@ private:
 
 	// 加算予定スコアを適用させるインターバル（フレーム数）
 	const unsigned char SCORE_ADD_INTERVAL = 10;
-
+	// 加算予定スコアを適用させるインターバルを計測するためのカウンター
 	unsigned char scoreAddInterval;
+
+#pragma region フォント
+	const unsigned char SCORE_FONT_SIZE = 60;
+	int scoreFont;
+	const unsigned char ADD_SCORE_FONT_SIZE = 32;
+	int addScoreFont;
+#pragma endregion
+
+	static const unsigned char SCORE_DISP_STEP = 5; // スコア表示のステップ数
+
+	// スコア表示の色テーブル
+	const unsigned int SCORE_DISP_COLOR_TABLE[SCORE_DISP_STEP] = {
+		// 白、緑、黄、青、紫の順番
+		0xffffff, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff
+	};
+
+	// スコア表示の色のしきい値テーブル
+	const unsigned int SOCRE_DISP_THRESHOLD_TABLE[SCORE_DISP_STEP] = { 0, 10000, 50000, 200000, 500000 };
+
+	// スコア表示の色を取得
+	unsigned int GetScoreDispColor(unsigned int score)const {
+		for(int i = SCORE_DISP_STEP - 1; i >= 0; --i) {
+			if (score >= SOCRE_DISP_THRESHOLD_TABLE[i]) { return SCORE_DISP_COLOR_TABLE[i]; }
+		}
+	}
+
+	int comboBackImage[12];
+	float comboAnimeIndex;
+	float comboAnimeSigned;
 };
