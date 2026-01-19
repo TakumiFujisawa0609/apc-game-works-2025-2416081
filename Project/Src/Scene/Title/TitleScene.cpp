@@ -54,7 +54,7 @@ void TitleScene::Update(void)
 	}
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::GAME);
+		SceneManager::GetIns().ChangeScene(SCENE_ID::RANKING);
 		return;
 	}
 	skyDome_->Update();

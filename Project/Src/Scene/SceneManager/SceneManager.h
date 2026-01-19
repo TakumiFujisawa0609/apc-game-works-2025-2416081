@@ -14,6 +14,7 @@ public:
 		NONE = -1,
 
 		TITLE,
+		RANKING,
 		GAME,
 		CLEAR,
 		OVER,

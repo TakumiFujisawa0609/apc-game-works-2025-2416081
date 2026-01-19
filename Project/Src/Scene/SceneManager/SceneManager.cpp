@@ -5,6 +5,7 @@
 #include "../../Manager/Loading/Loading.h"
 
 #include"../Title/TitleScene.h"
+#include"../Ranking/RankingScene.h"
 #include"../Game/GameScene.h"
 #include"../Clear/ClearScene.h"
 #include"../Over/OverScene.h"
@@ -121,6 +122,9 @@ void SceneManager::ChangeScene(SCENE_ID scene)
 	case SCENE_ID::TITLE:
 		ChangeScene(std::make_shared<TitleScene>());
 		break;
+	case SCENE_ID::RANKING:
+		ChangeScene(std::make_shared<RankingScene>());
+		break;
 	case SCENE_ID::GAME:
 		ChangeScene(std::make_shared<GameScene>());
 		break;
@@ -149,6 +153,9 @@ void SceneManager::PushScene(SCENE_ID scene)
 	{
 	case SCENE_ID::TITLE:
 		PushScene(std::make_shared<TitleScene>());
+		break;
+	case SCENE_ID::RANKING:
+		PushScene(std::make_shared<RankingScene>());
 		break;
 	case SCENE_ID::GAME:
 		PushScene(std::make_shared<GameScene>());
@@ -190,6 +197,9 @@ void SceneManager::JumpScene(SCENE_ID scene)
 	{
 	case SCENE_ID::TITLE:
 		JumpScene(std::make_shared<TitleScene>());
+		break;
+	case SCENE_ID::RANKING:
+		JumpScene(std::make_shared<RankingScene>());
 		break;
 	case SCENE_ID::GAME:
 		JumpScene(std::make_shared<GameScene>());

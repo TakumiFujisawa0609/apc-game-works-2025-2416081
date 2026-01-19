@@ -182,6 +182,7 @@
     <ClCompile Include="Src\Scene\Game\GameScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Pause\GamePause.cpp" />
     <ClCompile Include="Src\Scene\Over\OverScene.cpp" />
+    <ClCompile Include="Src\Scene\Ranking\RankingScene.cpp" />
     <ClCompile Include="Src\Scene\SceneManager\SceneManager.cpp" />
     <ClCompile Include="Src\Scene\Title\End\EndScene.cpp" />
     <ClCompile Include="Src\Scene\Title\TitleScene.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="Src\Scene\Debug\GameDebugScene.h" />
     <ClInclude Include="Src\Scene\Game\Pause\GamePauseh.h" />
     <ClInclude Include="Src\Scene\Over\OverScene.h" />
+    <ClInclude Include="Src\Scene\Ranking\RankingScene.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Scene\SceneManager\SceneManager.h" />
     <ClInclude Include="Src\Scene\Title\End\EndScene.h" />

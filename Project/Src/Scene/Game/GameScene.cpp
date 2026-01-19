@@ -78,7 +78,7 @@ void GameScene::Load(void)
 	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
 	ObjAdd(new ScoreUI());
 	//ObjAdd(new SphereDebugObject());
-
+	
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
 
