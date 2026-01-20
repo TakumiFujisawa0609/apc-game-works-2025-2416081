@@ -386,6 +386,8 @@ void Boss::LowerUpdate(void)
 	preview->Update();
 	
 	for (BossHpBarManager*& h : hpBar_) { h->Update(); }
+
+	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down) { state_ = (int)STATE::END; }
 }
 void Boss::LowerDraw(void)
 {

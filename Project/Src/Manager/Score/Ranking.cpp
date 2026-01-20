@@ -122,9 +122,10 @@ void Ranking::AddScore(int score)
 		}
 
 		// 新規スコアが現在のスコアより大きい場合
-		if(score > rankingList[i].score) {
+		if (score > rankingList[i].score) {
 			// 現在スコアを一時変数に保持しておく
-			int work = rankingList[i].score;
+			RankingData work;
+			work.score = rankingList[i].score;
 
 			// 現在スコアを新規スコアで上書きする
 			rankingList[i].score = score;
@@ -136,7 +137,7 @@ void Ranking::AddScore(int score)
 			for (size_t j = rankingList.size() - 1; j > i; j--) { rankingList[j] = rankingList[j - 1]; }
 
 			// 一時変数に保持しておいたスコアを挿入する
-			if (i < rankingList.size() - 2) { rankingList[i + 1].score = work; }
+			if (i < rankingList.size() - 2) { rankingList[i + 1] = work; }
 
 			// 終了
 			break;

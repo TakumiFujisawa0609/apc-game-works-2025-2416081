@@ -3,6 +3,7 @@
 #include"../../Utility/Utility.h"
 
 #include"../../Manager/Input/KeyManager.h"
+#include"../../Manager/Camera/Camera.h"
 
 #include"../../Application/Application.h"
 #include"../SceneManager/SceneManager.h"
@@ -23,6 +24,7 @@ void OverScene::Load(void)
 
 void OverScene::Init(void)
 {
+	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 }
 
 void OverScene::Update(void)
