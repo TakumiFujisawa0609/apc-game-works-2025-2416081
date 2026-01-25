@@ -72,6 +72,9 @@ public:
 		DOWN,
 		LEFT,
 		RIGHT,
+
+		// テキスト入力時の(日本語/英語)を切り替えるキー
+		TEXT_INPUT_LANGUAGE_SWITCH,
 #pragma endregion
 
 #pragma region デバッグキー

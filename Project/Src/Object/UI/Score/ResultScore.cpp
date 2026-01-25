@@ -1,0 +1,72 @@
+#include"ResultScore.h"
+
+#include"../../../Manager/Score/Score.h"
+
+#include"../../../Manager/Font/FontManager.h"
+
+ResultScore::ResultScore() :
+	baseScore(),
+	baseDisplaScore(),
+	baseEasingEnd(false),
+
+	bonusScore(),
+	bonusDisplayScore(),
+	bonusEasingEnd(false),
+
+	totalScore(),
+	totalDisplayScore(),
+	totalEasingEnd(false)
+{
+}
+
+void ResultScore::Load(void)
+{
+
+}
+
+void ResultScore::Init(void)
+{
+	baseScore = Score::GetIns().TotalScore();
+	baseDisplaScore = 0;
+	baseEasingEnd = false;
+
+	bonusScore = Score::GetIns().TotalScore();
+	bonusDisplayScore = 0;
+	bonusEasingEnd = false;
+
+	totalScore = Score::GetIns().TotalScore();
+	totalDisplayScore = 0;
+	totalEasingEnd = false;
+}
+
+void ResultScore::Update(void)
+{
+	// 表示用スコアを現在のスコアへ近づける（徐々に）
+	if (!baseEasingEnd) {
+		int smoothScoreSub = (int)((baseScore - baseDisplaScore) * DISPLAY_SCORE_SMOOTH);
+		if (smoothScoreSub > 0) { baseDisplaScore += smoothScoreSub; }
+		else { baseDisplaScore = baseScore; baseEasingEnd = true; }
+	}
+	else if (!bonusEasingEnd) {
+		int smoothScoreSub = (int)((bonusScore - bonusDisplayScore) * DISPLAY_SCORE_SMOOTH);
+		if (smoothScoreSub > 0) { bonusDisplayScore += smoothScoreSub; }
+		else { bonusDisplayScore = bonusScore; bonusEasingEnd = true; }
+	}
+	else if (!totalEasingEnd) {
+		int smoothScoreSub = (int)((totalScore - totalDisplayScore) * DISPLAY_SCORE_SMOOTH);
+		if (smoothScoreSub > 0) { totalDisplayScore += smoothScoreSub; }
+		else { totalDisplayScore = totalScore; totalEasingEnd = true; }
+	}
+}
+
+void ResultScore::UiDraw(void)
+{
+	DrawFormatStringToHandle(700, 235, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", baseDisplaScore);
+	DrawFormatStringToHandle(700, 377, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", bonusDisplayScore);
+	DrawFormatStringToHandle(700, 575, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", totalDisplayScore);
+}
+
+void ResultScore::Release(void)
+{
+
+}

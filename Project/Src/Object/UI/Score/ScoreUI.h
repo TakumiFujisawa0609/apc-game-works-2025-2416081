@@ -4,6 +4,8 @@
 
 #include"../../ActorBase.h"
 
+#include"../../../Manager/Font/FontManager.h"
+
 class ScoreUI : public ActorBase
 {
 public:
@@ -88,14 +90,8 @@ private:
 	// 加算予定スコアを適用させるインターバルを計測するためのカウンター
 	unsigned char scoreAddInterval;
 
-#pragma region フォント
-	const unsigned char SCORE_FONT_SIZE = 60;
-	int scoreFont;
-	const unsigned char ADD_SCORE_FONT_SIZE = 32;
-	int addScoreFont;
-#pragma endregion
-
-	static const unsigned char SCORE_DISP_STEP = 5; // スコア表示のステップ数
+	// スコア表示のステップ数
+	static const unsigned char SCORE_DISP_STEP = 5;
 
 	// スコア表示の色テーブル
 	const unsigned int SCORE_DISP_COLOR_TABLE[SCORE_DISP_STEP] = {
@@ -111,6 +107,7 @@ private:
 		for(int i = SCORE_DISP_STEP - 1; i >= 0; --i) {
 			if (score >= SOCRE_DISP_THRESHOLD_TABLE[i]) { return SCORE_DISP_COLOR_TABLE[i]; }
 		}
+		return SCORE_DISP_COLOR_TABLE[SCORE_DISP_STEP - 1];
 	}
 
 	int comboBackImage[12];

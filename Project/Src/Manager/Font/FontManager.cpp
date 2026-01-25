@@ -1,0 +1,26 @@
+#include"FontManager.h"
+
+#include<DxLib.h>
+
+FontManager* FontManager::ins = nullptr;
+
+FontManager::FontManager() :
+	font()
+{
+}
+
+// 初期化処理
+void FontManager::Init(void)
+{
+	// フォントを作成
+	for (int i = 0; i < (int)FONT_KINDS_SIZE::MAX; i++) {
+		font[i] = CreateFontToHandle(FONT_NAME_TABLE[i], FONT_SIZE_TABLE[i], -1, DX_FONTTYPE_EDGE);
+	}
+}
+
+// 終了処理
+void FontManager::Release(void)
+{
+	// フォントを削除
+	for (int& f : font) { DeleteFontToHandle(f); }
+}

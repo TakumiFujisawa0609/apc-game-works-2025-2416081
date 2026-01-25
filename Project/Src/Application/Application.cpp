@@ -8,6 +8,7 @@
 #include"../Manager/Sound/SoundManager.h"
 #include"../Manager/Score/Score.h"
 #include"../Manager/Score/Ranking.h"
+#include"../Manager/Font/FontManager.h"
 #include"../Scene/SceneManager/SceneManager.h"
 
 
@@ -52,26 +53,30 @@ void Application::Init(void)
 	SetUseDirectInputFlag(true);
 	KeyManager::CreateIns();
 
+	// FPS初期化
+	fps_ = new FPS;
+	fps_->Init();
+
 	// カメラ
 	Camera::CreateIns();
 
 	// ランキング管理クラスの生成/初期化処理
 	Ranking::CreateIns();
 
-	// シーン管理初期化
-	SceneManager::CreateIns();
-	SceneManager::GetIns().Init();
+	// スコア管理クラスの生成/初期化処理
+	Score::CreateIns();
 
+	// サウンド管理クラスの生成/初期化処理
 	Smng::CreateIns();
 	Smng::GetIns().Load(SOUND::SE_SYSTEM_BUTTON);
 	Smng::GetIns().Load(SOUND::SE_SYSTEM_SELECT);
 
-	// スコア管理クラスの生成/初期化処理
-	Score::CreateIns();
+	// フォントデータ生成
+	FontManager::CreateIns();
 
-	// FPS初期化
-	fps_ = new FPS;
-	fps_->Init();
+	// シーン管理初期化
+	SceneManager::CreateIns();
+	SceneManager::GetIns().Init();
 }
 
 // ゲームループ
@@ -93,7 +98,7 @@ void Application::Run(void)
 		Camera::GetIns().Update();
 
 		// デバッグ表示切替
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); Ranking::GetIns().AllDeleteRankingList(); }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
 
 		// フレームレート計算
 		fps_->CalcFrameRate();
@@ -108,15 +113,9 @@ void Application::Run(void)
 		SceneManager::GetIns().Draw();
 
 #ifdef _DEBUG
-		fps_->DrawFrameRate();
-
 		// フレームレートデバッグ描画
-
-		// カメラデバッグ描画
-		//Camera::GetIns().DrawDebug();
-
+		fps_->DrawFrameRate();
 #endif // DEBUG
-
 
 		// 描画が完了した背面画面を表に持ってくる
 		ScreenFlip();
@@ -126,8 +125,15 @@ void Application::Run(void)
 // 解放
 void Application::Release(void)
 {
-	// 入力制御削除
-	KeyManager::DeleteIns();
+	// シーン管理解放・削除	
+	SceneManager::GetIns().Release();
+	SceneManager::DeleteIns();
+
+	// フォントデータの削除
+	FontManager::DeleteIns();
+
+	// サウンド管理解放・削除
+	Smng::DeleteIns();
 
 	// スコア管理クラスの終了処理/消去
 	Score::DeleteIns();
@@ -135,18 +141,14 @@ void Application::Release(void)
 	// ランキング管理クラスの終了処理/消去
 	Ranking::DeleteIns();
 
-	// サウンド管理解放・削除
-	Smng::DeleteIns();
-
-	// シーン管理解放・削除	
-	SceneManager::GetIns().Release();
-	SceneManager::DeleteIns();
-
 	// カメラ
 	Camera::DeleteIns();
 
 	// フレームレート解放
 	delete fps_;
+
+	// 入力制御削除
+	KeyManager::DeleteIns();
 
 	// DxLib終了
 	if (DxLib_End() == -1) { isReleaseFail_ = true; }

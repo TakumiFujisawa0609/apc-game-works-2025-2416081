@@ -143,7 +143,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 		if (collider.GetTag() == TAG::PLAYER_PUNCH) {
 			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 			LifeSharpen();
-			Score::GetIns().ScoreAddAttack(3000);
+			Score::GetIns().ScoreAddBreak(3000);
 		}
 		return;
 	}
@@ -152,7 +152,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(30);
-		Score::GetIns().ScoreAddAttack(1500);
+		Score::GetIns().ScoreAddBreak(1500);
 		return;
 	}
 
@@ -160,7 +160,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 		GameScene::Shake();
 		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
 		HpSharpen(5);
-		Score::GetIns().ScoreAddAttack(500);
+		Score::GetIns().ScoreAddBreak(500);
 		SetInviCounter(20);
 		return;
 	}

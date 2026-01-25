@@ -22,21 +22,22 @@ public:
 
 private:
 	int img_;
-	std::vector<ActorBase*>objects;
 
+	std::vector<ActorBase*>objects;
 	// 配列の中から特定のオブジェクトを探す
 	template<typename T>
-	std::vector<T*> ObjSerch(void) {
-		std::vector<T*> out;
-		out.reserve(objects.size());
-		for (auto* obj : objects) {
+	T* ObjSerch(void) {
+		for (ActorBase*& obj : objects) {
 			if (!obj) continue;
 			if (auto* ptr = dynamic_cast<T*>(obj)) {
-				out.push_back(ptr);
+				return ptr;
 			}
 		}
-		return out;
+		return nullptr;
 	}
+
+	// ランクイン判定
+	bool rankinJudge;
 
 	const std::vector<VoxelBase::MeshBatch> stageBatches;
 	const int stageTexture;

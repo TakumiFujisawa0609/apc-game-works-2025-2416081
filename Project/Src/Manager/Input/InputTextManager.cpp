@@ -1,12 +1,14 @@
 ﻿#include"InputTextManager.h"
 
+#include"KeyManager.h"
+
 InputTextManager::InputTextManager() :
 	inputText(),
 
 	prevKey(),nowKey(),
 	downKey(),
 
-	isConversionJapanese(false)
+	isConversionJapanese(true)
 {
 }
 
@@ -17,6 +19,9 @@ void InputTextManager::Update(void)
 
 	// 日本語変換
 	if (isConversionJapanese) { ConversionJapanese(inputText); }
+
+	// 日本語変換切り替え
+	if (KEY::GetIns().GetInfo(KEY_TYPE::TEXT_INPUT_LANGUAGE_SWITCH).down) { IsConversionJapaneseSwitch(); }
 }
 
 void InputTextManager::Input(std::wstring& inputText)

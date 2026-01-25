@@ -10,12 +10,20 @@
 #include"../../Manager/Score/Score.h"
 #include"../../Manager/Score/Ranking.h"
 
-#include"../../Object/SkyDome/SkyDome.h"
+#include"Rankin/EnterNameScene.h"
+
 #include"../../Object/Stage/Block/BlockManager.h"
+
+#include"../../Object/SkyDome/SkyDome.h"
+#include"../../Object/UI/Score/ResultScore.h"
 
 ClearScene::ClearScene(std::vector<VoxelBase::MeshBatch> stageBatches, const char* stageTexturePath) :
 	img_(-1),
+
 	objects(),
+
+	rankinJudge(false),
+
 	stageBatches(stageBatches),
 	stageTexture(stageTexturePath != nullptr ? LoadGraph(stageTexturePath) : -1)
 {
@@ -39,6 +47,7 @@ void ClearScene::Load(void)
 		};
 
 	ObjAdd(new SkyDome());
+	ObjAdd(new ResultScore());
 }
 
 void ClearScene::Init(void)
@@ -48,6 +57,8 @@ void ClearScene::Init(void)
 	Ranking::GetIns().AddScore(Score::GetIns().TotalScore());
 
 	for (ActorBase*& obj : objects) { obj->Init(); }
+
+	rankinJudge = false;
 }
 
 void ClearScene::Update(void)
@@ -59,6 +70,19 @@ void ClearScene::Update(void)
 	}
 
 	for (ActorBase*& obj : objects) { obj->Update(); }
+
+	// スコア表示のイージングが終わったらランクインしたかの判定を行う
+	if (!rankinJudge && ObjSerch<ResultScore>()->EasingEnd()) {
+
+		// ランクイン判定
+		if (Ranking::GetIns().GetLastAddScoreRankIndex() != -1) {
+			// ランクインしたので名前入力用のシーンを積む
+			SceneManager::GetIns().PushScene(std::make_shared<EnterNameScene>());
+		}
+
+		// 判定は1度限りにする
+		rankinJudge = true;
+	}
 }
 
 void ClearScene::Draw(void)
@@ -79,17 +103,13 @@ void ClearScene::Draw(void)
 
 	for (ActorBase*& obj : objects) { obj->Draw(); }
 
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
 	DrawBox(0, 0, x, y, 0xffffff, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	DrawExtendGraph(0, 0, x, y, img_, true);
 
-	SetFontSize(64);
-
-	DrawFormatStringF(x / 2.0f - 300.0f, y / 2.0f + 325.0f, 0xffffff, "SCORE : %08d", Score::GetIns().TotalScore());
-
-	SetFontSize(16);
+	for (ActorBase*& obj : objects) { obj->UiDraw(); }
 }
 
 void ClearScene::Release(void)
@@ -100,6 +120,7 @@ void ClearScene::Release(void)
 		delete obj;
 		obj = nullptr;
 	}
+
 	DeleteGraph(img_);
-	DeleteGraph(stageTexture);
+	if (stageTexture != -1) { DeleteGraph(stageTexture); }
 }
