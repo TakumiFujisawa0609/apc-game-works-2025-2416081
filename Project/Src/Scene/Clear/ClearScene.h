@@ -5,12 +5,13 @@
 #include"../SceneBase.h"
 
 #include"../../Object/ActorBase.h"
+#include"../../Object/VoxelBase.h"
 
 
 class ClearScene : public SceneBase
 {
 public:
-	ClearScene();
+	ClearScene(std::vector<VoxelBase::MeshBatch> stageBatches = {}, const char* stageTexturePath = nullptr);
 	~ClearScene()override;
 
 	void Load(void)override;
@@ -36,4 +37,7 @@ private:
 		}
 		return out;
 	}
+
+	const std::vector<VoxelBase::MeshBatch> stageBatches;
+	const int stageTexture;
 };

@@ -13,9 +13,11 @@
 #include"../../Object/SkyDome/SkyDome.h"
 #include"../../Object/Stage/Block/BlockManager.h"
 
-ClearScene::ClearScene() :
+ClearScene::ClearScene(std::vector<VoxelBase::MeshBatch> stageBatches, const char* stageTexturePath) :
 	img_(-1),
-	objects()
+	objects(),
+	stageBatches(stageBatches),
+	stageTexture(stageTexturePath != nullptr ? LoadGraph(stageTexturePath) : -1)
 {
 }
 
@@ -37,12 +39,11 @@ void ClearScene::Load(void)
 		};
 
 	ObjAdd(new SkyDome());
-	
 }
 
 void ClearScene::Init(void)
 {
-	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
+	Camera::GetIns().ChangeModeDisplay(Vector3::XZonly(1000.0f, 1000.0f), Vector3::YZonly(800.0f, -2000.0f), Utility::Deg2RadF(0.1f));
 
 	Ranking::GetIns().AddScore(Score::GetIns().TotalScore());
 
@@ -65,7 +66,22 @@ void ClearScene::Draw(void)
 	int x = Application::SCREEN_SIZE_X;
 	int y = Application::SCREEN_SIZE_Y;
 
+	// ƒƒbƒVƒ…•`‰æ
+	for (auto& b : stageBatches) {
+		if (b.i.empty()) { continue; }
+		DrawPolygonIndexed3D(
+			b.v.empty() ? b.v.data() : b.v.data(),
+			(int)(b.v.empty() ? b.v.size() : b.v.size()),
+			b.i.data(), (int)(b.i.size() / 3),
+			(stageTexture != -1) ? stageTexture : DX_NONE_GRAPH, true
+		);
+	}
+
 	for (ActorBase*& obj : objects) { obj->Draw(); }
+
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+	DrawBox(0, 0, x, y, 0xffffff, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	DrawExtendGraph(0, 0, x, y, img_, true);
 
@@ -85,4 +101,5 @@ void ClearScene::Release(void)
 		obj = nullptr;
 	}
 	DeleteGraph(img_);
+	DeleteGraph(stageTexture);
 }

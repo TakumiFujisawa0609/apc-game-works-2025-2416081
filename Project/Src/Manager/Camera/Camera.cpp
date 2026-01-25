@@ -20,8 +20,10 @@ Camera::Camera(void) :
 	ROT_POWER(0.0f),
 	MOVE_POWER(0.0f),
 
-	lookAt(nullptr),
+	fixedLookAtPos(),
 	lookAtDiff(),
+
+	lookAt(nullptr),
 
 	lookAtYangle(nullptr),
 	lookTarget(nullptr),
@@ -41,6 +43,12 @@ void Camera::Init(void)
 
 	SET_MODE_FUNC(MODE::FREE, &Camera::FreeModeFunc);
 	SET_APPLY(MODE::FREE, &Camera::FreeApply);
+
+	SET_MODE_FUNC(MODE::LOOK_AT_FREE, &Camera::LookAtFreeModeFunc);
+	SET_APPLY(MODE::LOOK_AT_FREE, &Camera::LookAtFreeAplly);
+
+	SET_MODE_FUNC(MODE::DISPLAY, &Camera::DisplayModeFunc);
+	SET_APPLY(MODE::DISPLAY, &Camera::DisplayAplly);
 
 	SET_MODE_FUNC(MODE::FOLLOW_REMOTE, &Camera::FollowRemoteModeFunc);
 	SET_APPLY(MODE::FOLLOW_REMOTE, &Camera::FollowRemoteApply);
@@ -68,7 +76,7 @@ void Camera::Apply(void)
 	(this->*modeApply[(int)mode])();
 }
 
-
+#pragma region 定点
 void Camera::ChangeModeFixedPoint(const Vector3& pos, const Vector3& angle, float fov)
 {
 	// 現在の情報を破棄
@@ -96,7 +104,9 @@ void Camera::FixedPointApply(void)
 	// 適用
 	SetCameraPositionAndAngle(pos.ToVECTOR(), angle.x, angle.y, angle.z);
 }
+#pragma endregion
 
+#pragma region フリー
 void Camera::ChangeModeFree(float ROT_POWER, float MOVE_POWER, const Vector3& pos, const Vector3& angle, float fov)
 {
 	// 現在の情報を破棄
@@ -182,7 +192,117 @@ void Camera::FreeApply(void)
 	// 適用
 	SetCameraPositionAndAngle(pos.ToVECTOR(), angle.x, angle.y, angle.z);
 }
+#pragma endregion
 
+#pragma region 回転のみフリー（注視点起点）
+void Camera::ChangeModeLookAtFree(const Vector3& fixedLookAtPos, const Vector3& lookAtDiff, float ROT_POWER, const Vector3& angle, float fov)
+{
+	// 現在の情報を破棄
+	Release();
+
+	// 状態遷移
+	mode = MODE::LOOK_AT_FREE;
+
+	// 注視点
+	this->fixedLookAtPos = fixedLookAtPos;
+
+	// 注視点からの相対座標
+	this->lookAtDiff = lookAtDiff;
+
+	// 回転量
+	this->ROT_POWER = ROT_POWER;
+
+	// 初期角度
+	this->angle = angle;
+
+	// 視野角を設定
+	this->fov = fov;
+}
+
+void Camera::LookAtFreeModeFunc(void)
+{
+	// 回転処理(コントローラー -> マウス-> ボタン の順に入力を確認していく)
+
+	// コントローラーの右スティックベクトルを代入
+	Vector3 vec = KEY::GetIns().GetRightStickVec().ToVector3YX();
+
+	// コントローラーの右スティックが入力なしならマウスの移動ベクトルを代入
+	if (vec == 0.0f) { vec = KEY::GetIns().GetMouceMove().ToVector3YX(); }
+
+	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
+	if (vec == 0.0f) {
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { vec.x++; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { vec.x--; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { vec.y++; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { vec.y--; }
+	}
+
+	// 最終的に入力が１つでもあれば回転させる
+	if (vec != 0.0f) {
+		angle += vec.Normalized() * ROT_POWER;
+
+		if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
+		if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
+		if (angle.x < Utility::Deg2RadF(-30.0f)) { angle.x = Utility::Deg2RadF(-30.0f); }
+		if (angle.x > Utility::Deg2RadF(60.0f)) { angle.x = Utility::Deg2RadF(60.0f); }
+	}
+
+	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
+	pos = fixedLookAtPos + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+}
+
+void Camera::LookAtFreeAplly(void)
+{
+	// 適用
+	SetCameraPositionAndTarget_UpVecY(pos.ToVECTOR(), fixedLookAtPos.ToVECTOR());
+}
+#pragma endregion
+
+#pragma region ディスプレイ（特定の座標を起点に周回しながら注視する）
+void Camera::ChangeModeDisplay(const Vector3& fixedLookAtPos, const Vector3& lookAtDiff, float ROT_POWER, const Vector3& angle, float fov)
+{
+	// 現在の情報を破棄
+	Release();
+
+	// 状態遷移
+	mode = MODE::DISPLAY;
+
+	// 注視点
+	this->fixedLookAtPos = fixedLookAtPos;
+
+	// 注視点からの相対座標
+	this->lookAtDiff = lookAtDiff;
+
+	// 回転量
+	this->ROT_POWER = ROT_POWER;
+
+	// 初期角度
+	this->angle = angle;
+
+	// 視野角を設定
+	this->fov = fov;
+}
+
+void Camera::DisplayModeFunc(void)
+{
+	// 回転処理（設定された値横向きに回し続ける）
+	angle += Vector3::Yonly(1.0f).Normalized() * ROT_POWER;
+
+	if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
+	if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
+
+	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
+	pos = fixedLookAtPos + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+}
+
+void Camera::DisplayAplly(void)
+{
+	// 適用
+	SetCameraPositionAndTarget_UpVecY(pos.ToVECTOR(), fixedLookAtPos.ToVECTOR());
+}
+#pragma endregion
+
+#pragma region 追従（手動操作）
 void Camera::ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff, float ROT_POWER, const Vector3& angle, float fov)
 {
 	// 現在の情報を破棄
@@ -253,7 +373,9 @@ void Camera::FollowRemoteApply(void)
 	// 適用
 	SetCameraPositionAndTarget_UpVecY(pos.ToVECTOR(), lookAt->ToVECTOR());
 }
+#pragma endregion
 
+#pragma region 追従（自動操作）
 void Camera::ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float FOLLOW_AUTO_MIN_DISTANCE, float FOLLOW_AUTO_MAX_DISTANCE, float fov)
 {
 	// 現在の情報を破棄
@@ -379,6 +501,7 @@ void Camera::FollowAutoApply(void)
 	// 適用
 	SetCameraPositionAndTarget_UpVecY(pos.ToVECTOR(), ((*lookAt + *lookTarget) * 0.5f).ToVECTOR());
 }
+#pragma endregion
 
 void Camera::DrawDebug(void)
 {
@@ -406,7 +529,10 @@ void Camera::Release(void)
 	case Camera::MODE::FIXED_POINT:
 		break;
 	case Camera::MODE::FREE:
-
+		break;
+	case Camera::MODE::LOOK_AT_FREE:
+		break;
+	case Camera::MODE::DISPLAY:
 		break;
 	case Camera::MODE::FOLLOW_REMOTE:
 		lookAt = nullptr;

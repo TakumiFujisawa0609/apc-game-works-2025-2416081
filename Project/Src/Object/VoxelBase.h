@@ -41,6 +41,19 @@ public:
 	// 全セルを復活させる
 	void ReVival(void);
 
+	// メッシュ群をワールド座標仕様で取得
+	std::vector<MeshBatch> GetBatches(void)const {
+		std::vector<MeshBatch>ret = {};
+		
+		ret = batches;
+
+		for (auto& r : ret) {
+			for (auto& vPos : r.v) { vPos.pos = (Vector3(vPos.pos) + trans_.pos).ToVECTOR(); }
+		}
+
+		return ret; 
+	}
+
 private:
 
 #pragma region ユーティリティ

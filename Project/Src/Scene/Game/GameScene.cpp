@@ -17,6 +17,8 @@
 
 #include"Pause/GamePauseh.h"
 
+#include"../Clear/ClearScene.h"
+
 #include"../../Object/SkyDome/SkyDome.h"
 #include"../../Object/UI/Score/ScoreUI.h"
 #include"../../Object/Stage/Block/BlockManager.h"
@@ -133,8 +135,14 @@ void GameScene::Update(void)
 	}
 
 	// ÉQÅ[ÉÄÉNÉäÉAîªíË
-	if (ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::CLEAR);
+	if (ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END || KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) {
+		std::vector<VoxelBase::MeshBatch>meshBatchs = {};
+		for (auto& block : ObjSerch<BlockManager>().back()->GetBlocks()) {
+			for (auto& mesh : dynamic_cast<VoxelBase*>(block)->GetBatches()) {
+				meshBatchs.emplace_back(mesh);
+			}
+		}
+		SceneManager::GetIns().ChangeScene(std::make_shared<ClearScene>(meshBatchs, "Data/Model/Rock/Rock.png"));
 		return;
 	}
 	

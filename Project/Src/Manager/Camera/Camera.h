@@ -34,6 +34,12 @@ public:
 		// フリー
 		FREE,
 
+		// 回転のみフリー（注視点起点）
+		LOOK_AT_FREE,
+
+		// ディスプレイ（特定の座標を起点に周回しながら注視する）
+		DISPLAY,
+
 		// 追従（手動操作）
 		FOLLOW_REMOTE,
 
@@ -48,8 +54,12 @@ public:
 	void ChangeModeFixedPoint(const Vector3& pos, const Vector3& angle, float fov = (60.0f * (DX_PI_F / 180.0f)));
 	// フリーモードに変更
 	void ChangeModeFree(float ROT_POWER, float MOVE_POWER, const Vector3& pos = Vector3(), const Vector3& angle = Vector3(), float fov = (60.0f * (DX_PI_F / 180.0f)));
+	// 回転のみフリー（注視点起点）モードに変更
+	void ChangeModeLookAtFree(const Vector3& fixedLookAtPos, const Vector3& lookAtDiff = Vector3::Zonly(-400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3(), float fov = 60.0f * (DX_PI_F / 180.0f));
+	// ディスプレイ（特定の座標を起点に周回しながら注視する）モードに変更
+	void ChangeModeDisplay(const Vector3& fixedLookAtPos, const Vector3& lookAtDiff = Vector3::Zonly(-400), float ROT_POWER = 0.5f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3(), float fov = 60.0f * (DX_PI_F / 180.0f));
 	// 追従（手動操作）モードに変更
-	void ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff = Vector3(0, 0, -400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3(), float fov = (60.0f * (DX_PI_F / 180.0f)));
+	void ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAtDiff = Vector3::Zonly(-400), float ROT_POWER = 3.0f * (DX_PI_F / 180.0f), const Vector3& angle = Vector3(), float fov = (60.0f * (DX_PI_F / 180.0f)));
 	// 追従（自動操作）モードに変更（引数省略バージョン）
 	void ChangeModeFollowAuto(const Transform& lookAt, const Vector3* lookTarget, float FOLLOW_AUTO_MIN_DISTANCE = 400.0f, float FOLLOW_AUTO_MAX_DISTANCE = 500.0f, float fov = (80.0f * (DX_PI_F / 180.0f)));
 	// 追従（自動操作）モードに変更（引数非省略バージョン）
@@ -99,7 +109,6 @@ public:
 
 	// 追従(自動操作)モードのときの視野に含める対象物を途中で変更する。追従(自動操作)モード = FOLLOW_AUTO
 	void FollowAutoToLookTargetChange(const Vector3* lookTarget) { if (mode == MODE::FOLLOW_AUTO) { this->lookTarget = lookTarget; } }
-
 #pragma endregion
 
 
@@ -133,7 +142,6 @@ private:
 
 #pragma endregion
 
-
 #pragma region FIXED_POINT
 	// 更新処理
 	void FixedPointModeFunc(void);
@@ -141,7 +149,6 @@ private:
 	// 適用
 	void FixedPointApply(void);
 #pragma endregion
-
 
 #pragma region FREE
 	// 更新処理
@@ -153,11 +160,47 @@ private:
 	// 移動量
 	float MOVE_POWER;
 
-
 	// 適用
 	void FreeApply(void);
 #pragma endregion
 
+#pragma region LOOK_AT_FREE
+	// 更新処理
+	void LookAtFreeModeFunc(void);
+
+	// 注視点
+	Vector3 fixedLookAtPos;
+
+	// 注視点からのローカル座標
+	Vector3 lookAtDiff;
+
+	// 回転量
+	//float ROT_POWER;
+	// ↑FREEのものを流用
+
+	// 適用
+	void LookAtFreeAplly(void);
+#pragma endregion
+
+#pragma region DISPLAY
+	// 更新処理
+	void DisplayModeFunc(void);
+
+	// 注視点
+	//Vector3 fixedLookAtPos;
+	// ↑LOOK_AT_FREEのものを流用
+
+	// 注視点からのローカル座標
+	//Vector3 lookAtDiff;
+	// ↑LOOK_AT_FREEのものを流用
+
+	// 回転量
+	//float ROT_POWER;
+	// ↑FREEのものを流用
+	
+	// 適用
+	void DisplayAplly(void);
+#pragma endregion
 
 #pragma region FOLLOW_REMOTE
 	// 更新処理
@@ -167,7 +210,8 @@ private:
 	const Vector3* lookAt;
 
 	// 追従対象からのローカル座標
-	Vector3 lookAtDiff;
+	//Vector3 lookAtDiff;
+	// ↑LOOK_AT_FREEのものを流用
 
 	// 回転量
 	//float ROT_POWER;
@@ -176,7 +220,6 @@ private:
 	// 適用
 	void FollowRemoteApply(void);
 #pragma endregion
-
 
 #pragma region FOLLOW_AUTO
 	// 更新処理
