@@ -1,4 +1,4 @@
-#include"KeyManager.h"
+ï»¿#include"KeyManager.h"
 
 #include"../../Application/Application.h"
 #include"../../Utility/Utility.h"
@@ -12,26 +12,29 @@ KeyManager::KeyManager():
 	controllerButtonFormat(),
 	mouceFixed_(false),
 
-	lastInputKinds(false)
+	lastInputKinds(false),
+
+	isInputText(false),
+	inputTextManager(nullptr)
 {
 }
 
 void KeyManager::Init(void)
 {
-	// ƒL[ƒ{[ƒh‚ðŠ„‚èU‚é‚Æ‚«
+	// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‚’å‰²ã‚ŠæŒ¯ã‚‹ã¨ã
 #define SET_KEYBOARD(type,key)keyboardFormat[(int)type].emplace_back(key)
 
-	// ƒRƒ“ƒgƒ[ƒ‰[‚Ìƒ{ƒ^ƒ“‚ðŠ„‚èU‚é‚Æ‚«
+	// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®ãƒœã‚¿ãƒ³ã‚’å‰²ã‚ŠæŒ¯ã‚‹ã¨ã
 #define SET_C_BUTTON(type,key)controllerButtonFormat[(int)type].emplace_back(key)
 
-	// ƒ}ƒEƒX‚Ìƒ{ƒ^ƒ“‚ðŠ„‚èU‚é‚Æ‚«
+	// ãƒžã‚¦ã‚¹ã®ãƒœã‚¿ãƒ³ã‚’å‰²ã‚ŠæŒ¯ã‚‹ã¨ã
 #define SET_MOUCE_BUTTON(type,key)mouceButtonFormat[(int)type].emplace_back(key)
 
-	// ƒRƒ“ƒgƒ[ƒ‰[‚Ìƒ{ƒ^ƒ“ˆÈŠO(ƒXƒeƒBƒbƒN‚âƒgƒŠƒK[‚È‚Ç)‚ðŠ„‚èU‚é‚Æ‚«
+	// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®ãƒœã‚¿ãƒ³ä»¥å¤–(ã‚¹ãƒ†ã‚£ãƒƒã‚¯ã‚„ãƒˆãƒªã‚¬ãƒ¼ãªã©)ã‚’å‰²ã‚ŠæŒ¯ã‚‹ã¨ã
 #define SET_C_OTHERS(type,key)controllerOthersFormat[(int)type].emplace_back(key)
 
-#pragma region ƒvƒŒƒCƒ„[‘€ì
-	// ˆÚ“®
+#pragma region ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ“ä½œ
+	// ç§»å‹•
 	SET_KEYBOARD(KEY_TYPE::PLAYER_MOVE_FRONT, KEY_INPUT_W);
 	SET_C_BUTTON(KEY_TYPE::PLAYER_MOVE_FRONT, XINPUT_BUTTON_DPAD_UP);
 	SET_C_OTHERS(KEY_TYPE::PLAYER_MOVE_FRONT, CONTROLLER_OTHERS::LEFTSTICK_UP);
@@ -48,25 +51,25 @@ void KeyManager::Init(void)
 	SET_C_BUTTON(KEY_TYPE::PLAYER_MOVE_LEFT, XINPUT_BUTTON_DPAD_LEFT);
 	SET_C_OTHERS(KEY_TYPE::PLAYER_MOVE_LEFT, CONTROLLER_OTHERS::LEFTSTICK_LEFT);
 
-	// ƒWƒƒƒ“ƒv
+	// ã‚¸ãƒ£ãƒ³ãƒ—
 	SET_KEYBOARD(KEY_TYPE::PLAYER_JUMP, KEY_INPUT_SPACE);
 	SET_KEYBOARD(KEY_TYPE::PLAYER_JUMP, KEY_INPUT_B);
 	SET_C_BUTTON(KEY_TYPE::PLAYER_JUMP, XINPUT_BUTTON_A);
 
-	// ‰ñ”ð
+	// å›žé¿
 	SET_KEYBOARD(KEY_TYPE::PLAYER_EVASION, KEY_INPUT_H);
 	SET_KEYBOARD(KEY_TYPE::PLAYER_EVASION, KEY_INPUT_LSHIFT);
 	SET_C_BUTTON(KEY_TYPE::PLAYER_EVASION, XINPUT_BUTTON_B);
 	SET_C_OTHERS(KEY_TYPE::PLAYER_EVASION, CONTROLLER_OTHERS::LEFT_TRIGGER);
 
-	// ’ÊíUŒ‚iƒpƒ“ƒ`j
+	// é€šå¸¸æ”»æ’ƒï¼ˆãƒ‘ãƒ³ãƒï¼‰
 	SET_KEYBOARD(KEY_TYPE::PLAYER_ATTACK, KEY_INPUT_J);
 	SET_KEYBOARD(KEY_TYPE::PLAYER_ATTACK, KEY_INPUT_RETURN);
 	SET_C_BUTTON(KEY_TYPE::PLAYER_ATTACK, XINPUT_BUTTON_X);
 	SET_C_BUTTON(KEY_TYPE::PLAYER_ATTACK, XINPUT_BUTTON_RIGHT_SHOULDER);
 	SET_MOUCE_BUTTON(KEY_TYPE::PLAYER_ATTACK, MOUSE_INPUT_LEFT);
 
-	// “ÁŽês“®i‚¦‚®‚èŽæ‚èj
+	// ç‰¹æ®Šè¡Œå‹•ï¼ˆãˆãã‚Šå–ã‚Šï¼‰
 	SET_KEYBOARD(KEY_TYPE::PLAYER_GOUGE, KEY_INPUT_K);
 	SET_C_BUTTON(KEY_TYPE::PLAYER_GOUGE, XINPUT_BUTTON_Y);
 	SET_MOUCE_BUTTON(KEY_TYPE::PLAYER_GOUGE, MOUSE_INPUT_RIGHT);
@@ -74,8 +77,8 @@ void KeyManager::Init(void)
 #pragma endregion
 
 
-#pragma region ƒJƒƒ‰‘€ì
-	// ˆÚ“®
+#pragma region ã‚«ãƒ¡ãƒ©æ“ä½œ
+	// ç§»å‹•
 	SET_KEYBOARD(KEY_TYPE::CAMERA_MOVE_FRONT, KEY_INPUT_I);
 	SET_C_OTHERS(KEY_TYPE::CAMERA_MOVE_FRONT, CONTROLLER_OTHERS::LEFTSTICK_UP);
 
@@ -94,7 +97,7 @@ void KeyManager::Init(void)
 	SET_KEYBOARD(KEY_TYPE::CAMERA_MOVE_DOWN, KEY_INPUT_U);
 	SET_C_BUTTON(KEY_TYPE::CAMERA_MOVE_DOWN, XINPUT_BUTTON_DPAD_DOWN);
 
-	// ‰ñ“]
+	// å›žè»¢
 	SET_KEYBOARD(KEY_TYPE::CAMERA_ROT_FRONT, KEY_INPUT_UP);
 	SET_C_OTHERS(KEY_TYPE::CAMERA_ROT_FRONT, CONTROLLER_OTHERS::RIGHTSTICK_UP);
 
@@ -109,24 +112,24 @@ void KeyManager::Init(void)
 #pragma endregion
 
 
-#pragma region ƒVƒXƒeƒ€‘€ì
-	// ”Ä—piƒ|[ƒY/I—¹jƒL[
+#pragma region ã‚·ã‚¹ãƒ†ãƒ æ“ä½œ
+	// æ±Žç”¨ï¼ˆãƒãƒ¼ã‚º/çµ‚äº†ï¼‰ã‚­ãƒ¼
 	SET_KEYBOARD(KEY_TYPE::PAUSE, KEY_INPUT_ESCAPE);
 	SET_C_BUTTON(KEY_TYPE::PAUSE, XINPUT_BUTTON_START);
 
-	// ”Ä—pŒˆ’èƒL[
+	// æ±Žç”¨æ±ºå®šã‚­ãƒ¼
 	SET_KEYBOARD(KEY_TYPE::ENTER, KEY_INPUT_SPACE);
 	SET_KEYBOARD(KEY_TYPE::ENTER, KEY_INPUT_RETURN);
 	SET_C_BUTTON(KEY_TYPE::ENTER, XINPUT_BUTTON_B);
 	SET_C_BUTTON(KEY_TYPE::ENTER, XINPUT_BUTTON_X);
 
-	// ”Ä—p•ûŒüƒL[
+	// æ±Žç”¨æ–¹å‘ã‚­ãƒ¼
 	SET_KEYBOARD(KEY_TYPE::UP, KEY_INPUT_W);
 	SET_KEYBOARD(KEY_TYPE::UP, KEY_INPUT_UP);
 	SET_C_BUTTON(KEY_TYPE::UP, XINPUT_BUTTON_DPAD_UP);
 	SET_C_OTHERS(KEY_TYPE::UP, CONTROLLER_OTHERS::LEFTSTICK_UP);
 	SET_C_OTHERS(KEY_TYPE::UP, CONTROLLER_OTHERS::RIGHTSTICK_UP);
-	
+
 	SET_KEYBOARD(KEY_TYPE::DOWN, KEY_INPUT_S);
 	SET_KEYBOARD(KEY_TYPE::DOWN, KEY_INPUT_DOWN);
 	SET_C_BUTTON(KEY_TYPE::DOWN, XINPUT_BUTTON_DPAD_DOWN);
@@ -147,8 +150,8 @@ void KeyManager::Init(void)
 #pragma endregion
 
 
-#pragma region ƒfƒoƒbƒOƒL[
-	// ƒfƒoƒbƒOƒIƒuƒWƒFƒNƒg‘€ì
+#pragma region ãƒ‡ãƒãƒƒã‚°ã‚­ãƒ¼
+	// ãƒ‡ãƒãƒƒã‚°ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆæ“ä½œ
 	SET_KEYBOARD(KEY_TYPE::DEBUG_OBJECT_FRONT, KEY_INPUT_T);
 	SET_KEYBOARD(KEY_TYPE::DEBUG_OBJECT_BACK, KEY_INPUT_G);
 	SET_KEYBOARD(KEY_TYPE::DEBUG_OBJECT_RIGHT, KEY_INPUT_H);
@@ -156,25 +159,36 @@ void KeyManager::Init(void)
 	SET_KEYBOARD(KEY_TYPE::DEBUG_OBJECT_UP, KEY_INPUT_Y);
 	SET_KEYBOARD(KEY_TYPE::DEBUG_OBJECT_DOWN, KEY_INPUT_R);
 
-	// ƒfƒoƒbƒO•`‰æƒXƒCƒbƒ`
+	// ãƒ‡ãƒãƒƒã‚°æç”»ã‚¹ã‚¤ãƒƒãƒ
 	SET_KEYBOARD(KEY_TYPE::DEBUG_DRAW_SWITCH, KEY_INPUT_8);
 
-	// ƒfƒoƒbƒOƒV[ƒ“‚ÌØ‚è‘Ö‚¦
+	// ãƒ‡ãƒãƒƒã‚°ã‚·ãƒ¼ãƒ³ã®åˆ‡ã‚Šæ›¿ãˆ
 	SET_KEYBOARD(KEY_TYPE::DEBUG_MODE_SWITCH, KEY_INPUT_9);
 
-	// ƒfƒoƒbƒOƒ‚[ƒhŽžŒ³‚ÌƒV[ƒ“‚ÌXV
+	// ãƒ‡ãƒãƒƒã‚°ãƒ¢ãƒ¼ãƒ‰æ™‚å…ƒã®ã‚·ãƒ¼ãƒ³ã®æ›´æ–°
 	SET_KEYBOARD(KEY_TYPE::DEBUG_MODE_TOPUPDATE, KEY_INPUT_0);
 #pragma endregion
+
+	// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã«ã‚ˆã‚‹ãƒ†ã‚­ã‚¹ãƒˆå…¥åŠ›ç®¡ç†ã‚¯ãƒ©ã‚¹ã®ç”Ÿæˆ
+	inputTextManager = new InputTextManager();
+	isInputText = false;
 }
 
 void KeyManager::Update(void)
 {
 	KeyUpdate();
 	MouceUpdate();
+	if (isInputText) { inputTextManager->Update(); }
 }
 
 void KeyManager::Release(void)
 {
+	if (inputTextManager != nullptr) {
+		inputTextManager->Reset();
+		delete inputTextManager;
+		inputTextManager = nullptr;
+	}
+
 	for (auto& input : keyboardFormat) { input.clear(); }			keyboardFormat->clear();
 	for (auto& input : controllerButtonFormat) { input.clear(); }	controllerButtonFormat->clear();
 	for (auto& input : mouceButtonFormat) { input.clear(); }		mouceButtonFormat->clear();

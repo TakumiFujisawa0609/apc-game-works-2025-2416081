@@ -148,3 +148,12 @@ static Vector3 VTransform(const Vector3& v, const MATRIX& m) {
 	if (v == 0.0f) { return Vector3(); }
 	return Vector3(VTransform(v.ToVECTOR(), m));
 }
+
+static std::string WStringToString(const std::wstring& ws)
+{
+	int len = WideCharToMultiByte(932, 0, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	if (len <= 0) return {};
+	std::string s(len - 1, '\0');
+	WideCharToMultiByte(932, 0, ws.c_str(), -1, &s[0], len, nullptr, nullptr);
+	return s;
+}

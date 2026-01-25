@@ -11,10 +11,11 @@
 #include"../../Manager/Score/Ranking.h"
 
 #include"../../Object/SkyDome/SkyDome.h"
+#include"../../Object/Stage/Block/BlockManager.h"
 
 ClearScene::ClearScene() :
 	img_(-1),
-	skyDome_(nullptr)
+	objects()
 {
 }
 
@@ -27,8 +28,16 @@ void ClearScene::Load(void)
 	KEY::GetIns().SetMouceFixed(false);
 	Utility::LoadImg(img_, "Data/Image/Clear/GameClear.png");
 
-	skyDome_ = new SkyDome();
-	skyDome_->Load();
+	// 初期化も含めたオブジェクト生成のラムダ関数
+	auto ObjAdd = [&](ActorBase* newClass)->void {
+		// 配列の末尾に追加
+		objects.emplace_back(newClass);
+		// 共通の読み込み処理
+		objects.back()->Load();
+		};
+
+	ObjAdd(new SkyDome());
+	
 }
 
 void ClearScene::Init(void)
@@ -36,6 +45,8 @@ void ClearScene::Init(void)
 	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 
 	Ranking::GetIns().AddScore(Score::GetIns().TotalScore());
+
+	for (ActorBase*& obj : objects) { obj->Init(); }
 }
 
 void ClearScene::Update(void)
@@ -45,7 +56,8 @@ void ClearScene::Update(void)
 		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
 		return;
 	}
-	skyDome_->Update();
+
+	for (ActorBase*& obj : objects) { obj->Update(); }
 }
 
 void ClearScene::Draw(void)
@@ -53,7 +65,8 @@ void ClearScene::Draw(void)
 	int x = Application::SCREEN_SIZE_X;
 	int y = Application::SCREEN_SIZE_Y;
 
-	skyDome_->Draw();
+	for (ActorBase*& obj : objects) { obj->Draw(); }
+
 	DrawExtendGraph(0, 0, x, y, img_, true);
 
 	SetFontSize(64);
@@ -65,10 +78,11 @@ void ClearScene::Draw(void)
 
 void ClearScene::Release(void)
 {
-	if (skyDome_) {
-		skyDome_->Release();
-		delete skyDome_;
-		skyDome_ = nullptr;
+	for (ActorBase*& obj : objects) {
+		if (!obj) { continue; }
+		obj->Release();
+		delete obj;
+		obj = nullptr;
 	}
 	DeleteGraph(img_);
 }

@@ -137,6 +137,7 @@
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Manager\Camera\InstantCamera.cpp" />
+    <ClCompile Include="Src\Manager\Input\InputTextManager.cpp" />
     <ClCompile Include="Src\Manager\Score\Ranking.cpp" />
     <ClCompile Include="Src\Manager\Score\Score.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\Common\Vector3.h" />
     <ClInclude Include="Src\Manager\Camera\InstantCamera.h" />
+    <ClInclude Include="Src\Manager\Input\InputTextManager.h" />
     <ClInclude Include="Src\Manager\Score\Ranking.h" />
     <ClInclude Include="Src\Manager\Score\Score.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h" />

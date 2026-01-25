@@ -1,7 +1,10 @@
 #pragma once
 
+#include<string>
 #include<vector>
 #include"../../Common/Vector2.h"
+
+#include"InputTextManager.h"
 
 class KeyManager
 {
@@ -9,7 +12,7 @@ private:
 	static KeyManager* ins;
 
 	KeyManager();
-	~KeyManager() {};
+	~KeyManager() = default;
 public:
 	static void CreateIns(void) { if (ins == nullptr) { ins = new KeyManager(); ins->Init(); } }
 	static KeyManager& GetIns(void) { return *ins; }
@@ -124,6 +127,14 @@ public:
 	// 最後の入力の種類(キーボード,マウスorコントローラー)を判別するフラグ（true = コントローラー、false = キーボード,マウス）
 	bool LastInputKinds(void)const { return lastInputKinds; }
 
+	// キーボードによるテキスト入力管理を実行するかどうか
+	bool IsInputText(void)const { return isInputText; }
+	// キーボードによるテキスト入力管理を実行するかどうかを切り替える
+	void IsInputTextSwitch(void) { isInputText = !isInputText; }
+
+	// キーボードによるテキスト入力管理クラスの取得
+	InputTextManager& InputText(void) { return *inputTextManager; }
+
 private:
 	void Init(void);
 	void Release(void);
@@ -161,6 +172,11 @@ private:
 
 	// 最後の入力の種類(キーボード,マウスorコントローラー)を判別するフラグ（true = コントローラー、false = キーボード,マウス）
 	bool lastInputKinds;
+
+#pragma region キーボードによるテキスト入力管理クラス
+	bool isInputText;
+	InputTextManager* inputTextManager;
+#pragma endregion
 };
 
 using KEY = KeyManager;
