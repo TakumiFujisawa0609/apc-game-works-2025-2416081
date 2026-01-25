@@ -17,6 +17,12 @@ public:
 	void Release(void)override;
 
 	bool EasingEnd(void)const { return totalEasingEnd; }
+	void EasingSkip(void) {
+		baseDisplaScore = baseScore;
+		bonusDisplayScore = bonusScore;
+		totalDisplayScore = totalScore;
+		baseEasingEnd = bonusEasingEnd = totalEasingEnd = true;
+	}
 
 private:
 #pragma region ÉXÉRÉA

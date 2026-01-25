@@ -22,15 +22,26 @@ public:
 		KEY::GetIns().InputText().Reset();
 	}
 	void Update(void)override {
-		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) { SceneManager::GetIns().PopScene(); return; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+			const std::wstring& text = KEY::GetIns().InputText().InputText();
+			if (0 < text.size() && text.size() <= 7) {
+				SceneManager::GetIns().PopScene();
+				return;
+			}
+			else {
+				// •¶Žš”‚ª“KØ‚Å‚Í‚È‚¢
+
+			}
+		}
 	}
 	void Draw(void)override {
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
 		DrawBox(0, 0, App::SCREEN_SIZE_X, App::SCREEN_SIZE_Y, 0xffffff, true);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
+		DrawStringToHandle(0, 0, "–¼‘O“ü—Íi‚P`‚V•¶Žšj", 0xffffff, Font::GetIns().GetFont(FontKinds::DEFAULT_64));
 		DrawStringToHandle(
-			0, 0,
+			100, 100,
 			WStringToString(KEY::GetIns().InputText().InputText()).c_str(),
 			0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110)
 		);

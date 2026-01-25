@@ -65,8 +65,11 @@ void ClearScene::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
 		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
-		return;
+		if (!rankinJudge) { ObjSerch<ResultScore>()->EasingSkip(); }
+		else {
+			SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
+			return;
+		}
 	}
 
 	for (ActorBase*& obj : objects) { obj->Update(); }
