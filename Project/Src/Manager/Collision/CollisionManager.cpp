@@ -73,45 +73,6 @@ void CollisionManager::Check(void)
 	Matching(otherColliders_);
 }
 
-#pragma region ‹ŒIsStageCollision
-//bool CollisionManager::IsStageCollision(const Vector3& pos, float radius)
-//{
-//	for (ColliderBase*& collider : stageColliders_) {
-//
-//		// ‹——£‚É‚æ‚é‘å‚Ü‚©‚È”»’è
-//		if ((collider->GetPos() - pos).LengthSq() > std::pow(collider->GetEnoughDistance() + radius, 2)) { continue; }
-//
-//		if (auto voxel = dynamic_cast<VoxelCollider*>(collider)) {
-//			Vector3 nearest = {};
-//
-//			Vector3 voxelRoughPos = voxel->GetPos();
-//			Vector3 voxelRoughHalfSize = voxel->GetRoughSize();
-//
-//			nearest = Vector3(
-//				std::clamp(pos.x, voxelRoughPos.x - voxelRoughHalfSize.x, voxelRoughPos.x + voxelRoughHalfSize.x),
-//				std::clamp(pos.y, voxelRoughPos.y - voxelRoughHalfSize.y, voxelRoughPos.y + voxelRoughHalfSize.y),
-//				std::clamp(pos.z, voxelRoughPos.z - voxelRoughHalfSize.z, voxelRoughPos.z + voxelRoughHalfSize.z)
-//			);
-//
-//			if ((pos - nearest).LengthSq() >= radius * radius) { continue; }
-//
-//			float cellHalfSize = voxel->GetCellSize() * 0.5f;
-//
-//			for (std::pair<const int, Vector3>& cellPos : voxel->GetCellWorldPoss()) {
-//				nearest = Vector3(
-//					std::clamp(pos.x, cellPos.second.x - cellHalfSize, cellPos.second.x + cellHalfSize),
-//					std::clamp(pos.z, cellPos.second.z - cellHalfSize, cellPos.second.z + cellHalfSize),
-//					std::clamp(pos.y, cellPos.second.y - cellHalfSize, cellPos.second.y + cellHalfSize)
-//				);
-//
-//				if ((pos - nearest).LengthSq() < radius * radius) { return true; }
-//			}
-//		}
-//
-//	}
-//	return false;
-//}
-#pragma endregion
 bool CollisionManager::IsStageCollision(const Vector3& pos, float radius, TAG tag)
 {
 	float r2 = radius * radius;
@@ -119,7 +80,7 @@ bool CollisionManager::IsStageCollision(const Vector3& pos, float radius, TAG ta
 	for (ColliderBase*& collider : stageColliders_) {
 		if (tag == collider->GetTag()) { continue; }
 
-		if (auto voxel = dynamic_cast<VoxelCollider*>(collider)) {
+		if (VoxelCollider* voxel = dynamic_cast<VoxelCollider*>(collider)) {
 			// --- Rough AABB ---
 			Vector3 half = voxel->GetRoughSize() * 0.5f;
 			Vector3 cpos = voxel->GetPos();
@@ -130,21 +91,19 @@ bool CollisionManager::IsStageCollision(const Vector3& pos, float radius, TAG ta
 				std::clamp(pos.z, cpos.z - half.z, cpos.z + half.z)
 			);
 
-			if ((pos - nearest).LengthSq() > r2)
-				continue;
+			if ((pos - nearest).LengthSq() > r2) { continue; }
 
 			// --- Cell check ---
 			float cellHalf = voxel->GetCellSize() * 0.5f;
 
-			for (auto& cell : voxel->GetCellWorldPoss()) {
+			for (std::pair<const int, Vector3>& cell : voxel->GetCellWorldPoss()) {
 				Vector3 nearestCell(
 					std::clamp(pos.x, cell.second.x - cellHalf, cell.second.x + cellHalf),
 					std::clamp(pos.y, cell.second.y - cellHalf, cell.second.y + cellHalf),
 					std::clamp(pos.z, cell.second.z - cellHalf, cell.second.z + cellHalf)
 				);
 
-				if ((pos - nearestCell).LengthSq() <= r2)
-					return true;
+				if ((pos - nearestCell).LengthSq() <= r2) { return true; }
 			}
 		}
 	}

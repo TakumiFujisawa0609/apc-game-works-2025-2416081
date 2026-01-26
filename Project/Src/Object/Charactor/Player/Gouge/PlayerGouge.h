@@ -38,7 +38,7 @@ private:
 
 	STATE state_;
 
-	const float STATE_RADIUS[(int)STATE::MAX] = { 10.0f,150.0f };
+	const float STATE_RADIUS[(int)STATE::MAX] = { 10.0f,100.0f };
 
 	float xAngle_;
 

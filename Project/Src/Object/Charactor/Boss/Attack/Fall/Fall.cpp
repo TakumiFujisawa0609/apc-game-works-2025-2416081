@@ -91,13 +91,13 @@ void Fall::Set(const Vector3& pos)
 	groundHeight_ = 0.0f;
 
 	Vector3 work = trans_.pos;
-	work.y = 500.0f;
+	work.y = 1500.0f;
 
 	float radius = ColliderSerch<SphereCollider>().back()->GetRadius();
 
 	while (work.y > 0.0f) {
 		if (CollisionManager::IsStageCollision(work, radius)) { break; }
 		work.y -= 10.0f;
-		groundHeight_ = work.y - radius;
 	}
+	groundHeight_ = work.y - radius;
 }

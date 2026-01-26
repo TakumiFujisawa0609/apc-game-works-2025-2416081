@@ -106,10 +106,6 @@ void ClearScene::Draw(void)
 
 	for (ActorBase*& obj : objects) { obj->Draw(); }
 
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
-	DrawBox(0, 0, x, y, 0xffffff, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
 	DrawExtendGraph(0, 0, x, y, img_, true);
 
 	for (ActorBase*& obj : objects) { obj->UiDraw(); }
