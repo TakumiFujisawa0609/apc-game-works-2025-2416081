@@ -111,12 +111,12 @@ public:
 	void FollowAutoToLookTargetChange(const Vector3* lookTarget) { if (mode == MODE::FOLLOW_AUTO) { this->lookTarget = lookTarget; } }
 #pragma endregion
 
+	// ‰ğ•ú
+	void Release(void);
 
 private:
 	// ‰Šú‰»
 	void Init(void);
-	// ‰ğ•ú
-	void Release(void);
 
 	// ƒ‚[ƒh
 	MODE mode;

@@ -125,9 +125,10 @@ void Ranking::AddScore(int score)
 		if (score > rankingList[i].score) {
 			// 現在スコアを一時変数に保持しておく
 			RankingData work;
-			work.score = rankingList[i].score;
+			work = rankingList[i];
 
 			// 現在スコアを新規スコアで上書きする
+			rankingList[i] = {};
 			rankingList[i].score = score;
 
 			// スコア追加位置を記録する

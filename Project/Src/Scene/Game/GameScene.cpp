@@ -206,7 +206,9 @@ void GameScene::Draw(void)
 void GameScene::Release(void)
 {
 	Smng::GetIns().Delete(SOUND::OBJECT_BREAK);
-	
+
+	Camera::GetIns().Release();
+
 	// “–‚½‚è”»’èŠÇ—ƒNƒ‰ƒX‚Ì‰ð•ú
 	if (collision_) {
 		collision_->Clear();
