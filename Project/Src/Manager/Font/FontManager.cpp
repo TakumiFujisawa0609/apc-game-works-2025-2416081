@@ -12,6 +12,8 @@ FontManager::FontManager() :
 // 初期化処理
 void FontManager::Init(void)
 {
+	for (const char*& name : FONT_NAME_ALL) { AddFontResourceExA(name, FR_PRIVATE, NULL); }
+
 	// フォントを作成
 	for (int i = 0; i < (int)FONT_KINDS_SIZE::MAX; i++) {
 		font[i] = CreateFontToHandle(FONT_NAME_TABLE[i], FONT_SIZE_TABLE[i], -1, DX_FONTTYPE_EDGE);
@@ -23,4 +25,7 @@ void FontManager::Release(void)
 {
 	// フォントを削除
 	for (int& f : font) { DeleteFontToHandle(f); }
+
+	// ウィンドウズに一時的に保持していたフォントデータを削除
+	for (const char*& name : FONT_NAME_ALL) { RemoveFontResourceExA(name, FR_PRIVATE, NULL); }
 }

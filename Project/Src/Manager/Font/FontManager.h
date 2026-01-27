@@ -60,6 +60,11 @@ private:
 		"x10y12pxDonguriDuel",	// GOKUSYOU_110
 	};
 
+	const char* FONT_NAME_ALL[1] =
+	{
+		"x10y12pxDonguriDuel"
+	};
+
 };
 
 using Font = FontManager;

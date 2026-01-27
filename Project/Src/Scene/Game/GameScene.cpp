@@ -135,7 +135,7 @@ void GameScene::Update(void)
 	}
 
 	// ÉQÅ[ÉÄÉNÉäÉAîªíË
-	if (ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END || KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) {
+	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END) || (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down)) {
 		std::vector<VoxelBase::MeshBatch>meshBatchs = {};
 		for (auto& block : ObjSerch<BlockManager>().back()->GetBlocks()) {
 			for (auto& mesh : dynamic_cast<VoxelBase*>(block)->GetBatches()) {

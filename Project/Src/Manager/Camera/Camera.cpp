@@ -142,10 +142,10 @@ void Camera::FreeModeFunc(void)
 
 	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
 	if (rot == 0.0f) {
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { rot.x += ROT_POWER; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { rot.x -= ROT_POWER; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { rot.y += ROT_POWER; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { rot.x -= ROT_POWER; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { rot.x += ROT_POWER; }
 		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { rot.y -= ROT_POWER; }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { rot.y += ROT_POWER; }
 	}
 
 	// 最終的に入力が１つでもあれば回転させる
