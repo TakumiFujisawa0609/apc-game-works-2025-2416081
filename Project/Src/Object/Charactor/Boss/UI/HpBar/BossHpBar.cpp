@@ -8,6 +8,9 @@ BossHpBar::BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
 	position(position),
 	HP_BAR_ONE_DIVISION_SIZE(HP_BAR_ONE_DIVISION_SIZE),
 
+	ALIVE_LOCAL_POSITION(),
+	localPosition(),
+
 	angle(0.0f),
 
 	state(STATE::NON),
@@ -26,7 +29,7 @@ BossHpBar::BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
 
 void BossHpBar::Init(const Vector2& localAlivePosition, unsigned short num, unsigned short HP_BAR_DIVISIONS_NUM)
 {
-	localPosition = localAlivePosition;
+	localPosition = ALIVE_LOCAL_POSITION = localAlivePosition;
 
 	angle = 0.0f;
 
@@ -100,6 +103,20 @@ void BossHpBar::SetLostDrop(void)
 
 	dropAccel = Vector2(-(float)(GetRand(3) + 2), -(float)(GetRand(3) + 2));
 }
+
+void BossHpBar::Revival(unsigned short num)
+{
+	localPosition = ALIVE_LOCAL_POSITION;
+
+	angle = 0.0f;
+
+	idleTimer = num;
+
+	idleShakeSign = 1;
+
+	state = STATE::ALIVE;
+}
+
 void BossHpBar::LostDrop(void)
 {
 	// ‰ñ“]‚³‚¹‚é

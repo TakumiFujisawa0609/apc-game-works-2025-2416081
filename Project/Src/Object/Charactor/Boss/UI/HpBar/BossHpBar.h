@@ -7,7 +7,7 @@ public:
 	BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
 	~BossHpBar() {}
 
-	void Init(const Vector2& localAlivePosition, unsigned short initCounter, unsigned short HP_BAR_DIVISION_NUM);
+	void Init(const Vector2& localAlivePosition, unsigned short num, unsigned short HP_BAR_DIVISIONS_NUM);
 
 	void SetDefaultColor(unsigned char r, unsigned char g, unsigned char b) { ALIVE_DEFAULT_R = r; ALIVE_DEFAULT_G = g; ALIVE_DEFAULT_B = b; }
 	void SetDefaultColor(unsigned int color) {
@@ -38,6 +38,9 @@ public:
 	// èÛë‘ê›íË
 	void SetLostIdle(void);
 	void SetLostDrop(void);
+
+	// ïúäà
+	void Revival(unsigned short num);
 private:
 
 	// ëÂÇ´Ç≥
@@ -45,6 +48,7 @@ private:
 
 	// ç¿ïW
 	const Vector2& position;
+	Vector2 ALIVE_LOCAL_POSITION;
 	Vector2 localPosition;
 	Vector2 DrawPosition(void) { return position + localPosition; }
 

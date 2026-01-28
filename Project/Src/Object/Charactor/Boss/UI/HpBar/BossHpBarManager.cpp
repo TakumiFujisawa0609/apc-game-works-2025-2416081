@@ -79,6 +79,9 @@ void BossHpBarManager::Update(void)
 			// 死んだHPバーブロックの処理
 			for (unsigned short i = newAliveHpBarNum; i < aliveHpBarNum; i++) { hpBar[i]->SetLostIdle(); }
 
+			// 復活したHPバーブロックの処理
+			for (unsigned short i = aliveHpBarNum; i < newAliveHpBarNum; i++) { hpBar[i]->Revival(i + 1); }
+
 			// 変化した数値を保持
 			aliveHpBarNum = newAliveHpBarNum;
 		}
@@ -90,6 +93,8 @@ void BossHpBarManager::Update(void)
 				totalHpBarNum--;
 			}
 		}
+
+		if (totalHpBarNum < aliveHpBarNum) { totalHpBarNum = aliveHpBarNum; }
 	}
 
 	for (BossHpBar*& h : hpBar) { h->Update(); }

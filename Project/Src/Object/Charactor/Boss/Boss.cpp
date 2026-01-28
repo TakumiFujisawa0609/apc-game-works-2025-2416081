@@ -284,7 +284,7 @@ void Boss::Damage(void)
 void Boss::Stan(void)
 {
 	if (--stanTimer_ <= 0) {
-		hp_ = (int)(HP_MAX * 0.1f);
+		hp_ = (int)(HP_MAX * 0.2f);
 		state_ = (int)STATE::IDLE;
 	}
 }
