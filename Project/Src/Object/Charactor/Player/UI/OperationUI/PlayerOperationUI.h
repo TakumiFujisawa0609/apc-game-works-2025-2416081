@@ -18,13 +18,14 @@ private:
 	static constexpr unsigned char ACTION_IMG_LOAD_SIZE_Y = 197;
 
 	// アクションを表現したイラストの描画時の拡大縮小倍率
-	//static constexpr float ACTION_IMG_DRAW_SCALE = 0.35f;
-	static constexpr float ACTION_IMG_DRAW_SCALE = 0.390625f;
+	static constexpr float ACTION_IMG_DRAW_SCALE = 0.5f;
 
 	// アクションを表現したイラストの描画時のサイズ
 	static constexpr unsigned char ACTION_IMG_SIZE_X = (unsigned char)(ACTION_IMG_LOAD_SIZE_X * ACTION_IMG_DRAW_SCALE);
 	static constexpr unsigned char ACTION_IMG_SIZE_Y = (unsigned char)(ACTION_IMG_LOAD_SIZE_Y * ACTION_IMG_DRAW_SCALE);
 
+	// アクションを表現したイラストの描画時のイラスト同士のスペース
+	static constexpr unsigned char ACTION_DRAW_SPACE_X = ACTION_IMG_SIZE_X - 20;
 
 	// 操作ボタンイラスト(キーボード)の描画時の拡大縮小倍率
 	static constexpr float OPERATION_KEYBOARD_IMG_DRAW_SCALE = 0.175f;

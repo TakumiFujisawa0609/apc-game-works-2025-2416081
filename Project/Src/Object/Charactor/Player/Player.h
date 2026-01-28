@@ -209,7 +209,7 @@ private:
 	PlayerOperationUI* operationUi;
 
 	// ç¿ïW
-	const Vector2 OPERATION_UI_POS = Vector2(HP_BAR_POS.x + 10, HP_BAR_POS.y - PlayerOperationUI::WHOLE_SIZE_Y);
+	const Vector2 OPERATION_UI_POS = Vector2(HP_BAR_POS.x, HP_BAR_POS.y - PlayerOperationUI::WHOLE_SIZE_Y);
 	// Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 #pragma endregion
 

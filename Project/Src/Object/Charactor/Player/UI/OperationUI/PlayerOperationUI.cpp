@@ -136,18 +136,18 @@ void PlayerOperationUI::Draw(void)
 			else { SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); }
 		}
 
-		DrawRotaGraph3F(pos.x + (i * ACTION_IMG_SIZE_X), pos.y, 0.0f, 0.0f, ACTION_IMG_DRAW_SCALE, ACTION_IMG_DRAW_SCALE, 0, actionImg[SortNumToActionNum(i)], true);
+		DrawRotaGraph3F(pos.x + (i * ACTION_DRAW_SPACE_X), pos.y, 0.0f, 0.0f, ACTION_IMG_DRAW_SCALE, ACTION_IMG_DRAW_SCALE, 0, actionImg[SortNumToActionNum(i)], true);
 
 		if (KEY::GetIns().LastInputKinds()) {
 			DrawRotaGraphF(
-				pos.x + (i * ACTION_IMG_SIZE_X) + OPERATION_CONTROLLER_IMG_DRAW_OFFSET_X,
+				pos.x + (i * ACTION_DRAW_SPACE_X) + OPERATION_CONTROLLER_IMG_DRAW_OFFSET_X,
 				pos.y + OPERATION_CONTROLLER_IMG_DRAW_OFFSET_Y,
 				OPERATION_CONTROLLER_IMG_DRAW_SCALE, 0,
 				operationControllerImg[i], true);
 		}
 		else {
 			DrawRotaGraphF(
-				pos.x + (i * ACTION_IMG_SIZE_X) + OPERATION_KEYBOARD_IMG_DRAW_OFFSET_X,
+				pos.x + (i * ACTION_DRAW_SPACE_X) + OPERATION_KEYBOARD_IMG_DRAW_OFFSET_X,
 				pos.y + OPERATION_KEYBOARD_IMG_DRAW_OFFSET_Y,
 				OPERATION_KEYBOARD_IMG_DRAW_SCALE, 0,
 				operationKeyboardImg[i], true);
