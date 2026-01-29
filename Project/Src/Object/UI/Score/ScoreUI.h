@@ -91,16 +91,16 @@ private:
 	unsigned char scoreAddInterval;
 
 	// スコア表示のステップ数
-	static const unsigned char SCORE_DISP_STEP = 5;
+	static const unsigned char SCORE_DISP_STEP = 6;
 
 	// スコア表示の色テーブル
 	const unsigned int SCORE_DISP_COLOR_TABLE[SCORE_DISP_STEP] = {
-		// 白、緑、黄、青、紫の順番
-		0xffffff, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff
+		// 白、緑、青、黄、赤、紫の順番
+		0xffffff, 0x00ff00, 0x0000ff, 0xffff00, 0xff0000, 0xff00ff
 	};
 
 	// スコア表示の色のしきい値テーブル
-	const unsigned int SOCRE_DISP_THRESHOLD_TABLE[SCORE_DISP_STEP] = { 0, 10000, 50000, 200000, 500000 };
+	const unsigned int SOCRE_DISP_THRESHOLD_TABLE[SCORE_DISP_STEP] = { 0, 100000, 300000, 500000, 1000000, 1500000 };
 
 	// スコア表示の色を取得
 	unsigned int GetScoreDispColor(unsigned int score)const {

@@ -40,7 +40,10 @@ void Application::Init(void)
 
 	// ウィンドウ関連
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);	// サイズ変更
-	ChangeWindowMode(true);	// false = フルスクリーン
+	ChangeWindowMode(false);
+#ifdef _DEBUG
+	ChangeWindowMode(true);
+#endif // _DEBUG
 
 	// DxLibの初期化
 	isInitFail_ = false;

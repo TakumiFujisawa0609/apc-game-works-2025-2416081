@@ -139,7 +139,7 @@ void GameScene::Update(void)
 	}
 
 	// ゲームクリア判定
-	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END) || (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down)) {
+	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END)) {
 
 		// ボーナススコアを追加
 		Score::GetIns().ScoreAddBonus(Score::GetIns().BestRecordCombo() * 1000);
