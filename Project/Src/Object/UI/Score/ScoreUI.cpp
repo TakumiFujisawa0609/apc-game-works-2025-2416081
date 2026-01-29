@@ -41,7 +41,7 @@ void ScoreUI::Update(void)
 		for (int loop = 0; loop < MAX_ADD_SCORE_NUM; loop++) {
 
 			// スコア管理クラスの加算スコア適用関数を呼び出し、加算スコアを取得
-			int a = Score::GetIns().AddScoreApplyAndGet();
+			int a = Score::GetIns().AddBaseScoreApplyAndGet();
 
 			// 加算スコアが0ならループを抜ける
 			if (a == 0) { break; }
@@ -64,10 +64,10 @@ void ScoreUI::Update(void)
 	}
 
 	// 表示用スコアを現在のスコアへ近づける（徐々に）
-	int smoothScoreSub = (int)((Score::GetIns().TotalScore() - displayScore) * DISPLAY_SCORE_SMOOTH);
-	displayScore += (smoothScoreSub > 0) ? smoothScoreSub : Score::GetIns().TotalScore() - displayScore;
+	int smoothScoreSub = (int)((Score::GetIns().BaseScore() - displayScore) * DISPLAY_SCORE_SMOOTH);
+	displayScore += (smoothScoreSub > 0) ? smoothScoreSub : Score::GetIns().BaseScore() - displayScore;
 
-	if (Score::GetIns().TotalCombo() > 0) {
+	if (Score::GetIns().Combo() > 0) {
 		comboAnimeIndex += comboAnimeSigned;
 		if (comboAnimeIndex <= 0 || comboAnimeIndex >= 12 - 1) { comboAnimeSigned *= -1; }
 	}
@@ -83,7 +83,7 @@ void ScoreUI::UiDraw(void)
 	for (AddScoreInfo& add : addScore) { add.Draw(); }
 
 	// コンボ数表示
-	int comboCount = Score::GetIns().TotalCombo();
+	int comboCount = Score::GetIns().Combo();
 	if (comboCount > 0) {
 		Vector2I comboPos = Vector2I((int)SCORE_POS.x + 65, (int)SCORE_POS.y + Font::GetIns().FONT_SIZE_TABLE[(int)FontKinds::GOKUSYOU_60] + 65);
 		// コンボ背景画像の表示

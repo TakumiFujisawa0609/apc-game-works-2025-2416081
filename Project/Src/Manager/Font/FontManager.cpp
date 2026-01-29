@@ -16,7 +16,7 @@ void FontManager::Init(void)
 
 	// ƒtƒHƒ“ƒg‚ğì¬
 	for (int i = 0; i < (int)FONT_KINDS_SIZE::MAX; i++) {
-		font[i] = CreateFontToHandle(FONT_NAME_TABLE[i], FONT_SIZE_TABLE[i], -1, DX_FONTTYPE_EDGE);
+		font[i] = CreateFontToHandle(FONT_NAME_TABLE[i], (int)FONT_SIZE_TABLE[i], (int)FONT_THICK_TABLE[i], FONT_TYPE_TABLE[i]);
 	}
 }
 

@@ -179,6 +179,7 @@ void Player::OnGrounded()
 void Player::OnCollision(const ColliderBase& collider)
 {
 	if (GetInviCounter() > 0) { return; }
+	if (state_ == (int)STATE::DEATH) { return; }
 
 	auto knockBack = [&](Vector3 pos)->void {
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);

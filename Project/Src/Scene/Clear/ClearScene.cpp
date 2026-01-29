@@ -58,8 +58,6 @@ void ClearScene::Init(void)
 {
 	Camera::GetIns().ChangeModeDisplay(Vector3::XZonly(1000.0f, 1000.0f), Vector3::YZonly(800.0f, -2000.0f), Utility::Deg2RadF(0.1f));
 
-	Ranking::GetIns().AddScore(Score::GetIns().TotalScore());
-
 	for (ActorBase*& obj : objects) { obj->Init(); }
 
 	rankinJudge = false;
@@ -81,6 +79,9 @@ void ClearScene::Update(void)
 	// スコア表示のイージングが終わったらランクインしたかの判定を行う
 	if (!rankinJudge && ObjSerch<ResultScore>()->EasingEnd()) {
 
+		// ランキングに合計スコアを投げる
+		Ranking::GetIns().AddScore(Score::GetIns().TotalScore());
+
 		// ランクイン判定
 		if (Ranking::GetIns().GetLastAddScoreRankIndex() != -1) {
 			// ランクインしたので名前入力用のシーンを積む
@@ -99,6 +100,8 @@ void ClearScene::Draw(void)
 
 	SetDrawScreen(mainScreen);
 	ClearDrawScreen();
+
+	Camera::GetIns().Apply();
 
 	// メッシュ描画
 	for (auto& b : stageBatches) {

@@ -11,6 +11,7 @@ ResultScore::ResultScore() :
 
 	bonusScore(),
 	bonusDisplayScore(),
+	bonusAddScore(),
 	bonusEasingEnd(false),
 
 	totalScore(),
@@ -26,12 +27,13 @@ void ResultScore::Load(void)
 
 void ResultScore::Init(void)
 {
-	baseScore = Score::GetIns().TotalScore();
+	baseScore = Score::GetIns().BaseScore();
 	baseDisplaScore = 0;
 	baseEasingEnd = false;
 
-	bonusScore = Score::GetIns().TotalScore();
+	bonusScore = Score::GetIns().BonusScore();
 	bonusDisplayScore = 0;
+	bonusAddScore = 0;
 	bonusEasingEnd = false;
 
 	totalScore = Score::GetIns().TotalScore();
@@ -50,7 +52,16 @@ void ResultScore::Update(void)
 	else if (!bonusEasingEnd) {
 		int smoothScoreSub = (int)((bonusScore - bonusDisplayScore) * DISPLAY_SCORE_SMOOTH);
 		if (smoothScoreSub > 0) { bonusDisplayScore += smoothScoreSub; }
-		else { bonusDisplayScore = bonusScore; bonusEasingEnd = true; }
+		else {
+			bonusAddScore = Score::GetIns().AddBonusScoreApplyAndGet();
+
+			if (bonusAddScore > 0) { bonusScore = Score::GetIns().BonusScore(); }
+			else {
+				bonusDisplayScore = bonusScore;
+				bonusEasingEnd = true;
+				totalScore = Score::GetIns().TotalScore();
+			}
+		}
 	}
 	else if (!totalEasingEnd) {
 		int smoothScoreSub = (int)((totalScore - totalDisplayScore) * DISPLAY_SCORE_SMOOTH);

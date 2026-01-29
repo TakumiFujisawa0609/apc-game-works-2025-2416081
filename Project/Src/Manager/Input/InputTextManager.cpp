@@ -8,6 +8,8 @@ InputTextManager::InputTextManager() :
 	prevKey(),nowKey(),
 	downKey(),
 
+	INPUT_TEXT_MAX(255),
+
 	isConversionJapanese(true)
 {
 }
@@ -38,14 +40,19 @@ void InputTextManager::Input(std::wstring& inputText)
 	}
 	for (unsigned short i = 0; i < 256; i++) { downKey[i] = (prevKey[i] <= 0 && nowKey[i] > 0) || (nowKey[i] >= 40); }
 
-	// A〜Z
-	for (int k = 0; k < (int)Alphabet::MAX; k++) {
-		if (downKey[ALPHABET_INPUT_SIGNAL[k]]) { inputText.push_back(ALPHABET_CHARACTER_CODE[k]); }
-	}
 
-	// 数字
-	for (int k = 0; k < (int)Numbers::MAX; k++) {
-		if (downKey[NUMBERS_INPUT_SIGNAL[k]]) { inputText.push_back(NUMBERS_CHARACTER_CODE[k]); }
+	if (inputText.size() < INPUT_TEXT_MAX) {
+
+		// A〜Z
+		for (int k = 0; k < (int)Alphabet::MAX; k++) {
+			if (downKey[ALPHABET_INPUT_SIGNAL[k]]) { inputText.push_back(ALPHABET_CHARACTER_CODE[k]); }
+		}
+
+		// 数字
+		for (int k = 0; k < (int)Numbers::MAX; k++) {
+			if (downKey[NUMBERS_INPUT_SIGNAL[k]]) { inputText.push_back(NUMBERS_CHARACTER_CODE[k]); }
+		}
+
 	}
 
 	// 消去

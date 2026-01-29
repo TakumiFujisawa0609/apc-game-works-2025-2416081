@@ -18,6 +18,9 @@ public:
 	// 入力中の文字列情報を取得
 	std::wstring InputText(void)const { return inputText; }
 
+	// 入力文字数に制限をかける
+	void SetInputTextMax(unsigned char INPUT_TEXT_MAX) { this->INPUT_TEXT_MAX = INPUT_TEXT_MAX; }
+
 	// 今日本語変換機能がオンになっているかどうか
 	bool IsConversionJapanese(void) { return isConversionJapanese; }
 	// 日本語変換を行うかを切り替える
@@ -29,6 +32,8 @@ private:
 
 	char prevKey[256], nowKey[256];
 	bool downKey[256];
+
+	unsigned char INPUT_TEXT_MAX;
 
 	// 入力を検出し、文字列に格納していく
 	void Input(std::wstring& inputText);
@@ -122,9 +127,6 @@ private:
 
 	// K行
 	bool ConsonantToK(std::wstring& inputText, std::wstring& newChar);
-
-	// L行
-	//bool ConsonantToL(std::wstring& inputText, std::wstring& newChar);
 
 	// M行
 	bool ConsonantToM(std::wstring& inputText, std::wstring& newChar);

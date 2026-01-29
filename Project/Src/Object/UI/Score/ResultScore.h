@@ -37,6 +37,8 @@ private:
 	unsigned int bonusScore;
 	// クリアタイムや残りHPなどのクリア画面で加算されるボーナススコア（表示用）
 	unsigned int bonusDisplayScore;
+	// ボーナススコアに加算された数値
+	unsigned int bonusAddScore;
 	// クリアタイムや残りHPなどのクリア画面で加算されるボーナススコア（表示用）の加算が終了したかどうか
 	bool bonusEasingEnd;
 

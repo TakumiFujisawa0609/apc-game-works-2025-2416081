@@ -15,7 +15,9 @@ RankInScene::RankInScene(const int& mainScreen) :
 	tempScreen(-1),
 
 	backImage(-1),
-	scale()
+	scale(),
+
+	genericCounter()
 {
 }
 
@@ -30,8 +32,11 @@ void RankInScene::Init(void)
 {
 	if (!KEY::GetIns().IsInputText()) { KEY::GetIns().IsInputTextSwitch(); }
 	KEY::GetIns().InputText().Reset();
+	KEY::GetIns().InputText().SetInputTextMax(8);
 
 	scale = START_SCALE;
+
+	genericCounter = 0.0f;
 }
 
 void RankInScene::Update(void)
@@ -50,27 +55,59 @@ void RankInScene::Update(void)
 
 	if (scale > 1.0f) { scale -= 0.1f; }
 	else if (scale < 1.0f) { scale = 1.0f; }
+
+	if (scale == 1.0f) {
+		genericCounter += 0.05f;
+		if (genericCounter > 100000.0f) { genericCounter = 0.0f; }
+	}
 }
 
 void RankInScene::Draw(void)
 {
 	int x = App::SCREEN_SIZE_X, y = App::SCREEN_SIZE_Y;
 
+	static int drawX = x / 5, drawY = y / 3;
+	if (CheckHitKey(KEY_INPUT_UP)) { drawY -= 5; }
+	if (CheckHitKey(KEY_INPUT_DOWN)) { drawY += 5; }
+	if (CheckHitKey(KEY_INPUT_LEFT)) { drawX -= 5; }
+	if (CheckHitKey(KEY_INPUT_RIGHT)) { drawX += 5; }
+
 	// ランクイン情報の描画をひとまとめにした関数
 	auto RankInInfoDraw = [&](void)->void {
 		DrawRotaGraph(x / 2, y / 2, 1, 0, backImage, true);
 
+		int alpha = (int)fabsf(sinf(genericCounter) * 255.0f);
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
 		DrawStringToHandle(
-			x / 4, y / 3,
-			(std::to_string(Ranking::GetIns().GetLastAddScoreRankIndex() + 1) + "位にランクインしました！").c_str(),
-			0xffffff, Font::GetIns().GetFont(FontKinds::DEFAULT_64)
+			RANK_POP_POS.x, RANK_POP_POS.y,
+			(std::to_string(Ranking::GetIns().GetLastAddScoreRankIndex() + 1) + "位にランクインしました").c_str(),
+			0xffff00, Font::GetIns().GetFont(FontKinds::MARUMINYA_80)
+		);
+
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+		DrawStringToHandle(
+			NAME_PROMPT_POS.x, NAME_PROMPT_POS.y,
+			"ランキングにのせる名前を入力してね！",
+			0xffffff, Font::GetIns().GetFont(FontKinds::MARUMINYA_50)
 		);
 
 		DrawStringToHandle(
-			x / 4, y / 2,
+			NAME_LENGTH_NOTE_POS.x, NAME_LENGTH_NOTE_POS.y,
+			"（１～７文字）",
+			0xffffff, Font::GetIns().GetFont(FontKinds::MARUMINYA_50)
+		);
+
+		DrawStringToHandle(
+			NAME_DISPLAY_POS.x, NAME_DISPLAY_POS.y,
+			(((int)(genericCounter * 20) / 30) % 2 == 0) ?
+			WStringToString(KEY::GetIns().InputText().InputText() + L"_").c_str() :
 			WStringToString(KEY::GetIns().InputText().InputText()).c_str(),
 			0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110)
 		);
+
 		};
 
 	if (scale > 1.0f) {

@@ -90,6 +90,8 @@ private:
 	Vector2I ShakePoint(void);
 	//---------------------------------
 #pragma endregion
+
+	unsigned int timer;
 };
 
 

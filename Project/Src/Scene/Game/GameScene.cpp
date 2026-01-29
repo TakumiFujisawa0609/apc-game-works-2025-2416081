@@ -43,7 +43,9 @@ GameScene::GameScene():
 
 	objects_(),
 
-	mainScreen_(-1)
+	mainScreen_(-1),
+
+	timer(0)
 {
 }
 
@@ -103,6 +105,8 @@ void GameScene::Init(void)
 	// スコアを初期化
 	Score::GetIns().Reset();
 
+	timer = 0;
+
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 }
@@ -136,6 +140,12 @@ void GameScene::Update(void)
 
 	// ゲームクリア判定
 	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END) || (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down)) {
+
+		// ボーナススコアを追加
+		Score::GetIns().ScoreAddBonus(Score::GetIns().BestRecordCombo() * 1000);
+		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>().back()->HpRatio() * 100000));
+		Score::GetIns().ScoreAddBonus(100000 - (timer * 10));
+
 		std::vector<VoxelBase::MeshBatch>meshBatchs = {};
 		for (auto& block : ObjSerch<BlockManager>().back()->GetBlocks()) {
 			for (auto& mesh : dynamic_cast<VoxelBase*>(block)->GetBatches()) {
@@ -163,6 +173,8 @@ void GameScene::Update(void)
 		return;
 	}
 #pragma endregion
+
+	timer++;
 }
 
 void GameScene::Draw(void)

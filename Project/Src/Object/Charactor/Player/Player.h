@@ -75,6 +75,8 @@ public:
 
 	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival_ = std::move(ptr); }
 
+	// Œ»İ‚ÌHP‚Ìc‚èŠ„‡‚ğ•Ô‚·
+	float HpRatio(void)const { return ((float)hp_ / (float)HP_MAX); }
 private:
 
 #pragma region ’è”’è‹`
