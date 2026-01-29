@@ -4,12 +4,13 @@
 
 #include"../../Application/Application.h"
 
-#include"../SceneManager/SceneManager.h"
 #include"../../Manager/Input/KeyManager.h"
+#include"../../Manager/Sound/SoundManager.h"
 #include"../../Manager/Camera/Camera.h"
 #include"../../Manager/Score/Score.h"
 #include"../../Manager/Score/Ranking.h"
 
+#include"../SceneManager/SceneManager.h"
 #include"Rankin/RankInScene.h"
 
 #include"../../Object/Stage/Block/BlockManager.h"
@@ -52,6 +53,8 @@ void ClearScene::Load(void)
 
 	ObjAdd(new SkyDome());
 	ObjAdd(new ResultScore());
+
+	Smng::GetIns().Load(SOUND::BGM_GAME_CLEAR);
 }
 
 void ClearScene::Init(void)
@@ -61,6 +64,8 @@ void ClearScene::Init(void)
 	for (ActorBase*& obj : objects) { obj->Init(); }
 
 	rankinJudge = false;
+
+	Smng::GetIns().Play(SOUND::BGM_GAME_CLEAR, true, 150);
 }
 
 void ClearScene::Update(void)
@@ -70,6 +75,7 @@ void ClearScene::Update(void)
 		if (!rankinJudge) { ObjSerch<ResultScore>()->EasingSkip(); }
 		else {
 			SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
+			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 			return;
 		}
 	}
@@ -126,6 +132,8 @@ void ClearScene::Draw(void)
 
 void ClearScene::Release(void)
 {
+	Smng::GetIns().Delete(SOUND::BGM_GAME_CLEAR);
+
 	for (ActorBase*& obj : objects) {
 		if (!obj) { continue; }
 		obj->Release();

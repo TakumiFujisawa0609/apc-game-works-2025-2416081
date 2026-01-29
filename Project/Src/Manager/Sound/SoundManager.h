@@ -26,10 +26,23 @@ public:
 		PLAYER_EVASION,
 		PLAYER_DAMAGE,
 
+		// ランクイン
+		RANK_IN,
+
+		// ゲームオーバー
+		GAME_OVER,
+
+		// スコア加算
+		SCORE_ADD,
 
 		// システム音声
 		SE_SYSTEM_BUTTON,
 		SE_SYSTEM_SELECT,
+
+		// BGM
+		BGM_TITLE,
+		BGM_BATTLE,
+		BGM_GAME_CLEAR,
 
 		MAX,
 	};

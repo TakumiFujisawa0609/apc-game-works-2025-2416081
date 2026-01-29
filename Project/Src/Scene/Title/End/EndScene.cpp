@@ -30,24 +30,24 @@ void EndScene::Init(void)
 	SoundManager::GetIns().AllStop();
 }
 
-void EndScene::Update(void) 
+void EndScene::Update(void)
 {
 	switch (nowSelect_)
 	{
 	case EndScene::SELECT::YES:
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect_ = EndScene::SELECT::NO; Smng::GetIns().Play(SOUND::SE_SYSTEM_SELECT, true); }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect_ = EndScene::SELECT::NO; Smng::GetIns().Play(SOUND::SE_SYSTEM_SELECT, true, 100); }
 		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			SoundManager::GetIns().PauseInfoDelete();
-			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true);
+			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 			App::GetIns().GameEnd();
 			return;
 		}
 		break;
 	case EndScene::SELECT::NO:
-		if (KEY::GetIns().GetInfo(KEY_TYPE::UP).down) { nowSelect_ = EndScene::SELECT::YES; Smng::GetIns().Play(SOUND::SE_SYSTEM_SELECT, true); }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::UP).down) { nowSelect_ = EndScene::SELECT::YES; Smng::GetIns().Play(SOUND::SE_SYSTEM_SELECT, true, 100); }
 		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			SoundManager::GetIns().PausePlay();
-			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true);
+			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 			SceneManager::GetIns().PopScene();
 			return;
 		}
@@ -55,7 +55,7 @@ void EndScene::Update(void)
 	}
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SoundManager::GetIns().PausePlay();
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true);
+		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 		SceneManager::GetIns().PopScene();
 	}
 }

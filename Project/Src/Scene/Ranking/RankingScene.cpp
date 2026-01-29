@@ -4,8 +4,10 @@
 
 #include"../../Application/Application.h"
 
-#include"../SceneManager/SceneManager.h"
 #include"../../Manager/Input/KeyManager.h"
+#include"../../Manager/Sound/SoundManager.h"
+
+#include"../SceneManager/SceneManager.h"
 
 RankingScene::RankingScene() :
 	rankingData(Ranking::GetIns().GetRankingList()),
@@ -45,10 +47,12 @@ void RankingScene::Update(void)
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::GAME);
+		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 		return;
 	}
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
+		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 		return;
 	}
 }

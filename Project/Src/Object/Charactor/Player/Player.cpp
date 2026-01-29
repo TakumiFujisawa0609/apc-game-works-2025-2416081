@@ -475,7 +475,7 @@ void Player::Run(void)
 
 		if (isGround) {
 			AnimePlay((int)ANIME_TYPE::RUN);
-			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 150, true);
+			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 100, true);
 		}
 		else { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
 
@@ -574,7 +574,7 @@ void Player::CarryRun(void)
 
 		if (!isJump_[0]) {
 			AnimePlay((int)ANIME_TYPE::CARRY_RUN);
-			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 150, true);
+			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 100, true);
 		}
 		else { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
 

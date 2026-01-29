@@ -3,6 +3,7 @@
 #include"../../../Manager/Score/Score.h"
 
 #include"../../../Manager/Font/FontManager.h"
+#include"../../../Manager/Sound/SoundManager.h"
 
 ResultScore::ResultScore() :
 	baseScore(),
@@ -22,7 +23,7 @@ ResultScore::ResultScore() :
 
 void ResultScore::Load(void)
 {
-
+	Smng::GetIns().Load(SOUND::SCORE_ADD);
 }
 
 void ResultScore::Init(void)
@@ -43,15 +44,21 @@ void ResultScore::Init(void)
 
 void ResultScore::Update(void)
 {
+	bool soundPlay = false;
+	auto addSound = [&](void)->void {
+		Smng::GetIns().Play(SOUND::SCORE_ADD, false, 150, true);
+		soundPlay = true;
+		};
+
 	// 表示用スコアを現在のスコアへ近づける（徐々に）
 	if (!baseEasingEnd) {
 		int smoothScoreSub = (int)((baseScore - baseDisplaScore) * DISPLAY_SCORE_SMOOTH);
-		if (smoothScoreSub > 0) { baseDisplaScore += smoothScoreSub; }
+		if (smoothScoreSub > 0) { baseDisplaScore += smoothScoreSub; addSound(); }
 		else { baseDisplaScore = baseScore; baseEasingEnd = true; }
 	}
 	else if (!bonusEasingEnd) {
 		int smoothScoreSub = (int)((bonusScore - bonusDisplayScore) * DISPLAY_SCORE_SMOOTH);
-		if (smoothScoreSub > 0) { bonusDisplayScore += smoothScoreSub; }
+		if (smoothScoreSub > 0) { bonusDisplayScore += smoothScoreSub; addSound(); }
 		else {
 			bonusAddScore = Score::GetIns().AddBonusScoreApplyAndGet();
 
@@ -65,9 +72,11 @@ void ResultScore::Update(void)
 	}
 	else if (!totalEasingEnd) {
 		int smoothScoreSub = (int)((totalScore - totalDisplayScore) * DISPLAY_SCORE_SMOOTH);
-		if (smoothScoreSub > 0) { totalDisplayScore += smoothScoreSub; }
+		if (smoothScoreSub > 0) { totalDisplayScore += smoothScoreSub; addSound(); }
 		else { totalDisplayScore = totalScore; totalEasingEnd = true; }
 	}
+
+	if (!soundPlay) { Smng::GetIns().Stop(SOUND::SCORE_ADD); }
 }
 
 void ResultScore::UiDraw(void)
@@ -79,5 +88,5 @@ void ResultScore::UiDraw(void)
 
 void ResultScore::Release(void)
 {
-
+	Smng::GetIns().Delete(SOUND::SCORE_ADD);
 }

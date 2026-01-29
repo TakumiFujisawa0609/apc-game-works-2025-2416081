@@ -87,6 +87,7 @@ void GameScene::Load(void)
 	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
 
 #pragma region ゲームシーンで使用するサウンドをロード
+	Smng::GetIns().Load(SOUND::BGM_BATTLE);
 	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
 #pragma endregion
 }
@@ -109,6 +110,8 @@ void GameScene::Init(void)
 
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
+
+	Smng::GetIns().Play(SOUND::BGM_BATTLE, false, 80, true, true);
 }
 
 void GameScene::Update(void)
@@ -139,7 +142,7 @@ void GameScene::Update(void)
 	}
 
 	// ゲームクリア判定
-	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END)) {
+	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END)||KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) {
 
 		// ボーナススコアを追加
 		Score::GetIns().ScoreAddBonus(Score::GetIns().BestRecordCombo() * 1000);
@@ -218,6 +221,7 @@ void GameScene::Draw(void)
 void GameScene::Release(void)
 {
 	Smng::GetIns().Delete(SOUND::OBJECT_BREAK);
+	Smng::GetIns().Delete(SOUND::BGM_BATTLE);
 
 	Camera::GetIns().Release();
 

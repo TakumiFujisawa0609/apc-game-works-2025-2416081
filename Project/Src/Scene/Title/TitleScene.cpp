@@ -1,13 +1,15 @@
 #include"TitleScene.h"
 
 #include<DxLib.h>
+#include"../../Utility/Utility.h"
+
+#include"../../Application/Application.h"
 
 #include"../../Manager/Input/KeyManager.h"
 #include"../../Manager/Camera/Camera.h"
+#include"../../Manager/Sound/SoundManager.h"
 
-#include"../../Application/Application.h"
 #include"../SceneManager/SceneManager.h"
-#include"../../Utility/Utility.h"
 
 #include"End/EndScene.h"
 
@@ -39,22 +41,28 @@ void TitleScene::Load(void)
 	skyDome_->SetPos({0.0f,0.0f,0.0f});
 
 	KEY::GetIns().SetMouceFixed(false);
+
+	Smng::GetIns().Load(SOUND::BGM_TITLE);
 }
 void TitleScene::Init(void)
 {
 	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 
 	blinkingCounter = 100;
+
+	Smng::GetIns().Play(SOUND::BGM_BATTLE, false, 80, true);
 }
 void TitleScene::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().PushScene(std::make_shared<EndScene>());
+		Smng::GetIns().Play(SOUND::SE_SYSTEM_SELECT, true, 100);
 		return;
 	}
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::RANKING);
+		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
 		return;
 	}
 	skyDome_->Update();
@@ -86,6 +94,7 @@ void TitleScene::Draw(void)
 }
 void TitleScene::Release(void)
 {
+	Smng::GetIns().Delete(SOUND::BGM_TITLE);
 	if (skyDome_) {
 		skyDome_->Release();
 		delete skyDome_;

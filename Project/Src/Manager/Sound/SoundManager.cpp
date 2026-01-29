@@ -112,9 +112,18 @@ void SoundManager::Init(void)
 	sounds_[SOUND::PLAYER_EVASION].path_ = "Game/Player/Evasion.mp3";
 	sounds_[SOUND::PLAYER_DAMAGE].path_ = "Game/Player/îÌÉ_ÉÅ.mp3";
 
+	sounds_[SOUND::RANK_IN].path_ = "Game/RankIn.mp3";
+	sounds_[SOUND::GAME_OVER].path_ = "Game/GameOver.mp3";
+
+	sounds_[SOUND::SCORE_ADD].path_ = "Game/ScoreAdd.mp3";
 
 	sounds_[SOUND::SE_SYSTEM_BUTTON].path_ = "System/Button.mp3";
 	sounds_[SOUND::SE_SYSTEM_SELECT].path_ = "System/Select.mp3";
+
+	sounds_[SOUND::BGM_TITLE].path_ = "BGM/TitleBgm.mp3";
+	sounds_[SOUND::BGM_BATTLE].path_ = "BGM/BattleBgm.mp3";
+	sounds_[SOUND::BGM_GAME_CLEAR].path_ = "BGM/GameClear.mp3";
+
 }
 
 void SoundManager:: Release(void)
