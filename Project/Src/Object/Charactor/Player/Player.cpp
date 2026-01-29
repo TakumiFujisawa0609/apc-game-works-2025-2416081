@@ -649,6 +649,7 @@ void Player::HpSharpen(int damage)
 	if (hp_ <= 0) { return; }
 
 	punch_->Off();
+	gouge_->Off();
 	throwing_->Drop();
 
 	hp_ -= (hp_ >= damage) ? damage : hp_;
