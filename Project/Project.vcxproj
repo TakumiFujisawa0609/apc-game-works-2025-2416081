@@ -181,6 +181,7 @@
     <ClCompile Include="Src\Object\UI\Score\ScoreUI.cpp" />
     <ClCompile Include="Src\Object\VoxelBase.cpp" />
     <ClCompile Include="Src\Scene\Clear\ClearScene.cpp" />
+    <ClCompile Include="Src\Scene\Clear\Rankin\RankInScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Explanat\Explanat.cpp" />
     <ClCompile Include="Src\Scene\Game\GameScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Pause\GamePause.cpp" />
@@ -249,7 +250,7 @@
     <ClInclude Include="Src\Object\UI\Score\ScoreUI.h" />
     <ClInclude Include="Src\Object\VoxelBase.h" />
     <ClInclude Include="Src\Scene\Clear\ClearScene.h" />
-    <ClInclude Include="Src\Scene\Clear\Rankin\EnterNameScene.h" />
+    <ClInclude Include="Src\Scene\Clear\Rankin\RankInScene.h" />
     <ClInclude Include="Src\Scene\Game\Explanat\Explanat.h" />
     <ClInclude Include="Src\Scene\Game\GameScene.h" />
     <ClInclude Include="Src\Scene\Debug\GameDebugScene.h" />

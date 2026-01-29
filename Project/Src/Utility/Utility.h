@@ -157,3 +157,20 @@ static std::string WStringToString(const std::wstring& ws)
 	WideCharToMultiByte(932, 0, ws.c_str(), -1, &s[0], len, nullptr, nullptr);
 	return s;
 }
+
+/// <summary>
+/// 値を最小値と最大値の間で正規化する
+/// </summary>
+/// <param name="value">現在の値</param>
+/// <param name="minValue">その値における最小値</param>
+/// <param name="maxValue">その値における最大値</param>
+/// <returns>現在の値がその値においてどこに位置しているか（ 割合 : 0.0f～1.0f ）</returns>
+static float ValueNormalizeRatio(float value, float minValue, float maxValue) {
+	// 0除算防止
+	if (maxValue - minValue == 0.0f) { return 0.0f; }
+
+	return (value - minValue) / (maxValue - minValue);
+}
+
+/// 割合を反転させる
+static float RatioReverse(float ratio) { return (1.0f - ratio); }

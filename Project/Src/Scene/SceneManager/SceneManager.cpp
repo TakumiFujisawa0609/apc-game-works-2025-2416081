@@ -218,7 +218,7 @@ void SceneManager::JumpScene(SCENE_ID scene)
 void SceneManager::Init3D(void)
 {
 	// 背景色設定
-	SetBackgroundColor(0, 139, 139);
+	SetBackgroundColor(0, 0, 0);
 
 	// Zバッファを有効にする
 	SetUseZBuffer3D(true);

@@ -12,7 +12,7 @@ FontManager::FontManager() :
 // 初期化処理
 void FontManager::Init(void)
 {
-	for (const char*& name : FONT_NAME_ALL) { AddFontResourceExA(name, FR_PRIVATE, NULL); }
+	for (const char*& name : FONT_PATH_TABLE) { AddFontResourceExA(name, FR_PRIVATE, NULL); }
 
 	// フォントを作成
 	for (int i = 0; i < (int)FONT_KINDS_SIZE::MAX; i++) {
@@ -27,5 +27,5 @@ void FontManager::Release(void)
 	for (int& f : font) { DeleteFontToHandle(f); }
 
 	// ウィンドウズに一時的に保持していたフォントデータを削除
-	for (const char*& name : FONT_NAME_ALL) { RemoveFontResourceExA(name, FR_PRIVATE, NULL); }
+	for (const char*& name : FONT_PATH_TABLE) { RemoveFontResourceExA(name, FR_PRIVATE, NULL); }
 }

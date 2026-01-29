@@ -10,7 +10,7 @@
 #include"../../Manager/Score/Score.h"
 #include"../../Manager/Score/Ranking.h"
 
-#include"Rankin/EnterNameScene.h"
+#include"Rankin/RankInScene.h"
 
 #include"../../Object/Stage/Block/BlockManager.h"
 
@@ -18,6 +18,8 @@
 #include"../../Object/UI/Score/ResultScore.h"
 
 ClearScene::ClearScene(std::vector<VoxelBase::MeshBatch> stageBatches, const char* stageTexturePath) :
+	mainScreen(-1),
+
 	img_(-1),
 
 	objects(),
@@ -37,6 +39,8 @@ void ClearScene::Load(void)
 {
 	KEY::GetIns().SetMouceFixed(false);
 	Utility::LoadImg(img_, "Data/Image/Clear/GameClear.png");
+
+	mainScreen = MakeScreen(App::SCREEN_SIZE_X, App::SCREEN_SIZE_Y, true);
 
 	// 初期化も含めたオブジェクト生成のラムダ関数
 	auto ObjAdd = [&](ActorBase* newClass)->void {
@@ -80,7 +84,7 @@ void ClearScene::Update(void)
 		// ランクイン判定
 		if (Ranking::GetIns().GetLastAddScoreRankIndex() != -1) {
 			// ランクインしたので名前入力用のシーンを積む
-			SceneManager::GetIns().PushScene(std::make_shared<EnterNameScene>());
+			SceneManager::GetIns().PushScene(std::make_shared<RankInScene>(mainScreen));
 		}
 
 		// 判定は1度限りにする
@@ -92,6 +96,9 @@ void ClearScene::Draw(void)
 {
 	int x = Application::SCREEN_SIZE_X;
 	int y = Application::SCREEN_SIZE_Y;
+
+	SetDrawScreen(mainScreen);
+	ClearDrawScreen();
 
 	// メッシュ描画
 	for (auto& b : stageBatches) {
@@ -109,6 +116,9 @@ void ClearScene::Draw(void)
 	DrawExtendGraph(0, 0, x, y, img_, true);
 
 	for (ActorBase*& obj : objects) { obj->UiDraw(); }
+
+	SetDrawScreen(DX_SCREEN_BACK);
+	DrawGraph(0, 0, mainScreen, true);
 }
 
 void ClearScene::Release(void)
@@ -122,4 +132,6 @@ void ClearScene::Release(void)
 
 	DeleteGraph(img_);
 	if (stageTexture != -1) { DeleteGraph(stageTexture); }
+
+	DeleteGraph(mainScreen);
 }

@@ -60,9 +60,10 @@ private:
 		"x10y12pxDonguriDuel",	// GOKUSYOU_110
 	};
 
-	const char* FONT_NAME_ALL[1] =
+	// フォントをウィンドウズに一時保持するためのフォントデータパス
+	const char* FONT_PATH_TABLE[1] =
 	{
-		"x10y12pxDonguriDuel"
+		"Data/Font/x10y12pxDonguriDuel.ttf"
 	};
 
 };

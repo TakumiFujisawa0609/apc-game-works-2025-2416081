@@ -21,6 +21,8 @@ public:
 	void Release(void)override;
 
 private:
+	int mainScreen;
+
 	int img_;
 
 	std::vector<ActorBase*>objects;

@@ -186,6 +186,9 @@
     <ClCompile Include="Src\Object\UI\Score\ResultScore.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scene\Clear\Rankin\RankInScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">
@@ -392,7 +395,7 @@
     <ClInclude Include="Src\Object\UI\Score\ResultScore.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Scene\Clear\Rankin\EnterNameScene.h">
+    <ClInclude Include="Src\Scene\Clear\Rankin\RankInScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
