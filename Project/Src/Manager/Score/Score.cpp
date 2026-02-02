@@ -4,6 +4,7 @@ Score* Score::ins = nullptr;
 
 Score::Score() :
 	baseScore(),
+	bonusScore(),
 	addScore(),
 
 	combo(0),
@@ -30,6 +31,7 @@ void Score::Update(void)
 void Score::Reset(void)
 {
 	baseScore = 0;
+	bonusScore = 0;
 	addScore.clear();
 
 	combo = 0;

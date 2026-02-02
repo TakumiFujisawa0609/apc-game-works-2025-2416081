@@ -581,7 +581,7 @@ bool InputTextManager::ConsonantToT(std::wstring& inputText, std::wstring& newCh
 	{
 	case L'A': { newChar = L"タ"; break; }
 	case L'I': { newChar = L"チ"; break; }
-	case L'U': { newChar = L"ツ"; break; }
+	case L'U': { newChar = L"ツ"; ret = true; break; }
 	case L'E': { newChar = L"テ"; break; }
 	case L'O': { newChar = L"ト"; break; }
 
@@ -748,6 +748,8 @@ bool InputTextManager::ConsonantToXL(std::wstring& inputText, std::wstring& newC
 	case L'ヤ': { newChar = L"ャ"; break; }
 	case L'ユ': { newChar = L"ュ"; break; }
 	case L'ヨ': { newChar = L"ョ"; break; }
+
+	case L'ツ': { newChar = L"ッ"; break; }
 
 	default: { assimiDetection = false; break; }
 	}
