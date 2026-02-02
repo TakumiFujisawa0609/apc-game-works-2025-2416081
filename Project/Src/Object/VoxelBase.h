@@ -61,12 +61,11 @@ private:
 	int Idx(int x, int y, int z)const { return Idx(x, y, z, Nx, Ny); }
 
 	Vector3 IdxReverse(int idx, int Nx, int Ny)const {
-		Vector3 out;
-		int layer = Nx * Ny;
-		out.z = (float)(idx / layer);
-		int rem = idx % layer;
-		out.y = (float)(rem / Nx);
-		out.x = (float)(rem % Nx);
+		Vector3 out = {};
+		out.x = (float)(idx % Nx);
+		int work = (idx - (int)out.x) / Nx;
+		out.y = (float)(work % Ny);
+		out.z = (work - out.y) / Ny;
 		return out;
 	}
 	Vector3 IdxReverse(int idx)const { return IdxReverse(idx, Nx, Ny); }
