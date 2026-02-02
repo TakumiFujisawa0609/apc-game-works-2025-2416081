@@ -4,8 +4,15 @@ class FontManager
 {
 private:
 
+	// コンストラクタ/デストラクタ
 	FontManager();
 	~FontManager() = default;
+
+	// コピー・ムーブ操作を禁止
+	FontManager(const FontManager&) = delete;
+	FontManager& operator=(const FontManager&) = delete;
+	FontManager(FontManager&&) = delete;
+	FontManager& operator=(FontManager&&) = delete;
 
 	static FontManager* ins;
 
