@@ -15,7 +15,7 @@ public:
 
 	enum SOUND
 	{
-		NON=-1,
+		NON = -1,
 
 		// ŠÂ‹«Œø‰Ê‰¹
 		OBJECT_BREAK,
