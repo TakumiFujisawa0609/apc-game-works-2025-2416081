@@ -10,7 +10,7 @@ private:
 	~SoundManager();
 public:
 	static void CreateIns(void) { if (ins_ == nullptr) { ins_ = new SoundManager(); ins_->Init(); } }
-	static SoundManager& GetIns(void) { CreateIns(); return *ins_; }
+	static SoundManager& GetIns(void) { return *ins_; }
 	static void DeleteIns(void) { if (ins_ != nullptr) { ins_->Release(); delete ins_; } }
 
 	enum SOUND
