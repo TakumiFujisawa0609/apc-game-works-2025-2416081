@@ -1,3 +1,5 @@
+SystemButton,All,SE,Data/Sound/Se/All/Button.mp3,0.5,False,2
+SystemSelect,All,SE,Data/Sound/Se/All/Select.mp3,0.25,False,2
 TitleBgm,Title,BGM,Data/Sound/Bgm/TitleBgm.mp3,0.3,True,1
 GameBgm,Game,BGM,Data/Sound/Bgm/BattleBgm.mp3,0.3,True,1
 ObjBreak,Game,SE,Data/Sound/Se/Game/ObjBreak.mp3,0.8,False,10
