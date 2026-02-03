@@ -29,8 +29,6 @@ void RankInScene::Load(void)
 	tempScreen = MakeScreen(App::SCREEN_SIZE_X, App::SCREEN_SIZE_Y);
 
 	Utility::LoadImg(backImage, "Data/Image/Clear/RankInBack.png");
-
-	Smng::GetIns().Load(SOUND::RANK_IN);
 }
 
 void RankInScene::Init(void)
@@ -50,7 +48,7 @@ void RankInScene::Update(void)
 		const std::wstring& text = KEY::GetIns().InputText().InputText();
 		if (0 < text.size() && text.size() <= 7) {
 			SceneManager::GetIns().PopScene();
-			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+			Snd::GetIns().Play("SystemButton");
 			return;
 		}
 		else {
@@ -61,7 +59,7 @@ void RankInScene::Update(void)
 
 	if (scale > 1.0f) { scale -= 0.11f; }
 	else if (scale < 1.0f) {
-		Smng::GetIns().Play(SOUND::RANK_IN, true, 150);
+		Snd::GetIns().Play("RankIn");
 		scale = 1.0f;
 	}
 
@@ -155,7 +153,6 @@ void RankInScene::Draw(void)
 
 void RankInScene::Release(void)
 {
-	Smng::GetIns().Delete(SOUND::RANK_IN);
 	// ‰æ‘œ‚ð‰ð•ú
 	DeleteGraph(backImage);
 	DeleteGraph(tempScreen);

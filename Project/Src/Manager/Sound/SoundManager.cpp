@@ -2,134 +2,263 @@
 
 #include<DxLib.h>
 
+#include<sstream>
+#include<fstream>
+#include<iostream>
+
+#include"../../Utility/Utility.h"
+
 SoundManager* SoundManager::ins_ = nullptr;
 
-SoundManager::SoundManager()
+SoundManager::SoundManager() :
+	masterVolume(255),
+	bgmVolume(0.5f),
+	seVolume(1.0f)
 {
 }
 
-SoundManager::~SoundManager()
+void SoundManager::Init(void)
 {
-}
+#pragma region サウンドテーブルを読み込む
+	// CSVファイルを開く
+	std::ifstream ifs = std::ifstream("Data/Sound/SoundTable.csv");
 
-void SoundManager::Load(SOUND s)
-{
-	// すでに読み込まれていたら読み込まない
-	if (sounds_[s].id_ != -1) return;
+	// 例外処理：ファイルが開けなかった場合
+	if (!ifs) { std::cerr << "サウンドデータの読み込みに失敗しました。" << '\n'; }
 
-	// 読み込み
-	sounds_[s].id_ = LoadSoundMem(("Data/Sound/" + sounds_[s].path_).c_str());
-	sounds_[s].type_ = s;
-}
+	// 1行の代入先
+	std::string line;
 
-void SoundManager::Play(SOUND s, bool over, int volume, bool loop, bool topPlay)
-{
-	// 読み込まれていなかったら再生しない
-	if (sounds_[s].id_ == -1) return;
+	// 1行ずつカンマ区切りにされた状態で読み込む
+	while (getline(ifs, line)) {
+		// カンマごとに分けて文字列として配列に格納
+		std::vector<std::string> table = Utility::Split(line, ',');
 
-	// 再生中だったら再生しない
-	if ((CheckSoundMem(sounds_[s].id_) == 1) && !over)return;
+		// 一旦一時変数にデータを取りまとめる
+		SoundTable data(
+			table[TABLE_SCENE],
+			table[TABLE_TYPE],
+			table[TABLE_PATH],
+			table[TABLE_VOLUME],
+			table[TABLE_LOOP],
+			table[TABLE_DUPLI]
+		);
 
-	// 情報を記録
-	sounds_[s].loop_ = loop;
-	sounds_[s].paused_ = false;
+		// IDを添え字にしてデータを格納
+		SOUND_TABLE[table[TABLE_ID]] = data;
+	}
+#pragma endregion
 
-	// 音量を設定
-	if (sounds_[s].volume_ != volume) {
-		sounds_[s].volume_ = volume;
-		ChangeVolumeSoundMem(sounds_[s].volume_, sounds_[s].id_);
+#pragma region 読み込みシーンAllのものは最初に読み込んでおく
+
+	for (std::pair<const std::string, SoundTable>& data : SOUND_TABLE) {
+		// 「All」以外はスキップ
+		if (data.second.scene != "All") { continue; }
+
+		// 音声を追加する
+		SoundInfoAdd(data);
 	}
 
-	// 再生
-	PlaySoundMem(sounds_[s].id_, (sounds_[s].loop_) ? DX_PLAYTYPE_LOOP : DX_PLAYTYPE_BACK, topPlay);
+#pragma endregion
 }
 
-void SoundManager::Stop(SOUND s)
+void SoundManager::Release(void)
 {
-	// 読み込まれていなかったら再生しない
-	if (sounds_[s].id_ == -1) return;
+	// 現状抱えているデータを全て破棄する
+	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
+		for (SoundInfo& info : sound.second) { DeleteSoundMem(info.id); }
+		sound.second.clear();
+	}
+	sounds.clear();
 
-	// 再生中じゃなかったら早期リターン
-	if (CheckSoundMem(sounds_[s].id_) == 0)return;
+	SOUND_TABLE.clear();
+}
 
-	// 停止
-	StopSoundMem(sounds_[s].id_);
+void SoundManager::ChangeScene(const std::string& scene)
+{
+#pragma region All以外を破棄する
+	// 削除した配列要素数の添え字を記憶しておくための一時変数
+	std::vector<std::string> deleteSubscrs = {};
+	deleteSubscrs.reserve(sounds.size());
+
+	// まず現状抱えているサウンドデータのなかの「All」以外のもののリソースを解放する
+	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
+		if (SOUND_TABLE.at(sound.first).scene == "All") { continue; }
+
+		for (SoundInfo& info : sound.second) { DeleteSoundMem(info.id); info.id = -1; }
+
+		sound.second.clear();
+
+		// 何を消したか記憶する
+		deleteSubscrs.emplace_back(sound.first);
+	}
+	// 消したものを完全に配列から削除する
+	for (std::string& subscr : deleteSubscrs) { sounds.erase(subscr); }
+
+	// 一時変数をクリア
+	deleteSubscrs.clear();
+#pragma endregion
+
+#pragma region 指定されたシーンに対応するサウンドを読み込む
+	// テーブルを探索する
+	for (std::pair<const std::string, SoundTable>& data : SOUND_TABLE) {
+		// 指定のもの以外は早期リターン
+		if (data.second.scene != scene) { continue; }
+
+		// 読み込んでデータ追加
+		SoundInfoAdd(data);
+	}
+#pragma endregion
+}
+
+void SoundManager::Play(const std::string& id)
+{
+	// テーブルにIDがなかったらエラー通知して終了
+	if (!SOUND_TABLE.contains(id)) {
+		std::cerr << "指定のIDが見つからない為、音声を再生できませんでした" << '\n';
+		return;
+	}
+	// サウンドデータがあるか確認する
+	if (!sounds.contains(id)) {
+		std::cerr << "指定のIDの音声が正常に読み込まれていなかった為、音声を再生できませんでした" << '\n';
+		return;
+	}
+
+	// 配列を探索する
+	for (SoundInfo& info : sounds.at(id)) {
+		// 再生中だったら次のを確認しに行く
+		if (info.play()) { continue; }
+
+		// 音量設定
+		ChangeVolumeSoundMem(VolumeValue(id), info.id);
+
+		// ループ再生するかどうか
+		bool loop = (SOUND_TABLE.at(id).loop) ? DX_PLAYTYPE_LOOP : DX_PLAYTYPE_BACK;
+
+		// 再生
+		PlaySoundMem(info.id, loop, true);
+
+		break;
+	}
+}
+
+void SoundManager::Stop(const std::string& id)
+{
+	// テーブルにIDがなかったらエラー通知して終了
+	if (!SOUND_TABLE.contains(id)) {
+		std::cerr << "指定のIDが見つからない為、音声を停止できませんでした" << '\n';
+		return;
+	}
+	// サウンドデータがあるか確認する
+	if (!sounds.contains(id)) {
+		std::cerr << "指定のIDの音声が正常に読み込まれていなかった為、音声を停止できませんでした" << '\n';
+		return;
+	}
+
+	// 配列を探索する
+	for (SoundInfo& info : sounds.at(id)) {
+		// 再生中じゃなかったら次のを確認しに行く
+		if (!info.play()) { continue; }
+
+		// 停止
+		StopSoundMem(info.id);
+
+		info.paused = false;
+	}
 }
 
 void SoundManager::AllStop(void)
 {
-	for (auto& sound : sounds_) {
-		if (sound.id_ == -1)continue;
-		if (CheckSoundMem(sound.id_) == 0)continue;
+	// 配列を探索する
+	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
+		for (SoundInfo& info : sound.second) {
+			// 再生中じゃなかったら次のを確認しに行く
+			if (!info.play()) { continue; }
 
-		sound.paused_ = true;
-		StopSoundMem(sound.id_);
+			// 停止
+			StopSoundMem(info.id);
+
+			info.paused = false;
+		}
+	}
+}
+
+void SoundManager::Pause(void)
+{
+	// 配列を探索する
+	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
+		for (SoundInfo& info : sound.second) {
+			// 再生中じゃなかったら次のを確認しに行く
+			if (!info.play()) { continue; }
+
+			// 停止
+			StopSoundMem(info.id);
+
+			info.paused = true;
+		}
 	}
 }
 
 void SoundManager::PausePlay(void)
 {
-	for (auto& sound : sounds_) {
-		if (!sound.paused_)continue;
+	// 配列を探索する
+	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
+		for (SoundInfo& info : sound.second) {
+			if (!info.paused) { continue; }
 
-		Play(sound.type_, false, sound.volume_, sound.loop_, false);
+			// ループ再生するかどうか
+			bool loop = (SOUND_TABLE.at(sound.first).loop) ? DX_PLAYTYPE_LOOP : DX_PLAYTYPE_BACK;
+
+			// 途中から再生
+			PlaySoundMem(info.id, loop, false);
+		}
 	}
 }
 
-void SoundManager::PauseInfoDelete(void)
+int SoundManager::VolumeValue(std::string id)
 {
-	for (auto& sound : sounds_) { sound.paused_ = false; }
+	int ret = masterVolume;
+
+	// BGM/SE どちらなのかテーブルから取ってくる
+	std::string type = SOUND_TABLE.at(id).type;
+	
+	// タイプ別の音量の割合計算
+	float volumeRatio = 1.0f;
+	if (type == "BGM") { volumeRatio = bgmVolume; }
+	else if (type == "SE") { volumeRatio = seVolume; }
+
+	ret = (int)((float)ret * volumeRatio);
+
+	// 個別の音量の割合計算
+	volumeRatio = SOUND_TABLE.at(id).volume;
+
+	ret = (int)((float)ret * volumeRatio);
+
+	return ret;
 }
 
-
-void SoundManager::Delete(SOUND s)
+void SoundManager::SoundInfoAdd(const std::pair<const std::string, SoundTable>& data)
 {
-	// 中身がなかったら早期リターン
-	if (sounds_[s].id_ == -1) return;
+	// その場所にすでに要素数があれば何もしない
+	if (sounds.contains(data.first)) { return; }
 
-	// 中身を消去して-1を入れとく
-	DeleteSoundMem(sounds_[s].id_);
-	sounds_[s].id_ = -1;
-	sounds_[s].paused_ = false;
-	sounds_[s].volume_ = 255;
-}
+	// 明示的に配列を追加
+	sounds[data.first] = {};
 
-void SoundManager::Init(void)
-{
-	// ハンドルIDの変数内をすべて-1で初期化
-	// 一時停止判定を初期化
-	for (auto& sound : sounds_) {
-		sound.id_ = -1;
-		sound.paused_ = false;
-		sound.volume_ = 255;
+	// 最大同時再生数の数だけ音声を読み込む と同時に初期化も行う
+	for (unsigned char i = 0; i < data.second.maxDupli; i++) {
+
+		// 一旦一時変数にデータを取りまとめる
+		SoundInfo work = {};
+		work.id = LoadSoundMem(data.second.path.c_str());
+		work.paused = false;
+
+		// 一時変数にまとめて生成した情報を配列に追加する
+		sounds.at(data.first).emplace_back(work);
 	}
-
-	// 使用するデータのパスを入れておく("Data/Sound/～～"←ここから先のパス)
-	sounds_[SOUND::OBJECT_BREAK].path_ = "Game/Environ/ObjBreak.mp3";
-
-	sounds_[SOUND::PLAYER_RUN].path_ = "Game/Player/Run.mp3";
-	sounds_[SOUND::PLAYER_PUNCH].path_ = "Game/Player/Punch.mp3";
-	sounds_[SOUND::PLAYER_EVASION].path_ = "Game/Player/Evasion.mp3";
-	sounds_[SOUND::PLAYER_DAMAGE].path_ = "Game/Player/被ダメ.mp3";
-
-	sounds_[SOUND::RANK_IN].path_ = "Game/RankIn.mp3";
-	sounds_[SOUND::GAME_OVER].path_ = "Game/GameOver.mp3";
-
-	sounds_[SOUND::SCORE_ADD].path_ = "Game/ScoreAdd.mp3";
-
-	sounds_[SOUND::SE_SYSTEM_BUTTON].path_ = "System/Button.mp3";
-	sounds_[SOUND::SE_SYSTEM_SELECT].path_ = "System/Select.mp3";
-
-	sounds_[SOUND::BGM_TITLE].path_ = "BGM/TitleBgm.mp3";
-	sounds_[SOUND::BGM_BATTLE].path_ = "BGM/BattleBgm.mp3";
-	sounds_[SOUND::BGM_GAME_CLEAR].path_ = "BGM/GameClear.mp3";
-
 }
 
-void SoundManager:: Release(void)
+bool SoundManager::SoundInfo::play(void)
 {
-	// 消去されていないものをすべて解放する
-	for (auto& sound : sounds_) {
-		if (sound.id_ != -1) { DeleteSoundMem(sound.id_); }
-	}
+	return (CheckSoundMem(id) == 1);
 }

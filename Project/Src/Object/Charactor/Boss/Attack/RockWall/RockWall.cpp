@@ -113,7 +113,7 @@ void RockWall::OnCollision(const ColliderBase& collider)
         if (collider.GetTag() == TAG::PLAYER_GOUGE) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * 50); }
         if (collider.GetTag() == TAG::PLAYER_THROWING) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * 50); }
         GameScene::Shake();
-        Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+        Snd::GetIns().Play("ObjBreak");
         return;
     }
     default: { return; }

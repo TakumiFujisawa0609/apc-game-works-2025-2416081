@@ -35,7 +35,7 @@ private:
 	// デストラクタも同様
 	~SceneManager(void);
 
-	// コピー・ムーブ操作を禁止
+	// コピー/ムーブ 操作を禁止
 	SceneManager(const SceneManager&) = delete;
 	SceneManager& operator=(const SceneManager&) = delete;
 	SceneManager(SceneManager&&) = delete;

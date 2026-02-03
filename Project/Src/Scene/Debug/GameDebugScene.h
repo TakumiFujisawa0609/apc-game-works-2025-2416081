@@ -21,11 +21,11 @@ public:
 	~GameDebugScene() = default;
 
 	void Load(void)override { Camera::GetIns().ChangeModeFree(Utility::Deg2RadF(2.0f), 10.0f, Camera::GetIns().GetPos(), Camera::GetIns().GetAngle()); }
-	void Init(void) override { Smng::GetIns().AllStop(); }
+	void Init(void) override { Snd::GetIns().AllStop(); }
 	void Update(void) override {
 
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_TOPUPDATE).now) { TopUpdate(); Smng::GetIns().PausePlay(); }
-		else { Smng::GetIns().AllStop(); }
+		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_TOPUPDATE).now) { TopUpdate(); Snd::GetIns().PausePlay(); }
+		else { Snd::GetIns().AllStop(); }
 
 		if (
 			KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down ||
@@ -40,7 +40,7 @@ public:
 		DrawString(0, 0, "デバッグモード", 0xffffff);
 		SetFontSize(16);
 	}
-	void Release(void) override { CameraReset(); Smng::GetIns().PausePlay(); }
+	void Release(void) override { CameraReset(); Snd::GetIns().PausePlay(); }
 
 private:
 	std::function<void(void)>CameraReset;

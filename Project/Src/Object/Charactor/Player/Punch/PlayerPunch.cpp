@@ -26,6 +26,6 @@ void PlayerPunch::OnCollision(const ColliderBase& collider)
 		collider.GetTag() == TAG::STAGE ||
 		collider.GetTag() == TAG::GOLEM_ATTACK_WALL
 		) {
-		Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+		Snd::GetIns().Play("ObjBreak");
 	}
 }

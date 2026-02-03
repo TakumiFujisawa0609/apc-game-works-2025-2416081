@@ -67,12 +67,6 @@ void Player::Load(void)
 	AnimeLoad();
 	AnimePlay((int)ANIME_TYPE::IDLE, true);
 
-	// 音声読み込み
-	Smng::GetIns().Load(SOUND::PLAYER_RUN);
-	Smng::GetIns().Load(SOUND::PLAYER_PUNCH);
-	Smng::GetIns().Load(SOUND::PLAYER_EVASION);
-	Smng::GetIns().Load(SOUND::PLAYER_DAMAGE);
-
 	// コライダー生成
 	ColliderCreate(new LineCollider(TAG::PLAYER, LINE_COLLIDER_START_POS, LINE_COLLIDER_END_POS, (LINE_COLLIDER_START_POS - LINE_COLLIDER_END_POS).Length()));
 	ColliderCreate(new CapsuleCollider(TAG::PLAYER, CAPSULE_COLLIDER_START_POS, CAPSULE_COLLIDER_END_POS, RADIUS,(CAPSULE_COLLIDER_START_POS - CAPSULE_COLLIDER_END_POS).Length() + RADIUS * 2));
@@ -160,12 +154,6 @@ void Player::CharactorRelease(void)
 {
 	// プレイヤーが抱えている下位クラスのゲーム終了時処理
 	LowerRelease();
-
-	// 音声解放
-	Smng::GetIns().Delete(SOUND::PLAYER_RUN);
-	Smng::GetIns().Delete(SOUND::PLAYER_PUNCH);
-	Smng::GetIns().Delete(SOUND::PLAYER_EVASION);
-	Smng::GetIns().Delete(SOUND::PLAYER_DAMAGE);
 }
 
 void Player::OnGrounded()
@@ -225,7 +213,7 @@ void Player::StateManager(void)
 		DoStateAttack();
 		DoStateEvasion();
 		DoStateGouge();
-		if (state_ != (int)STATE::MOVE) { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
+		if (state_ != (int)STATE::MOVE) { Snd::GetIns().Stop("PlayerRun"); }
 		break;
 	case (int)STATE::ATTACK:
 		DoStateMove();
@@ -296,7 +284,7 @@ void Player::DoStateAttack(void)
 	}
 
 	// SE再生
-	Smng::GetIns().Play(SOUND::PLAYER_PUNCH, true, 150);
+	Snd::GetIns().Play("PlayerPunch");
 }
 void Player::DoStateGouge(void)
 {
@@ -324,7 +312,7 @@ void Player::DoStateEvasion(void)
 	AnimePlay((int)ANIME_TYPE::EVASION, false);
 
 	// SE再生
-	Smng::GetIns().Play(SOUND::PLAYER_EVASION, true, 150);
+	Snd::GetIns().Play("PlayerEvasion");
 }
 
 void Player::Move(void)
@@ -463,7 +451,7 @@ void Player::Run(void)
 
 	if (vec == 0.0f) {
 		if (isGround) { AnimePlay((int)ANIME_TYPE::IDLE); }
-		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
+		Snd::GetIns().Stop("PlayerRun");
 	}
 	else {
 		MATRIX mat = MGetIdent();
@@ -475,9 +463,9 @@ void Player::Run(void)
 
 		if (isGround) {
 			AnimePlay((int)ANIME_TYPE::RUN);
-			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 100, true);
+			Snd::GetIns().Play("PlayerRun");
 		}
-		else { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
+		else { Snd::GetIns().Stop("PlayerRun"); }
 
 		trans_.angle.y = atan2(vec.x, vec.z);
 	}
@@ -562,7 +550,7 @@ void Player::CarryRun(void)
 
 	if (vec == 0.0f) {
 		if (!isJump_[0]) { AnimePlay((int)ANIME_TYPE::CARRY_IDLE); }
-		Smng::GetIns().Stop(SOUND::PLAYER_RUN);
+		Snd::GetIns().Stop("PlayerRun");
 	}
 	else {
 		MATRIX mat = MGetIdent();
@@ -574,9 +562,9 @@ void Player::CarryRun(void)
 
 		if (!isJump_[0]) {
 			AnimePlay((int)ANIME_TYPE::CARRY_RUN);
-			Smng::GetIns().Play(SOUND::PLAYER_RUN, false, 100, true);
+			Snd::GetIns().Play("PlayerRun");
 		}
-		else { Smng::GetIns().Stop(SOUND::PLAYER_RUN); }
+		else { Snd::GetIns().Stop("PlayerRun"); }
 
 		trans_.angle.y = atan2(vec.x, vec.z);
 	}
@@ -654,10 +642,11 @@ void Player::HpSharpen(int damage)
 
 	hp_ -= (hp_ >= damage) ? damage : hp_;
 
-	Smng::GetIns().Stop(SOUND::PLAYER_RUN);
-	Smng::GetIns().Stop(SOUND::PLAYER_EVASION);
-	Smng::GetIns().Stop(SOUND::PLAYER_PUNCH);
-	Smng::GetIns().Play(SOUND::PLAYER_DAMAGE, true, 200);
+	Snd::GetIns().Stop("PlayerRun");
+	Snd::GetIns().Stop("PlayerEvasion");
+	Snd::GetIns().Stop("PlayerPunch");
+
+	Snd::GetIns().Play("PlayerDamage");
 
 	state_ = (int)STATE::DAMAGE;
 	AnimePlay((int)ANIME_TYPE::DAMAGE, false);

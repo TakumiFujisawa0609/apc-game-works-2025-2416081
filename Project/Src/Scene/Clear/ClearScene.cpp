@@ -38,6 +38,8 @@ ClearScene::~ClearScene()
 
 void ClearScene::Load(void)
 {
+	Snd::GetIns().ChangeScene("Clear");
+
 	KEY::GetIns().SetMouceFixed(false);
 	Utility::LoadImg(img_, "Data/Image/Clear/GameClear.png");
 
@@ -53,8 +55,6 @@ void ClearScene::Load(void)
 
 	ObjAdd(new SkyDome());
 	ObjAdd(new ResultScore());
-
-	Smng::GetIns().Load(SOUND::BGM_GAME_CLEAR);
 }
 
 void ClearScene::Init(void)
@@ -64,8 +64,6 @@ void ClearScene::Init(void)
 	for (ActorBase*& obj : objects) { obj->Init(); }
 
 	rankinJudge = false;
-
-	Smng::GetIns().Play(SOUND::BGM_GAME_CLEAR, true, 150);
 }
 
 void ClearScene::Update(void)
@@ -75,7 +73,7 @@ void ClearScene::Update(void)
 		if (!rankinJudge) { ObjSerch<ResultScore>()->EasingSkip(); }
 		else {
 			SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
-			Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+			Snd::GetIns().Play("SystemButton");
 			return;
 		}
 	}
@@ -132,8 +130,6 @@ void ClearScene::Draw(void)
 
 void ClearScene::Release(void)
 {
-	Smng::GetIns().Delete(SOUND::BGM_GAME_CLEAR);
-
 	for (ActorBase*& obj : objects) {
 		if (!obj) { continue; }
 		obj->Release();

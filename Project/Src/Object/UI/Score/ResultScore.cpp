@@ -23,7 +23,6 @@ ResultScore::ResultScore() :
 
 void ResultScore::Load(void)
 {
-	Smng::GetIns().Load(SOUND::SCORE_ADD);
 }
 
 void ResultScore::Init(void)
@@ -46,7 +45,7 @@ void ResultScore::Update(void)
 {
 	bool soundPlay = false;
 	auto addSound = [&](void)->void {
-		Smng::GetIns().Play(SOUND::SCORE_ADD, false, 150, true);
+		Snd::GetIns().Play("ScoreAdd");
 		soundPlay = true;
 		};
 
@@ -76,7 +75,7 @@ void ResultScore::Update(void)
 		else { totalDisplayScore = totalScore; totalEasingEnd = true; }
 	}
 
-	if (!soundPlay) { Smng::GetIns().Stop(SOUND::SCORE_ADD); }
+	if (!soundPlay) { Snd::GetIns().Stop("ScoreAdd"); }
 }
 
 void ResultScore::UiDraw(void)
@@ -88,5 +87,4 @@ void ResultScore::UiDraw(void)
 
 void ResultScore::Release(void)
 {
-	Smng::GetIns().Delete(SOUND::SCORE_ADD);
 }

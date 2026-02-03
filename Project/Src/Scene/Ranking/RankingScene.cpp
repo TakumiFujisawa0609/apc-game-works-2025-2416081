@@ -47,12 +47,12 @@ void RankingScene::Update(void)
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::GAME);
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 }
@@ -62,7 +62,7 @@ void RankingScene::Draw(void)
 	DrawGraph(0, 0, backImg, true);
 	// ƒ‰ƒ“ƒLƒ“ƒO•\Ž¦
 	for (size_t i = 0; i < rankingData.size(); i++) {
-		Vector2I drawPos = Vector2I(250, 230 + (i * FONT_SIZE) + scrollHeight);
+		Vector2I drawPos = Vector2I(250, 230 + ((int)i * FONT_SIZE) + scrollHeight);
 		int dispScore = rankingData[i].score;
 
 		DrawFormatStringToHandle(drawPos.x, drawPos.y, 0xffffff, font, "%02d.", i + 1);

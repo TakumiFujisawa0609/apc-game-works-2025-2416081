@@ -33,6 +33,8 @@ TitleScene::~TitleScene()
 
 void TitleScene::Load(void)
 {
+	Snd::GetIns().ChangeScene("Title");
+
 	Utility::LoadImg(img_, "Data/Image/Title/Title.png");
 	Utility::LoadImg(pushToImg, "Data/Image/Title/PushToStart.png");
 
@@ -41,8 +43,6 @@ void TitleScene::Load(void)
 	skyDome_->SetPos({0.0f,0.0f,0.0f});
 
 	KEY::GetIns().SetMouceFixed(false);
-
-	Smng::GetIns().Load(SOUND::BGM_TITLE);
 }
 void TitleScene::Init(void)
 {
@@ -50,19 +50,19 @@ void TitleScene::Init(void)
 
 	blinkingCounter = 100;
 
-	Smng::GetIns().Play(SOUND::BGM_BATTLE, false, 80, true);
+	Snd::GetIns().Play("TitleBgm");
 }
 void TitleScene::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().PushScene(std::make_shared<EndScene>());
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_SELECT, true, 100);
+ 		Snd::GetIns().Play("SystemSelect");
 		return;
 	}
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::RANKING);
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 	skyDome_->Update();
@@ -94,7 +94,6 @@ void TitleScene::Draw(void)
 }
 void TitleScene::Release(void)
 {
-	Smng::GetIns().Delete(SOUND::BGM_TITLE);
 	if (skyDome_) {
 		skyDome_->Release();
 		delete skyDome_;

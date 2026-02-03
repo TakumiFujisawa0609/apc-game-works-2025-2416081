@@ -21,17 +21,16 @@ OverScene::~OverScene()
 
 void OverScene::Load(void)
 {
+	Snd::GetIns().ChangeScene("Over");
 	KEY::GetIns().SetMouceFixed(false);
 	Utility::LoadImg(img_, "Data/Image/Over/GameOver.png");
-
-	Smng::GetIns().Load(SOUND::GAME_OVER);
 }
 
 void OverScene::Init(void)
 {
 	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 
-	Smng::GetIns().Play(SOUND::GAME_OVER, true, 150);
+	Snd::GetIns().Play("OverBgm");
 }
 
 void OverScene::Update(void)
@@ -39,7 +38,7 @@ void OverScene::Update(void)
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
 		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 }
@@ -51,6 +50,5 @@ void OverScene::Draw(void)
 
 void OverScene::Release(void)
 {
-	Smng::GetIns().Delete(SOUND::GAME_OVER);
 	DeleteGraph(img_);
 }

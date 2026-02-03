@@ -55,6 +55,8 @@ GameScene::~GameScene()
 
 void GameScene::Load(void)
 {
+	Snd::GetIns().ChangeScene("Game");
+
 	// 画面演出用
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
@@ -85,11 +87,6 @@ void GameScene::Load(void)
 	
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
-
-#pragma region ゲームシーンで使用するサウンドをロード
-	Smng::GetIns().Load(SOUND::BGM_BATTLE);
-	Smng::GetIns().Load(SOUND::OBJECT_BREAK);
-#pragma endregion
 }
 
 void GameScene::Init(void)
@@ -111,7 +108,7 @@ void GameScene::Init(void)
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 
-	Smng::GetIns().Play(SOUND::BGM_BATTLE, false, 80, true, true);
+	Snd::GetIns().Play("BatleBgm");
 }
 
 void GameScene::Update(void)
@@ -220,9 +217,6 @@ void GameScene::Draw(void)
 
 void GameScene::Release(void)
 {
-	Smng::GetIns().Delete(SOUND::OBJECT_BREAK);
-	Smng::GetIns().Delete(SOUND::BGM_BATTLE);
-
 	Camera::GetIns().Release();
 
 	// 当たり判定管理クラスの解放

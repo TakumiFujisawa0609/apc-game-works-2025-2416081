@@ -70,9 +70,7 @@ void Application::Init(void)
 	Score::CreateIns();
 
 	// サウンド管理クラスの生成/初期化処理
-	Smng::CreateIns();
-	Smng::GetIns().Load(SOUND::SE_SYSTEM_BUTTON);
-	Smng::GetIns().Load(SOUND::SE_SYSTEM_SELECT);
+	Snd::CreateIns();
 
 	// フォントデータ生成
 	FontManager::CreateIns();
@@ -136,7 +134,7 @@ void Application::Release(void)
 	FontManager::DeleteIns();
 
 	// サウンド管理解放・削除
-	Smng::DeleteIns();
+	Snd::DeleteIns();
 
 	// スコア管理クラスの終了処理/消去
 	Score::DeleteIns();

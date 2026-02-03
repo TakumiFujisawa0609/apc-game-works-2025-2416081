@@ -60,7 +60,7 @@ void Block::OnCollision(const ColliderBase& collider)
 		GameScene::Shake();
 
 		// ‰¹‚ð–Â‚ç‚·
-		Smng::GetIns().Play(SOUND::OBJECT_BREAK, false, 150);
+		Snd::GetIns().Play("ObjBreak");
 
 		break;
 	}

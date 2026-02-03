@@ -37,12 +37,12 @@ void Explanat::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().PopScene();
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().JumpScene(SCENE_ID::TITLE);
-		Smng::GetIns().Play(SOUND::SE_SYSTEM_BUTTON, true, 150);
+		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 

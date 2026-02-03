@@ -82,7 +82,7 @@ void PlayerGouge::OnCollision(const ColliderBase& collider)
 
 		if (!gougeHit_) {
 			gougeHit_ = true;
-			Smng::GetIns().Play(SOUND::OBJECT_BREAK, true, 150);
+			Snd::GetIns().Play("ObjBreak");
 		}
 		return;
 	}
