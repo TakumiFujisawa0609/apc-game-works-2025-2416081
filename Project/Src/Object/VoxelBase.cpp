@@ -412,7 +412,7 @@ void VoxelBase::BuildGreedyMesh(
                         int XYZ[3] = { 0,0,0 };
                         XYZ[u] = I;
                         XYZ[v] = J;
-                        XYZ[d] = w; // Åö ã´äEÇ…å≈íË
+                        XYZ[d] = w;
 
                         float xf = (XYZ[0] - Nx * 0.5f) * cell;
                         float yf = (XYZ[1] - Ny * 0.5f) * cell;
