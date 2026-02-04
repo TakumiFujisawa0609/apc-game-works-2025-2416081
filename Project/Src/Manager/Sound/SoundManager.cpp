@@ -101,7 +101,10 @@ void SoundManager::ChangeScene(const std::string& scene)
 		deleteSubscrs.emplace_back(sound.first);
 	}
 	// 消したものを完全に配列から削除する
-	for (std::string& subscr : deleteSubscrs) { sounds.erase(subscr); }
+	for (std::string& subscr : deleteSubscrs) {
+		soundInfos.erase(subscr);
+		sounds.erase(subscr);
+	}
 
 	// 一時変数をクリア
 	deleteSubscrs.clear();
