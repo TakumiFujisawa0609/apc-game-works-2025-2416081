@@ -110,7 +110,7 @@ void SoundManager::ChangeScene(const std::string& scene)
 #pragma region 指定されたシーンに対応するサウンドを読み込む
 	// テーブルを探索する
 	for (std::pair<const std::string, SoundTable>& data : SOUND_TABLE) {
-		// 指定のもの以外は早期リターン
+		// 指定のもの以外はスキップ
 		if (data.second.scene != scene) { continue; }
 
 		// 読み込んでデータ追加
