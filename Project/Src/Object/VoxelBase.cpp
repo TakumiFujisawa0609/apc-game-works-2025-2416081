@@ -160,7 +160,7 @@ void VoxelBase::AlphaDraw(void)
                 b.v.empty() ? b.v.data() : b.v.data(),
                 (int)(b.v.empty() ? b.v.size() : b.v.size()),
                 b.i.data(), (int)(b.i.size() / 3),
-                (texture != -1) ? texture : texture, true
+                (texture != -1) ? texture : DX_NONE_GRAPH, true
             );
         }
 
