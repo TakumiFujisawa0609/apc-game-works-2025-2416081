@@ -412,19 +412,12 @@ void VoxelBase::BuildGreedyMesh(
                         int XYZ[3] = { 0,0,0 };
                         XYZ[u] = I;
                         XYZ[v] = J;
-                        XYZ[d] = solidW;
+                        XYZ[d] = w; // ★ 境界に固定
 
                         float xf = (XYZ[0] - Nx * 0.5f) * cell;
                         float yf = (XYZ[1] - Ny * 0.5f) * cell;
                         float zf = (XYZ[2] - Nz * 0.5f) * cell;
 
-                        // ソリッド側セルの中心から、法線方向へ half ずらした位置が面
-                        //if (d == 0) xf += nSign * half;
-                        //if (d == 1) yf += nSign * cell;
-                        //if (d == 2) zf += nSign * half;
-                        if (d == 0) xf += nSign * (nSign == 1) ? cell : 0;
-                        if (d == 1) yf += nSign * (nSign == 1) ? cell : half;
-                        if (d == 2) zf += nSign * (nSign == 1) ? cell : 0;
                         return VGet(xf, yf, zf);
                         };
 
