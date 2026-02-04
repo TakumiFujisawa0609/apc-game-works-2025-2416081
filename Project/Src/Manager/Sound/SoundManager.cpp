@@ -12,7 +12,7 @@ SoundManager* SoundManager::ins_ = nullptr;
 
 SoundManager::SoundManager() :
 	masterVolume(255),
-	bgmVolume(0.5f),
+	bgmVolume(1.0f),
 	seVolume(1.0f)
 {
 }
@@ -65,13 +65,21 @@ void SoundManager::Init(void)
 void SoundManager::Release(void)
 {
 	// 現状抱えているデータを全て破棄する
-	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
-		for (SoundInfo& info : sound.second) { DeleteSoundMem(info.id); }
+	for (std::pair<const std::string, std::vector<SoundData>>& sound : sounds) {
+		for (SoundData& s : sound.second) { DeleteSoundMem(s.id); }
 		sound.second.clear();
 	}
 	sounds.clear();
 
 	SOUND_TABLE.clear();
+}
+
+void SoundManager::Update(void)
+{
+	for (auto& info : soundInfos) {
+		if (info.second.playInterval > 0) { info.second.playInterval--; }
+		else if (info.second.playInterval < 0) { info.second.playInterval = 0; }
+	}
 }
 
 void SoundManager::ChangeScene(const std::string& scene)
@@ -82,10 +90,10 @@ void SoundManager::ChangeScene(const std::string& scene)
 	deleteSubscrs.reserve(sounds.size());
 
 	// まず現状抱えているサウンドデータのなかの「All」以外のもののリソースを解放する
-	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
+	for (std::pair<const std::string, std::vector<SoundData>>& sound : sounds) {
 		if (SOUND_TABLE.at(sound.first).scene == "All") { continue; }
 
-		for (SoundInfo& info : sound.second) { DeleteSoundMem(info.id); info.id = -1; }
+		for (SoundData& info : sound.second) { DeleteSoundMem(info.id); info.id = -1; }
 
 		sound.second.clear();
 
@@ -119,13 +127,16 @@ void SoundManager::Play(const std::string& id)
 		return;
 	}
 	// サウンドデータがあるか確認する
-	if (!sounds.contains(id)) {
+	if (!soundInfos.contains(id) || !sounds.contains(id)) {
 		std::cerr << "指定のIDの音声が正常に読み込まれていなかった為、音声を再生できませんでした" << '\n';
 		return;
 	}
 
+	// インターバル
+	if (soundInfos.at(id).playInterval > 0) { return; }
+
 	// 配列を探索する
-	for (SoundInfo& info : sounds.at(id)) {
+	for (SoundData& info : sounds.at(id)) {
 		// 再生中だったら次のを確認しに行く
 		if (info.play()) { continue; }
 
@@ -137,6 +148,9 @@ void SoundManager::Play(const std::string& id)
 
 		// 再生
 		PlaySoundMem(info.id, loop, true);
+
+		// 再生したのでインターバルをセット
+		soundInfos.at(id).playInterval = PLAY_INTERVAL_TIME;
 
 		break;
 	}
@@ -150,13 +164,13 @@ void SoundManager::Stop(const std::string& id)
 		return;
 	}
 	// サウンドデータがあるか確認する
-	if (!sounds.contains(id)) {
+	if (!soundInfos.contains(id) || !sounds.contains(id)) {
 		std::cerr << "指定のIDの音声が正常に読み込まれていなかった為、音声を停止できませんでした" << '\n';
 		return;
 	}
 
 	// 配列を探索する
-	for (SoundInfo& info : sounds.at(id)) {
+	for (SoundData& info : sounds.at(id)) {
 		// 再生中じゃなかったら次のを確認しに行く
 		if (!info.play()) { continue; }
 
@@ -170,8 +184,8 @@ void SoundManager::Stop(const std::string& id)
 void SoundManager::AllStop(void)
 {
 	// 配列を探索する
-	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
-		for (SoundInfo& info : sound.second) {
+	for (std::pair<const std::string, std::vector<SoundData>>& sound : sounds) {
+		for (SoundData& info : sound.second) {
 			// 再生中じゃなかったら次のを確認しに行く
 			if (!info.play()) { continue; }
 
@@ -186,8 +200,8 @@ void SoundManager::AllStop(void)
 void SoundManager::Pause(void)
 {
 	// 配列を探索する
-	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
-		for (SoundInfo& info : sound.second) {
+	for (std::pair<const std::string, std::vector<SoundData>>& sound : sounds) {
+		for (SoundData& info : sound.second) {
 			// 再生中じゃなかったら次のを確認しに行く
 			if (!info.play()) { continue; }
 
@@ -202,8 +216,8 @@ void SoundManager::Pause(void)
 void SoundManager::PausePlay(void)
 {
 	// 配列を探索する
-	for (std::pair<const std::string, std::vector<SoundInfo>>& sound : sounds) {
-		for (SoundInfo& info : sound.second) {
+	for (std::pair<const std::string, std::vector<SoundData>>& sound : sounds) {
+		for (SoundData& info : sound.second) {
 			if (!info.paused) { continue; }
 
 			// ループ再生するかどうか
@@ -212,6 +226,28 @@ void SoundManager::PausePlay(void)
 			// 途中から再生
 			PlaySoundMem(info.id, loop, false);
 		}
+	}
+}
+
+void SoundManager::SoundInfoAdd(const std::pair<const std::string, SoundTable>& data)
+{
+	// その場所にすでに要素数があれば何もしない
+	if (soundInfos.contains(data.first) || sounds.contains(data.first)) { return; }
+
+	// 明示的に配列を追加
+	soundInfos[data.first] = {};
+	sounds[data.first] = {};
+
+	// 最大同時再生数の数だけ音声を読み込む と同時に初期化も行う
+	for (unsigned char i = 0; i < data.second.maxDupli; i++) {
+
+		// 一旦一時変数にデータを取りまとめる
+		SoundData work = {};
+		work.id = LoadSoundMem(data.second.path.c_str());
+		work.paused = false;
+
+		// 一時変数にまとめて生成した情報を配列に追加する
+		sounds.at(data.first).emplace_back(work);
 	}
 }
 
@@ -237,28 +273,4 @@ int SoundManager::VolumeValue(std::string id)
 	return ret;
 }
 
-void SoundManager::SoundInfoAdd(const std::pair<const std::string, SoundTable>& data)
-{
-	// その場所にすでに要素数があれば何もしない
-	if (sounds.contains(data.first)) { return; }
-
-	// 明示的に配列を追加
-	sounds[data.first] = {};
-
-	// 最大同時再生数の数だけ音声を読み込む と同時に初期化も行う
-	for (unsigned char i = 0; i < data.second.maxDupli; i++) {
-
-		// 一旦一時変数にデータを取りまとめる
-		SoundInfo work = {};
-		work.id = LoadSoundMem(data.second.path.c_str());
-		work.paused = false;
-
-		// 一時変数にまとめて生成した情報を配列に追加する
-		sounds.at(data.first).emplace_back(work);
-	}
-}
-
-bool SoundManager::SoundInfo::play(void)
-{
-	return (CheckSoundMem(id) == 1);
-}
+bool SoundManager::SoundData::play(void) { return (CheckSoundMem(id) == 1); }

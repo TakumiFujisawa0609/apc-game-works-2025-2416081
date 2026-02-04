@@ -23,9 +23,6 @@ private:
 
 	int scrollHeight;
 
-	int font;
-	const unsigned char FONT_SIZE = 64;
-
 	int backImg;
 	int frameImg;
 };

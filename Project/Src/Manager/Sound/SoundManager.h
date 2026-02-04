@@ -20,6 +20,7 @@ private:
 	SoundManager& operator=(const SoundManager&) = delete;
 	SoundManager(SoundManager&&) = delete;
 	SoundManager& operator=(SoundManager&&) = delete;
+
 public:
 
 #pragma region シングルトン定義
@@ -30,6 +31,9 @@ public:
 	// 終了処理/削除
 	static void DeleteIns(void) { if (ins_ != nullptr) { ins_->Release(); delete ins_; } }
 #pragma endregion
+
+	// 更新
+	void Update(void);
 
 	/// <summary>
 	/// 現在の音声情報を破棄して指定されたシーンの音声情報を読み込む
@@ -64,9 +68,6 @@ public:
 	/// </summary>
 	void PausePlay(void);
 
-	// 更新
-	void Update(void);
-
 private:
 
 #pragma region 定数定義
@@ -80,14 +81,17 @@ private:
 		TABLE_LOOP,		// ループ
 		TABLE_DUPLI,	// 最大同時再生数
 	};
-#pragma endregion
 
+	// 1度その音声を再生してから次に再生するまで最低でも必要なインターバル
+	const int PLAY_INTERVAL_TIME = 5;
+#pragma endregion
 
 	// 初期化処理
 	void Init(void);
 	// 終了処理
 	void Release(void);
 
+#pragma region 構造体定義
 	// 音声テーブル読み込み用構造体
 	struct SoundTable
 	{
@@ -130,8 +134,17 @@ private:
 		}
 	};
 
-	// 音声情報構造体
+	// 音声データの種類ごとに１つ抱える情報の構造体
 	struct SoundInfo
+	{
+		// 連続再生に制限をかけるためのインターバルカウンター
+		int playInterval = 0;
+
+
+	};
+
+	// 音声データ構造体
+	struct SoundData
 	{
 		// ハンドル番号
 		int id = -1;
@@ -142,29 +155,49 @@ private:
 		// 一時停止中か
 		bool paused = false;
 	};
-	
+#pragma endregion
+
+	// 外部ファイルからサウンドテーブルをそのまま読み込む際の格納先
 	std::map<std::string, SoundTable>SOUND_TABLE;
-	std::map<std::string, std::vector<SoundInfo>>sounds;
+
+	// 今読み込んでいる音声データの種類ごとに抱えるデータ
+	std::map<std::string, SoundInfo>soundInfos;
+
+	// 実際に今読み込んで使う音声データ
+	std::map<std::string, std::vector<SoundData>>sounds;
 
 #pragma region 音量
 
 	// ベースの音量
 	unsigned char masterVolume;
+	// ベースの最大音量
+	const unsigned char MASTER_VOLUME_MAX = 255;
+	// ベースの最小音量
+	const unsigned char MASTER_VOLUME_MIN = 0;
 
 	// ベースの音量に対しての「BGM」の音量の割合
 	float bgmVolume;
+	// ベースの音量に対しての「BGM」の最大割合
+	const float BGM_VOLUME_MAX = 1.0f;
+	// ベースの音量に対しての「BGM」の最小割合
+	const float BGM_VOLUME_MIN = 0.0f;
 
 	// ベースの音量に対しての「SE」の音量の割合
 	float seVolume;
+	// ベースの音量に対しての「SE」の最大割合
+	const float SE_VOLUME_MAX = 1.0f;
+	// ベースの音量に対しての「SE」の最小割合
+	const float SE_VOLUME_MIN = 0.0f;
 
 #pragma endregion
 
-	// ベースの音量とテーブルを参照して最終的な音量を返す
-	int VolumeValue(std::string id);
-
+#pragma region ユーティリティ
 	// 読み込み関数
 	void SoundInfoAdd(const std::pair<const std::string, SoundTable>& data);
 
+	// ベースの音量とテーブルを参照して最終的な音量を返す
+	int VolumeValue(std::string id);
+#pragma endregion
 };
 
 using Snd = SoundManager;

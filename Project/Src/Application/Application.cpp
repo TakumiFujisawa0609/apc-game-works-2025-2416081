@@ -98,6 +98,9 @@ void Application::Run(void)
 		// カメラ更新
 		Camera::GetIns().Update();
 
+		// 音声管理クラスの更新
+		Snd::GetIns().Update();
+
 		// デバッグ表示切替
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
 

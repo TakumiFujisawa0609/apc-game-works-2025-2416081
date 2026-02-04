@@ -32,6 +32,7 @@ public:
 
 		GOKUSYOU_32,
 		GOKUSYOU_60,
+		GOKUSYOU_64,
 		GOKUSYOU_80,
 		GOKUSYOU_110,
 
@@ -50,6 +51,7 @@ public:
 		64,		// DEFAULT_64
 		32,		// GOKUSYOU_32
 		60,		// GOKUSYOU_60
+		64,		// GOKUSYOU_64
 		80,		// GOKUSYOU_80
 		110,	// GOKUSYOU_110
 		50,		// MARUMINYA_50
@@ -71,6 +73,7 @@ private:
 		nullptr,				// DEFAULT_64
 		"x10y12pxDonguriDuel",	// GOKUSYOU_32
 		"x10y12pxDonguriDuel",	// GOKUSYOU_60
+		"x10y12pxDonguriDuel",	// GOKUSYOU_64
 		"x10y12pxDonguriDuel",	// GOKUSYOU_80
 		"x10y12pxDonguriDuel",	// GOKUSYOU_110
 		"x12y12pxMaruMinya",	// MARUMINYA_50
@@ -83,6 +86,7 @@ private:
 		-1,	// DEFAULT_64
 		-1,	// GOKUSYOU_32
 		-1,	// GOKUSYOU_60
+		-1,	// GOKUSYOU_64
 		-1,	// GOKUSYOU_80
 		-1,	// GOKUSYOU_110
 		-1,	// MARUMINYA_50
@@ -108,6 +112,7 @@ private:
 		0x01,	// DEFAULT_64
 		0x01,	// GOKUSYOU_32
 		0x01,	// GOKUSYOU_60
+		0x01,	// GOKUSYOU_64
 		0x01,	// GOKUSYOU_80
 		0x01,	// GOKUSYOU_110
 		0x01,	// MARUMINYA_50
