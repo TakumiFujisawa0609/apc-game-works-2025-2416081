@@ -34,6 +34,7 @@ RockWall::RockWall(int modelId, int textureId) :
         TAG::GOLEM_ATTACK_WALL,
         ROUGH_SIZE,
         textureId,
+        128.0f,
         30.0f,
         GRID_CENTER_DIFF,
         0.1f

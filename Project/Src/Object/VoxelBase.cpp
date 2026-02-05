@@ -11,6 +11,8 @@
 VoxelBase::VoxelBase() :
 
     texture(-1),
+    TEX_SCALE(),
+
     batches(),
     Nx(0), Ny(0), Nz(0),
     cellSize(0.0f),
@@ -306,9 +308,23 @@ void VoxelBase::BuildGreedyMesh(
     int Nx, int Ny, int Nz, float cell,
     std::vector<MeshBatch>& batches)
 {
-    auto Solid = [&](int x, int y, int z)->int {
-        return (Inb(x, y, z) && density[Idx(x, y, z)] > 0) ? 1 : 0;
-        };
+    // 生存しているセル中心位置リストを作成
+    cellCenterLocalPoss.clear();
+    cellCenterPoss.clear();
+    for (int z = 0; z < Nz; ++z)
+        for (int y = 0; y < Ny; ++y)
+            for (int x = 0; x < Nx; ++x) {
+                if (density[Idx(x, y, z)] == 0) { continue; }
+                Vector3 lp = IdxToLocalPos(x, y, z);
+                cellCenterLocalPoss[Idx(x, y, z)] = lp;
+                cellCenterPoss[Idx(x, y, z)] = trans_.pos + lp;
+            }
+
+    // 生存比率を計算して、一定以下なら死滅扱いにする
+    const int totalCells = Nx * Ny * Nz;
+    if (((float)cellCenterPoss.size() / (float)totalCells) < aliveNeedRatio) { SetJudge(false); SetIsDraw(false); return; }
+
+    auto Solid = [&](int x, int y, int z)->int { return (Inb(x, y, z) && density[Idx(x, y, z)] > 0) ? 1 : 0; };
 
     batches.clear();
 
@@ -326,7 +342,7 @@ void VoxelBase::BuildGreedyMesh(
         cur.bmax.z = (std::max)(cur.bmax.z, p.z);
         };
 
-    static const size_t kMaxVerts = 65000;
+    const size_t kMaxVerts = 65000;
     auto flush = [&]() {
         if (!cur.v.empty()) {
             batches.push_back(std::move(cur));
@@ -349,7 +365,7 @@ void VoxelBase::BuildGreedyMesh(
         std::vector<Mask> mask(Du * Dv);
 
         for (int w = 0; w <= Dw; ++w) {
-            // 1) スライス差分で“面が立つ”所を作る
+            // スライス差分で“面が立つ”所を作る
             for (int j = 0; j < Dv; ++j) {
                 for (int i = 0; i < Du; ++i) {
                     int L[3] = { 0,0,0 }, R[3] = { 0,0,0 };
@@ -372,7 +388,7 @@ void VoxelBase::BuildGreedyMesh(
                 }
             }
 
-            // 2) Greedy で長方形にまとめる
+            // 長方形にまとめる
             int i = 0, j = 0;
             while (j < Dv) {
                 while (i < Du) {
@@ -430,39 +446,43 @@ void VoxelBase::BuildGreedyMesh(
                     Vector3 nrm{ 0,0,0 };
                     (&nrm.x)[d] = (float)nSign; // d軸に ±1
 
-                    // BuildGreedyMesh の UV 決定付近
-                    float u0 = 0.0f, v0 = 0.0f;
-                    float u1 = (float)wlen;
-                    float v1 = (float)hlen;
-
-                    // 端のにじみ対策
-                    const float UV_EPS = 0.001f;
-                    u0 += UV_EPS; v0 += UV_EPS;
-                    u1 -= UV_EPS; v1 -= UV_EPS;
-
-                    auto makeV = [&](const Vector3& P, float uu, float vv)->VERTEX3D {
+                    auto makeV = [&](const Vector3& P)->VERTEX3D {
                         VERTEX3D v{};
                         v.pos = P.ToVECTOR();
-                        v.norm = nrm.ToVECTOR();                    // ← 照明向け法線
-                        v.dif = GetColorU8(255, 255, 255, 255);     // ← 頂点拡散色
-                        v.spc = GetColorU8(0, 0, 0, 0);             // ← スペキュラ未使用
-                        v.u = uu; v.v = vv;                         // ← そのままタイル
+                        v.norm = nrm.ToVECTOR();
+                        v.dif = GetColorU8(255, 255, 255, 255);
+                        v.spc = GetColorU8(0, 0, 0, 0);
+
+                        // どっち向きの面かによってUV座標を設定する
+                        if (d == 0) {
+                            v.u = P.z * TEX_SCALE;
+                            v.v = P.y * TEX_SCALE;
+                        }
+                        else if (d == 1) {
+                            v.u = P.x * TEX_SCALE;
+                            v.v = P.z * TEX_SCALE;
+                        }
+                        else if (d == 2) {
+                            v.u = P.x * TEX_SCALE;
+                            v.v = P.y * TEX_SCALE;
+                        }
+
                         return v;
                         };
 
                     // 巻き順（法線から見て反時計回り）
                     unsigned short base = (unsigned short)cur.v.size();
                     if (nSign > 0) {
-                        cur.v.push_back(makeV(p00, u0, v0));
-                        cur.v.push_back(makeV(p10, u1, v0));
-                        cur.v.push_back(makeV(p11, u1, v1));
-                        cur.v.push_back(makeV(p01, u0, v1));
+                        cur.v.push_back(makeV(p00));
+                        cur.v.push_back(makeV(p10));
+                        cur.v.push_back(makeV(p11));
+                        cur.v.push_back(makeV(p01));
                     }
                     else {
-                        cur.v.push_back(makeV(p00, u0, v0));
-                        cur.v.push_back(makeV(p01, u0, v1));
-                        cur.v.push_back(makeV(p11, u1, v1));
-                        cur.v.push_back(makeV(p10, u1, v0));
+                        cur.v.push_back(makeV(p00));
+                        cur.v.push_back(makeV(p01));
+                        cur.v.push_back(makeV(p11));
+                        cur.v.push_back(makeV(p10));
                     }
 
                     cur.i.push_back(base + 0); cur.i.push_back(base + 1); cur.i.push_back(base + 2);
@@ -486,22 +506,6 @@ void VoxelBase::BuildGreedyMesh(
     }
 
     flush();
-
-	// 生存しているセル中心位置リストを作成
-    cellCenterLocalPoss.clear();
-    cellCenterPoss.clear();
-    for (int z = 0; z < Nz; ++z)
-        for (int y = 0; y < Ny; ++y)
-            for (int x = 0; x < Nx; ++x) {
-                if (density[Idx(x, y, z)] == 0) { continue; }
-                Vector3 lp = IdxToLocalPos(x, y, z);
-                cellCenterLocalPoss[Idx(x, y, z)] = lp;
-                cellCenterPoss[Idx(x, y, z)] = trans_.pos + lp;
-            }
-
-	// 生存比率を計算して、一定以下なら死滅扱いにする
-	const int totalCells = Nx * Ny * Nz;
-    if (((float)cellCenterPoss.size() / (float)totalCells) < aliveNeedRatio) { SetJudge(false); SetIsDraw(false); }
 }
 #pragma endregion
 

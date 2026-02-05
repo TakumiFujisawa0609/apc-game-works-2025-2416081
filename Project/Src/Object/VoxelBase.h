@@ -211,6 +211,8 @@ private:
 		std::vector<MeshBatch>& batches
 	);
 
+	float TEX_SCALE;
+
 #pragma endregion
 
 protected:
@@ -222,13 +224,15 @@ protected:
 	/// ボクセルメッシュ生成情報設定
 	/// </summary>
 	/// <param name="roughSize">大まかに全体を囲めるサイズ</param>
-	/// <param name="texturePath">テクスチャパス（「指定なし」または「""」で頂点カラーによる描画）</param>
+	/// <param name="texturePath">テクスチャId（すでに読み込まれているものを代入）（「指定なし」または「-１」で頂点カラーによる描画）</param>
+	/// <param name="textureSize">テクスチャサイズ</param>
 	/// <param name="cellSize">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
-	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, std::string texturePath = "", float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, int texture = -1, float textureSize = 512.0f, float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
 		this->roughSize = roughSize;
-		this->texture = (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1;
+		this->texture = texture;
+		this->TEX_SCALE = 1.0f / textureSize;
 		this->cellSize = cellSize;
 		this->gridCenter = gridCenter;
 		this->aliveNeedRatio = aliveNeedRatio;
@@ -240,18 +244,13 @@ protected:
 	/// ボクセルメッシュ生成情報設定
 	/// </summary>
 	/// <param name="roughSize">大まかに全体を囲めるサイズ</param>
-	/// <param name="texturePath">テクスチャId（すでに読み込まれているものを代入）（「指定なし」または「-１」で頂点カラーによる描画）</param>
+	/// <param name="texturePath">テクスチャパス（「指定なし」または「""」で頂点カラーによる描画）</param>
+	/// <param name="textureSize">テクスチャサイズ</param>
 	/// <param name="cellSize">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
 	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
-	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, int texture = -1, float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
-		this->roughSize = roughSize;
-		this->texture = texture;
-		this->cellSize = cellSize;
-		this->gridCenter = gridCenter;
-		this->aliveNeedRatio = aliveNeedRatio;
-		// ボクセルオブジェクト専用のコライダーを生成
-		ColliderCreate(new VoxelCollider(colliderTag, this->roughSize, this->cellSize, cellCenterPoss, (this->roughSize / 2).Length()));
+	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, std::string texturePath = "", float textureSize = 512.0f, float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
+		VoxelInfoInit(colliderTag, roughSize, (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1, textureSize, cellSize, gridCenter, aliveNeedRatio);
 	}
 
 #pragma region 削る
