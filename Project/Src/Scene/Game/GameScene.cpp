@@ -26,7 +26,7 @@
 #include"../../Object/Charactor/Boss/Boss.h"
 
 #include"../../Object/DebugObject/SphereDebugObject.h"
-#include"../Debug/GameDebugScene.h"
+#include"../Common/GameDebugScene.h"
 
 
 int GameScene::hitStop_ = 0;
@@ -87,6 +87,9 @@ void GameScene::Load(void)
 	
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
+
+	// イベントシーンをはさむ
+	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 }
 
 void GameScene::Init(void)
@@ -104,9 +107,6 @@ void GameScene::Init(void)
 	Score::GetIns().Reset();
 
 	timer = 0;
-
-	// イベントシーンをはさむ
-	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
 
 	Snd::GetIns().Play("BatleBgm");
 }
@@ -152,13 +152,13 @@ void GameScene::Update(void)
 				meshBatchs.emplace_back(mesh);
 			}
 		}
-		SceneManager::GetIns().ChangeScene(std::make_shared<ClearScene>(meshBatchs, "Data/Model/Rock/Rock.png"));
+		SceneManager::GetIns().ChangeSceneFade(std::make_shared<ClearScene>(meshBatchs, "Data/Model/Rock/Rock.png"));
 		return;
 	}
 	
 	// ゲームオーバー判定
 	if (ObjSerch<Player>().back()->GetState() == (int)Player::STATE::END) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::OVER);
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::OVER);
 		return;
 	}
 

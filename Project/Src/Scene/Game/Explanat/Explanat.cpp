@@ -41,7 +41,7 @@ void Explanat::Update(void)
 		return;
 	}
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
-		SceneManager::GetIns().JumpScene(SCENE_ID::TITLE);
+		SceneManager::GetIns().JumpSceneFade(SCENE_ID::TITLE);
 		Snd::GetIns().Play("SystemButton");
 		return;
 	}

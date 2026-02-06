@@ -55,14 +55,14 @@ void TitleScene::Init(void)
 void TitleScene::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
-		SceneManager::GetIns().PushScene(std::make_shared<EndScene>());
  		Snd::GetIns().Play("SystemSelect");
+		SceneManager::GetIns().PushScene(std::make_shared<EndScene>());
 		return;
 	}
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::RANKING);
 		Snd::GetIns().Play("SystemButton");
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::RANKING);
 		return;
 	}
 	skyDome_->Update();

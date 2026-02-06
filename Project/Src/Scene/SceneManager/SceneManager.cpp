@@ -10,6 +10,9 @@
 #include"../Clear/ClearScene.h"
 #include"../Over/OverScene.h"
 
+#include"../Common/Fade/FadeInScene.h"
+#include"../Common/Fade/FadeOutScene.h"
+
 SceneManager* SceneManager::ins_ = nullptr;
 
 // コンストラクタ
@@ -54,8 +57,9 @@ void SceneManager::Update(void)
 		if (Loading::GetInstance()->IsLoading() == false)
 		{
 			// ロード後の初期化
-			scenes_.back()->Init();
+			for (auto& scene : scenes_) { scene->Init(); }
 		}
+		
 	}		
 	// 通常の更新処理
 	else
@@ -139,6 +143,35 @@ void SceneManager::ChangeScene(SCENE_ID scene)
 	}
 }
 
+void SceneManager::ChangeSceneFade(std::shared_ptr<SceneBase> scene, unsigned short FADE_TIME, unsigned int FADE_COLOR)
+{
+	PushScene(std::make_shared<FadeInScene>(scene, FADE_TIME, FADE_COLOR, true));
+}
+
+void SceneManager::ChangeSceneFade(SCENE_ID scene, unsigned short FADE_TIME, unsigned int FADE_COLOR)
+{
+	switch (scene)
+	{
+	case SCENE_ID::TITLE:
+		ChangeSceneFade(std::make_shared<TitleScene>(), FADE_TIME, FADE_COLOR);
+		break;
+	case SCENE_ID::RANKING:
+		ChangeSceneFade(std::make_shared<RankingScene>(), FADE_TIME, FADE_COLOR);
+		break;
+	case SCENE_ID::GAME:
+		ChangeSceneFade(std::make_shared<GameScene>(), FADE_TIME, FADE_COLOR);
+		break;
+	case SCENE_ID::CLEAR:
+		ChangeSceneFade(std::make_shared<ClearScene>(), FADE_TIME, FADE_COLOR);
+		break;
+	case SCENE_ID::OVER:
+		ChangeSceneFade(std::make_shared<OverScene>(), FADE_TIME, FADE_COLOR);
+		break;
+	default:
+		break;
+	}
+}
+
 void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 {
 	//新しく積むのでもともと入っている奴はまだ削除されない
@@ -174,7 +207,7 @@ void SceneManager::PushScene(SCENE_ID scene)
 void SceneManager::PopScene(void)
 {
 	//積んであるものを消して、もともとあったものを末尾にする
-	if (scenes_.size() > 1) 
+	if (scenes_.size() > 0) 
 	{
 		scenes_.back()->Release();
 		scenes_.pop_back();
@@ -213,6 +246,41 @@ void SceneManager::JumpScene(SCENE_ID scene)
 	default:
 		break;
 	}
+}
+
+void SceneManager::JumpSceneFade(std::shared_ptr<SceneBase> scene, unsigned short FADE_TIME, unsigned int FADE_COLOR)
+{
+	PushScene(std::make_shared<FadeInScene>(scene, FADE_TIME, FADE_COLOR, false));
+}
+
+void SceneManager::JumpSceneFade(SCENE_ID scene, unsigned short FADE_TIME, unsigned int FADE_COLOR)
+{
+	switch (scene)
+	{
+	case SCENE_ID::TITLE:
+		JumpSceneFade(std::make_shared<TitleScene>());
+		break;
+	case SCENE_ID::RANKING:
+		JumpSceneFade(std::make_shared<RankingScene>());
+		break;
+	case SCENE_ID::GAME:
+		JumpSceneFade(std::make_shared<GameScene>());
+		break;
+	case SCENE_ID::CLEAR:
+		JumpSceneFade(std::make_shared<ClearScene>());
+		break;
+	case SCENE_ID::OVER:
+		JumpSceneFade(std::make_shared<OverScene>());
+		break;
+	default:
+		break;
+	}
+}
+
+void SceneManager::AnyPopAndChangeScene(char popNum, std::shared_ptr<SceneBase> scene)
+{
+	for (char i = 0; i < popNum; i++) { PopScene(); }
+	ChangeScene(scene);
 }
 
 void SceneManager::Init3D(void)

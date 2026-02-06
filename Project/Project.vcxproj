@@ -182,6 +182,8 @@
     <ClCompile Include="Src\Object\VoxelBase.cpp" />
     <ClCompile Include="Src\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Src\Scene\Clear\Rankin\RankInScene.cpp" />
+    <ClCompile Include="Src\Scene\Common\Fade\FadeInScene.cpp" />
+    <ClCompile Include="Src\Scene\Common\Fade\FadeOutScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Explanat\Explanat.cpp" />
     <ClCompile Include="Src\Scene\Game\GameScene.cpp" />
     <ClCompile Include="Src\Scene\Game\Pause\GamePause.cpp" />
@@ -251,9 +253,11 @@
     <ClInclude Include="Src\Object\VoxelBase.h" />
     <ClInclude Include="Src\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Src\Scene\Clear\Rankin\RankInScene.h" />
+    <ClInclude Include="Src\Scene\Common\Fade\FadeInScene.h" />
+    <ClInclude Include="Src\Scene\Common\Fade\FadeOutScene.h" />
     <ClInclude Include="Src\Scene\Game\Explanat\Explanat.h" />
     <ClInclude Include="Src\Scene\Game\GameScene.h" />
-    <ClInclude Include="Src\Scene\Debug\GameDebugScene.h" />
+    <ClInclude Include="Src\Scene\Common\GameDebugScene.h" />
     <ClInclude Include="Src\Scene\Game\Pause\GamePauseh.h" />
     <ClInclude Include="Src\Scene\Over\OverScene.h" />
     <ClInclude Include="Src\Scene\Ranking\RankingScene.h" />

@@ -37,7 +37,7 @@ void OverScene::Update(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
 		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::TITLE);
 		Snd::GetIns().Play("SystemButton");
 		return;
 	}

@@ -47,13 +47,13 @@ void RankingScene::Update(void)
 #pragma endregion
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::GAME);
 		Snd::GetIns().Play("SystemButton");
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GAME);
 		return;
 	}
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
-		SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
 		Snd::GetIns().Play("SystemButton");
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::TITLE);
 		return;
 	}
 }

@@ -72,7 +72,7 @@ void ClearScene::Update(void)
 		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		if (!rankinJudge) { ObjSerch<ResultScore>()->EasingSkip(); }
 		else {
-			SceneManager::GetIns().ChangeScene(SCENE_ID::TITLE);
+			SceneManager::GetIns().ChangeSceneFade(SCENE_ID::TITLE);
 			Snd::GetIns().Play("SystemButton");
 			return;
 		}

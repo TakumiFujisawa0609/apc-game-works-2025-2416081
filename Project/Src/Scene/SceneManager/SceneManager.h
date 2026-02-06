@@ -55,6 +55,9 @@ public:
 	// 状態遷移
 	void ChangeScene(std::shared_ptr<SceneBase>scene);
 	void ChangeScene(SCENE_ID scene);
+	// 状態遷移（フェードあり）
+	void ChangeSceneFade(std::shared_ptr<SceneBase>scene, unsigned short FADE_TIME = 30, unsigned int FADE_COLOR = 0x000000);
+	void ChangeSceneFade(SCENE_ID scene, unsigned short FADE_TIME = 30, unsigned int FADE_COLOR = 0x000000);
 
 	// シーンを新しく積む
 	void PushScene(std::shared_ptr<SceneBase>scene);
@@ -63,9 +66,15 @@ public:
 	// 最後に追加したシーンを削除する。
 	void PopScene(void);
 
-	// 強制的に特定のシーンに飛ぶ。リセットをかけ特定のシーンのみにする。
+	// 強制的に特定のシーンに飛ぶ。リセットをかけ特定のシーンのみにする
 	void JumpScene(std::shared_ptr<SceneBase>scene);
 	void JumpScene(SCENE_ID scene);
+	// 強制的に特定のシーンに飛ぶ。リセットをかけ特定のシーンのみにする（フェードあり）
+	void JumpSceneFade(std::shared_ptr<SceneBase>scene, unsigned short FADE_TIME = 30, unsigned int FADE_COLOR = 0x000000);
+	void JumpSceneFade(SCENE_ID scene, unsigned short FADE_TIME = 30, unsigned int FADE_COLOR = 0x000000);
+
+	// 指定した数の分シーンを吐き出して指定のシーンを上塗りする
+	void AnyPopAndChangeScene(char popNum, std::shared_ptr<SceneBase>scene);
 
 	// シーンIDの取得
 	SCENE_ID GetSceneID(void) const { return sceneId_; };

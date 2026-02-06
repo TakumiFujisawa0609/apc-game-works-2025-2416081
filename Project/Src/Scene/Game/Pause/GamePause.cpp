@@ -38,7 +38,7 @@ void GamePause::Update(void)
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect_ = GamePause::SELECT::NO; Snd::GetIns().Play("SystemSelect"); }
 		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			Snd::GetIns().Play("SystemButton");
-			SceneManager::GetIns().JumpScene(SCENE_ID::TITLE);
+			SceneManager::GetIns().JumpSceneFade(SCENE_ID::TITLE);
 			return;
 		}
 		break;
