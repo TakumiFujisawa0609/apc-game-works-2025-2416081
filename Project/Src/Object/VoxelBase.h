@@ -258,7 +258,7 @@ protected:
 	void ApplyBrush(unsigned char amount);
 
 	// 破壊セルのインデックス群を取得
-	const std::vector<int>BreakCellIdx(void)const { return breakCellIdx; }
+	const std::vector<int>& BreakCellIdx(void)const { return breakCellIdx; }
 #pragma endregion
 
 	// エフェクト

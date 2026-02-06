@@ -17,9 +17,9 @@ BlockManager::~BlockManager(void)
 
 void BlockManager::Load(void)
 {
-	Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
+	Utility::LoadImg(textureId_, "Data/Model/StageBlock/Block.png");
 
-	models_[0] = MV1LoadModel("Data/Model/StageBlocks/Block.mv1");
+	models_[0] = MV1LoadModel("Data/Model/StageBlock/Block.mv1");
 
 	LoadMapCsvData();
 

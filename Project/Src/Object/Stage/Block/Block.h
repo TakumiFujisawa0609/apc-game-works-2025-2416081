@@ -28,11 +28,7 @@ private:
 	// ƒuƒƒbƒNí•Ê
 	TYPE type_;
 
-	void SubLoad(void)override{}
+	void SubLoad(void)override {}
 	void SubInit(void)override { SetJudge(true); SetIsDraw(true); }
-	void SubUpdate(void)override{}
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 };
 

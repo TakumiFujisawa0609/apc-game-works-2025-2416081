@@ -13,7 +13,7 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 	ModelDuplicate(baseModelId);
 	
 	// ボクセルメッシュ生成に必要な情報を設定する
-	VoxelInfoInit(TAG::STAGE, Vector3(BlockManager::SIZE_BLOCK), textureId, 128.0f, 25.0f, Vector3(), 0.1f);
+	VoxelInfoInit(TAG::STAGE, Vector3(BlockManager::SIZE_BLOCK), textureId, 100.0f, 25.0f, Vector3(), 0.1f);
 
 	// 1ブロックあたりの半分の大きさ
 	const float SIZE_HALF_BLOCK = (BlockManager::SIZE_BLOCK / 2.0f);
