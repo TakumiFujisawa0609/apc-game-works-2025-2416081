@@ -103,3 +103,8 @@ void ScoreUI::Release(void)
 	for (int& id : comboBackImage) { DeleteGraph(id); }
 
 }
+
+void ScoreUI::AllAddScoreApply(void)
+{
+	for (int i = 0; i < 1000; i++) { if (Score::GetIns().AddBaseScoreApplyAndGet() == 0) { break; } }
+}

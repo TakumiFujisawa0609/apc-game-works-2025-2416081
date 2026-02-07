@@ -20,6 +20,8 @@ public:
 	void UiDraw(void);
 	void Release(void)override;
 
+	void AllAddScoreApply(void);
+
 private:
 
 	// スコア表示座標

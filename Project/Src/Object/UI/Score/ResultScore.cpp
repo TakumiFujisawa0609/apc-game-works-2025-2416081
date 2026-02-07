@@ -5,9 +5,11 @@
 #include"../../../Manager/Font/FontManager.h"
 #include"../../../Manager/Sound/SoundManager.h"
 
+const Vector2I ResultScore::ADD_BONUS_SCORE_OFFSET_POS = Vector2I(450, 0);
+
 ResultScore::ResultScore() :
 	baseScore(),
-	baseDisplaScore(),
+	baseDisplayScore(),
 	baseEasingEnd(false),
 
 	bonusScore(),
@@ -17,21 +19,19 @@ ResultScore::ResultScore() :
 
 	totalScore(),
 	totalDisplayScore(),
-	totalEasingEnd(false)
-{
-}
+	totalEasingEnd(false),
 
-void ResultScore::Load(void)
+	addBonusScore()
 {
 }
 
 void ResultScore::Init(void)
 {
 	baseScore = Score::GetIns().BaseScore();
-	baseDisplaScore = 0;
+	baseDisplayScore = 0;
 	baseEasingEnd = false;
 
-	bonusScore = Score::GetIns().BonusScore();
+	bonusScore = 0;
 	bonusDisplayScore = 0;
 	bonusAddScore = 0;
 	bonusEasingEnd = false;
@@ -51,9 +51,9 @@ void ResultScore::Update(void)
 
 	// 表示用スコアを現在のスコアへ近づける（徐々に）
 	if (!baseEasingEnd) {
-		int smoothScoreSub = (int)((baseScore - baseDisplaScore) * DISPLAY_SCORE_SMOOTH);
-		if (smoothScoreSub > 0) { baseDisplaScore += smoothScoreSub; addSound(); }
-		else { baseDisplaScore = baseScore; baseEasingEnd = true; }
+		int smoothScoreSub = (int)((baseScore - baseDisplayScore) * DISPLAY_SCORE_SMOOTH);
+		if (smoothScoreSub > 0) { baseDisplayScore += smoothScoreSub; addSound(); }
+		else { baseDisplayScore = baseScore; baseEasingEnd = true; }
 	}
 	else if (!bonusEasingEnd) {
 		int smoothScoreSub = (int)((bonusScore - bonusDisplayScore) * DISPLAY_SCORE_SMOOTH);
@@ -61,7 +61,10 @@ void ResultScore::Update(void)
 		else {
 			bonusAddScore = Score::GetIns().AddBonusScoreApplyAndGet();
 
-			if (bonusAddScore > 0) { bonusScore = Score::GetIns().BonusScore(); }
+			if (bonusAddScore > 0) {
+				addBonusScore.emplace_back(AddBonusScoreInfo(bonusAddScore, BONUS_DISPLAY_SCORE_POS, Font::GetIns().GetFont(FontKinds::GOKUSYOU_64)));
+				bonusScore = Score::GetIns().BonusScore();
+			}
 			else {
 				bonusDisplayScore = bonusScore;
 				bonusEasingEnd = true;
@@ -75,16 +78,32 @@ void ResultScore::Update(void)
 		else { totalDisplayScore = totalScore; totalEasingEnd = true; }
 	}
 
+	// 加算スコアの更新
+	for (auto it = addBonusScore.begin(); it != addBonusScore.end(); ) {
+		if (!it->AliveUpdate()) { it = addBonusScore.erase(it); }
+		else { ++it; }
+	}
+
 	if (!soundPlay) { Snd::GetIns().Stop("ScoreAdd"); }
 }
 
 void ResultScore::UiDraw(void)
 {
-	DrawFormatStringToHandle(700, 235, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", baseDisplaScore);
-	DrawFormatStringToHandle(700, 377, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", bonusDisplayScore);
-	DrawFormatStringToHandle(700, 575, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", totalDisplayScore);
+	DrawFormatStringToHandle(BASE_DISPLAY_SCORE_POS.x, BASE_DISPLAY_SCORE_POS.y, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", baseDisplayScore);
+	DrawFormatStringToHandle(BONUS_DISPLAY_SCORE_POS.x, BONUS_DISPLAY_SCORE_POS.y, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", bonusDisplayScore);
+	for (AddBonusScoreInfo& add : addBonusScore) { add.Draw(); }
+	DrawFormatStringToHandle(TOTAL_DISPLAY_SCORE_POS.x, TOTAL_DISPLAY_SCORE_POS.y, 0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110), "%08d", totalDisplayScore);
 }
 
-void ResultScore::Release(void)
+void ResultScore::EasingSkip(void)
 {
+	baseDisplayScore = baseScore;
+
+	for (int i = 0; i < 1000; i++) { if (Score::GetIns().AddBonusScoreApplyAndGet() == 0) { break; } }
+	bonusDisplayScore = bonusScore = Score::GetIns().BonusScore();
+
+	totalDisplayScore = totalScore = Score::GetIns().TotalScore();
+
+	// 全てのフラグを「true」に
+	baseEasingEnd = bonusEasingEnd = totalEasingEnd = true;
 }
