@@ -5,8 +5,8 @@
 class ThrowRock : public ThrowObjBase
 {
 public:
-	ThrowRock(const Vector3& playerPos_, const Vector3& playerAngle_);
-	~ThrowRock()override;
+	ThrowRock(const int& playerModel, const Vector3& playerAngle);
+	~ThrowRock()override = default;
 
 	void Load(void)override;
 

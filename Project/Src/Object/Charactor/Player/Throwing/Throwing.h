@@ -9,8 +9,8 @@ class Throwing
 {
 public:
 
-	Throwing(const Vector3& playerPos, const Vector3& playerAngle);
-	~Throwing();
+	Throwing(const int& playerModel, const Vector3& playerAngle);
+	~Throwing() = default;
 
 	void Load(void);
 	void Init(void);
@@ -50,6 +50,6 @@ private:
 
 	int models_[(int)THROW_TYPE::MAX];
 
-	const Vector3& playerPos_;
-	const Vector3& playerAngle_;
+	const int& playerModel;
+	const Vector3& playerAngle;
 };

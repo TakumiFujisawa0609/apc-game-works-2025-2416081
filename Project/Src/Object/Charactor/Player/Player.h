@@ -49,7 +49,7 @@ public:
 	// 定数
 	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
 
-	static constexpr float MAX_JUMP_POWER = 20.0f;		//最大ジャンプ力
+	static constexpr float MAX_JUMP_POWER = 25.0f;		//最大ジャンプ力
 	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ジャンプキーを受け付けるフレーム数
 	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
 	//----------------------------------------------------------------------------------------------
@@ -81,7 +81,8 @@ private:
 
 #pragma region 定数定義
 	// スケール
-	const float SCALE = 2.5f;
+	//const float SCALE = 0.075f;
+	const float SCALE = 0.1f;
 
 	// モデルのサイズ
 	const Vector3 SIZE = Vector3(73.204f, 73.096f, 32.071f) * SCALE;
@@ -170,8 +171,15 @@ private:
 	// ～～～～～～～～～～～～～～～
 
 	// えぐり取る～～～～～～～～～～
+	
 	// インスタンス
 	PlayerGouge* gouge_;
+	
+	// 変数
+	
+	// Gouge(えぐり取り)を実行したかどうかのフラグ
+	bool isGouge;
+
 	//～～～～～～～～～～～～～～～～
 
 	// 投げ～～～～～～～～～～～～～～
@@ -218,21 +226,42 @@ private:
 #pragma region モーション
 	// モーションの全て
 	enum class ANIME_TYPE {
+
 		IDLE,
 		RUN,
-		JUMP_POST,
 		JUMP,
 		FALL,
 		EVASION,
 		PUNCH_FIRST,
 		PUNCH_SECOND,
-		PUNCH_THIRD,
-		GOUPE,
+		GOUGE_IDLE,
+		CATCH,
+		GOUGE,
 		CARRY_IDLE,
 		CARRY_RUN,
 		THROW,
 		DAMAGE,
 		DEATH,
+
+		MAX,
+	};
+	const float INFBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] =
+	{
+		0.5f,	//IDLE
+		6.0f,	//RUN
+		5.0f,	//JUMP
+		1.5f,	//FALL
+		1.5f,	//EVASION
+		1.5f,	//PUNCH_FIRST
+		1.5f,	//PUNCH_SECOND
+		1.0f,	//GOUGE_IDLE
+		1.0f,	//CATCH
+		1.5f,	//GOUPE
+		1.0f,	//CARRY_IDLE
+		2.5f,	//CARRY_RUN
+		1.5f,	//THROW
+		1.0f,	//DAMAGE
+		1.0f,	//DEATH
 	};
 
 	// モーションの初期設定

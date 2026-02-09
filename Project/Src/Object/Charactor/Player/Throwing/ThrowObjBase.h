@@ -5,7 +5,7 @@
 class ThrowObjBase : public ActorBase
 {
 public:
-	ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_);
+	ThrowObjBase(const int& playerModel, const Vector3& playerAngle);
 	virtual ~ThrowObjBase() = default;
 
 	void OnCollision(const ColliderBase& collider)override;
@@ -27,15 +27,17 @@ public:
 	STATE GetState(void)const { return state_; }
 
 private:
+	const int PLAYER_RIGHTHAND_FRAME_INDEX = 14;
+	const int& playerModel;
+	const Vector3& playerAngle;
+
+	const Vector3& PlayerRightHandPos(void)const { return Vector3(MV1GetFramePosition(playerModel, PLAYER_RIGHTHAND_FRAME_INDEX)); }
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 
 protected:
-	int model_;
+	int model;
 
 	STATE state_;
 
@@ -52,22 +54,17 @@ protected:
 
 
 	// ìäÇ∞ÇΩå„ÇÃèàóùÇ…égÇ§Å`Å`Å`Å`Å`Å`
-	Vector3 moveVec_;
+	Vector3 moveVec;
 
-	float speed_;
+	float speed;
 
 	int aliveTime;
-	int aliveCounter_;
+	int aliveCounter;
 
 	int ALIVE_HIT_NUM;
-	int aliveHitCou_;
+	int aliveHitCou;
 	//Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
-	const Vector3 CARRY_OBJ_LOCAL_POS = { 100.0f,80.0f,0.0f };
-
-	const Vector3 LOCAL_THROW_POS = { 0.0f,50.0f,100.0f };
 	const Vector3 THROW_VEC = { 0.0f,0.0f,1.0f };
 
-	const Vector3& playerPos_;
-	const Vector3& playerAngle_;
 };

@@ -2,12 +2,8 @@
 
 #include"../../../../Common/Collider/SphereCollider.h"
 
-ThrowRock::ThrowRock(const Vector3& playerPos_, const Vector3& playerAngle_) : 
-	ThrowObjBase(playerPos_,playerAngle_)
-{
-}
-
-ThrowRock::~ThrowRock()
+ThrowRock::ThrowRock(const int& playerModel, const Vector3& playerAngle) :
+	ThrowObjBase(playerModel, playerAngle)
 {
 }
 
@@ -15,7 +11,7 @@ void ThrowRock::Load(void)
 {
 	ColliderCreate(new SphereCollider(TAG::PLAYER_THROWING, COLLIDER_RADIUS, COLLIDER_RADIUS));
 
-	speed_ = 15.0f;
+	speed = 15.0f;
 
 	aliveTime = ALIVE_TIME;
 

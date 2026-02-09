@@ -39,7 +39,7 @@ Player::Player() :
 
 void Player::Load(void)
 {
-	trans_.Load("Player/Player");
+	trans_.Load("Player/Player試作");
 	trans_.scale = SCALE;
 	trans_.localAngle = LOCAL_ROT;
 
@@ -292,8 +292,8 @@ void Player::DoStateGouge(void)
 
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).down) {
 		state_ = (int)STATE::GOUGE;
-		gouge_->On();
-		AnimePlay((int)ANIME_TYPE::GOUPE, false);
+		gouge_->SearchOn();
+		AnimePlay((int)ANIME_TYPE::CATCH, false);
 	}
 }
 void Player::DoStateThrowing(void)
@@ -337,14 +337,14 @@ void Player::Attack(void)
 		vec.z = cosf(trans_.angle.y);
 
 		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
-		trans_.pos += vec.Normalized() * 10.0f;
+		trans_.pos += vec.Normalized() * 13.0f;
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
 	punch_->Off();
 
 	// 大体攻撃判定を発生させる時間
-	if (0.4f <= nowAnimeRatio && nowAnimeRatio <= 0.6f) { punch_->On(); }
+	if (0.5f <= nowAnimeRatio && nowAnimeRatio <= 0.6f) { punch_->On(); }
 
 	// 攻撃判定終わったらボタンで次段攻撃に遷移可能にしておく(操作性向上)
 	if (nowAnimeRatio > 0.6f) { AttackMove(); DoStateAttack(); }
@@ -355,19 +355,45 @@ void Player::Attack(void)
 void Player::Gouge(void)
 {
 	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
-		if (GetAnimeRatio() > 0.25f) {
-			if (gouge_->Gouge()) {
-				state_ = (int)STATE::CARRY_OBJ;
-				throwing_->Carry(THROW_TYPE::ROCK);
+		// ボタンが押され続けている間処理を行う
+
+		// 現在のモーションを取得
+		const int& animeType = GetAnimePlayType();
+
+		// まだ破壊箇所探索中の処理
+		if (animeType == (int)ANIME_TYPE::CATCH) {
+			if (gouge_->SearchHit()) {
+				AnimePlay((int)ANIME_TYPE::GOUGE, false);
+				isGouge = false;
 			}
-			else {
+			// モーション終了で状態遷移
+			if (IsAnimeEnd()) {
+				gouge_->Reset();
+				throwing_->Drop();
 				state_ = (int)STATE::MOVE;
 				AnimePlay((int)ANIME_TYPE::IDLE);
 			}
 		}
+		// 破壊モーション待ち
+		else if (animeType == (int)ANIME_TYPE::GOUGE) {
+			float animeRatio = GetAnimeRatio();
+			if (!isGouge && animeRatio > 0.33f) {
+				isGouge = true;
+				gouge_->GougeOn();
+				throwing_->Carry(THROW_TYPE::ROCK);
+			}
+
+			// モーション終了で状態遷移
+			if (IsAnimeEnd()) {
+				gouge_->Reset();
+				state_ = (int)STATE::CARRY_OBJ;
+			}
+		}
+
 	}
 	else {
-		gouge_->Off();
+		gouge_->Reset();
+		throwing_->Drop();
 		state_ = (int)STATE::MOVE;
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
@@ -386,9 +412,9 @@ void Player::CarryObj(void)
 void Player::ThrowingObj(void)
 {
 	float nowAnimeRatio = GetAnimeRatio();
-	if (nowAnimeRatio <= 0.05f) {}
-	else if (nowAnimeRatio <= 0.3f) { throwing_->Throw(); }
-	else { state_ = (int)STATE::MOVE; }
+	if (nowAnimeRatio <= 0.65f) {}
+	else { throwing_->Throw(); }
+	if (IsAnimeEnd()) { state_ = (int)STATE::MOVE; }
 }
 void Player::Evasion(void)
 {
@@ -406,7 +432,7 @@ void Player::Evasion(void)
 	// 無敵(無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように １ を代入し続けておく)
 	if (GetAnimeRatio() <= 0.7f) { SetInviCounter(1); }
 	// 無敵判定が終わったらボタンで遷移可能にしておく(操作性向上)
-	else { DoStateMove(); DoStateAttack(); }
+	//else { DoStateMove(); DoStateAttack(); }
 
 	// 何も入力なく回避アニメーションが終了したら通常状態に自動で遷移
 	if (IsAnimeEnd()) { state_ = (int)STATE::MOVE; }
@@ -480,7 +506,7 @@ void Player::Jump(void)
 		// ダウントリガーでジャンプ開始
 		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
 			isJump_[i] = true; 
-			AnimePlay((int)ANIME_TYPE::JUMP_POST, false);
+			AnimePlay((int)ANIME_TYPE::JUMP, false);
 
 			jumpKeyCounter_[i]++;
 
@@ -510,7 +536,7 @@ void Player::Jump(void)
 	}
 
 	// モーション更新
-	if (isJump_[0] && IsAnimeEnd()) { AnimePlay((int)ANIME_TYPE::JUMP); }
+	if (isJump_[0] && IsAnimeEnd() && AccelSum.y <= 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
 }
 
 void Player::AttackMove(void)
@@ -579,7 +605,7 @@ void Player::CarryJump(void)
 		// ダウントリガーでジャンプ開始
 		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
 			isJump_[i] = true;
-			AnimePlay((int)ANIME_TYPE::JUMP_POST, false);
+			AnimePlay((int)ANIME_TYPE::JUMP, false);
 		}
 
 		// ジャンプしていなかったらループから抜ける
@@ -602,34 +628,36 @@ void Player::CarryJump(void)
 	}
 
 	// モーション更新
-	if (isJump_[0] && IsAnimeEnd()) { AnimePlay((int)ANIME_TYPE::JUMP); }
+	if (isJump_[0] && IsAnimeEnd() && AccelSum.y < 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
 }
 
 void Player::AnimeLoad(void)
 {
+	AddInFbxAnimation((int)ANIME_TYPE::MAX, INFBX_ANIME_SPEED);
+
 	const std::string ANIME_PATH = "Data/Model/Player/Animation/";
 	
-	AddAnimation((int)ANIME_TYPE::IDLE, 1.0f, (ANIME_PATH + "Idle.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::RUN, 1.0f, (ANIME_PATH + "Run.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::IDLE, 1.0f, (ANIME_PATH + "Idle.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::RUN, 1.0f, (ANIME_PATH + "Run.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::JUMP, 1.5f, (ANIME_PATH + "Jump.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::JUMP_POST, 1.5f, (ANIME_PATH + "JumpPost.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::FALL, 1.5f, (ANIME_PATH + "Fall.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::JUMP, 1.5f, (ANIME_PATH + "Jump.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::JUMP_POST, 1.5f, (ANIME_PATH + "JumpPost.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::FALL, 1.5f, (ANIME_PATH + "Fall.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::EVASION, 1.5f, (ANIME_PATH + "Evasion.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::EVASION, 1.5f, (ANIME_PATH + "Evasion.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::PUNCH_FIRST, 1.5f, (ANIME_PATH + "PunchFirst.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::PUNCH_SECOND, 1.5f, (ANIME_PATH + "PunchSecond.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::PUNCH_THIRD, 1.5f, (ANIME_PATH + "PunchThird.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::PUNCH_FIRST, 1.5f, (ANIME_PATH + "PunchFirst.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::PUNCH_SECOND, 1.5f, (ANIME_PATH + "PunchSecond.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::PUNCH_THIRD, 1.5f, (ANIME_PATH + "PunchThird.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::GOUPE, 0.6f, (ANIME_PATH + "Goupe.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::GOUPE, 0.6f, (ANIME_PATH + "Goupe.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::CARRY_IDLE, 0.5f, (ANIME_PATH + "CarryIdle.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::CARRY_RUN, 0.5f, (ANIME_PATH + "CarryRun.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::THROW, 0.5f, (ANIME_PATH + "Throw.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::CARRY_IDLE, 0.5f, (ANIME_PATH + "CarryIdle.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::CARRY_RUN, 0.5f, (ANIME_PATH + "CarryRun.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::THROW, 0.5f, (ANIME_PATH + "Throw.mv1").c_str());
 
-	AddAnimation((int)ANIME_TYPE::DAMAGE, 0.5f, (ANIME_PATH + "Damage.mv1").c_str());
-	AddAnimation((int)ANIME_TYPE::DEATH, 0.5f, (ANIME_PATH + "Death.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::DAMAGE, 0.5f, (ANIME_PATH + "Damage.mv1").c_str());
+	//AddAnimation((int)ANIME_TYPE::DEATH, 0.5f, (ANIME_PATH + "Death.mv1").c_str());
 }
 
 void Player::HpSharpen(int damage)
@@ -637,7 +665,7 @@ void Player::HpSharpen(int damage)
 	if (hp_ <= 0) { return; }
 
 	punch_->Off();
-	gouge_->Off();
+	gouge_->Reset();
 	throwing_->Drop();
 
 	hp_ -= (hp_ >= damage) ? damage : hp_;
@@ -661,11 +689,11 @@ void Player::LowerLoad(void)
 	punch_->Load();
 
 	// 抉り
-	gouge_ = new PlayerGouge(trans_.pos, trans_.angle);
+	gouge_ = new PlayerGouge(trans_.model);
 	gouge_->Load();
 
 	// 特殊攻撃（投げ）
-	throwing_ = new Throwing(trans_.pos, trans_.angle);
+	throwing_ = new Throwing(trans_.model, trans_.angle);
 	throwing_->Load();
 
 #pragma region UI

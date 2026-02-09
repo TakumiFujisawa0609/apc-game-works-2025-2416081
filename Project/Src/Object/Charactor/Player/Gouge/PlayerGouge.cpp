@@ -2,18 +2,16 @@
 
 #include"../../../../Manager/Sound/SoundManager.h"
 
-PlayerGouge::PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle) :
+
+PlayerGouge::PlayerGouge(const int& playerModel):
 	ActorBase(),
 
-	state_(STATE::NON),
+	playerModel(playerModel),
 
-	xAngle_(0.0f),
+	state(STATE::NON),
 
-	searchHit_(false),
-	gougeHit_(false),
-
-	playerPos(playerPos),
-	playerAngle(playerAngle)
+	searchHit(false),
+	gougeHit(false)
 {
 }
 
@@ -25,45 +23,37 @@ void PlayerGouge::Load(void)
 	SetPushFlg(false);
 
 	// コライダー生成
-	ColliderCreate(new SphereCollider(TAG::PLAYER_GOUGE, STATE_RADIUS[(int)state_], STATE_RADIUS[(int)STATE::GOUGE]));
+	ColliderCreate(new SphereCollider(TAG::PLAYER_GOUGE, STATE_RADIUS[(int)state], STATE_RADIUS[(int)STATE::GOUGE]));
 }
 
 void PlayerGouge::SubInit(void)
 {
-	searchHit_ = false;
-	gougeHit_ = false;
-	Off();
+	searchHit = false;
+	gougeHit = false;
+	Reset();
 }
 
 void PlayerGouge::SubUpdate(void)
 {
-	if (!GetJudgeFlg()) { return; }
+	if (state == STATE::NON) { return; }
 
-	ColliderSerch<SphereCollider>().back()->SetRadius(STATE_RADIUS[(int)state_]);
+	ColliderSerch<SphereCollider>().back()->SetRadius(STATE_RADIUS[(int)state]);
 
-	switch (state_)
+	switch (state)
 	{
 	case PlayerGouge::STATE::SEARCH:
-		if (searchHit_) { return; }
-		xAngle_ += Utility::Deg2RadF(5.0f);
-		if (xAngle_ > Utility::Deg2RadF(120.0f)) { xAngle_ = Utility::Deg2RadF(120.0f); }
-		else {
-			trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
-		}
+		if (searchHit) { return; }
+		trans_.pos = MV1GetFramePosition(playerModel, PLAYER_RIGHTHAND_FRAME_INDEX);
 		break;
 	case PlayerGouge::STATE::GOUGE:
-		if(gougeHit_){
-			SetJudge(false);
-			SetIsDraw(false);
-			state_ = STATE::NON;
-		}
+		if (gougeHit) { Reset(); }
 		break;
 	}
 }
 
 void PlayerGouge::OnCollision(const ColliderBase& collider)
 {
-	TAG otherTag = collider.GetTag();
+	const TAG& otherTag = collider.GetTag();
 
 	if (
 		otherTag != TAG::STAGE &&
@@ -73,50 +63,27 @@ void PlayerGouge::OnCollision(const ColliderBase& collider)
 		return;
 	}
 
-	switch (state_)
+	switch (state)
 	{
-	case PlayerGouge::STATE::SEARCH:
-		searchHit_ = true;
+	case PlayerGouge::STATE::SEARCH: {
+		searchHit = true;
+		gougeHit = false;
 		return;
-	case PlayerGouge::STATE::GOUGE:
-
-		if (!gougeHit_) {
-			gougeHit_ = true;
-			Snd::GetIns().Play("ObjBreak");
-		}
+	}
+	case PlayerGouge::STATE::GOUGE: {
+		gougeHit = true;
+		Snd::GetIns().Play("ObjBreak");
 		return;
+	}
 	}
 }
 
-void PlayerGouge::On(void)
-{
-	if (GetJudgeFlg()) { return; }
-
-	SetJudge(true);
-	SetIsDraw(true);
-	searchHit_ = false;
-	gougeHit_ = false;
-	state_ = STATE::SEARCH;
-	xAngle_ = 0.0f;
-
-	trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
-}
-
-void PlayerGouge::Off(void)
+void PlayerGouge::Reset(void)
 {
 	SetJudge(false);
-	//SetIsDraw(false);
-	state_ = STATE::NON;
-}
+	SetIsDraw(false);
+	state = STATE::NON;
 
-bool PlayerGouge::Gouge(void)
-{
-	if (searchHit_) {
-		state_ = STATE::GOUGE;
-		gougeHit_ = false;
-		return true;
-	}
-
-	Off();
-	return false;
+	searchHit = false;
+	gougeHit = false;
 }

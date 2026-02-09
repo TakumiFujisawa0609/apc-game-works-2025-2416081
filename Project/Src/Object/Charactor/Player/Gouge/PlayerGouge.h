@@ -15,38 +15,36 @@ public:
 		MAX
 	};
 
-	PlayerGouge(const Vector3& playerPos, const Vector3& playerAngle);
-	~PlayerGouge()override {}
+	PlayerGouge(const int& playerModel);
+	~PlayerGouge()override = default;
 
 	void Load(void)override;
 
 	void OnCollision(const ColliderBase& collider)override;
 
-	int GetState(void)const { return (int)state_; }
+	int GetState(void)const { return (int)state; }
 
-	void On(void);
-	void Off(void);
-	bool Gouge(void);
+	void SearchOn(void) { state = STATE::SEARCH; searchHit = false; On(); SubUpdate(); }
+	void GougeOn(void) { state = STATE::GOUGE; }
+
+	bool SearchHit(void) { return searchHit; }
+
+	void Reset(void);
 
 private:
+	const int PLAYER_RIGHTHAND_FRAME_INDEX = 14;
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 
-	STATE state_;
+	void On(void) { SetJudge(true); SetIsDraw(true); }
+
+	STATE state;
 
 	const float STATE_RADIUS[(int)STATE::MAX] = { 30.0f,120.0f };
 
-	float xAngle_;
+	bool searchHit;
+	bool gougeHit;
 
-	bool searchHit_;
-	bool gougeHit_;
-
-	const Vector3 LOCAL_POS = { 0.0f,150.0f,0.0f };
-	const Vector3 FOOT_POS = { 0.0f,-90.0f,0.0f };
-	const Vector3& playerPos;
-	const Vector3& playerAngle;
+	const int& playerModel;
 };

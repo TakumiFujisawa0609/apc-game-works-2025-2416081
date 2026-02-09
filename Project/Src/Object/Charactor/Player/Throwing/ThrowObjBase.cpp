@@ -2,26 +2,26 @@
 
 #include"../../Boss/Boss.h"
 
-ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_) :
+ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle) :
 	ActorBase(),
 
-	playerPos_(playerPos_),
-	playerAngle_(playerAngle_),
+	playerModel(playerModel),
+	playerAngle(playerAngle),
 
-	model_(-1),
+	model(-1),
 
 	state_(STATE::NON),
 	stateFuncPtr(),
 
 	aliveTime(100),
-	aliveCounter_(0),
+	aliveCounter(0),
 
 	ALIVE_HIT_NUM(5),
-	aliveHitCou_(0),
+	aliveHitCou(0),
 
-	speed_(10.0f),
+	speed(10.0f),
 
-	moveVec_()
+	moveVec()
 {
 }
 
@@ -83,7 +83,7 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 		return;
 	case ThrowObjBase::STATE::THROW:
 		// ‰½‰ñ‚©“–‚½‚Á‚½‚çÁ‚¦‚éˆ—‚ð‚ ‚Æ‚Å‘‚«‚Ü‚·
-		if (++aliveHitCou_ >= ALIVE_HIT_NUM) {
+		if (++aliveHitCou >= ALIVE_HIT_NUM) {
 			state_ = STATE::DROP;
 		}
 		return;
@@ -92,21 +92,21 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 
 void ThrowObjBase::Throw(void)
 {
-	trans_.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
+	trans_.pos = PlayerRightHandPos();
 
-	moveVec_ = THROW_VEC.TransMat(MGetRotY(playerAngle_.y)) * speed_;
+	moveVec = THROW_VEC.TransMat(MGetRotY(playerAngle.y)) * speed;
 
-	aliveCounter_ = aliveTime;
+	aliveCounter = aliveTime;
 
-	aliveHitCou_ = 0;
+	aliveHitCou = 0;
 
 	state_ = STATE::THROW;
 }
 
 void ThrowObjBase::CarryStateFunc(void)
 {
-	trans_.pos = playerPos_ + CARRY_OBJ_LOCAL_POS.TransMat(Utility::MatrixAllMultY({ playerAngle_ }));
-	trans_.angle = playerAngle_;
+	trans_.pos = PlayerRightHandPos();
+	trans_.angle = playerAngle;
 }
 void ThrowObjBase::DropStateFunc(void)
 {
@@ -116,10 +116,10 @@ void ThrowObjBase::DropStateFunc(void)
 
 void ThrowObjBase::ThrowStateFunc(void)
 {
-	trans_.pos += moveVec_;
+	trans_.pos += moveVec;
 
-	if (--aliveCounter_ <= 0) {
-		aliveCounter_ = 0;
+	if (--aliveCounter <= 0) {
+		aliveCounter = 0;
 		state_ = STATE::NON;
 	}
 }
