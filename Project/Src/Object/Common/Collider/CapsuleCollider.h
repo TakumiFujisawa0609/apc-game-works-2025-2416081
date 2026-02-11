@@ -7,9 +7,9 @@ class CapsuleCollider : public ColliderBase
 public:
 	CapsuleCollider(TAG type, const Vector3& localStartPos, const Vector3& localEndPos, float radius, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
-		startPos_(localStartPos),
-		endPos_(localEndPos),
-		radius_(radius)
+		startPos(localStartPos),
+		endPos(localEndPos),
+		radius(radius)
 	{
 		SetShape(SHAPE::CAPSULE);
 	}
@@ -17,16 +17,16 @@ public:
 
 #pragma region 各ゲット関数
 	// 線分の長さ
-	float GetLen(void)const { return (startPos_ - endPos_).Length(); }
+	float GetLen(void)const { return (startPos - endPos).Length(); }
 	// 線分の半分の長さ
-	float GetHalfLen(void)const { return (startPos_ - endPos_).Length() / 2; }
+	float GetHalfLen(void)const { return (startPos - endPos).Length() / 2; }
 	// 半径
-	float GetRadius(void)const { return radius_; }
+	float GetRadius(void)const { return radius; }
 
 	// カプセル線分の始点
-	Vector3 GetStartPos(void)const { return GetPos() + GetTransform().VTrans(startPos_); }
+	Vector3 GetStartPos(void)const { return GetPos() + GetTransform().VTrans(startPos); }
 	// カプセル線分の終点
-	Vector3 GetEndPos(void)const { return GetPos() + GetTransform().VTrans(endPos_); }
+	Vector3 GetEndPos(void)const { return GetPos() + GetTransform().VTrans(endPos); }
 
 	// 指定した座標から線分の中で一番近い座標を取得する
 	Vector3 ClosestPoint(const Vector3& point) const {
@@ -55,15 +55,15 @@ public:
 #pragma endregion
 
 	void DrawDebug(unsigned int color = 0xffffff)override {
-		DrawCapsule3D(GetStartPos().ToVECTOR(), GetEndPos().ToVECTOR(), radius_, 12, color, color, true);
+		DrawCapsule3D(GetStartPos().ToVECTOR(), GetEndPos().ToVECTOR(), radius, 12, color, color, true);
 	}
 private:
 
 	// 線分の開始点
-	Vector3 startPos_;
+	Vector3 startPos;
 	// 線分の終了点
-	Vector3 endPos_;
+	Vector3 endPos;
 	
 	// 半径
-	float radius_;
+	float radius;
 };

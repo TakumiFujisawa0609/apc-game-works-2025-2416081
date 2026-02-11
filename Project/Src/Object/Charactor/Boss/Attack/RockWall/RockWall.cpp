@@ -19,7 +19,7 @@ RockWall::RockWall(int modelId, int textureId) :
     state_(STATE::NON),
     stateFuncPtr(),
 
-    stageCollisionFlg_(0)
+    stageCollisionFlg(0)
 {
     SetDynamicFlg(true);
 	SetGravityFlg(false);
@@ -70,7 +70,7 @@ void RockWall::SubInit(void)
 
 	state_ = STATE::NON;
 
-    stageCollisionFlg_ = false;
+    stageCollisionFlg = false;
 }
 
 void RockWall::SubUpdate(void)

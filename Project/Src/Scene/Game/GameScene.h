@@ -35,10 +35,10 @@ public:
 
 
 	// ヒットストップ演出
-	static void HitStop(int time = 20) { hitStop_ = time; }
+	static void HitStop(int time = 20) { hitStop = time; }
 
 	// スロー演出
-	static void Slow(int time = 10, int inter = 5) { slow_ = time; slowInter_ = inter; }
+	static void Slow(int time = 10, int inter = 5) { slow = time; slowInter = inter; }
 
 	// 画面揺れの種類
 	enum ShakeKinds { WID/*横揺れ*/, HIG/*縦揺れ*/, DIAG/*斜め揺れ*/, ROUND/*くるくる*/ };
@@ -55,42 +55,38 @@ public:
 
 private:
 	// 当たり判定管理クラス
-	CollisionManager* collision_;
+	CollisionManager* collision;
 
 	// オブジェクト格納用の配列
-	std::vector<ActorBase*>objects_;
+	std::vector<ActorBase*>objects;
 
 	// 配列の中から特定のオブジェクトを探す
 	template<typename T>
-	std::vector<T*> ObjSerch(void) {
-		std::vector<T*> out;
-		out.reserve(objects_.size());
-		for (auto* obj : objects_) {
-			if (!obj) continue;
-			if (auto* ptr = dynamic_cast<T*>(obj)) {
-				out.push_back(ptr);
-			}
+	T* ObjSerch(void) {
+		for (auto* obj : objects) {
+			if (dynamic_cast<T*>(obj)) { return dynamic_cast<T*>(obj); }
 		}
-		return out;
+		return nullptr;
 	}
 
 #pragma region 画面演出用
 	// ヒットストップカウンター
-	static int hitStop_;
+	static int hitStop;
 
 	// スローカウンター
-	static int slow_;
-	static int slowInter_;
+	static int slow;
+	static int slowInter;
 
 	// 画面揺れ------------------------
-	int mainScreen_;
-	static int shake_;
-	static ShakeKinds shakeKinds_;
-	static ShakeSize shakeSize_;
+	int mainScreen;
+	static int shake;
+	static ShakeKinds shakeKinds;
+	static ShakeSize shakeSize;
 	Vector2I ShakePoint(void);
 	//---------------------------------
 #pragma endregion
 
+	// 戦闘時間計測用カウンター
 	unsigned int timer;
 };
 

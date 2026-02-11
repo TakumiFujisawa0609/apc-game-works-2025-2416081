@@ -4,9 +4,9 @@ class Loading
 {
 public:
 	// シングルトン（生成・取得・削除）
-	static void CreateInstance(void) { if (instance_ == nullptr) { instance_ = new Loading(); } };
-	static Loading* GetInstance(void) { return instance_; };
-	static void DeleteInstance(void) { if (instance_ != nullptr) { delete instance_; instance_ = nullptr; } }
+	static void CreateInstance(void) { if (ins == nullptr) { ins = new Loading(); } };
+	static Loading* GetInstance(void) { return ins; };
+	static void DeleteInstance(void) { if (ins != nullptr) { delete ins; ins = nullptr; } }
 
 private:
 	// デフォルトコンストラクタをprivateにして、
@@ -36,23 +36,25 @@ public:
 	void EndAsyncLoad(void);	// 非同期ロードの終了
 
 	// ロード中かを返す。
-	bool IsLoading(void) { return isLoading_; }
+	bool IsLoading(void) { return isLoading; }
 
 private:
 
 	// 静的インスタンス
-	static Loading* instance_;
+	static Loading* ins;
 
 	// 最低でもロード画面を表示する時間
 	static constexpr int MIN_LOAD_TIME = 60;	// 60fps(1秒) * x
 
 	// 画像ハンドル
-	int animCounter_;
-	int animInterval_;
+
+
+	int animCounter;
+	int animInterval;
 
 	// ロード中の判定用
-	bool isLoading_;
+	bool isLoading;
 
 	// 最低でもロード画面を表示する時間の範囲
-	int loadTimer_;
+	int loadTimer;
 };

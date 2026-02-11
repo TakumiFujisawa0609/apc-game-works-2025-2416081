@@ -25,8 +25,8 @@ void BossPreview::Load(void)
 {
 	mainScreen = MakeScreen((int)SIZE, (int)SIZE);
 
-	Utility::LoadImg(frameImg, "Data/Image/Game/UI/BossPreviewFrame.png");
-	Utility::LoadImg(backImg, "Data/Image/Game/UI/BossPreviewBack.png");
+	LoadImg(frameImg, "Data/Image/Game/UI/BossPreviewFrame.png");
+	LoadImg(backImg, "Data/Image/Game/UI/BossPreviewBack.png");
 
 	previewCam = new InstantCamera();
 }

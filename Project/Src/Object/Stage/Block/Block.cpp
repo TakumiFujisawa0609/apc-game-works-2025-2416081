@@ -7,7 +7,7 @@
 #include"../../../Scene/Game/GameScene.h"
 
 Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int mapZ) :
-	type_(type)
+	type(type)
 {
 	// ƒ‚ƒfƒ‹‚ğ•¡»‚·‚é
 	ModelDuplicate(baseModelId);

@@ -3,8 +3,8 @@
 #include"../../../../Common/Collider/SphereCollider.h"
 
 Stone::Stone(int model):
-	moveVec_(),
-	aliveCounter_()
+	moveVec(),
+	aliveCounter()
 {
 	ModelDuplicate(model);
 }
@@ -31,28 +31,28 @@ void Stone::SubInit(void)
 	SetJudge(false);
 	SetIsDraw(false);
 
-	aliveCounter_ = 0;
+	aliveCounter = 0;
 }
 
 void Stone::SubUpdate(void)
 {
 	if (GetJudgeFlg() == false) { return; }
 
-	if (--aliveCounter_ <= 0) {
-		aliveCounter_ = 0;
+	if (--aliveCounter <= 0) {
+		aliveCounter = 0;
 		SetJudge(false);
 		SetIsDraw(false);
 	}
 
-	trans.pos += moveVec_;
+	trans.pos += moveVec;
 }
 
 void Stone::On(const Vector3& pos, const Vector3& moveVec)
 {
 	trans.pos = pos;
-	moveVec_ = moveVec * MOVE_SPEED;
+	this->moveVec = moveVec * MOVE_SPEED;
 
-	aliveCounter_ = ALIVE_TIME;
+	aliveCounter = ALIVE_TIME;
 
 	SetJudge(true);
 	SetIsDraw(true);

@@ -15,7 +15,7 @@ void ThrowRock::Load(void)
 {
 	ColliderCreate(new SphereCollider(TAG::PLAYER_THROWING, COLLIDER_RADIUS, COLLIDER_RADIUS));
 
-	speed_ = 15.0f;
+	speed = 15.0f;
 
 	aliveTime = ALIVE_TIME;
 

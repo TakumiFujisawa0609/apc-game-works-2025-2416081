@@ -65,10 +65,10 @@ void PlayerHpBar::Draw(void)
 		);
 
 	DrawQuadrangle(
-		drawPoss.topLeft.x, drawPoss.topLeft.y,
-		drawPoss.topRight.x, drawPoss.topRight.y,
-		drawPoss.bottomRight.x, drawPoss.bottomRight.y,
-		drawPoss.bottomLeft.x, drawPoss.bottomLeft.y,
+		(int)drawPoss.topLeft.x, (int)drawPoss.topLeft.y,
+		(int)drawPoss.topRight.x, (int)drawPoss.topRight.y,
+		(int)drawPoss.bottomRight.x, (int)drawPoss.bottomRight.y,
+		(int)drawPoss.bottomLeft.x, (int)drawPoss.bottomLeft.y,
 		(state == STATE::ALIVE) ? aliveColor : 0xff0000,
 		true
 	);
@@ -109,7 +109,7 @@ void PlayerHpBar::SetLostDrop(void)
 void PlayerHpBar::LostDrop(void)
 {
 	// ‰ñ“]‚³‚¹‚é
-	angle += Utility::Deg2RadF(5.0f);
+	angle += Deg2Rad(5.0f);
 
 	// —Ž‰º
 	localPosition += dropAccel;

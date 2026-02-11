@@ -154,13 +154,13 @@ void Camera::FreeModeFunc(void)
 		angle += rot.Normalized() * ROT_POWER;
 
 		// 回転の数値制御
-		if (angle.x <= Utility::Deg2RadF(0.0f)) { angle.x += Utility::Deg2RadF(360.0f); }
-		if (angle.x >= Utility::Deg2RadF(360.0f)) { angle.x -= Utility::Deg2RadF(360.0f); }
+		if (angle.x <= Deg2Rad(0.0f)) { angle.x += Deg2Rad(360.0f); }
+		if (angle.x >= Deg2Rad(360.0f)) { angle.x -= Deg2Rad(360.0f); }
 
-		if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
-		if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
+		if (angle.y <= Deg2Rad(0.0f)) { angle.y += Deg2Rad(360.0f); }
+		if (angle.y >= Deg2Rad(360.0f)) { angle.y -= Deg2Rad(360.0f); }
 
-		//if (angle.z >= Utility::Deg2RadF(360.0f)) { angle.z = 0.0f; }
+		//if (angle.z >= Deg2Rad(360.0f)) { angle.z = 0.0f; }
 		// ↑Z軸回転はしない
 	}
 #pragma endregion
@@ -241,14 +241,14 @@ void Camera::LookAtFreeModeFunc(void)
 	if (vec != 0.0f) {
 		angle += vec.Normalized() * ROT_POWER;
 
-		if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
-		if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
-		if (angle.x < Utility::Deg2RadF(-30.0f)) { angle.x = Utility::Deg2RadF(-30.0f); }
-		if (angle.x > Utility::Deg2RadF(60.0f)) { angle.x = Utility::Deg2RadF(60.0f); }
+		if (angle.y >= Deg2Rad(360.0f)) { angle.y -= Deg2Rad(360.0f); }
+		if (angle.y <= Deg2Rad(0.0f)) { angle.y += Deg2Rad(360.0f); }
+		if (angle.x < Deg2Rad(-30.0f)) { angle.x = Deg2Rad(-30.0f); }
+		if (angle.x > Deg2Rad(60.0f)) { angle.x = Deg2Rad(60.0f); }
 	}
 
 	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
-	pos = fixedLookAtPos + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+	pos = fixedLookAtPos + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
 }
 
 void Camera::LookAtFreeAplly(void)
@@ -288,11 +288,11 @@ void Camera::DisplayModeFunc(void)
 	// 回転処理（設定された値横向きに回し続ける）
 	angle += Vector3::Yonly(1.0f).Normalized() * ROT_POWER;
 
-	if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
-	if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
+	if (angle.y >= Deg2Rad(360.0f)) { angle.y -= Deg2Rad(360.0f); }
+	if (angle.y <= Deg2Rad(0.0f)) { angle.y += Deg2Rad(360.0f); }
 
 	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
-	pos = fixedLookAtPos + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+	pos = fixedLookAtPos + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
 }
 
 void Camera::DisplayAplly(void)
@@ -324,7 +324,7 @@ void Camera::ChangeModeFollowRemote(const Vector3* lookAt, const Vector3& lookAt
 	this->angle = angle;
 
 	// 座標をセット
-	pos = *lookAt + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+	pos = *lookAt + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
 
 	// 視野角を設定
 	this->fov = fov;
@@ -355,14 +355,14 @@ void Camera::FollowRemoteModeFunc(void)
 	if (vec != 0.0f) {
 		angle += vec.Normalized() * ROT_POWER;
 
-		if (angle.y >= Utility::Deg2RadF(360.0f)) { angle.y -= Utility::Deg2RadF(360.0f); }
-		if (angle.y <= Utility::Deg2RadF(0.0f)) { angle.y += Utility::Deg2RadF(360.0f); }
-		if (angle.x < Utility::Deg2RadF(-30.0f)) { angle.x = Utility::Deg2RadF(-30.0f); }
-		if (angle.x > Utility::Deg2RadF(60.0f)) { angle.x = Utility::Deg2RadF(60.0f); }
+		if (angle.y >= Deg2Rad(360.0f)) { angle.y -= Deg2Rad(360.0f); }
+		if (angle.y <= Deg2Rad(0.0f)) { angle.y += Deg2Rad(360.0f); }
+		if (angle.x < Deg2Rad(-30.0f)) { angle.x = Deg2Rad(-30.0f); }
+		if (angle.x > Deg2Rad(60.0f)) { angle.x = Deg2Rad(60.0f); }
 	}
 
 	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
-	pos = *lookAt + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+	pos = *lookAt + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
 }
 
 void Camera::FollowRemoteApply(void)
@@ -513,9 +513,9 @@ void Camera::DrawDebug(void)
 	DrawFormatString(
 		0, 30, 0xffffff,
 		"カメラ角度　 ：(% .1f, % .1f, % .1f)",
-		Utility::Rad2DegF(angle.x),
-		Utility::Rad2DegF(angle.y),
-		Utility::Rad2DegF(angle.z)
+		Rad2Deg(angle.x),
+		Rad2Deg(angle.y),
+		Rad2Deg(angle.z)
 	);
 
 }

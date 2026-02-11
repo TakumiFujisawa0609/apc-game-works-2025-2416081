@@ -6,10 +6,10 @@
 #include"../../../../Common/Collider/SphereCollider.h"
 
 Fall::Fall(int model):
-	state_(),
+	state(),
 
-	idleCounter_(),
-	groundHeight_()
+	idleCounter(),
+	groundHeight()
 {
 	ModelDuplicate(model);
 }
@@ -39,11 +39,11 @@ void Fall::SubUpdate(void)
 {
 	if (!GetJudgeFlg()) { return; }
 
-	switch (state_)
+	switch (state)
 	{
 	case STATE::IDLE:
-		if (++idleCounter_ > IDLE_TIME) {
-			state_ = STATE::FALL;
+		if (++idleCounter > IDLE_TIME) {
+			state = STATE::FALL;
 		}
 		break;
 	case STATE::FALL:
@@ -57,8 +57,8 @@ void Fall::SubAlphaDraw(void)
 {
 	if (!GetIsDraw()) { return; }
 
-	if (state_ == STATE::IDLE && idleCounter_ / 10 % 2 == 0) {
-		VECTOR predictionPos = { trans.pos.x,groundHeight_,trans.pos.z };
+	if (state == STATE::IDLE && idleCounter / 10 % 2 == 0) {
+		VECTOR predictionPos = { trans.pos.x,groundHeight,trans.pos.z };
 		float radius = ColliderSerch<SphereCollider>().back()->GetRadius();
 		DrawSphere3D(predictionPos, radius * 1.3f, 4, 0xff0000, 0xff0000, true);
 	}
@@ -82,13 +82,13 @@ void Fall::OnCollision(const ColliderBase& collider)
 void Fall::Set(const Vector3& pos)
 {
 	trans.pos = pos;
-	idleCounter_ = 0;
-	state_ = STATE::IDLE;
+	idleCounter = 0;
+	state = STATE::IDLE;
 
 	SetJudge(true);
 	SetIsDraw(true);
 
-	groundHeight_ = 0.0f;
+	groundHeight = 0.0f;
 
 	Vector3 work = trans.pos;
 	work.y = 1500.0f;
@@ -99,5 +99,5 @@ void Fall::Set(const Vector3& pos)
 		if (CollisionManager::IsStageCollision(work, radius)) { break; }
 		work.y -= 10.0f;
 	}
-	groundHeight_ = work.y - radius;
+	groundHeight = work.y - radius;
 }

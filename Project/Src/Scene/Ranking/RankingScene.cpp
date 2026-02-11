@@ -24,8 +24,8 @@ void RankingScene::Load(void)
 {
 	Snd::GetIns().ChangeScene("Ranking");
 
-	backImg = Utility::LoadImg("Data/Image/Ranking/RankingImageBack.png");
-	frameImg = Utility::LoadImg("Data/Image/Ranking/RankingImageFrame.png");
+	backImg = LoadImg("Data/Image/Ranking/RankingImageBack.png");
+	frameImg = LoadImg("Data/Image/Ranking/RankingImageFrame.png");
 }
 
 void RankingScene::Init(void)
@@ -39,7 +39,7 @@ void RankingScene::Update(void)
 	if (KEY::GetIns().GetInfo(KEY_TYPE::UP).now) { scrollHeight += 10; }
 	if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).now) { scrollHeight -= 10; }
 	scrollHeight =
-		Utility::Clamp(
+		std::clamp(
 			scrollHeight,
 			-((int)(rankingData.size() - 7) * (int)Font::GetIns().FONT_SIZE_TABLE[(int)FontKinds::GOKUSYOU_64]),
 			0

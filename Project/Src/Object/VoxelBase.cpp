@@ -13,7 +13,7 @@ VoxelBase::VoxelBase() :
     texture(-1),
     TEX_SCALE(),
 
-    batches(),
+    meshs(),
     Nx(0), Ny(0), Nz(0),
     cellSize(0.0f),
     gridCenter(0.0f, 0.0f, 0.0f),
@@ -128,7 +128,7 @@ void VoxelBase::Draw(void)
         SetTransformToWorld(&M);
 
         // ƒƒbƒVƒ…•`‰æ
-        for (auto& b : batches) {
+        for (auto& b : meshs) {
             if (b.i.empty()) { continue; }
             DrawPolygonIndexed3D(
                 b.v.empty() ? b.v.data() : b.v.data(),
@@ -160,7 +160,7 @@ void VoxelBase::AlphaDraw(void)
         SetTransformToWorld(&M);
 
         // ƒƒbƒVƒ…•`‰æ
-        for (auto& b : batches) {
+        for (auto& b : meshs) {
             if (b.i.empty()) { continue; }
             DrawPolygonIndexed3D(
                 b.v.empty() ? b.v.data() : b.v.data(),
@@ -185,11 +185,11 @@ void VoxelBase::AlphaDraw(void)
 void VoxelBase::Release(void)
 {
     // ƒƒbƒVƒ…î•ñŒQ‚ð‘S‚Ä”jŠü
-    for (auto& b : batches) {
+    for (auto& b : meshs) {
         b.i.clear();
         b.v.clear();
     }
-    batches.clear();
+    meshs.clear();
 
     // ƒeƒNƒXƒ`ƒƒ‚ð‰ð•úi“Ç‚Ýž‚Ü‚ê‚Ä‚¢‚½ê‡j
     if (texture != -1) { DeleteGraph(texture); }
@@ -230,7 +230,7 @@ void VoxelBase::BuildVoxelMeshFromMV1Handle(void)
     BuildGreedyMesh();
 
     // ƒƒbƒVƒ…¶¬‚ª³í‚És‚í‚ê‚½‚©”Û‚©iŽ¸”s‚ª‚ ‚ê‚Î’Ê’m‚µ‚Ä‚¨‚­j
-    if (batches.empty()) { printfDx("ƒ{ƒNƒZƒ‹ƒƒbƒVƒ…¶¬‚ÉŽ¸”s‚µ‚Ü‚µ‚½"); }
+    if (meshs.empty()) { printfDx("ƒ{ƒNƒZƒ‹ƒƒbƒVƒ…¶¬‚ÉŽ¸”s‚µ‚Ü‚µ‚½"); }
     // ```````````````````````````
 }
 
@@ -327,7 +327,7 @@ void VoxelBase::BuildGreedyMesh(void)
 
     auto Solid = [&](int x, int y, int z)->int { return (Inb(x, y, z) && density[Idx(x, y, z)] > 0) ? 1 : 0; };
 
-    batches.clear();
+    meshs.clear();
 
     MeshBatch cur;
     const float INF = 1e30f;
@@ -346,7 +346,7 @@ void VoxelBase::BuildGreedyMesh(void)
     const size_t kMaxVerts = 65000;
     auto flush = [&]() {
         if (!cur.v.empty()) {
-            batches.push_back(std::move(cur));
+            meshs.push_back(std::move(cur));
             cur = MeshBatch{};
             cur.bmin = Vector3(+INF, +INF, +INF);
             cur.bmax = Vector3(-INF, -INF, -INF);

@@ -23,9 +23,9 @@ Explanat::~Explanat()
 
 void Explanat::Load(void)
 {
-	img_ = Utility::LoadImg("Data/Image/Game/Start/Illustrate.png");
-	bottonImg_[0] = Utility::LoadImg("Data/Image/Game/Start/SpaceKey.png");
-	bottonImg_[1] = Utility::LoadImg("Data/Image/Game/Start/X.png");
+	img_ = LoadImg("Data/Image/Game/Start/Illustrate.png");
+	bottonImg_[0] = LoadImg("Data/Image/Game/Start/SpaceKey.png");
+	bottonImg_[1] = LoadImg("Data/Image/Game/Start/X.png");
 }
 
 void Explanat::Init(void)

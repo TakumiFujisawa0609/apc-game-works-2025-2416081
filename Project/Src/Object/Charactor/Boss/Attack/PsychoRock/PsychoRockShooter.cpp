@@ -6,7 +6,7 @@ PsychoRockShooter::PsychoRockShooter(const Vector3& bossPos, const Vector3& play
 	bossPos(bossPos),
 	playerPos(playerPos),
 
-	model_(-1)
+	model(-1)
 
 {
 }
@@ -17,44 +17,44 @@ PsychoRockShooter::~PsychoRockShooter()
 
 void PsychoRockShooter::Load(void)
 {
-	model_ = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
+	model = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
 
 	for (unsigned char i = 0; i < NUM_MAX; i++) {
-		rocks_[i] = new PsychoRock(model_, playerPos);
-		rocks_[i]->Load();
+		rocks[i] = new PsychoRock(model, playerPos);
+		rocks[i]->Load();
 	}
 }
 
 void PsychoRockShooter::Init(void)
 {
-	for (PsychoRock*& rock : rocks_) { rock->Init(); }
+	for (PsychoRock*& rock : rocks) { rock->Init(); }
 }
 
 void PsychoRockShooter::Update(void)
 {
-	for (PsychoRock*& rock : rocks_) { rock->Update(); }
+	for (PsychoRock*& rock : rocks) { rock->Update(); }
 }
 
 void PsychoRockShooter::Draw(void)
 {
-	for (PsychoRock*& rock : rocks_) { rock->Draw(); }
+	for (PsychoRock*& rock : rocks) { rock->Draw(); }
 }
 
 void PsychoRockShooter::AlphaDraw(void)
 {
-	for (PsychoRock*& rock : rocks_) { rock->AlphaDraw(); }
+	for (PsychoRock*& rock : rocks) { rock->AlphaDraw(); }
 }
 
 void PsychoRockShooter::Release(void)
 {
-	for (PsychoRock*& rock : rocks_) {
+	for (PsychoRock*& rock : rocks) {
 		if (!rock) { continue; }
 		rock->Release();
 		delete rock;
 		rock = nullptr;
 	}
 
-	MV1DeleteModel(model_);
+	MV1DeleteModel(model);
 }
 
 void PsychoRockShooter::Set(void)
@@ -63,7 +63,7 @@ void PsychoRockShooter::Set(void)
 		float x = 0.0f, z = 0.0f;
 		RandPos(x, z);
 
-		for (auto& rock : rocks_) {
+		for (auto& rock : rocks) {
 			if (rock->GetState() == PsychoRock::STATE::NON) {
 				rock->Set(x, z);
 				break;
@@ -74,7 +74,7 @@ void PsychoRockShooter::Set(void)
 
 void PsychoRockShooter::On(void)
 {
-	for (auto& rock : rocks_) {
+	for (auto& rock : rocks) {
 		if (rock->GetState() == PsychoRock::STATE::RISE_PREPARA) {
 			rock->On();
 		}

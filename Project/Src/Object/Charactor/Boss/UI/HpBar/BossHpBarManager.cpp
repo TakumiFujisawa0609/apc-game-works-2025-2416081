@@ -28,7 +28,7 @@ BossHpBarManager::BossHpBarManager(const unsigned short& HP, const unsigned shor
 
 void BossHpBarManager::Load(void)
 {
-	if (NUMBER == 0) { Utility::LoadImg(hpBarFrameImageHandle, "Data/Image/Game/UI/BossHpBarFrame.png"); }
+	if (NUMBER == 0) { LoadImg(hpBarFrameImageHandle, "Data/Image/Game/UI/BossHpBarFrame.png"); }
 
 	for (unsigned short i = 0; i < HP_BAR_DIVISIONS_NUM; i++) {
 		hpBar[i] = new BossHpBar(position, HP_BAR_ONE_DIVISION_SIZE);

@@ -4,57 +4,57 @@ RockWallShooter::RockWallShooter(const Vector3& bossPos, const Vector3& bossAngl
 	bossPos(bossPos),
 	bossAngle(bossAngle),
 
-	modelId_(-1),
-	textureId_(-1)
+	modelId(-1),
+	textureId(-1)
 {
 }
 
 void RockWallShooter::Load(void)
 {
-	modelId_ = MV1LoadModel("Data/Model/Rock/Rock.mv1");
-	Utility::LoadImg(textureId_, "Data/Model/Rock/Rock.png");
+	modelId = MV1LoadModel("Data/Model/Rock/Rock.mv1");
+	LoadImg(textureId, "Data/Model/Rock/Rock.png");
 
 	for (unsigned char i = 0; i < WALL_MAX_NUM; i++) {
-		walls_[i] = new RockWall(modelId_, textureId_);
+		walls[i] = new RockWall(modelId, textureId);
 	}
-	for (RockWall*& wall : walls_) { wall->Load(); }
+	for (RockWall*& wall : walls) { wall->Load(); }
 }
 
 void RockWallShooter::Init(void)
 {
-	for (RockWall*& wall : walls_) { wall->Init(); }
+	for (RockWall*& wall : walls) { wall->Init(); }
 }
 
 void RockWallShooter::Update(void)
 {
-	for (RockWall*& wall : walls_) { wall->Update(); }
+	for (RockWall*& wall : walls) { wall->Update(); }
 }
 
 void RockWallShooter::Draw(void)
 {
-	for (RockWall*& wall : walls_) { wall->Draw(); }
+	for (RockWall*& wall : walls) { wall->Draw(); }
 }
 
 void RockWallShooter::AlphaDraw(void)
 {
-	for (RockWall*& wall : walls_) { wall->AlphaDraw(); }
+	for (RockWall*& wall : walls) { wall->AlphaDraw(); }
 }
 
 void RockWallShooter::Release(void)
 {
-	for (RockWall*& wall : walls_) {
+	for (RockWall*& wall : walls) {
 		if (!wall) { continue; }
 		wall->Release();
 		delete wall;
 		wall = nullptr;
 	}
-	DeleteGraph(textureId_);
-	MV1DeleteModel(modelId_);
+	DeleteGraph(textureId);
+	MV1DeleteModel(modelId);
 }
 
 void RockWallShooter::On(void)
 {
-	Vector3 vec = VTransform(CREATE_ST_LOCAL_POS, Utility::MatrixAllMultY({ bossAngle }));
+	Vector3 vec = VTransform(CREATE_ST_LOCAL_POS, MatrixAllMultY({ bossAngle }));
 	Vector3 pos = bossPos + vec;
 
 	vec = vec.Normalized() * ONE_DISTANCE;
@@ -65,8 +65,8 @@ void RockWallShooter::On(void)
 
 		for (unsigned char j = serchNum; j < WALL_MAX_NUM; j++) {
 
-			if (!walls_[j]->GetJudgeFlg()) {
-				walls_[j]->On(pos);
+			if (!walls[j]->GetJudgeFlg()) {
+				walls[j]->On(pos);
 				pos += vec;
 				serchNum = j + 1;
 				break;

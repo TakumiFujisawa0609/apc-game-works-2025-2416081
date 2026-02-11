@@ -29,21 +29,21 @@
 #include"../Common/GameDebugScene.h"
 
 
-int GameScene::hitStop_ = 0;
+int GameScene::hitStop = 0;
 
-int GameScene::slow_ = 0;
-int GameScene::slowInter_ = 0;
+int GameScene::slow = 0;
+int GameScene::slowInter = 0;
 
-int GameScene::shake_ = 0;
-ShakeKinds GameScene::shakeKinds_ = ShakeKinds::DIAG;
-ShakeSize GameScene::shakeSize_ = ShakeSize::MEDIUM;
+int GameScene::shake = 0;
+ShakeKinds GameScene::shakeKinds = ShakeKinds::DIAG;
+ShakeSize GameScene::shakeSize = ShakeSize::MEDIUM;
 
 GameScene::GameScene():
-	collision_(nullptr),
+	collision(nullptr),
 
-	objects_(),
+	objects(),
 
-	mainScreen_(-1),
+	mainScreen(-1),
 
 	timer(0)
 {
@@ -58,22 +58,22 @@ void GameScene::Load(void)
 	Snd::GetIns().ChangeScene("Game");
 
 	// 画面演出用
-	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	mainScreen = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
 	// 当たり判定管理クラスを生成
-	collision_ = new CollisionManager();
+	collision = new CollisionManager();
 
 	// オブジェクト配列の上限設定(追加時、無駄なメモリ探索をしないように)
-	objects_.reserve(10);
+	objects.reserve(10);
 
 	// 初期化も含めたオブジェクト生成のラムダ関数
 	auto ObjAdd = [&](ActorBase* newClass)->void {
 		// 配列の末尾に追加
-		objects_.emplace_back(newClass);
+		objects.emplace_back(newClass);
 		// 共通の読み込み処理
-		objects_.back()->Load();
+		objects.back()->Load();
 		// そのオブジェクトが持つコライダーを管理クラスへ追加する
-		collision_->Add(objects_.back()->GetCollider());
+		collision->Add(objects.back()->GetCollider());
 		};
 
 
@@ -81,12 +81,12 @@ void GameScene::Load(void)
 	ObjAdd(new SkyDome());
 	ObjAdd(new BlockManager());
 	ObjAdd(new Player());
-	ObjAdd(new Boss(ObjSerch<Player>().back()->GetTrans().pos));
+	ObjAdd(new Boss(ObjSerch<Player>()->GetTrans().pos));
 	ObjAdd(new ScoreUI());
 	//ObjAdd(new SphereDebugObject());
 	
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
-	ObjSerch<Player>().back()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>().back()));
+	ObjSerch<Player>()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>()));
 
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());
@@ -98,10 +98,10 @@ void GameScene::Init(void)
 	KEY::GetIns().SetMouceFixed(true);
 
 	// オブジェクト全ての初期化処理
-	for (ActorBase*& obj : objects_) { obj->Init(); }
+	for (ActorBase*& obj : objects) { obj->Init(); }
 
 	// カメラ設定
-	Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>().back()->GetTrans(), &(ObjSerch<Boss>().back()->GetTrans().pos));
+	Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>()->GetTrans(), &(ObjSerch<Boss>()->GetTrans().pos));
 
 	// スコアを初期化
 	Score::GetIns().Reset();
@@ -114,19 +114,19 @@ void GameScene::Init(void)
 void GameScene::Update(void)
 {
 #pragma region 画面演出
-	if (hitStop_ > 0) { hitStop_--; return; }
-	if (shake_ > 0) { shake_--; }
-	if (slow_ > 0) {
-		slow_--;
-		if (slow_ % slowInter_ != 0) { return; }
+	if (hitStop > 0) { hitStop--; return; }
+	if (shake > 0) { shake--; }
+	if (slow > 0) {
+		slow--;
+		if (slow % slowInter != 0) { return; }
 	}
 #pragma endregion
 
 	// オブジェクト全ての更新処理
-	for (ActorBase*& obj : objects_) { obj->Update(); }
+	for (ActorBase*& obj : objects) { obj->Update(); }
 
 	// 当たり判定
-	collision_->Check();
+	collision->Check();
 
 	// スコアの更新
 	Score::GetIns().Update();
@@ -139,27 +139,23 @@ void GameScene::Update(void)
 	}
 
 	// ゲームクリア判定
-	if ((ObjSerch<Boss>().back()->GetState() == (int)Boss::STATE::END)||KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) {
+	if ((ObjSerch<Boss>()->GetState() == (int)Boss::STATE::END) || KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) {
 		// 追加予定で待機していたスコアを全て適用しておく
-		ObjSerch<ScoreUI>().back()->AllAddScoreApply();
+		ObjSerch<ScoreUI>()->AllAddScoreApply();
 
 		// ボーナススコアを追加
 		Score::GetIns().ScoreAddBonus(Score::GetIns().BestRecordCombo() * 1000);
-		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>().back()->HpRatio() * 100000));
+		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>()->HpRatio() * 100000));
 		Score::GetIns().ScoreAddBonus(100000 - (timer * 10));
 
-		std::vector<VoxelBase::MeshBatch>meshBatchs = {};
-		for (auto& block : ObjSerch<BlockManager>().back()->GetBlocks()) {
-			for (auto& mesh : dynamic_cast<VoxelBase*>(block)->GetBatches()) {
-				meshBatchs.emplace_back(mesh);
-			}
-		}
+		std::vector<VoxelBase::MeshBatch>meshBatchs = ObjSerch<BlockManager>()->GetMesh();
 		SceneManager::GetIns().ChangeSceneFade(std::make_shared<ClearScene>(meshBatchs, "Data/Model/Rock/Rock.png"));
+
 		return;
 	}
 	
 	// ゲームオーバー判定
-	if (ObjSerch<Player>().back()->GetState() == (int)Player::STATE::END) {
+	if (ObjSerch<Player>()->GetState() == (int)Player::STATE::END) {
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::OVER);
 		return;
 	}
@@ -168,7 +164,7 @@ void GameScene::Update(void)
 	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down) {
 		SceneManager::GetIns().PushScene(
 			std::make_shared<GameDebugScene>(
-				[this](void) { Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>().back()->GetTrans(), &(ObjSerch<Boss>().back()->GetTrans().pos)); },
+				[this](void) { Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>()->GetTrans(), &(ObjSerch<Boss>()->GetTrans().pos)); },
 				[this](void) { this->Update(); }
 			)
 		);
@@ -183,7 +179,7 @@ void GameScene::Draw(void)
 {
 #pragma region 画面演出
 	// 描画先を変更
-	SetDrawScreen(mainScreen_);
+	SetDrawScreen(mainScreen);
 
 	// 画面リセット
 	ClearDrawScreen();
@@ -194,9 +190,9 @@ void GameScene::Draw(void)
 
 #pragma region 描画処理（メイン）
 	// オブジェクト全ての描画処理
-	for (ActorBase*& obj : objects_) { obj->Draw(); }
+	for (ActorBase*& obj : objects) { obj->Draw(); }
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-	for (ActorBase*& obj : objects_) { obj->AlphaDraw(); }
+	for (ActorBase*& obj : objects) { obj->AlphaDraw(); }
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 #pragma endregion
 
@@ -208,12 +204,12 @@ void GameScene::Draw(void)
 	Vector2I s = ShakePoint();
 
 	// 揺れの数値分座標をずらして描画
-	DrawGraph(s.x, s.y, mainScreen_, true);
+	DrawGraph(s.x, s.y, mainScreen, true);
 #pragma endregion
 
 #pragma region UI描画（画面演出をかけないもの）
 	// オブジェクト全てのUI描画処理
-	for (ActorBase*& obj : objects_) { obj->UiDraw(); }
+	for (ActorBase*& obj : objects) { obj->UiDraw(); }
 #pragma endregion
 }
 
@@ -222,14 +218,14 @@ void GameScene::Release(void)
 	Camera::GetIns().Release();
 
 	// 当たり判定管理クラスの解放
-	if (collision_) {
-		collision_->Clear();
-		delete collision_;
-		collision_ = nullptr;
+	if (collision) {
+		collision->Clear();
+		delete collision;
+		collision = nullptr;
 	}
 
 	// オブジェクト全ての解放処理
-	for (ActorBase*& obj : objects_) {
+	for (ActorBase*& obj : objects) {
 		if (!obj) { continue; }
 		obj->Release();
 		delete obj;
@@ -237,24 +233,24 @@ void GameScene::Release(void)
 	}
 
 	// 画面演出用のメインスクリーンを解放
-	DeleteGraph(mainScreen_);
+	DeleteGraph(mainScreen);
 }
 
 void GameScene::Shake(ShakeKinds kinds, ShakeSize size, int time)
 {
-	if ((abs(shake_ - time) > 10) || shake_ <= 0)shake_ = time;
-	shakeKinds_ = kinds;
-	shakeSize_ = size;
+	if ((abs(shake - time) > 10) || shake <= 0)shake = time;
+	shakeKinds = kinds;
+	shakeSize = size;
 }
 Vector2I GameScene::ShakePoint(void)
 {
 	Vector2I ret = {};
 
-	if (shake_ > 0) {
-		int size = shake_ / 5 % 2;
+	if (shake > 0) {
+		int size = shake / 5 % 2;
 		size *= 2;
 		size -= 1;
-		switch (shakeKinds_)
+		switch (shakeKinds)
 		{
 		case GameScene::WID:ret.x = size;
 			break;
@@ -263,14 +259,14 @@ Vector2I GameScene::ShakePoint(void)
 		case GameScene::DIAG:ret = size;
 			break;
 		case GameScene::ROUND:
-			size = shake_ / 3 % 12; size++;
-			ret = { (int)(((int)shakeSize_ * 1.5f) * cos(size * 30.0f)),(int)(((int)shakeSize_ * 1.5f) * sin(size * 30.0f)) };
+			size = shake / 3 % 12; size++;
+			ret = { (int)(((int)shakeSize * 1.5f) * cos(size * 30.0f)),(int)(((int)shakeSize * 1.5f) * sin(size * 30.0f)) };
 			break;
 		}
 
-		if (shakeKinds_ != ShakeKinds::ROUND) { ret *= shakeSize_; }
+		if (shakeKinds != ShakeKinds::ROUND) { ret *= shakeSize; }
 
-		DrawGraph(0, 0, mainScreen_, true);
+		DrawGraph(0, 0, mainScreen, true);
 	}
 
 	return ret;

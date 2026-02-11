@@ -120,7 +120,7 @@ void BossHpBar::Revival(unsigned short num)
 void BossHpBar::LostDrop(void)
 {
 	// ‰ñ“]‚³‚¹‚é
-	angle += Utility::Deg2RadF(5.0f);
+	angle += Deg2Rad(5.0f);
 
 	// —Ž‰º
 	localPosition += dropAccel;

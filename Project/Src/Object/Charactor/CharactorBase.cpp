@@ -3,15 +3,15 @@
 CharactorBase::CharactorBase() :
 	ActorBase(),
 
-	state_(0),
+	state(0),
 	stateFuncPtr(),
 
 	DEFAULT_COLOR(),
 
-	anime_(nullptr),
+	anime(nullptr),
 
-	inviCounter_(0),
-	isInviEffect_(false)
+	inviCounter(0),
+	isInviEffect(false)
 {
 }
 
@@ -33,10 +33,10 @@ void CharactorBase::SubUpdate(void)
 	CharactorUpdate();
 
 	// 派生先で割り振り可能のステート別関数
-	(this->*stateFuncPtr[state_])();
+	(this->*stateFuncPtr[state])();
 
 	// アニメーション更新
-	if (anime_) { anime_->Update(); }
+	if (anime) { anime->Update(); }
 }
 
 void CharactorBase::SubDraw(void)
@@ -62,23 +62,23 @@ void CharactorBase::SubRelease(void)
 	}
 
 	// アニメーションコントローラーの解放（使われていたら）
-	if (anime_) {
-		anime_->Release();
-		delete anime_;
-		anime_ = nullptr;
+	if (anime) {
+		anime->Release();
+		delete anime;
+		anime = nullptr;
 	}
 }
 
 void CharactorBase::Invi(void)
 {
-	if (inviCounter_ > 0) { inviCounter_--; }
-	else { inviCounter_ = 0; }
+	if (inviCounter > 0) { inviCounter--; }
+	else { inviCounter = 0; }
 
 	// ダメージ演出
-	if (!isInviEffect_) { return; }
+	if (!isInviEffect) { return; }
 
-	if (inviCounter_ > 1) {
-		if (inviCounter_ / 10 % 2 == 0) {
+	if (inviCounter > 1) {
+		if (inviCounter / 10 % 2 == 0) {
 			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
 				MV1SetMaterialEmiColor(trans.model, i, DEFAULT_COLOR[i]);
 			}
@@ -92,7 +92,7 @@ void CharactorBase::Invi(void)
 		}
 
 	}
-	else if (inviCounter_ == 1) {
+	else if (inviCounter == 1) {
 		for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
 			MV1SetMaterialEmiColor(trans.model, i, DEFAULT_COLOR[i]);
 		}
@@ -102,18 +102,18 @@ void CharactorBase::Invi(void)
 void CharactorBase::AddInFbxAnimation(int inFbxMaxIndex, float speed)
 {
 	for (int index = 0; index < inFbxMaxIndex; index++) {
-		anime_->AddInFbx(index, speed, index);
+		anime->AddInFbx(index, speed, index);
 	}
 }
 
 void CharactorBase::AddInFbxAnimation(int inFbxMaxIndex, const float* speed)
 {
 	for (int index = 0; index < inFbxMaxIndex; index++) {
-		anime_->AddInFbx(index, speed[index], index);
+		anime->AddInFbx(index, speed[index], index);
 	}
 }
 
 void CharactorBase::AddAnimation(int index, float speed, const char* filePath)
 {
-	anime_->Add(index, speed, filePath);
+	anime->Add(index, speed, filePath);
 }

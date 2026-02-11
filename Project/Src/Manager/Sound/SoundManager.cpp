@@ -8,7 +8,7 @@
 
 #include"../../Utility/Utility.h"
 
-SoundManager* SoundManager::ins_ = nullptr;
+SoundManager* SoundManager::ins = nullptr;
 
 SoundManager::SoundManager() :
 	masterVolume(255),
@@ -32,7 +32,7 @@ void SoundManager::Init(void)
 	// 1行ずつカンマ区切りにされた状態で読み込む
 	while (getline(ifs, line)) {
 		// カンマごとに分けて文字列として配列に格納
-		std::vector<std::string> table = Utility::Split(line, ',');
+		std::vector<std::string> table = Split(line, ',');
 
 		// 一旦一時変数にデータを取りまとめる
 		SoundTable data(

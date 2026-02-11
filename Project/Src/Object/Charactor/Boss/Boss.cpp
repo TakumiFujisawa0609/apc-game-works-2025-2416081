@@ -78,7 +78,7 @@ void Boss::Load(void)
 
 void Boss::CharactorInit(void)
 {
-	state_ = (int)STATE::IDLE;
+	state = (int)STATE::IDLE;
 
 	trans.pos = Vector3(1000.0f, 300.0f, 1000.0f);
 
@@ -122,7 +122,7 @@ void Boss::UiDraw(void)
 	preview->Draw(DX_SCREEN_BACK);
 	for (unsigned char i = 0; i < masterLife_; i++) { hpBar_[i]->Draw(); }
 
-	if (state_ == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
+	if (state == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
 		SetFontSize(45);
 		DrawString((int)HP_BAR_POS.x + 60, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
 		SetFontSize(16);
@@ -139,7 +139,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 {
 	if (GetInviCounter() > 0) { return; }
 
-	if (state_ == (int)STATE::STAN) {
+	if (state == (int)STATE::STAN) {
 		if (collider.GetTag() == TAG::PLAYER_PUNCH) {
 			Snd::GetIns().Play("ObjBreak");
 			LifeSharpen();
@@ -176,7 +176,7 @@ void Boss::Idle(void)
 	if (--attackInterval_ <= 0) {
 		attackInterval_ = 0;
 		attackInit_ = true;
-		state_ = (int)STATE::ATTACK;
+		state = (int)STATE::ATTACK;
 	}
 }
 void Boss::Attack(void)
@@ -270,7 +270,7 @@ void Boss::Attack(void)
 #pragma region 攻撃終了 通常状態へ遷移
 	if (attackEnd_) {
 		if (attackState_ != ATTACK_KINDS::NON) { attackInterval_ = ATTACK_INTERVAL[(int)attackState_]; }
-		state_ = (int)STATE::IDLE;
+		state = (int)STATE::IDLE;
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 #pragma endregion
@@ -278,21 +278,21 @@ void Boss::Attack(void)
 void Boss::Damage(void)
 {
 	if (IsAnimeEnd()) {
-		state_ = (int)STATE::IDLE;
+		state = (int)STATE::IDLE;
 	}
 }
 void Boss::Stan(void)
 {
 	if (--stanTimer_ <= 0) {
 		hp_ = (int)(HP_MAX * 0.2f);
-		state_ = (int)STATE::IDLE;
+		state = (int)STATE::IDLE;
 	}
 }
 void Boss::BigDamage(void)
 {
 	if (GetAnimeRatio() > 0.4f) {
 		hp_ = HP_MAX;
-		state_ = (int)STATE::IDLE;
+		state = (int)STATE::IDLE;
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 }
@@ -300,7 +300,7 @@ void Boss::Death(void)
 {
 	if (IsAnimeEnd()) {
 		SetJudge(false);
-		state_ = (int)STATE::END;
+		state = (int)STATE::END;
 	}
 }
 
@@ -450,15 +450,15 @@ void Boss::HpSharpen(int damage)
 
 		stanTimer_ = STAN_TIME;
 
-		state_ = (int)STATE::STAN;
+		state = (int)STATE::STAN;
 		AnimePlay((int)ANIME_TYPE::STAN);
 		return;
 	}
 
-	if (state_ != (int)STATE::ATTACK) {
+	if (state != (int)STATE::ATTACK) {
 		stanTimer_ = STAN_TIME;
 
-		state_ = (int)STATE::DAMAGE;
+		state = (int)STATE::DAMAGE;
 		AnimePlay((int)ANIME_TYPE::DAMAGE, false);
 	}
 	SetInviCounter(60);
@@ -469,7 +469,7 @@ void Boss::LifeSharpen(void)
 
 	if (--masterLife_ <= 0) {
 		masterLife_ = 0;
-		state_ = (int)STATE::DEATH;
+		state = (int)STATE::DEATH;
 		AnimePlay((int)ANIME_TYPE::DEATH, false);
 
 		GameScene::HitStop(40);
@@ -488,6 +488,6 @@ void Boss::LifeSharpen(void)
 	Vector3 vec = playerPos - trans.pos;
 	trans.angle.y = atan2f(vec.x, vec.z);
 
-	state_ = (int)STATE::BIG_DAMAGE;
+	state = (int)STATE::BIG_DAMAGE;
 	AnimePlay((int)ANIME_TYPE::DEATH, false);
 }

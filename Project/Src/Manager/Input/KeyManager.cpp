@@ -10,7 +10,7 @@ KeyManager::KeyManager():
 	keyboardFormat(),
 	mouceButtonFormat(),
 	controllerButtonFormat(),
-	mouceFixed_(false),
+	mouceFixed(false),
 
 	lastInputKinds(false),
 
@@ -287,7 +287,7 @@ bool KeyManager::ControllerOthersInput(const CONTROLLER_OTHERS& input)
 
 void KeyManager::MouceUpdate(void)
 {
-	if (mouceFixed_) {
+	if (mouceFixed) {
 
 		mouceInfo.prev = { Application::SCREEN_SIZE_X / 2,Application::SCREEN_SIZE_Y / 2 };
 
@@ -346,6 +346,6 @@ Vector2 KeyManager::GetLeftStickVec(void) const
 
 void KeyManager::SetMouceFixed(bool fixed)
 {
-	mouceFixed_ = fixed;
+	mouceFixed = fixed;
 	SetMouseDispFlag(!fixed);
 }

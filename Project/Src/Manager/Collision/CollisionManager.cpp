@@ -2,10 +2,10 @@
 
 #include<cmath>
 
-std::vector<ColliderBase*> CollisionManager::playerColliders_ = {};
-std::vector<ColliderBase*> CollisionManager::enemyColliders_ = {};
-std::vector<ColliderBase*> CollisionManager::stageColliders_ = {};
-std::vector<ColliderBase*> CollisionManager::otherColliders_ = {};
+//std::vector<ColliderBase*> CollisionManager::playerColliders = {};
+//std::vector<ColliderBase*> CollisionManager::enemyColliders = {};
+std::vector<ColliderBase*> CollisionManager::stageColliders = {};
+std::vector<ColliderBase*> CollisionManager::otherColliders = {};
 
 void CollisionManager::Add(ColliderBase* collider)
 {
@@ -22,7 +22,7 @@ void CollisionManager::Add(ColliderBase* collider)
 	case TAG::PLAYER_PUNCH:
 	case TAG::PLAYER_GOUGE:
 	case TAG::PLAYER_THROWING:
-		playerColliders_.emplace_back(collider);
+		playerColliders.emplace_back(collider);
 		break;
 
 		// エネミー系
@@ -33,18 +33,18 @@ void CollisionManager::Add(ColliderBase* collider)
 	case TAG::GOLEM_ATTACK_FALL:
 	case TAG::GOLEM_ATTACK_PSYCHOROCK:
 	case TAG::GOLEM_ATTACK_STONE:
-		enemyColliders_.emplace_back(collider);
+		enemyColliders.emplace_back(collider);
 		break;
 
 		// ステージ系
 	case TAG::STAGE:
 	case TAG::GOLEM_ATTACK_WALL:
-		stageColliders_.emplace_back(collider);
+		stageColliders.emplace_back(collider);
 		break;
 
 		// それ以外
 	default:
-		otherColliders_.emplace_back(collider);
+		otherColliders.emplace_back(collider);
 		break;
 	}
 }
@@ -52,32 +52,32 @@ void CollisionManager::Add(ColliderBase* collider)
 void CollisionManager::Check(void)
 {
 	// プレイヤー系×ステージ系
-	Matching(playerColliders_, stageColliders_);
+	Matching(playerColliders, stageColliders);
 
 	// エネミー系×ステージ系
-	Matching(enemyColliders_, stageColliders_);
+	Matching(enemyColliders, stageColliders);
 
 	// それ以外×ステージ系
-	Matching(otherColliders_, stageColliders_);
+	Matching(otherColliders, stageColliders);
 	
 	// プレイヤー系×エネミー系
-	Matching(playerColliders_, enemyColliders_);
+	Matching(playerColliders, enemyColliders);
 	
 	// プレイヤー系×それ以外
-	Matching(playerColliders_, otherColliders_);
+	Matching(playerColliders, otherColliders);
 
 	// エネミー系×それ以外
-	Matching(enemyColliders_, otherColliders_);
+	Matching(enemyColliders, otherColliders);
 
 	// それ以外×それ以外
-	Matching(otherColliders_);
+	Matching(otherColliders);
 }
 
 bool CollisionManager::IsStageCollision(const Vector3& pos, float radius, TAG tag)
 {
 	float r2 = radius * radius;
 
-	for (ColliderBase*& collider : stageColliders_) {
+	for (ColliderBase*& collider : stageColliders) {
 		if (tag == collider->GetTag()) { continue; }
 
 		if (VoxelCollider* voxel = dynamic_cast<VoxelCollider*>(collider)) {

@@ -25,14 +25,14 @@ void PlayerOperationUI::Load(void)
 	// 各画像のロード
 	for (unsigned char i = 0; i < (unsigned char)ACTION::MAX; i++) {
 		// アクションを表現したイラスト
-		Utility::LoadImg(actionImg[i], ACTION_IMG_PATH + ACTION_IMG_NAME[i] + COMMON_IMG_FILE_NAME);
+		LoadImg(actionImg[i], ACTION_IMG_PATH + ACTION_IMG_NAME[i] + COMMON_IMG_FILE_NAME);
 	}
 	for (unsigned char i = 0; i < (unsigned char)SORT::MAX; i++) {
 		// 操作ボタンイラスト(キーボード)
-		Utility::LoadImg(operationKeyboardImg[i], OPERATION_KEYBOARD_IMG_PATH + OPERATION_KEYBOARD_IMG_NAME[i] + COMMON_IMG_FILE_NAME);
+		LoadImg(operationKeyboardImg[i], OPERATION_KEYBOARD_IMG_PATH + OPERATION_KEYBOARD_IMG_NAME[i] + COMMON_IMG_FILE_NAME);
 
 		// 操作ボタンイラスト(コントローラー)
-		Utility::LoadImg(operationControllerImg[i], OPERATION_CONTROLLER_IMG_PATH + OPERATION_CONTROLLER_IMG_NAME[i] + COMMON_IMG_FILE_NAME);
+		LoadImg(operationControllerImg[i], OPERATION_CONTROLLER_IMG_PATH + OPERATION_CONTROLLER_IMG_NAME[i] + COMMON_IMG_FILE_NAME);
 	}
 }
 

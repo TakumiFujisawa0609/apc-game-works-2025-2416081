@@ -25,7 +25,5 @@ private:
 	int updateFrameRateTime;
 
 	float frameRate;
-
-
 };
 

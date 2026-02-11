@@ -75,7 +75,7 @@ private:
 	const Vector3 CENTER_DIFF = Vector3(0.0f, 190.9405f, 0.0f) * SCALE;
 
 	// ƒ[ƒJƒ‹‰ñ“]Šp“x
-	const Vector3 LOCAL_ANGLE = { 0.0f,Utility::Deg2RadF(180.0f),0.0f };
+	const Vector3 LOCAL_ANGLE = { 0.0f,Deg2Rad(180.0f),0.0f };
 
 	// ƒJƒvƒZƒ‹“–‚½‚è”»’è—p’è”`````````````````````````````````````````````````````````
 

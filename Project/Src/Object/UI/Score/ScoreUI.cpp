@@ -18,7 +18,7 @@ ScoreUI::ScoreUI(const Vector2& SCORE_POS) :
 
 void ScoreUI::Load(void)
 {
-	Utility::LoadArrayImg("Data/Image/Game/UI/ComboBack.png", 12, 4, 3, 311, 219, comboBackImage);
+	LoadArrayImg("Data/Image/Game/UI/ComboBack.png", 12, 4, 3, 311, 219, comboBackImage);
 }
 
 void ScoreUI::Init(void)

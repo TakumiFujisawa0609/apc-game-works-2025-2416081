@@ -12,18 +12,18 @@
 #include"../Scene/SceneManager/SceneManager.h"
 
 
-Application* Application::ins_ = nullptr;
+Application* Application::ins = nullptr;
 
 // コンストラクタ
 Application::Application(void) :
-	isInitFail_(false),
-	isReleaseFail_(false),
+	isInitFail(false),
+	isReleaseFail(false),
 
-	gameEnd_(false),
+	gameEnd(false),
 
-	fps_(nullptr),
+	fps(nullptr),
 
-	drawDebug_(false)
+	drawDebug(false)
 {
 }
 
@@ -46,8 +46,8 @@ void Application::Init(void)
 #endif // _DEBUG
 
 	// DxLibの初期化
-	isInitFail_ = false;
-	if (DxLib_Init() == -1) { isInitFail_ = true; return; }
+	isInitFail = false;
+	if (DxLib_Init() == -1) { isInitFail = true; return; }
 
 	// 描画先画面を裏にする
 	SetDrawScreen(DX_SCREEN_BACK);
@@ -57,8 +57,8 @@ void Application::Init(void)
 	KeyManager::CreateIns();
 
 	// FPS初期化
-	fps_ = new FPS;
-	fps_->Init();
+	fps = new FPS;
+	fps->Init();
 
 	// カメラ
 	Camera::CreateIns();
@@ -84,10 +84,10 @@ void Application::Init(void)
 void Application::Run(void)
 {
 	// ゲームループ
-	while (ProcessMessage() == 0 && !gameEnd_)
+	while (ProcessMessage() == 0 && !gameEnd)
 	{
 		// フレームレート上限まで経過していないなら再ループさせる
-		if (!fps_->UpdateFrameRate()) { continue; }
+		if (!fps->UpdateFrameRate()) { continue; }
 
 		// 入力管理クラスの更新
 		KeyManager::GetIns().Update();
@@ -105,7 +105,7 @@ void Application::Run(void)
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
 
 		// フレームレート計算
-		fps_->CalcFrameRate();
+		fps->CalcFrameRate();
 
 		// 背面描画画面をクリア
 		ClearDrawScreen();
@@ -118,7 +118,7 @@ void Application::Run(void)
 
 #ifdef _DEBUG
 		// フレームレートデバッグ描画
-		fps_->DrawFrameRate();
+		fps->DrawFrameRate();
 #endif // DEBUG
 
 		// 描画が完了した背面画面を表に持ってくる
@@ -149,11 +149,11 @@ void Application::Release(void)
 	Camera::DeleteIns();
 
 	// フレームレート解放
-	delete fps_;
+	delete fps;
 
 	// 入力制御削除
 	KeyManager::DeleteIns();
 
 	// DxLib終了
-	if (DxLib_End() == -1) { isReleaseFail_ = true; }
+	if (DxLib_End() == -1) { isReleaseFail = true; }
 }

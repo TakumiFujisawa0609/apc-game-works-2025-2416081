@@ -36,23 +36,22 @@ public:
 	void Release(void);
 
 	const bool IsEnd(void)const;
-	const int GetPlayType(void)const { return playType_; }
-	const bool GetAnimEnd(void)const { return playAnim_.step >= playAnim_.totalTime; }
+	const int GetPlayType(void)const { return playType; }
+	const bool GetAnimEnd(void)const { return playAnim.step >= playAnim.totalTime; }
 
-	const float GetAnimeRatio(void)const { return (playAnim_.step / playAnim_.totalTime); }
+	const float GetAnimeRatio(void)const { return (playAnim.step / playAnim.totalTime); }
 
 private:
 	// アニメーションするモデルのハンドルID
-	int modelId_;
+	int modelId;
 
 	// 種類別のアニメーションデータ
-	std::map<int, Animation> animations_;
+	std::map<int, Animation> animations;
 
 	// 再生中のアニメーション
-	int playType_;
-	Animation playAnim_;
-	bool loopflg_;
+	int playType;
+	Animation playAnim;
+	bool loopflg;
 
 	void Add(int type, float speed, Animation animation);
-
 };

@@ -19,8 +19,8 @@ EndScene::~EndScene()
 
 void EndScene::Load(void)
 {
-	img_[(int)SELECT::YES] = Utility::LoadImg("Data/Image/Title/End/Yes.png");
-	img_[(int)SELECT::NO] = Utility::LoadImg("Data/Image/Title/End/No.png");
+	img_[(int)SELECT::YES] = LoadImg("Data/Image/Title/End/Yes.png");
+	img_[(int)SELECT::NO] = LoadImg("Data/Image/Title/End/No.png");
 }
 
 void EndScene::Init(void) 

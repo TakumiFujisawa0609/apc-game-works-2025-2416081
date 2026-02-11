@@ -1,7 +1,6 @@
 #pragma once
 
 #include"ActorBase.h"
-#include<array>
 #include<map>
 
 #include"Common/Collider/VoxelCollider.h"
@@ -43,10 +42,10 @@ public:
 	void ReVival(void);
 
 	// メッシュ群をワールド座標仕様で取得
-	std::vector<MeshBatch> GetBatches(void)const {
+	std::vector<MeshBatch> GetMeshs(void)const {
 		std::vector<MeshBatch>ret = {};
 		
-		ret = batches;
+		ret = meshs;
 
 		for (auto& r : ret) {
 			for (auto& vPos : r.v) { vPos.pos = (Vector3(vPos.pos) + trans.pos).ToVECTOR(); }
@@ -130,7 +129,7 @@ private:
 	float aliveNeedRatio;
 
 	// メッシュバッチ群
-	std::vector<MeshBatch> batches;
+	std::vector<MeshBatch> meshs;
 
 	// グリッド中心位置(モデルによる中心座標のズレの補完用)
 	Vector3 gridCenter;

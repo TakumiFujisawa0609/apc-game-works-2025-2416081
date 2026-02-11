@@ -26,7 +26,7 @@ PlayerHpBarManager::~PlayerHpBarManager()
 
 void PlayerHpBarManager::Load(void)
 {
-	Utility::LoadImg(hpBarFrameImageHandle, "Data/Image/Game/UI/PlayerHpBarFrame.png");
+	LoadImg(hpBarFrameImageHandle, "Data/Image/Game/UI/PlayerHpBarFrame.png");
 
 	for (unsigned char i = 0; i < HP_BAR_DIVISION_NUM; i++) {
 		hpBar[i] = new PlayerHpBar(position, HP_BAR_ONE_DIVISION_SIZE);

@@ -2,9 +2,7 @@
 #include<map>
 #include<vector>
 
-class Block;
-
-#include"../../ActorBase.h"
+#include "Block.h"
 
 class BlockManager : public ActorBase
 {
@@ -27,27 +25,25 @@ public:
 	void AlphaDraw(void)override;
 	void Release(void)override;
 
+	// 生成したブロック全てのコライダーを取得
 	std::vector<ColliderBase*> GetCollider(void)const override;
 
-	const std::vector<ActorBase*>GetBlocks(void)const;
+	// 生成したブロック全てのメッシュを取得
+	const std::vector<MeshBatch> GetMesh(void)const;
 
+	// プレイヤーリスポーンによる地形復活
 	void StageRevival(void);
 
-
 private:
-	int textureId_;
+	// ブロック用のテクスチャハンドル
+	std::map<int, int> textures;
+	// ブロック用のモデルハンドル
+	std::map<int, int>models;
 
-	std::vector<Block*>blocks_;
+	// ブロック群のインスタンス格納配列
+	std::vector<Block*>blocks;
 
-	// ブロック用のモデルハンドルID
-	std::map<int, int>models_;
-
+	// マップデータ読み込み、ブロック生成
 	void LoadMapCsvData(void);
-
-	void SubInit(void)override {}
-	void SubUpdate(void)override {}
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 };
 

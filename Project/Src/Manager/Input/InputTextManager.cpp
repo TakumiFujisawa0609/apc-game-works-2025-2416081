@@ -33,7 +33,7 @@ void InputTextManager::Input(std::wstring& inputText)
 	GetHitKeyStateAll(key);
 	for (short i = 0; i < 256; i++) {
 		if (key[i]) {
-			if (nowKey[i] >= 150) { nowKey[i] = 150; }
+			if (nowKey[i] >= 150) { nowKey[i] = (char)150; }
 			else { nowKey[i]++; }
 		}
 		else { nowKey[i] = 0; }

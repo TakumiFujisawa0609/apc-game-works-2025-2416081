@@ -35,8 +35,8 @@ void TitleScene::Load(void)
 {
 	Snd::GetIns().ChangeScene("Title");
 
-	Utility::LoadImg(img_, "Data/Image/Title/Title.png");
-	Utility::LoadImg(pushToImg, "Data/Image/Title/PushToStart.png");
+	LoadImg(img_, "Data/Image/Title/Title.png");
+	LoadImg(pushToImg, "Data/Image/Title/PushToStart.png");
 
 	skyDome_ = new SkyDome();
 	skyDome_->Load();

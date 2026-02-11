@@ -4,7 +4,7 @@
 
 FallManager::FallManager(const Vector3& playerPos):
 	model(-1),
-	falls_(),
+	falls(),
 
 	playerPos(playerPos)
 {
@@ -19,34 +19,34 @@ void FallManager::Load(void)
 	model = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
 
 	for (unsigned char i = 0; i < FALL_NUM_MAX; i++) {
-		falls_[i] = new Fall(model);
+		falls[i] = new Fall(model);
 	}
 
-	for (Fall*& fall : falls_) { fall->Load(); }
+	for (Fall*& fall : falls) { fall->Load(); }
 }
 
 void FallManager::Init(void)
 {
-	for (Fall*& fall : falls_) { fall->Init(); }
+	for (Fall*& fall : falls) { fall->Init(); }
 }
 
 void FallManager::Update(void)
 {
-	for (Fall*& fall : falls_) { fall->Update(); }
+	for (Fall*& fall : falls) { fall->Update(); }
 }
 
 void FallManager::Draw(void)
 {
-	for (Fall*& fall : falls_) { fall->Draw(); }
+	for (Fall*& fall : falls) { fall->Draw(); }
 }
 void FallManager::AlphaDraw(void)
 {
-	for (Fall*& fall : falls_) { fall->AlphaDraw(); }
+	for (Fall*& fall : falls) { fall->AlphaDraw(); }
 }
 
 void FallManager::Release(void)
 {
-	for (Fall*& fall : falls_) {
+	for (Fall*& fall : falls) {
 		if (!fall) { continue; }
 		fall->Release();
 		delete fall;
@@ -57,7 +57,7 @@ void FallManager::Release(void)
 
 void FallManager::Set(void)
 {
-	for (Fall*& fall : falls_) {
+	for (Fall*& fall : falls) {
 		if (!fall->GetJudgeFlg()) {
 			fall->Set(playerPos + LOCAL_POS);
 			return;
@@ -67,7 +67,7 @@ void FallManager::Set(void)
 
 void FallManager::On(void)
 {
-	for (auto& fall : falls_) {
+	for (auto& fall : falls) {
 		if (fall->GetState() == Fall::STATE::IDLE) {
 			fall->On();
 		}

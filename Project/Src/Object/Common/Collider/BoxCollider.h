@@ -7,16 +7,16 @@ class BoxCollider : public ColliderBase
 public:
 	BoxCollider(TAG type, Vector3 size, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
-		size_(size)
+		size(size)
 	{
 		SetShape(SHAPE::BOX);
 	}
 	~BoxCollider()override {}
 
-	Vector3 GetSize(void)const { return size_; }
+	Vector3 GetSize(void)const { return size; }
 
 	void DrawDebug(unsigned int color = 0xffffff)override {
-        Vector3 half = size_ * 0.5f;
+        Vector3 half = size * 0.5f;
         Vector3 center = GetPos();
 
         // 8’¸“_
@@ -47,5 +47,5 @@ public:
         L(0, 4); L(1, 5); L(2, 6); L(3, 7);
 	}
 private:
-	Vector3 size_;
+	Vector3 size;
 };

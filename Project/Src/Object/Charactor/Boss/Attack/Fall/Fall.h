@@ -20,26 +20,30 @@ public:
 	};
 
 	void Set(const Vector3& pos);
-	void On(void) { state_ = STATE::FALL; }
+	void On(void) { state = STATE::FALL; }
 
-	STATE GetState(void)const { return state_; }
+	STATE GetState(void)const { return state; }
 
 private:
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-	void SubDraw(void)override {}
 	void SubAlphaDraw(void)override;
-	void SubRelease(void)override {}
 
-	STATE state_;
+	// 状態
+	STATE state;
 
+	// モデルのスケール
 	const float SCALE = 2.0f;
 
+	// 半径
 	const float RADIUS = 65.0f * SCALE;
 
+	// 生存時間
 	const short IDLE_TIME = 1000;
-	short idleCounter_;
+	// 生存時間計測用カウンター
+	short idleCounter;
 
-	float groundHeight_;
+	// ターゲット座標の高さ
+	float groundHeight;
 };

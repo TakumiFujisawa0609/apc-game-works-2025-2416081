@@ -13,7 +13,7 @@ private:
 	~SoundManager() = default;
 
 	// インスタンス
-	static SoundManager* ins_;
+	static SoundManager* ins;
 
 	// コピー/ムーブ 操作を禁止
 	SoundManager(const SoundManager&) = delete;
@@ -25,11 +25,11 @@ public:
 
 #pragma region シングルトン定義
 	// 生成/初期化処理
-	static void CreateIns(void) { if (ins_ == nullptr) { ins_ = new SoundManager(); ins_->Init(); } }
+	static void CreateIns(void) { if (ins == nullptr) { ins = new SoundManager(); ins->Init(); } }
 	// 取得
-	static SoundManager& GetIns(void) { return *ins_; }
+	static SoundManager& GetIns(void) { return *ins; }
 	// 終了処理/削除
-	static void DeleteIns(void) { if (ins_ != nullptr) { ins_->Release(); delete ins_; } }
+	static void DeleteIns(void) { if (ins != nullptr) { ins->Release(); delete ins; } }
 #pragma endregion
 
 	// 更新
@@ -67,6 +67,24 @@ public:
 	/// 「Pause()」で一時停止したサウンドをすべて再生再開
 	/// </summary>
 	void PausePlay(void);
+
+#pragma region ボリューム取得
+	// マスターボリューム
+	unsigned char MasterVolume(void)const { return masterVolume; }
+	// BGMボリューム割合
+	float BgmVolume(void)const { return bgmVolume; }
+	// SEボリューム割合
+	float SeVolume(void)const { return seVolume; }
+#pragma endregion
+
+#pragma region ボリューム変更
+	// マスターボリューム
+	void SetMasterVolume(unsigned char volume) { masterVolume = volume; }
+	// BGMボリューム割合
+	void SetBgmVolume(float volume) { bgmVolume = volume; }
+	// SEボリューム割合
+	void SetSeVolume(float volume) { seVolume = volume; }
+#pragma endregion
 
 private:
 

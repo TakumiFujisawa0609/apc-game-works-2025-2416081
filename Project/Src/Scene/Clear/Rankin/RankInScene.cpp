@@ -28,7 +28,7 @@ void RankInScene::Load(void)
 {
 	tempScreen = MakeScreen(App::SCREEN_SIZE_X, App::SCREEN_SIZE_Y);
 
-	Utility::LoadImg(backImage, "Data/Image/Clear/RankInBack.png");
+	LoadImg(backImage, "Data/Image/Clear/RankInBack.png");
 }
 
 void RankInScene::Init(void)

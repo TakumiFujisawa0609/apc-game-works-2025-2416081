@@ -5,14 +5,14 @@
 #include"../../Application/Application.h"
 #include"../../Utility/Utility.h"
 
-Loading* Loading::instance_ = nullptr;
+Loading* Loading::ins = nullptr;
 
 // コンストラクタ
 Loading::Loading()
-	: isLoading_(false)
-	, loadTimer_(0)
-	, animInterval_()
-	, animCounter_()
+	: isLoading(false)
+	, loadTimer(0)
+	, animInterval()
+	, animCounter()
 {}
 
 // デストラクタ
@@ -22,26 +22,26 @@ Loading::~Loading()
 // 初期化
 void Loading::Init(void)
 {
-	loadTimer_ = 0;
-	isLoading_ = false;
+	loadTimer = 0;
+	isLoading = false;
 
-	animCounter_ = 0;
-	animInterval_ = 0;
+	animCounter = 0;
+	animInterval = 0;
 }
 
 // 読み込み
 void Loading::Load(void)
 {
-	//Utility::LoadArrayImg("Data/Image/Player/まぼ.png", 7, 7, 1, 42, 66, handle_);
+	//LoadArrayImg("Data/Image/Player/まぼ.png", 7, 7, 1, 42, 66, handle_);
 }
 
 // 更新
 void Loading::Update(void)
 {
-	loadTimer_++;
+	loadTimer++;
 
 	// 読込中のものがなくなったら or 最低ロード時間経過
-	if (GetASyncLoadNum() == 0 && loadTimer_ >= MIN_LOAD_TIME)
+	if (GetASyncLoadNum() == 0 && loadTimer >= MIN_LOAD_TIME)
 	{
 		// ロード終了
 		Init();
@@ -50,10 +50,10 @@ void Loading::Update(void)
 	else
 	{
 		// ロード画面を動作させるならここに記述
-		if (++animInterval_ >= 10) {
-			animInterval_ = 0;
-			if (++animCounter_ >= 4) {
-				animCounter_ = 0;
+		if (++animInterval >= 10) {
+			animInterval = 0;
+			if (++animCounter >= 4) {
+				animCounter = 0;
 			}
 		}
 	}
@@ -70,7 +70,7 @@ void Loading::Draw(void)
 
 	DrawBox(0, 0, xx, yy, 0x000000, true);
 	std::string st = "Loading";
-	for (int i = 0; i < animCounter_; i++) { st += "."; }
+	for (int i = 0; i < animCounter; i++) { st += "."; }
 	int fontSize = 45;
 	SetFontSize(fontSize);
 	DrawString(xx - fontSize * 6, yy - fontSize, st.c_str(), 0xffffff);
@@ -85,7 +85,7 @@ void Loading::Release(void)
 // 非同期読み込みに切り替える
 void Loading::StartAsyncLoad(void)
 {
-	isLoading_ = true;
+	isLoading = true;
 	// 非同期読み込み開始
 	SetUseASyncLoadFlag(true);
 }

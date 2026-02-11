@@ -2,6 +2,8 @@
 
 #include"../../../../Manager/Sound/SoundManager.h"
 
+#include"../../../Common/Collider/SphereCollider.h"
+
 PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
 	ActorBase(),
 	playerPos(playerPos),

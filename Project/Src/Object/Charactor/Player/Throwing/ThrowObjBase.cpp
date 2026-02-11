@@ -5,23 +5,23 @@
 ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_) :
 	ActorBase(),
 
-	playerPos_(playerPos_),
-	playerAngle_(playerAngle_),
+	playerPos(playerPos_),
+	playerAngle(playerAngle_),
 
-	model_(-1),
+	model(-1),
 
-	state_(STATE::NON),
+	state(STATE::NON),
 	stateFuncPtr(),
 
 	aliveTime(100),
-	aliveCounter_(0),
+	aliveCounter(0),
 
 	ALIVE_HIT_NUM(5),
-	aliveHitCou_(0),
+	aliveHitCou(0),
 
-	speed_(10.0f),
+	speed(10.0f),
 
-	moveVec_()
+	moveVec()
 {
 }
 
@@ -35,7 +35,7 @@ void ThrowObjBase::SubInit(void)
 	SET_STATE(STATE::THROW, &ThrowObjBase::ThrowStateFunc);
 #pragma endregion
 
-	state_ = STATE::NON;
+	state = STATE::NON;
 
 	SetDynamicFlg(true);
 	SetGravityFlg(false);
@@ -45,9 +45,9 @@ void ThrowObjBase::SubInit(void)
 
 void ThrowObjBase::SubUpdate(void)
 {
-	(this->*stateFuncPtr[(int)state_])();
+	(this->*stateFuncPtr[(int)state])();
 
-	switch (state_)
+	switch (state)
 	{
 	case ThrowObjBase::STATE::NON:
 		SetIsDraw(false);
@@ -75,7 +75,7 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 		return;
 	}
 
-	switch (state_)
+	switch (state)
 	{
 	case ThrowObjBase::STATE::NON:
 	case ThrowObjBase::STATE::CARRY:
@@ -83,8 +83,8 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 		return;
 	case ThrowObjBase::STATE::THROW:
 		// ‰½‰ñ‚©“–‚½‚Á‚½‚çÁ‚¦‚éˆ—‚ð‚ ‚Æ‚Å‘‚«‚Ü‚·
-		if (++aliveHitCou_ >= ALIVE_HIT_NUM) {
-			state_ = STATE::DROP;
+		if (++aliveHitCou >= ALIVE_HIT_NUM) {
+			state = STATE::DROP;
 		}
 		return;
 	}
@@ -92,34 +92,34 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 
 void ThrowObjBase::Throw(void)
 {
-	trans.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
+	trans.pos = playerPos + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle.y));
 
-	moveVec_ = THROW_VEC.TransMat(MGetRotY(playerAngle_.y)) * speed_;
+	moveVec = THROW_VEC.TransMat(MGetRotY(playerAngle.y)) * speed;
 
-	aliveCounter_ = aliveTime;
+	aliveCounter = aliveTime;
 
-	aliveHitCou_ = 0;
+	aliveHitCou = 0;
 
-	state_ = STATE::THROW;
+	state = STATE::THROW;
 }
 
 void ThrowObjBase::CarryStateFunc(void)
 {
-	trans.pos = playerPos_ + CARRY_OBJ_LOCAL_POS.TransMat(Utility::MatrixAllMultY({ playerAngle_ }));
-	trans.angle = playerAngle_;
+	trans.pos = playerPos + CARRY_OBJ_LOCAL_POS.TransMat(MatrixAllMultY({ playerAngle }));
+	trans.angle = playerAngle;
 }
 void ThrowObjBase::DropStateFunc(void)
 {
 	trans.pos.y -= 5.0f;
-	if (trans.pos.y < -50.0f) { state_ = STATE::NON; }
+	if (trans.pos.y < -50.0f) { state = STATE::NON; }
 }
 
 void ThrowObjBase::ThrowStateFunc(void)
 {
-	trans.pos += moveVec_;
+	trans.pos += moveVec;
 
-	if (--aliveCounter_ <= 0) {
-		aliveCounter_ = 0;
-		state_ = STATE::NON;
+	if (--aliveCounter <= 0) {
+		aliveCounter = 0;
+		state = STATE::NON;
 	}
 }

@@ -90,7 +90,7 @@ void InstantCamera::ChangeModeFollow(const Vector3* lookAt, const Vector3& lookA
 	this->angle = angle;
 
 	// 座標をセット
-	pos = *lookAt + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+	pos = *lookAt + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
 }
 
 void InstantCamera::FollowModeFunc(void)
@@ -99,7 +99,7 @@ void InstantCamera::FollowModeFunc(void)
 	if (lookAt == nullptr) { return; }
 
 	// 現在の追従対象の座標と角度情報から自身(カメラ)の座標を算出する
-	pos = *lookAt + lookAtDiff.TransMat(Utility::MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
+	pos = *lookAt + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(angle.x,angle.y) }));
 }
 
 void InstantCamera::FolloweApply(void)

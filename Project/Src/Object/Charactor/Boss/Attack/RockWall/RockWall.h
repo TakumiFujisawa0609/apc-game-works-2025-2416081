@@ -28,23 +28,26 @@ public:
 private:
 
 #pragma region 定数定義
+	// 大体全体をおおえるサイズ
 	const Vector3 ROUGH_SIZE = { 224.68f,278.946f,309.564f };
+	// グリッド中心座標への差分
 	const Vector3 GRID_CENTER_DIFF = { -25.382f,135.837f,9.876f };
 
+	// おおまかな半径
 	const float ROUGH_RADIUS = ROUGH_SIZE.Length() / 3.0f;
 #pragma endregion
 
 	void SubLoad(void)override;
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 
 #pragma region 状態管理
+	// 状態
 	STATE state_;
-	// 関数ポインタ配列
+
+	// 関数ポインタ定義用
 	using STATEFUNC = void (RockWall::*)(void);
+	// 状態別関数ポインタ配列
 	STATEFUNC stateFuncPtr[(int)STATE::MAX];
 
 	// 状態別関数～～～～
@@ -56,8 +59,13 @@ private:
 
 #pragma region 状態別関数の中身
 	// Move～～～～～～
+
+	// スピード
 	const float MOVE_SPEED = 20.0f;
-	bool stageCollisionFlg_;
+
+	// ステージと当たっているかを判別するフラグ
+	bool stageCollisionFlg;
+
 	//～～～～～～～～～
 
 	// Be～～～～～～～

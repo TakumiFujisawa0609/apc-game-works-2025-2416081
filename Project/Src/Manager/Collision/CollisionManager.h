@@ -2,8 +2,6 @@
 
 #include<vector>
 
-#include"../../Object/Common/Transform.h"
-
 #include"../../Object/Common/Collider/LineCollider.h"
 #include"../../Object/Common/Collider/SphereCollider.h"
 #include"../../Object/Common/Collider/CapsuleCollider.h"
@@ -14,26 +12,28 @@
 class CollisionManager
 {
 public:
-	CollisionManager()
-		//playerColliders_(),
-		//enemyColliders_(),
+	CollisionManager() :
+		playerColliders(),
+		enemyColliders()
 		//stageColliders_()
-	{}
-	~CollisionManager() {}
+	{
+	}
+	~CollisionManager() = default;
 
 	// オブジェクト追加
-	static void Add(ColliderBase* collider);
+	void Add(ColliderBase* collider);
 	// オブジェクト追加
-	static void Add(std::vector<ColliderBase*> collider) { for (ColliderBase*& c : collider) { Add(c); } }
+	void Add(std::vector<ColliderBase*> collider) { for (ColliderBase*& c : collider) { Add(c); } }
 
 	// 判定実行
 	void Check(void);
 
 	// 解放
 	void Clear(void) {
-		playerColliders_.clear();
-		enemyColliders_.clear();
-		stageColliders_.clear();
+		playerColliders.clear();
+		enemyColliders.clear();
+		stageColliders.clear();
+		otherColliders.clear();
 	}
 
 	// 
@@ -42,14 +42,14 @@ public:
 private:
 #pragma region タイプ別コライダー格納配列
 	// プレイヤー系
-	static std::vector<ColliderBase*>playerColliders_;
+	std::vector<ColliderBase*>playerColliders;
 	// エネミー系	
-	static std::vector<ColliderBase*>enemyColliders_;
+	std::vector<ColliderBase*>enemyColliders;
 	// ステージ系
-	static std::vector<ColliderBase*>stageColliders_;
+	static std::vector<ColliderBase*>stageColliders;
 
 	// それ以外
-	static std::vector<ColliderBase*>otherColliders_;
+	static std::vector<ColliderBase*>otherColliders;
 
 	/*以下の組み合わせの判定が実行される（順番も以下の通り）
 	* 

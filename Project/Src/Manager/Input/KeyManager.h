@@ -170,7 +170,7 @@ private:
 
 	void MouceUpdate(void);
 	MOUCE_INFO mouceInfo;
-	bool mouceFixed_;
+	bool mouceFixed;
 	const float MOUCE_THRESHOLD = 1.0f;
 
 	// 最後の入力の種類(キーボード,マウスorコントローラー)を判別するフラグ（true = コントローラー、false = キーボード,マウス）

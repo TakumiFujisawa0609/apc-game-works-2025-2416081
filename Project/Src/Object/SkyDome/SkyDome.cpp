@@ -14,7 +14,7 @@ void SkyDome::Init(void)
 void SkyDome::Update(void)
 {
 	trans.AddAngleYDeg(0.02f);
-	if (trans.angle.y >= Utility::Deg2RadF(360.0f)) { trans.angle.y = 0.0f; }
+	if (trans.angle.y >= Deg2Rad(360.0f)) { trans.angle.y = 0.0f; }
 }
 
 void SkyDome::Draw(void)

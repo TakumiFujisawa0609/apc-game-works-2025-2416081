@@ -23,7 +23,7 @@ void OverScene::Load(void)
 {
 	Snd::GetIns().ChangeScene("Over");
 	KEY::GetIns().SetMouceFixed(false);
-	Utility::LoadImg(img_, "Data/Image/Over/GameOver.png");
+	LoadImg(img_, "Data/Image/Over/GameOver.png");
 }
 
 void OverScene::Init(void)

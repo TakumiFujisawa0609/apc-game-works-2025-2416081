@@ -84,7 +84,7 @@ void PsychoRock::RiseUpdate(void)
 	if (trans.pos.y >= 800.0f) {
 
 		// 移動ベクトルの取得(スピードも入れておく)
-		moveVec_ = (targetPos_ - trans.pos).Normalized() * MOVE_SPEED;
+		moveVec_ = (targetPos_ - trans.pos).Normalized() * SHOT_SPEED;
 
 		// 状態を遷移
 		state_ = STATE::SHOT;

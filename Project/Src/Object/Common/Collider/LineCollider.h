@@ -14,23 +14,23 @@ public:
 	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
 	LineCollider(TAG type, const Vector3& localStartPos, const Vector3& localEndPos, float enoughDistance = -1.0f, Vector3 pos = { 0.0f, 0.0f, 0.0f }) :
 		ColliderBase(type, enoughDistance, pos),
-		startPos_(localStartPos),
-		endPos_(localEndPos)
+		startPos(localStartPos),
+		endPos(localEndPos)
 	{
 		SetShape(SHAPE::LINE);
 	}
 	~LineCollider()override {}
 
 	// 線分の長さ
-	float GetLen(void)const { return (startPos_ - endPos_).Length(); }
+	float GetLen(void)const { return (startPos - endPos).Length(); }
 
 	// 線分の半分の長さ
-	float GetHalfLen(void)const { return (startPos_ - endPos_).Length() / 2; }
+	float GetHalfLen(void)const { return (startPos - endPos).Length() / 2; }
 
 	// 線分の始点
-	Vector3 GetStartPos(void)const { return GetPos() + GetTransform().VTrans(startPos_); }
+	Vector3 GetStartPos(void)const { return GetPos() + GetTransform().VTrans(startPos); }
 	// 線分の終点
-	Vector3 GetEndPos(void)const { return GetPos() + GetTransform().VTrans(endPos_); }
+	Vector3 GetEndPos(void)const { return GetPos() + GetTransform().VTrans(endPos); }
 
 	// 押し出しの方向
 	Vector3 GetDirection(void)const { return GetStartPos() - GetEndPos(); }
@@ -83,7 +83,7 @@ public:
 	}
 private:
 	// 線分の開始点
-	Vector3 startPos_;
+	Vector3 startPos;
 	// 線分の終了点
-	Vector3 endPos_;
+	Vector3 endPos;
 };

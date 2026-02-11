@@ -66,14 +66,14 @@ public:
 		std::vector<ColliderBase*>ret = {};
 
 		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : punch_->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : gouge_->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : throwing_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : punch->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : gouge->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : throwing->GetCollider()) { ret.emplace_back(collider); }
 
 		return ret;
 	}
 
-	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival_ = std::move(ptr); }
+	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival = std::move(ptr); }
 
 	// Œ»İ‚ÌHP‚Ìc‚èŠ„‡‚ğ•Ô‚·
 	float HpRatio(void)const { return ((float)hp_ / (float)HP_MAX); }
@@ -90,7 +90,7 @@ private:
 	const Vector3 CENTER_DIFF = Vector3(0, -37, 0) * SCALE;
 
 	// ƒ‚ƒfƒ‹‚ÌŠp“x‚ÌƒYƒŒ
-	const Vector3 LOCAL_ROT = Vector3(0.0f, Utility::Deg2RadF(180.0f), 0.0f);
+	const Vector3 LOCAL_ROT = Vector3(0.0f, Deg2Rad(180.0f), 0.0f);
 
 	const float RADIUS = SIZE.z / 2;
 
@@ -152,8 +152,8 @@ private:
 	void Jump(void);		//ƒWƒƒƒ“ƒvŠÖ”
 
 	// •Ï”
-	bool isJump_[JUMP_NUM];	//ƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚é‚©‚Ì•Ï”
-	int jumpKeyCounter_[JUMP_NUM];
+	bool isJump[JUMP_NUM];	//ƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚é‚©‚Ì•Ï”
+	int jumpKeyCounter[JUMP_NUM];
 	//---------------------------------------
 
 	// ƒpƒ“ƒ`````````````
@@ -161,31 +161,29 @@ private:
 	void AttackMove(void);
 
 	// ƒCƒ“ƒXƒ^ƒ“ƒX
-	PlayerPunch* punch_;
+	PlayerPunch* punch;
 
 	// UŒ‚‚Ì’i”
-	ATTACK_STAGE attackStage_;
-	bool isAttack_[(int)ATTACK_STAGE::MAX];
-	int attackStageCounter_;
+	ATTACK_STAGE attackStage;
+	bool isAttack[(int)ATTACK_STAGE::MAX];
+	int attackStageCounter;
 	// ```````````````
 
 	// ‚¦‚®‚èæ‚é``````````
 	// ƒCƒ“ƒXƒ^ƒ“ƒX
-	PlayerGouge* gouge_;
+	PlayerGouge* gouge;
 	//````````````````
 
 	// “Š‚°``````````````
-	Throwing* throwing_;
+	Throwing* throwing;
 
 	// ŠÖ”
 	void CarryRun(void);		//‰¡ˆÚ“®ŠÖ”
 	void CarryJump(void);		//ƒWƒƒƒ“ƒvŠÖ”
 	//````````````````
 
-
-	Vector3 knockBackVec_;
-
-
+	// ƒmƒbƒNƒoƒbƒN‚ÌˆÚ“®ƒxƒNƒgƒ‹
+	Vector3 knockBackVec;
 
 #pragma endregion
 
@@ -251,6 +249,6 @@ private:
 #pragma endregion
 
 	// ƒXƒe[ƒW•œŠˆ‚ÉŒÄ‚Ño‚·ŠÖ”ƒ|ƒCƒ“ƒ^
-	std::function<void(void)>stageRevival_;
+	std::function<void(void)>stageRevival;
 };
 

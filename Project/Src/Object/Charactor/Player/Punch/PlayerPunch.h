@@ -22,11 +22,10 @@ private:
 
 	void SubInit(void)override { Off(); }
 	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 
+	// プレイヤー座標(参照用)
 	const Vector3& playerPos;
+	// プレイヤー角度(参照用)
 	const Vector3& playerAngle;
 };
 

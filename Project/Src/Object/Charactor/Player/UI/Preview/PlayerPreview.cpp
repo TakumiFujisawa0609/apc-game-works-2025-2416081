@@ -24,8 +24,8 @@ void PlayerPreview::Load(void)
 {
 	mainScreen = MakeScreen((int)SIZE, (int)SIZE);
 
-	Utility::LoadImg(frameImg, "Data/Image/Game/UI/PlayerPreviewFrame.png");
-	Utility::LoadImg(backImg, "Data/Image/Game/UI/PlayerPreviewBack.png");
+	LoadImg(frameImg, "Data/Image/Game/UI/PlayerPreviewFrame.png");
+	LoadImg(backImg, "Data/Image/Game/UI/PlayerPreviewBack.png");
 
 	previewCam = new InstantCamera();
 }

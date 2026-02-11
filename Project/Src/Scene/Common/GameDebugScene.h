@@ -20,7 +20,7 @@ public:
 	}
 	~GameDebugScene() = default;
 
-	void Load(void)override { Camera::GetIns().ChangeModeFree(Utility::Deg2RadF(2.0f), 10.0f, Camera::GetIns().GetPos(), Camera::GetIns().GetAngle()); }
+	void Load(void)override { Camera::GetIns().ChangeModeFree(Deg2Rad(2.0f), 10.0f, Camera::GetIns().GetPos(), Camera::GetIns().GetAngle()); }
 	void Init(void) override { Snd::GetIns().AllStop(); }
 	void Update(void) override {
 

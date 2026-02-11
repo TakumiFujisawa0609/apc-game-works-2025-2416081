@@ -44,8 +44,8 @@ void Ranking::Load(void)
 	getline(ifs, scoreLine); getline(ifs, nameLine);
 
 	// 読み込んだ行をカンマ区切りで分割し、配列に格納
-	std::vector<std::string> scores = Utility::Split(scoreLine, ',');
-	std::vector<std::string> names = Utility::Split(nameLine, ',');
+	std::vector<std::string> scores = Split(scoreLine, ',');
+	std::vector<std::string> names = Split(nameLine, ',');
 
 	// 配列に格納されたデータをランキングリストに格納
 	for (size_t i = 0; i < scores.size() && i < names.size() && i < rankingList.size(); i++) {
@@ -115,7 +115,7 @@ void Ranking::AddScore(int score)
 			rankingList[i].score = score;
 
 			// スコア追加位置を記録する
-			lastAddScoreRankIndex = i;
+			lastAddScoreRankIndex = (int)i;
 
 			// ソートは必要ないのでそのまま処理を終了
 			break;
@@ -132,7 +132,7 @@ void Ranking::AddScore(int score)
 			rankingList[i].score = score;
 
 			// スコア追加位置を記録する
-			lastAddScoreRankIndex = i;
+			lastAddScoreRankIndex = (int)i;
 
 			// 以降のスコアを１つずつ後ろにずらして並べ替える
 			for (size_t j = rankingList.size() - 1; j > i; j--) { rankingList[j] = rankingList[j - 1]; }

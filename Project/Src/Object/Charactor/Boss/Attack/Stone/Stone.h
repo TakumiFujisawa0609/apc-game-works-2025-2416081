@@ -16,20 +16,20 @@ public:
 
 private:
 #pragma region 定数定義
+	// 半径
 	const float RADIUS = 100.0f;
-
+	// スピード
 	const float MOVE_SPEED = 30.0f;
-	
+	// 生存時間
 	const int ALIVE_TIME = 200;
 #pragma endregion
 
-	Vector3 moveVec_;
+	// 移動ベクトル
+	Vector3 moveVec;
 
-	int aliveCounter_;
+	// 生存時間計測用カウンター
+	int aliveCounter;
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-	void SubDraw(void)override {}
-	void SubAlphaDraw(void)override {}
-	void SubRelease(void)override {}
 };

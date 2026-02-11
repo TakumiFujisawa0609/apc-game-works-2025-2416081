@@ -1,10 +1,6 @@
 #pragma once
 
-#include"Common/Transform.h"
-
 #include"Common/Collider/ColliderBase.h"
-
-#include"../Manager/Collision/CollisionManager.h"
 
 class ActorBase
 {

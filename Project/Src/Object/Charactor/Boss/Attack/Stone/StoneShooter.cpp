@@ -14,49 +14,49 @@ StoneShooter::~StoneShooter()
 
 void StoneShooter::Load(void)
 {
-	model_ = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
+	model = MV1LoadModel("Data/Model/Boss/Attack/Rock.mv1");
 
 	for (unsigned char i = 0; i < NUM_MAX; i++) {
-		stones_[i] = new Stone(model_);
-		stones_[i]->Load();
+		stones[i] = new Stone(model);
+		stones[i]->Load();
 	}
 }
 
 void StoneShooter::Init(void)
 {
-	for (Stone*& stone : stones_) { stone->Init(); }
+	for (Stone*& stone : stones) { stone->Init(); }
 }
 
 void StoneShooter::Update(void)
 {
-	for (Stone*& stone : stones_) { stone->Update(); }
+	for (Stone*& stone : stones) { stone->Update(); }
 }
 
 void StoneShooter::Draw(void)
 {
-	for (Stone*& stone : stones_) { stone->Draw(); }
+	for (Stone*& stone : stones) { stone->Draw(); }
 }
 
 void StoneShooter::AlphaDraw(void)
 {
-	for (Stone*& stone : stones_) { stone->AlphaDraw(); }
+	for (Stone*& stone : stones) { stone->AlphaDraw(); }
 }
 
 void StoneShooter::Release(void)
 {
-	for (Stone*& stone : stones_) {
+	for (Stone*& stone : stones) {
 		if (!stone) { continue; }
 		stone->Release();
 		delete stone;
 		stone = nullptr;
 	}
 
-	MV1DeleteModel(model_);
+	MV1DeleteModel(model);
 }
 
 void StoneShooter::On(void)
 {
-	Vector3 dir = VTransform(LOCAL_POS, Utility::MatrixAllMultXYZ({ bossAngle }));
+	Vector3 dir = VTransform(LOCAL_POS, MatrixAllMultXYZ({ bossAngle }));
 	dir = VTransform(dir, MGetRotY(-ONE_DIFF * (ONE_SHOT_NUM / 2)));
 
 	for (int i = 0; i < ONE_SHOT_NUM; i++) {
@@ -65,7 +65,7 @@ void StoneShooter::On(void)
 		vec.y = 0.0f;
 		vec.Normalize();
 
-		for (auto& stone : stones_) {
+		for (auto& stone : stones) {
 			if (stone->GetJudgeFlg() == false) {
 				stone->On(pos, vec);
 				break;

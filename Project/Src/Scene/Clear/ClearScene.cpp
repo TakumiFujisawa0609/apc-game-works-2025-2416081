@@ -41,7 +41,7 @@ void ClearScene::Load(void)
 	Snd::GetIns().ChangeScene("Clear");
 
 	KEY::GetIns().SetMouceFixed(false);
-	Utility::LoadImg(img_, "Data/Image/Clear/GameClear.png");
+	LoadImg(img_, "Data/Image/Clear/GameClear.png");
 
 	mainScreen = MakeScreen(App::SCREEN_SIZE_X, App::SCREEN_SIZE_Y, true);
 
@@ -59,7 +59,7 @@ void ClearScene::Load(void)
 
 void ClearScene::Init(void)
 {
-	Camera::GetIns().ChangeModeDisplay(Vector3::XZonly(1000.0f, 1000.0f), Vector3::YZonly(800.0f, -2000.0f), Utility::Deg2RadF(0.1f));
+	Camera::GetIns().ChangeModeDisplay(Vector3::XZonly(1000.0f, 1000.0f), Vector3::YZonly(800.0f, -2000.0f), Deg2Rad(0.1f));
 
 	for (ActorBase*& obj : objects) { obj->Init(); }
 

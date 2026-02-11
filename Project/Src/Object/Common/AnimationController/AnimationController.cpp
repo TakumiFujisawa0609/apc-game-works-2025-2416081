@@ -1,10 +1,14 @@
 #include "AnimationController.h"
 #include <DxLib.h>
 
-AnimationController::AnimationController(int modelId)
+AnimationController::AnimationController(int modelId) : 
+	modelId(modelId),
+	playType(-1),
+
+	playAnim(),
+
+	loopflg(false)
 {
-	modelId_ = modelId;
-	playType_ = -1;
 }
 
 AnimationController::~AnimationController(void)
@@ -32,35 +36,35 @@ void AnimationController::AddInFbx(int type, float speed, int animIndex)
 }
 void AnimationController::Play(int type,bool loop)
 {
-	if (playType_ == type) {
-		if (!loop)playAnim_.step = 0.0f;
+	if (playType == type) {
+		if (!loop)playAnim.step = 0.0f;
 		return;
 	}
-	if (playType_ != -1) {
+	if (playType != -1) {
 		// モデルからアニメーションを外す
-		MV1DetachAnim(modelId_, playAnim_.attachNo);
+		MV1DetachAnim(modelId, playAnim.attachNo);
 	}
 
 	// アニメーション種別を変更
-	playType_ = type;
-	playAnim_ = animations_[type];
+	playType = type;
+	playAnim = animations[type];
 
 	// 初期化
-	loopflg_ = loop;
-	playAnim_.step = 0.0f;
+	loopflg = loop;
+	playAnim.step = 0.0f;
 
-	if (playAnim_.model == -1) {
+	if (playAnim.model == -1) {
 		// モデルと同じファイルからアニメーションをアタッチする
-		playAnim_.attachNo = MV1AttachAnim(modelId_, playAnim_.animIndex);
+		playAnim.attachNo = MV1AttachAnim(modelId, playAnim.animIndex);
 	}
 	else {
 		int animIndex = 0;
-		playAnim_.attachNo = MV1AttachAnim(modelId_, animIndex, playAnim_.model);
+		playAnim.attachNo = MV1AttachAnim(modelId, animIndex, playAnim.model);
 	}
 
 
 	// アニメーション総時間の取得
-	playAnim_.totalTime = MV1GetAttachAnimTotalTime(modelId_, playAnim_.attachNo);
+	playAnim.totalTime = MV1GetAttachAnimTotalTime(modelId, playAnim.attachNo);
 
 }
 
@@ -68,43 +72,43 @@ void AnimationController::Play(int type,bool loop)
 void AnimationController::Update(void)
 {
 	// 再生
-	playAnim_.step += playAnim_.speed;
+	playAnim.step += playAnim.speed;
 
-	if (loopflg_) {
-		if (playAnim_.step > playAnim_.totalTime)playAnim_.step = 0.0f;
+	if (loopflg) {
+		if (playAnim.step > playAnim.totalTime)playAnim.step = 0.0f;
 	}
 	else {
-		if (playAnim_.step > playAnim_.totalTime)playAnim_.step = playAnim_.totalTime;
+		if (playAnim.step > playAnim.totalTime)playAnim.step = playAnim.totalTime;
 
 	}
 
 	// アニメーション設定
-	MV1SetAttachAnimTime(modelId_, playAnim_.attachNo, playAnim_.step);
+	MV1SetAttachAnimTime(modelId, playAnim.attachNo, playAnim.step);
 
 }
 
 
 void AnimationController::Release(void)
 {
-	MV1DetachAnim(modelId_, playAnim_.attachNo);
+	MV1DetachAnim(modelId, playAnim.attachNo);
 
 	//ロードした外部FBXのモデルのメモリを解放する
-	for (auto& pair : animations_) {
+	for (auto& pair : animations) {
 		if (pair.second.model == -1)continue;
 		MV1DeleteModel(pair.second.model);
 	}
 
 	//可変長配列をクリア
-	animations_.clear();
+	animations.clear();
 }
 
 const bool AnimationController::IsEnd(void) const
 {
 	bool ret = false;
 
-	if (loopflg_)return ret;
+	if (loopflg)return ret;
 
-	if (playAnim_.step >= playAnim_.totalTime)ret = true;
+	if (playAnim.step >= playAnim.totalTime)ret = true;
 
 
 	return ret;
@@ -112,10 +116,10 @@ const bool AnimationController::IsEnd(void) const
 
 void AnimationController::Add(int type, float speed, Animation animation)
 {
-	if (animations_.count(type) == 0) {
+	if (animations.count(type) == 0) {
 		//追加
 		animation.speed = speed;
-		animations_.emplace(type, animation);
+		animations.emplace(type, animation);
 	}
 }
 
