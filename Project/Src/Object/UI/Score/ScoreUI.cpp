@@ -10,9 +10,14 @@ ScoreUI::ScoreUI(const Vector2& SCORE_POS) :
 	SCORE_POS(SCORE_POS),
 	displayScore(0),
 
+
 	addScore(),
 
-	scoreAddInterval(0)
+	scoreAddInterval(0),
+
+	comboAnimeIndex(),
+	comboAnimeSigned(),
+	comboBackImage(),
 {
 }
 
