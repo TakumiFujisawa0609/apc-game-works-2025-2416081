@@ -57,7 +57,7 @@ protected:
 
 #pragma region アニメーションコントローラー
 	// アニメーションコントローラーの作成
-	void CreateAnimationController(void) { anime_ = new AnimationController(trans_.model); }
+	void CreateAnimationController(void) { anime_ = new AnimationController(trans.model); }
 	
 	/// <summary>
 	/// モデルにくっついてるFBXアニメーションを全部登録する
@@ -100,9 +100,9 @@ protected:
 		// 無敵演出フラグが変わったとき色をデフォルトに戻す
 
 		// 無敵演出フラグが「する」に変わったときはモデルデフォルトカラーを保存しておく
-		int mnum = MV1GetMaterialNum(trans_.model);
+		int mnum = MV1GetMaterialNum(trans.model);
 		for (int i = 0; i < mnum; ++i) {
-			COLOR_F emi = MV1GetMaterialEmiColor(trans_.model, i);
+			COLOR_F emi = MV1GetMaterialEmiColor(trans.model, i);
 
 			emi.r = (std::min)(emi.r + 0.4f, 1.0f);
 			emi.g = (std::min)(emi.g + 0.4f, 1.0f);
@@ -111,7 +111,7 @@ protected:
 			// モデルデフォルトカラーの保存
 			if (isInviEffect_) { DEFAULT_COLOR.emplace_back(emi); }
 
-			MV1SetMaterialEmiColor(trans_.model, i, emi);
+			MV1SetMaterialEmiColor(trans.model, i, emi);
 		}
 
 		// 「しない」に変わったときは必要ないので情報を破棄する

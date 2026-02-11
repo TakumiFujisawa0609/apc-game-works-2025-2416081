@@ -26,7 +26,7 @@ void PsychoRock::Load(void)
 {
 	state_ = STATE::NON;
 
-	trans_.scale = SCALE;
+	trans.scale = SCALE;
 
 	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_PSYCHOROCK, RADIUS, RADIUS));
 
@@ -76,15 +76,15 @@ void PsychoRock::RisePreparaUpdate(void)
 void PsychoRock::RiseUpdate(void)
 {
 	// 飛ばしている間回転させる見栄え的に
-	trans_.AddAngleXDeg(1.0f);
-	trans_.AddAngleYDeg(1.0f);
+	trans.AddAngleXDeg(1.0f);
+	trans.AddAngleYDeg(1.0f);
 
 	// 生成場所から一定の高さまで持ち上げ、Shot状態(プレイヤー座標に向かって飛ばす)に遷移する
-	trans_.pos.y += RISE_SPEED;
-	if (trans_.pos.y >= 800.0f) {
+	trans.pos.y += RISE_SPEED;
+	if (trans.pos.y >= 800.0f) {
 
 		// 移動ベクトルの取得(スピードも入れておく)
-		moveVec_ = (targetPos_ - trans_.pos).Normalized() * MOVE_SPEED;
+		moveVec_ = (targetPos_ - trans.pos).Normalized() * MOVE_SPEED;
 
 		// 状態を遷移
 		state_ = STATE::SHOT;
@@ -94,14 +94,14 @@ void PsychoRock::RiseUpdate(void)
 void PsychoRock::ShotUpdate(void)
 {
 	// 飛ばしている間回転させる見栄え的に
-	trans_.AddAngleXDeg(1.0f);
-	trans_.AddAngleYDeg(1.0f);
+	trans.AddAngleXDeg(1.0f);
+	trans.AddAngleYDeg(1.0f);
 
 	// 取得しておいた移動ベクトルにそって飛ばす
-	trans_.pos += moveVec_;
+	trans.pos += moveVec_;
 
 	// 座標のY軸が0を下回ったら(ステージのさらに下まで到達したら)、終了する
-	if (trans_.pos.y < 0.0f) {
+	if (trans.pos.y < 0.0f) {
 		
 		// 状態をNON(何もしない再利用待ち)に遷移させる
 		state_ = STATE::NON;
@@ -127,7 +127,7 @@ void PsychoRock::RisePreparaDraw(void)
 
 	if (preparaTimer_ / 10 % 2 == 0) {
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-		DrawSphere3D(trans_.pos.ToVECTOR(), ColliderSerch<SphereCollider>().back()->GetRadius(), 4, 0xff0000, 0xff0000, true);
+		DrawSphere3D(trans.pos.ToVECTOR(), ColliderSerch<SphereCollider>().back()->GetRadius(), 4, 0xff0000, 0xff0000, true);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
 }
@@ -137,7 +137,7 @@ void PsychoRock::RiseDraw(void)
 	SetIsDraw(true);
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-	DrawCapsule3D(trans_.pos.ToVECTOR(), targetPos_.ToVECTOR(), ColliderSerch<SphereCollider>().back()->GetRadius(), 20, 0xff0000, 0xff0000, true);
+	DrawCapsule3D(trans.pos.ToVECTOR(), targetPos_.ToVECTOR(), ColliderSerch<SphereCollider>().back()->GetRadius(), 20, 0xff0000, 0xff0000, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
@@ -148,9 +148,9 @@ void PsychoRock::ShotDraw(void)
 
 void PsychoRock::Set(float x, float z)
 {
-	trans_.pos = Vector3(x, 500.0f, z);
+	trans.pos = Vector3(x, 500.0f, z);
 
-	trans_.angle = {};
+	trans.angle = {};
 
 	preparaTimer_ = 0;
 	state_ = STATE::RISE_PREPARA;
@@ -159,10 +159,10 @@ void PsychoRock::Set(float x, float z)
 
 	float radius = ColliderSerch<SphereCollider>().back()->GetRadius();
 
-	while (trans_.pos.y > 0.0f) {
-		trans_.pos.y -= 10.0f;
-		if (CollisionManager::IsStageCollision(trans_.pos, radius)) {
-			trans_.pos.y -= radius;
+	while (trans.pos.y > 0.0f) {
+		trans.pos.y -= 10.0f;
+		if (CollisionManager::IsStageCollision(trans.pos, radius)) {
+			trans.pos.y -= radius;
 			break;
 		}
 	}

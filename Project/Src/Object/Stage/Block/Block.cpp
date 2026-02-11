@@ -19,17 +19,17 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 	const float SIZE_HALF_BLOCK = (BlockManager::SIZE_BLOCK / 2.0f);
 
 	// 引数で指定されたマップ座標から座標を計算する
-	trans_.pos = Vector3(
+	trans.pos = Vector3(
 		((float)mapX * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK,
 		((float)mapY * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK,
 		((float)mapZ * BlockManager::SIZE_BLOCK) + SIZE_HALF_BLOCK
 	);
 
 	// 大きさ設定
-	trans_.scale = SCALE;
+	trans.scale = SCALE;
 
 	// モデル制御情報を反映する
-	trans_.Attach();
+	trans.Attach();
 
 	SetDynamicFlg(false);
 	SetGravityFlg(false);

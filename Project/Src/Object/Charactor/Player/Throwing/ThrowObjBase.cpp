@@ -92,7 +92,7 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 
 void ThrowObjBase::Throw(void)
 {
-	trans_.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
+	trans.pos = playerPos_ + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle_.y));
 
 	moveVec_ = THROW_VEC.TransMat(MGetRotY(playerAngle_.y)) * speed_;
 
@@ -105,18 +105,18 @@ void ThrowObjBase::Throw(void)
 
 void ThrowObjBase::CarryStateFunc(void)
 {
-	trans_.pos = playerPos_ + CARRY_OBJ_LOCAL_POS.TransMat(Utility::MatrixAllMultY({ playerAngle_ }));
-	trans_.angle = playerAngle_;
+	trans.pos = playerPos_ + CARRY_OBJ_LOCAL_POS.TransMat(Utility::MatrixAllMultY({ playerAngle_ }));
+	trans.angle = playerAngle_;
 }
 void ThrowObjBase::DropStateFunc(void)
 {
-	trans_.pos.y -= 5.0f;
-	if (trans_.pos.y < -50.0f) { state_ = STATE::NON; }
+	trans.pos.y -= 5.0f;
+	if (trans.pos.y < -50.0f) { state_ = STATE::NON; }
 }
 
 void ThrowObjBase::ThrowStateFunc(void)
 {
-	trans_.pos += moveVec_;
+	trans.pos += moveVec_;
 
 	if (--aliveCounter_ <= 0) {
 		aliveCounter_ = 0;

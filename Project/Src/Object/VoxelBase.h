@@ -49,7 +49,7 @@ public:
 		ret = batches;
 
 		for (auto& r : ret) {
-			for (auto& vPos : r.v) { vPos.pos = (Vector3(vPos.pos) + trans_.pos).ToVECTOR(); }
+			for (auto& vPos : r.v) { vPos.pos = (Vector3(vPos.pos) + trans.pos).ToVECTOR(); }
 		}
 
 		return ret; 
@@ -85,7 +85,7 @@ private:
 	}
 
 	// セルインデックスから座標を算出する
-	Vector3 IdxToPos(int idx)const { return (trans_.pos + IdxToLocalPos(idx)); }
+	Vector3 IdxToPos(int idx)const { return (trans.pos + IdxToLocalPos(idx)); }
 
 	// セル番地からローカル座標を算出する
 	Vector3 IdxToLocalPos(int x, int y, int z)const {
@@ -97,7 +97,7 @@ private:
 	}
 
 	// セル番地から座標を算出する
-	Vector3 IdxToPos(int x, int y, int z)const { return (trans_.pos + IdxToLocalPos(x, y, z)); }
+	Vector3 IdxToPos(int x, int y, int z)const { return (trans.pos + IdxToLocalPos(x, y, z)); }
 #pragma endregion
 
 	// 定数定義

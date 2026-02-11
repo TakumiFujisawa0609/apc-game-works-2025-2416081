@@ -29,12 +29,12 @@ private:
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_UP).now) { vec.y++; }
 		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_DOWN).now) { vec.y--; }
 
-		if (vec != 0.0f) { trans_.pos += vec.TransMat(MGetRotY(Camera::GetIns().GetAngle().y)).Normalized() * 10.0f; }
+		if (vec != 0.0f) { trans.pos += vec.TransMat(MGetRotY(Camera::GetIns().GetAngle().y)).Normalized() * 10.0f; }
 	};
 	void SubDraw(void)override {
-		DrawSphere3D(trans_.pos.ToVECTOR(), 50.0f, 12, 0xffffff, 0xffffff, true);
+		DrawSphere3D(trans.pos.ToVECTOR(), 50.0f, 12, 0xffffff, 0xffffff, true);
 
-		if (CollisionManager::IsStageCollision(trans_.pos, 50.0f)) { DrawString(0, 400, "true", 0xffffff); }
+		if (CollisionManager::IsStageCollision(trans.pos, 50.0f)) { DrawString(0, 400, "true", 0xffffff); }
 		else { DrawString(0, 400, "false", 0xffffff); }
 	};
 	void SubAlphaDraw(void)override {};

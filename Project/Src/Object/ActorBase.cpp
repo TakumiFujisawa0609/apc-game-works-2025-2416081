@@ -3,23 +3,23 @@
 #include"../Application/Application.h"
 
 ActorBase::ActorBase() :
-	trans_(prevPos_),
-	collider_(),
+	trans(prevPos),
+	collider(),
 
-	dynamicFlg_(true),
-	isGravity_(false),
+	dynamicFlg(true),
+	isGravity(false),
 
-	pushFlg_(true),
-	pushWeight_(0),
+	pushFlg(true),
+	pushWeight(0),
 
-	prevPos_(trans_.pos),
+	prevPos(trans.pos),
 
-	AccelSum(0.0f, 0.0f, 0.0f),
+	accelSum(0.0f, 0.0f, 0.0f),
 
-	isGroundMaster_(false),
+	isGroundMaster(false),
 
-	isDraw_(true),
-	isAlphaDraw_(false)
+	isDraw(true),
+	isAlphaDraw(false)
 {
 }
 
@@ -31,19 +31,19 @@ void ActorBase::Init(void)
 void ActorBase::Update(void)
 {
 	// 動的オブジェクトは１フレーム前の座標を保持
-	if (dynamicFlg_) { prevPos_ = trans_.pos; }
+	if (dynamicFlg) { prevPos = trans.pos; }
 
 	// 派生先追加更新
 	SubUpdate();
 
 	// 重力処理
-	if (dynamicFlg_ && isGravity_) { Gravity(); }
+	if (dynamicFlg && isGravity) { Gravity(); }
 
 	// 加速度更新
-	if (dynamicFlg_) { AccelUpdate(); }
+	if (dynamicFlg) { AccelUpdate(); }
 
 	// 接地判定のリセット
-	if (dynamicFlg_) { isGroundMaster_ = false; }
+	if (dynamicFlg) { isGroundMaster = false; }
 }
 
 void ActorBase::Draw(void)
@@ -52,11 +52,11 @@ void ActorBase::Draw(void)
 	SubDraw();
 
 	// 描画判定
-	if (!isDraw_) { return; }
+	if (!isDraw) { return; }
 
 	// モデルの描画
-	if (!isAlphaDraw_) {
-		trans_.Draw(); 
+	if (!isAlphaDraw) {
+		trans.Draw(); 
 	}
 }
 
@@ -66,14 +66,14 @@ void ActorBase::AlphaDraw(void)
 	SubAlphaDraw();
 
 	// 描画判定
-	if (!isDraw_) { return; }
+	if (!isDraw) { return; }
 
 	// モデルの描画（アルファ描画）
-	if (isAlphaDraw_) { trans_.Draw(); }
+	if (isAlphaDraw) { trans.Draw(); }
 
 	// 当たり判定のデバッグ描画
 	if (App::GetIns().IsDrawDebug()) {
-		for (ColliderBase*& c : collider_) { c->DrawDebug(); }
+		for (ColliderBase*& c : collider) { c->DrawDebug(); }
 	}
 }
 
@@ -83,15 +83,15 @@ void ActorBase::Release(void)
 	SubRelease();
 
 	// 当たり判定情報を解放
-	for (ColliderBase*& c : collider_) {
+	for (ColliderBase*& c : collider) {
 		if (!c) { continue; }
 		delete c;
 		c = nullptr;
 	}
-	collider_.clear();
+	collider.clear();
 
 	// モデル制御情報の解放
-	trans_.Release();
+	trans.Release();
 }
 
 void ActorBase::AccelUpdate(void)
@@ -104,25 +104,25 @@ void ActorBase::AccelUpdate(void)
 		};
 
 	// 横軸(横軸は減衰もする)
-	if (AccelSum.x != 0.0f) {
-		if (abs(AccelSum.x) > ACCEL_MAX) { AccelSum.x = ACCEL_MAX * Sign(AccelSum.x); }
-		trans_.pos.x += AccelSum.x;
-		AccelSum.x -= ATTENUATION * Sign(AccelSum.x);
-		if (abs(AccelSum.x) <= ATTENUATION / 2) { AccelSum.x = 0.0f; }
+	if (accelSum.x != 0.0f) {
+		if (abs(accelSum.x) > ACCEL_MAX) { accelSum.x = ACCEL_MAX * Sign(accelSum.x); }
+		trans.pos.x += accelSum.x;
+		accelSum.x -= ATTENUATION * Sign(accelSum.x);
+		if (abs(accelSum.x) <= ATTENUATION / 2) { accelSum.x = 0.0f; }
 	}
-	if (AccelSum.z != 0.0f) {
-		if (abs(AccelSum.z) > ACCEL_MAX) { AccelSum.z = ACCEL_MAX * Sign(AccelSum.z); }
-		trans_.pos.z += AccelSum.z;
-		AccelSum.z -= ATTENUATION * Sign(AccelSum.z);
-		if (abs(AccelSum.z) <= ATTENUATION / 2) { AccelSum.z = 0.0f; }
+	if (accelSum.z != 0.0f) {
+		if (abs(accelSum.z) > ACCEL_MAX) { accelSum.z = ACCEL_MAX * Sign(accelSum.z); }
+		trans.pos.z += accelSum.z;
+		accelSum.z -= ATTENUATION * Sign(accelSum.z);
+		if (abs(accelSum.z) <= ATTENUATION / 2) { accelSum.z = 0.0f; }
 	}
 
 	// 縦軸
-	if (AccelSum.y != 0.0f) { trans_.pos.y += AccelSum.y; }
+	if (accelSum.y != 0.0f) { trans.pos.y += accelSum.y; }
 }
 
 void ActorBase::Gravity(void)
 {
-	AccelSum.y += GRAVITY;
-	if (AccelSum.y < GRAVITY_MAX) { AccelSum.y = GRAVITY_MAX; }
+	accelSum.y += GRAVITY;
+	if (accelSum.y < GRAVITY_MAX) { accelSum.y = GRAVITY_MAX; }
 }

@@ -48,7 +48,7 @@ void PlayerGouge::SubUpdate(void)
 		xAngle_ += Utility::Deg2RadF(5.0f);
 		if (xAngle_ > Utility::Deg2RadF(120.0f)) { xAngle_ = Utility::Deg2RadF(120.0f); }
 		else {
-			trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
+			trans.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
 		}
 		break;
 	case PlayerGouge::STATE::GOUGE:
@@ -99,7 +99,7 @@ void PlayerGouge::On(void)
 	state_ = STATE::SEARCH;
 	xAngle_ = 0.0f;
 
-	trans_.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
+	trans.pos = (playerPos + FOOT_POS) + LOCAL_POS.TransMat(Utility::MatrixAllMultXYZ({ Vector3::Xonly(xAngle_) , playerAngle }));
 }
 
 void PlayerGouge::Off(void)

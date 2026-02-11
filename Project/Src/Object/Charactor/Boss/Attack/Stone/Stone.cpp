@@ -17,9 +17,9 @@ void Stone::Load(void)
 {
 	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_STONE, RADIUS, RADIUS));
 
-	trans_.scale = 1.3f;
+	trans.scale = 1.3f;
 
-	trans_.Attach();
+	trans.Attach();
 }
 
 void Stone::SubInit(void)
@@ -44,12 +44,12 @@ void Stone::SubUpdate(void)
 		SetIsDraw(false);
 	}
 
-	trans_.pos += moveVec_;
+	trans.pos += moveVec_;
 }
 
 void Stone::On(const Vector3& pos, const Vector3& moveVec)
 {
-	trans_.pos = pos;
+	trans.pos = pos;
 	moveVec_ = moveVec * MOVE_SPEED;
 
 	aliveCounter_ = ALIVE_TIME;

@@ -17,7 +17,7 @@ void PlayerPunch::Load(void)
 void PlayerPunch::SubUpdate(void)
 {
 	if (GetJudgeFlg() == false) { return; }
-	trans_.pos = playerPos + LOCAL_POS.TransMat(MGetRotY(playerAngle.y));
+	trans.pos = playerPos + LOCAL_POS.TransMat(MGetRotY(playerAngle.y));
 }
 
 void PlayerPunch::OnCollision(const ColliderBase& collider)

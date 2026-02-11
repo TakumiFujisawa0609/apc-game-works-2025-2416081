@@ -39,9 +39,9 @@ Player::Player() :
 
 void Player::Load(void)
 {
-	trans_.Load("Player/Player");
-	trans_.scale = SCALE;
-	trans_.localAngle = LOCAL_ROT;
+	trans.Load("Player/Player");
+	trans.scale = SCALE;
+	trans.localAngle = LOCAL_ROT;
 
 	SetDynamicFlg(true);
 	SetGravityFlg(true);
@@ -80,13 +80,13 @@ void Player::CharactorInit(void)
 	SetIsDraw(true);
 	SetJudge(true);;
 
-	trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);
-	trans_.centerDiff = CENTER_DIFF;
+	trans.pos = Vector3(1000.0f, 1000.0f, 200.0f);
+	trans.centerDiff = CENTER_DIFF;
 
-	AccelSum.x = 10.0f; AccelSum.z = 10.0f;
+	accelSum.x = 10.0f; accelSum.z = 10.0f;
 
-	trans_.angle = {};
-	trans_.localAngle = LOCAL_ROT;
+	trans.angle = {};
+	trans.localAngle = LOCAL_ROT;
 
 	state_ = (int)STATE::MOVE;
 
@@ -111,10 +111,10 @@ void Player::CharactorUpdate(void)
 	// プレイヤーが抱える下位クラスの更新処理
 	LowerUpdate();
 
-	if (trans_.pos.y < -500.0f) {
-		trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);
-		AccelSum.y = 0.0f;
-		AccelSum.x = 10.0f; AccelSum.z = 10.0f;
+	if (trans.pos.y < -500.0f) {
+		trans.pos = Vector3(1000.0f, 1000.0f, 200.0f);
+		accelSum.y = 0.0f;
+		accelSum.x = 10.0f; accelSum.z = 10.0f;
 
 		SetInviCounter(100);
 		HpSharpen(30);
@@ -173,13 +173,13 @@ void Player::OnCollision(const ColliderBase& collider)
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
 		GameScene::Slow(20);
 
-		AccelSum.y = 10.0f;
+		accelSum.y = 10.0f;
 
-		Vector3 vec = trans_.pos - pos;
+		Vector3 vec = trans.pos - pos;
 		vec.y = 0.0f;
 		knockBackVec_ = vec.Normalized() * 10.0f;
 
-		trans_.angle.y = atan2f(-vec.x, -vec.z);
+		trans.angle.y = atan2f(-vec.x, -vec.z);
 		};
 
 	switch (collider.GetTag())
@@ -333,11 +333,11 @@ void Player::Attack(void)
 		Vector3 vec = {};
 
 		// unit_.angle_(角度) から ベクトル(向き) を割り出す
-		vec.x = sinf(trans_.angle.y);
-		vec.z = cosf(trans_.angle.y);
+		vec.x = sinf(trans.angle.y);
+		vec.z = cosf(trans.angle.y);
 
 		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
-		trans_.pos += vec.Normalized() * 10.0f;
+		trans.pos += vec.Normalized() * 10.0f;
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
@@ -396,12 +396,12 @@ void Player::Evasion(void)
 	Vector3 vec = {};
 
 	// unit_.angle_(角度) から ベクトル(向き) を割り出す
-	vec.x = sinf(trans_.angle.y);
-	vec.z = cosf(trans_.angle.y);
+	vec.x = sinf(trans.angle.y);
+	vec.z = cosf(trans.angle.y);
 
 	// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 	vec.Normalize();
-	trans_.pos += vec * 15.0f/*unit_.para_.speed * 1.5f*/;
+	trans.pos += vec * 15.0f/*unit_.para_.speed * 1.5f*/;
 
 	// 無敵(無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように １ を代入し続けておく)
 	if (GetAnimeRatio() <= 0.7f) { SetInviCounter(1); }
@@ -413,7 +413,7 @@ void Player::Evasion(void)
 }
 void Player::Damage(void)
 {
-	trans_.pos += knockBackVec_;
+	trans.pos += knockBackVec_;
 
 	if (IsAnimeEnd()) {
 		if (hp_ > 0) {
@@ -459,7 +459,7 @@ void Player::Run(void)
 		vec.TransMatOwn(mat);
 		vec.Normalize();
 
-		trans_.pos += vec * 10.0f;
+		trans.pos += vec * 10.0f;
 
 		if (isGround) {
 			AnimePlay((int)ANIME_TYPE::RUN);
@@ -467,7 +467,7 @@ void Player::Run(void)
 		}
 		else { Snd::GetIns().Stop("PlayerRun"); }
 
-		trans_.angle.y = atan2(vec.x, vec.z);
+		trans.angle.y = atan2(vec.x, vec.z);
 	}
 }
 void Player::Jump(void)
@@ -484,7 +484,7 @@ void Player::Jump(void)
 
 			jumpKeyCounter_[i]++;
 
-			AccelSum.y = (std::max)(AccelSum.y, (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME));
+			accelSum.y = (std::max)(accelSum.y, (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME));
 		}
 
 		// ループから抜ける
@@ -503,7 +503,7 @@ void Player::Jump(void)
 			jumpKeyCounter_[i]++;
 
 			//ジャンプ力を分配加算する
-			AccelSum.y += (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
+			accelSum.y += (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
 		}
 
 		break;
@@ -530,7 +530,7 @@ void Player::AttackMove(void)
 		MATRIX mat = MGetIdent();
 		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
 		vec = VTransform(vec, mat);
-		trans_.angle.y = atan2(vec.x, vec.z);
+		trans.angle.y = atan2(vec.x, vec.z);
 	}
 }
 
@@ -558,7 +558,7 @@ void Player::CarryRun(void)
 		vec.TransMatOwn(mat);
 		vec.Normalize();
 
-		trans_.pos += vec * 5.0f;
+		trans.pos += vec * 5.0f;
 
 		if (!isJump_[0]) {
 			AnimePlay((int)ANIME_TYPE::CARRY_RUN);
@@ -566,7 +566,7 @@ void Player::CarryRun(void)
 		}
 		else { Snd::GetIns().Stop("PlayerRun"); }
 
-		trans_.angle.y = atan2(vec.x, vec.z);
+		trans.angle.y = atan2(vec.x, vec.z);
 	}
 }
 void Player::CarryJump(void)
@@ -594,7 +594,7 @@ void Player::CarryJump(void)
 			jumpKeyCounter_[i]++;
 
 			//ジャンプ力を分配加算する
-			AccelSum.y = (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
+			accelSum.y = (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
 
 			// その回のジャンプ処理をしたのでそれ以降のループに入らないようにする
 			break;
@@ -657,20 +657,20 @@ void Player::HpSharpen(int damage)
 void Player::LowerLoad(void)
 {
 	// 通常攻撃（パンチ）
-	punch_ = new PlayerPunch(trans_.pos, trans_.angle);
+	punch_ = new PlayerPunch(trans.pos, trans.angle);
 	punch_->Load();
 
 	// 抉り
-	gouge_ = new PlayerGouge(trans_.pos, trans_.angle);
+	gouge_ = new PlayerGouge(trans.pos, trans.angle);
 	gouge_->Load();
 
 	// 特殊攻撃（投げ）
-	throwing_ = new Throwing(trans_.pos, trans_.angle);
+	throwing_ = new Throwing(trans.pos, trans.angle);
 	throwing_->Load();
 
 #pragma region UI
 	// プレビュー
-	preview = new PlayerPreview(trans_.pos, [this](void) { trans_.Draw(); });
+	preview = new PlayerPreview(trans.pos, [this](void) { trans.Draw(); });
 	preview->Load();
 
 	// HPバー

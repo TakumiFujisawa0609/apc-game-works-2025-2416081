@@ -21,33 +21,33 @@ public:
 	virtual void Release(void);
 
 	// モデルを複製する
-	void ModelDuplicate(int model) { trans_.model = MV1DuplicateModel(model); }
+	void ModelDuplicate(int model) { trans.model = MV1DuplicateModel(model); }
 
 	// モデル制御情報構造体のゲット関数
-	const Transform& GetTrans(void)const { return trans_; }
+	const Transform& GetTrans(void)const { return trans; }
 
 	// 当たり判定の通知
 	virtual void OnCollision(const ColliderBase& collider) {}
 
 	// 接地判定の通知
 	virtual void OnGrounded() {
-		if (dynamicFlg_) {
-			AccelSum.y = (AccelSum.y < 0.0f) ? 0.0f : AccelSum.y;
+		if (dynamicFlg) {
+			accelSum.y = (accelSum.y < 0.0f) ? 0.0f : accelSum.y;
 		}
-		isGroundMaster_ = true;
+		isGroundMaster = true;
 	}
 
 	/// <summary>
 	/// コライダーすべてを取得
 	/// </summary>
-	virtual std::vector<ColliderBase*> GetCollider(void)const { return collider_; }
+	virtual std::vector<ColliderBase*> GetCollider(void)const { return collider; }
 
 	/// <summary>
 	/// 当たり判定フラグの取得
 	/// </summary>
 	/// <returns>どれか一つでも「判定する」状態ならtrue</returns>
 	bool GetJudgeFlg(void) {
-		for (ColliderBase*& c : collider_) {
+		for (ColliderBase*& c : collider) {
 			if (!c) { continue; }
 			if (c->GetJudge()) { return true; }
 		}
@@ -55,26 +55,26 @@ public:
 	}
 
 	// 描画判定の取得
-	bool GetIsDraw(void)const { return isDraw_; }
+	bool GetIsDraw(void)const { return isDraw; }
 
 private:
 	// 当たり判定情報
-	std::vector<ColliderBase*> collider_;
+	std::vector<ColliderBase*> collider;
 
 	// 動的オブジェクトか否か（true = 動的、false = 静的）
-	bool dynamicFlg_;
+	bool dynamicFlg;
 
 	// 重力を適用するかどうか(true = する、false = しない)
-	bool isGravity_;
+	bool isGravity;
 
 	// 衝突時押し出しを行うか否か（true = 押し出す、false = 押し出さず通り抜ける）
-	bool pushFlg_;
+	bool pushFlg;
 
 	// 押し出しを行う際の重さ（0 ～ 100 で設定）
-	unsigned char pushWeight_;
+	unsigned char pushWeight;
 
 	// １フレーム前の座標
-	Vector3 prevPos_;
+	Vector3 prevPos;
 
 	// 加速度の更新
 	void AccelUpdate(void);
@@ -87,20 +87,20 @@ private:
 	const float GRAVITY_MAX = -30.0f;
 
 	// 接地判定 管理用(派生先で変更不可で参照渡し)
-	bool isGroundMaster_;
+	bool isGroundMaster;
 
 	// 描画判定 （true = 「描画する」、false = 「描画しない」）
-	bool isDraw_;
+	bool isDraw;
 
 	// アルファ判定（true = 「メインの描画にアルファをかける」、false = 「メインの描画を普通に描画する」）（メインの描画 = 基底クラスで自動で描画されるモデルなど）
-	bool isAlphaDraw_;
+	bool isAlphaDraw;
 
 protected:
 	// モデル制御情報構造体
-	Transform trans_;
+	Transform trans;
 
 	// 加速度
-	VECTOR AccelSum;
+	VECTOR accelSum;
 
 	// 横軸加速度の１フレームごとの減衰量
 	float ATTENUATION = 3.0f;
@@ -108,7 +108,7 @@ protected:
 	float ACCEL_MAX = 30.0f;
 
 	// 接地判定(派生先で参照用)
-	const bool& isGround = isGroundMaster_;
+	const bool& isGround = isGroundMaster;
 
 	/// <summary>
 	/// 特定のコライダーを探す
@@ -119,9 +119,9 @@ protected:
 	template<typename T>
 	std::vector<T*> ColliderSerch(TAG tag = TAG::NON) {
 		std::vector<T*> out;
-		out.reserve(collider_.size());
+		out.reserve(collider.size());
 
-		for (auto c : collider_) {
+		for (auto c : collider) {
 			if (!c) continue;
 			if (auto* ptr = dynamic_cast<T*>(c)) {
 				if (c->GetTag() == tag || tag == TAG::NON) { out.push_back(ptr); }
@@ -132,13 +132,13 @@ protected:
 #pragma region 初期設定
 	// 当たり判定情報を生成
 	void ColliderCreate(ColliderBase* newClass) {
-		collider_.emplace_back(newClass);
-		collider_.back()->SetTransformPtr(&trans_);
-		collider_.back()->SetDynamicFlg((dynamicFlg_) ? true : false);
-		collider_.back()->SetPushFlg(pushFlg_);
-		collider_.back()->SetPushWeight(pushWeight_);
-		collider_.back()->SetOnCollisionFunc([this](const ColliderBase& collider) { this->OnCollision(collider); });
-		collider_.back()->SetOnGroundedFunc([this](void) {this->OnGrounded(); });
+		collider.emplace_back(newClass);
+		collider.back()->SetTransformPtr(&trans);
+		collider.back()->SetDynamicFlg((dynamicFlg) ? true : false);
+		collider.back()->SetPushFlg(pushFlg);
+		collider.back()->SetPushWeight(pushWeight);
+		collider.back()->SetOnCollisionFunc([this](const ColliderBase& collider) { this->OnCollision(collider); });
+		collider.back()->SetOnGroundedFunc([this](void) {this->OnGrounded(); });
 	}
 
 	/// <summary>
@@ -146,8 +146,8 @@ protected:
 	/// </summary>
 	/// <param name="flg">true = 「移動する」に切り替える、false = 「移動しない」に切り替える</param>
 	void SetDynamicFlg(bool flg) {
-		dynamicFlg_ = flg;
-		for (ColliderBase*& collider : collider_) {
+		dynamicFlg = flg;
+		for (ColliderBase*& collider : collider) {
 			collider->SetDynamicFlg(flg);
 		}
 	}
@@ -156,15 +156,15 @@ protected:
 	/// 重力を適用するかを切り替える
 	/// </summary>
 	/// <param name="flg">true = 「する」に切り替える、false = 「しない」に切り替える</param>
-	void SetGravityFlg(bool flg) { isGravity_ = flg; }
+	void SetGravityFlg(bool flg) { isGravity = flg; }
 
 	/// <summary>
 	/// 衝突時押し出しを行うかを設定する
 	/// </summary>
 	/// <param name="flg">true = 押し出す、false = 押し出さず通り抜ける</param>
 	void SetPushFlg(bool flg) {
-		pushFlg_ = flg;
-		for (ColliderBase*& coll : collider_) { coll->SetPushFlg(flg); }
+		pushFlg = flg;
+		for (ColliderBase*& coll : collider) { coll->SetPushFlg(flg); }
 	}
 
 	/// <summary>
@@ -172,34 +172,34 @@ protected:
 	/// </summary>
 	/// <param name="weight">0 ～ 100 で設定（数値が大きいほど重い）</param>
 	void SetPushWeight(unsigned char weight) {
-		pushWeight_ = weight;
-		for (ColliderBase*& coll : collider_) { coll->SetPushWeight(weight); }
+		pushWeight = weight;
+		for (ColliderBase*& coll : collider) { coll->SetPushWeight(weight); }
 	}
 #pragma endregion
 
 	// 当たり判定の設定（true = 「判定する」、false = 「判定しない」）
 	void SetJudge(bool flg) {
-		for (ColliderBase*& c : collider_) {
+		for (ColliderBase*& c : collider) {
 			if (!c) { continue; }
 			c->SetJudgeFlg(flg);
 		}
 	}
 
-	bool GetDynamicFlg(void)const { return dynamicFlg_; }
-	bool GetGravityFlg(void)const { return isGravity_; }
+	bool GetDynamicFlg(void)const { return dynamicFlg; }
+	bool GetGravityFlg(void)const { return isGravity; }
 
 	// 描画判定の設定（true = 「描画する」、false = 「描画しない」）
-	void SetIsDraw(bool flg) { isDraw_ = flg; }
+	void SetIsDraw(bool flg) { isDraw = flg; }
 	// 描画判定の設定（引数省略で現在の逆にスイッチ）
-	void SetIsDraw(void) { isDraw_ = !isDraw_; }
+	void SetIsDraw(void) { isDraw = !isDraw; }
 
 	// アルファ判定（true = 「メインの描画にアルファをかける」、false = 「メインの描画を普通に描画する」）（メインの描画 = 基底クラスで自動で描画されるモデルなど）
-	bool GetIsAlphaDraw(void)const { return isAlphaDraw_; }
+	bool GetIsAlphaDraw(void)const { return isAlphaDraw; }
 
 	// アルファ判定の設定（true = 「メインの描画にアルファをかける」、false = 「メインの描画を普通に描画する」）（メインの描画 = 基底クラスで自動で描画されるモデルなど）
-	void SetIsAlphaDraw(bool flg) { isAlphaDraw_ = flg; }
+	void SetIsAlphaDraw(bool flg) { isAlphaDraw = flg; }
 	// アルファ判定の設定（引数省略で現在の逆にスイッチ）
-	void SetIsAlphaDraw(void) { isAlphaDraw_ = !isAlphaDraw_; }
+	void SetIsAlphaDraw(void) { isAlphaDraw = !isAlphaDraw; }
 
 	// 派生先追加初期化
 	virtual void SubInit(void) {}

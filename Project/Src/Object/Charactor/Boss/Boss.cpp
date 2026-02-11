@@ -35,14 +35,14 @@ Boss::Boss(const Vector3& playerPos):
 void Boss::Load(void)
 {
 	// モデルをロード
-	trans_.Load("Boss/Giant");
+	trans.Load("Boss/Giant");
 
 	// スケールを設定
-	trans_.scale = SCALE;
+	trans.scale = SCALE;
 
 	// 相対　座標/角度
-	trans_.centerDiff = -CENTER_DIFF;
-	trans_.localAngle = LOCAL_ANGLE;
+	trans.centerDiff = -CENTER_DIFF;
+	trans.localAngle = LOCAL_ANGLE;
 
 	SetDynamicFlg(false);
 	SetGravityFlg(false);
@@ -80,7 +80,7 @@ void Boss::CharactorInit(void)
 {
 	state_ = (int)STATE::IDLE;
 
-	trans_.pos = Vector3(1000.0f, 300.0f, 1000.0f);
+	trans.pos = Vector3(1000.0f, 300.0f, 1000.0f);
 
 	SetJudge(true);
 	SetIsDraw(true);
@@ -170,8 +170,8 @@ void Boss::Idle(void)
 {
 	AnimePlay((int)ANIME_TYPE::IDLE);
 
-	Vector3 vec = playerPos - trans_.pos;
-	trans_.angle.y = atan2f(vec.x, vec.z);
+	Vector3 vec = playerPos - trans.pos;
+	trans.angle.y = atan2f(vec.x, vec.z);
 
 	if (--attackInterval_ <= 0) {
 		attackInterval_ = 0;
@@ -344,17 +344,17 @@ void Boss::LowerLoad(void)
 	fall_ = new FallManager(playerPos);
 	fall_->Load();
 
-	stone_ = new StoneShooter(trans_.pos, trans_.angle);
+	stone_ = new StoneShooter(trans.pos, trans.angle);
 	stone_->Load();
 
-	psycho_ = new PsychoRockShooter(trans_.pos, playerPos);
+	psycho_ = new PsychoRockShooter(trans.pos, playerPos);
 	psycho_->Load();
 
-	rockWall_ = new RockWallShooter(trans_.pos, trans_.angle);
+	rockWall_ = new RockWallShooter(trans.pos, trans.angle);
 	rockWall_->Load();
 
 	// プレビュー
-	preview = new BossPreview(trans_.pos, [this](void) {trans_.Draw(); });
+	preview = new BossPreview(trans.pos, [this](void) {trans.Draw(); });
 	preview->Load();
 
 	// HPバー
@@ -485,8 +485,8 @@ void Boss::LifeSharpen(void)
 	GameScene::Slow(20);
 	GameScene::Shake();
 
-	Vector3 vec = playerPos - trans_.pos;
-	trans_.angle.y = atan2f(vec.x, vec.z);
+	Vector3 vec = playerPos - trans.pos;
+	trans.angle.y = atan2f(vec.x, vec.z);
 
 	state_ = (int)STATE::BIG_DAMAGE;
 	AnimePlay((int)ANIME_TYPE::DEATH, false);

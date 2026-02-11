@@ -20,7 +20,7 @@ Fall::~Fall()
 
 void Fall::Load(void)
 {
-	trans_.scale = SCALE;
+	trans.scale = SCALE;
 
 	ColliderCreate(new SphereCollider(TAG::GOLEM_ATTACK_FALL, RADIUS, RADIUS));
 }
@@ -47,8 +47,8 @@ void Fall::SubUpdate(void)
 		}
 		break;
 	case STATE::FALL:
-		trans_.pos.y -= 30.0f;
-		if (trans_.pos.y < -100.0f) { SetJudge(false); SetIsDraw(false); }
+		trans.pos.y -= 30.0f;
+		if (trans.pos.y < -100.0f) { SetJudge(false); SetIsDraw(false); }
 		break;
 	}
 }
@@ -58,7 +58,7 @@ void Fall::SubAlphaDraw(void)
 	if (!GetIsDraw()) { return; }
 
 	if (state_ == STATE::IDLE && idleCounter_ / 10 % 2 == 0) {
-		VECTOR predictionPos = { trans_.pos.x,groundHeight_,trans_.pos.z };
+		VECTOR predictionPos = { trans.pos.x,groundHeight_,trans.pos.z };
 		float radius = ColliderSerch<SphereCollider>().back()->GetRadius();
 		DrawSphere3D(predictionPos, radius * 1.3f, 4, 0xff0000, 0xff0000, true);
 	}
@@ -81,7 +81,7 @@ void Fall::OnCollision(const ColliderBase& collider)
 
 void Fall::Set(const Vector3& pos)
 {
-	trans_.pos = pos;
+	trans.pos = pos;
 	idleCounter_ = 0;
 	state_ = STATE::IDLE;
 
@@ -90,7 +90,7 @@ void Fall::Set(const Vector3& pos)
 
 	groundHeight_ = 0.0f;
 
-	Vector3 work = trans_.pos;
+	Vector3 work = trans.pos;
 	work.y = 1500.0f;
 
 	float radius = ColliderSerch<SphereCollider>().back()->GetRadius();

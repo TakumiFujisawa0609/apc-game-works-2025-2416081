@@ -21,5 +21,5 @@ void ThrowRock::Load(void)
 
 	ALIVE_HIT_NUM = 10;
 
-	trans_.scale = SCALE;
+	trans.scale = SCALE;
 }

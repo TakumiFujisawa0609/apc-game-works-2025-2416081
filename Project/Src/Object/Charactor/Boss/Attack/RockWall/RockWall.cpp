@@ -49,8 +49,8 @@ void RockWall::On(const Vector3& pos)
 
     state_ = STATE::MOVE;
 
-    trans_.pos = pos;
-    trans_.pos.y = 0.0f;
+    trans.pos = pos;
+    trans.pos.y = 0.0f;
 }
 
 void RockWall::SubLoad(void)
@@ -82,10 +82,10 @@ void RockWall::SubUpdate(void)
 void RockWall::Move(void)
 {
     // 上に動かす（ステージとの接触がなくなるまで）
-    trans_.pos.y += MOVE_SPEED;
-    if (CollisionManager::IsStageCollision(trans_.pos, ROUGH_RADIUS, TAG::GOLEM_ATTACK_WALL) == false) {
+    trans.pos.y += MOVE_SPEED;
+    if (CollisionManager::IsStageCollision(trans.pos, ROUGH_RADIUS, TAG::GOLEM_ATTACK_WALL) == false) {
         state_ = STATE::BE;
-        trans_.pos = trans_.prevPos;
+        trans.pos = trans.prevPos;
         SetDynamicFlg(false);
         return;
     }

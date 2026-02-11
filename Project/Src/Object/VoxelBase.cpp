@@ -38,16 +38,16 @@ void VoxelBase::Load(void)
     SubLoad();
 
 	// モデルに制御情報を適用しておく
-    trans_.Attach();
+    trans.Attach();
 
 	// ボクセルメッシュ生成（モデルが正常に読み込まれていれば）
-    if (trans_.model != -1) {
+    if (trans.model != -1) {
 
 		// メッシュ生成実行
         BuildVoxelMeshFromMV1Handle();
 
         // モデルはもう使わないので解放
-        trans_.Release();
+        trans.Release();
 
         // 破壊エフェクト管理クラスを生成
         effect = new VoxelBreakEffectManager(texture);
@@ -88,13 +88,13 @@ void VoxelBase::Update(void)
 	// 動的オブジェクトの場合、移動していたらセル中心位置群(ワールド)を更新する
     if (GetDynamicFlg()) {
         // 移動量を見る
-        if (trans_.Velocity() != 0.0f) {
+        if (trans.Velocity() != 0.0f) {
 
             // 一旦もともと格納されていた中心座標群を初期化する
             cellCenterPoss.clear();
 
             // セル中心座標群(ローカル)からセル中心座標群(ワールド)を算出する
-            for (std::pair<const int, Vector3>p : cellCenterLocalPoss) { cellCenterPoss[p.first] = trans_.pos + p.second; }
+            for (std::pair<const int, Vector3>p : cellCenterLocalPoss) { cellCenterPoss[p.first] = trans.pos + p.second; }
         }
     }
 
@@ -124,7 +124,7 @@ void VoxelBase::Draw(void)
     if (!GetIsAlphaDraw()) {
 
         // 座標を移動して描画
-        MATRIX M = MGetTranslate(trans_.pos.ToVECTOR());
+        MATRIX M = MGetTranslate(trans.pos.ToVECTOR());
         SetTransformToWorld(&M);
 
         // メッシュ描画
@@ -156,7 +156,7 @@ void VoxelBase::AlphaDraw(void)
     if (GetIsAlphaDraw()) {
 
         // 座標を移動して描画
-        MATRIX M = MGetTranslate(trans_.pos.ToVECTOR());
+        MATRIX M = MGetTranslate(trans.pos.ToVECTOR());
         SetTransformToWorld(&M);
 
         // メッシュ描画
@@ -240,10 +240,10 @@ void VoxelBase::MarkSurface(void)
     density.resize(Nx * Ny * Nz, 0);
 
     // モデルのメッシュの当たり判定のセットアップ
-    MV1SetupCollInfo(trans_.model, -1);
+    MV1SetupCollInfo(trans.model, -1);
 
     // グリッド最小座標を算出
-    Vector3 minW = (trans_.pos + gridCenter) - (roughSize / 2);
+    Vector3 minW = (trans.pos + gridCenter) - (roughSize / 2);
 
     // セルサイズの半分のサイズを半径として保存（処理効率的にセルを球体としてメッシュとの当たり判定を行う）
     float r = cellSize * 0.5f;
@@ -260,7 +260,7 @@ void VoxelBase::MarkSurface(void)
                     minW.z + (z * cellSize) + (cellSize * 0.5f));
 
                 // 取得した座標で当たり判定（メッシュVS球体）
-                auto res = MV1CollCheck_Sphere(trans_.model, -1, pc.ToVECTOR(), r);
+                auto res = MV1CollCheck_Sphere(trans.model, -1, pc.ToVECTOR(), r);
 
                 // 当たっていたら、そのセルを埋める
                 if ((res.HitNum > 0)) { density[Idx(x, y, z, Nx, Ny)] = 255; }
@@ -318,7 +318,7 @@ void VoxelBase::BuildGreedyMesh(void)
                 if (density[Idx(x, y, z)] == 0) { continue; }
                 Vector3 lp = IdxToLocalPos(x, y, z);
                 cellCenterLocalPoss[Idx(x, y, z)] = lp;
-                cellCenterPoss[Idx(x, y, z)] = trans_.pos + lp;
+                cellCenterPoss[Idx(x, y, z)] = trans.pos + lp;
             }
 
     // 生存比率を計算して、一定以下なら死滅扱いにする

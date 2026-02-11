@@ -80,21 +80,21 @@ void CharactorBase::Invi(void)
 	if (inviCounter_ > 1) {
 		if (inviCounter_ / 10 % 2 == 0) {
 			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
-				MV1SetMaterialEmiColor(trans_.model, i, DEFAULT_COLOR[i]);
+				MV1SetMaterialEmiColor(trans.model, i, DEFAULT_COLOR[i]);
 			}
 		}
 		else {
 			for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
 				COLOR_F emi = DEFAULT_COLOR[i];
 				emi.r = (std::min)(DEFAULT_COLOR[i].r + 0.6f, 1.0f);
-				MV1SetMaterialEmiColor(trans_.model, i, emi);
+				MV1SetMaterialEmiColor(trans.model, i, emi);
 			}
 		}
 
 	}
 	else if (inviCounter_ == 1) {
 		for (int i = 0; i < DEFAULT_COLOR.size(); i++) {
-			MV1SetMaterialEmiColor(trans_.model, i, DEFAULT_COLOR[i]);
+			MV1SetMaterialEmiColor(trans.model, i, DEFAULT_COLOR[i]);
 		}
 	}
 }

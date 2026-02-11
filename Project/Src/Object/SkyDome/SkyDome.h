@@ -14,7 +14,7 @@ public:
 	void Draw(void)override;
 	void AlphaDraw(void)override {}
 
-	void SetPos(const Vector3& pos) { trans_.pos = pos; }
+	void SetPos(const Vector3& pos) { trans.pos = pos; }
 private:
 	// •\Ž¦‚·‚é‘å‚«‚³
 	const float SCALE = 30.0f;

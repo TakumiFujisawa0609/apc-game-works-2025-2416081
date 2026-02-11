@@ -97,7 +97,7 @@ private:
 		// •`‰æ
 		void Draw(void)const {
 			DrawFormatStringToHandle(
-				pos.x, (pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f),
+				(int)pos.x, (int)((pos.y + 20.0f) - ((ADD_SCORE_ALIVE_TIME - aliveTime) * 0.75f)),
 				0xffff00, addScoreFont,
 				"+%d", addScore
 			);
