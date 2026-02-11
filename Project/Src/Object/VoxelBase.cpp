@@ -44,17 +44,12 @@ void VoxelBase::Load(void)
     if (trans_.model != -1) {
 
 		// メッシュ生成実行
-        BuildVoxelMeshFromMV1Handle(
-            trans_.model,
-            cellSize,
-            trans_.pos + gridCenter,
-            roughSize,
-            batches
-        );
+        BuildVoxelMeshFromMV1Handle();
 
         // モデルはもう使わないので解放
         trans_.Release();
 
+        // 破壊エフェクト管理クラスを生成
         effect = new VoxelBreakEffectManager(texture);
         effect->Load();
     }
@@ -71,25 +66,34 @@ void VoxelBase::Init(void)
     // 破壊セルインデックス群の初期化
     BreakCellIdxClear();
 
+    // 破壊エフェクト管理クラスの初期化
     effect->Init();
 
+    // 基底クラスの初期化の呼び出し直し
     ActorBase::Init();
 }
 
 
 void VoxelBase::Update(void)
 {
+    // 基底クラスの更新処理の呼び出し直し
     ActorBase::Update();
 
+    // 破壊エフェクト管理クラスの更新
     effect->Update();
 
     // 実質的な生存判定
     if (!GetJudgeFlg()) { return; }
 
-	// 動的オブジェクトの場合、移動していたらセル中心位置群を更新する
+	// 動的オブジェクトの場合、移動していたらセル中心位置群(ワールド)を更新する
     if (GetDynamicFlg()) {
+        // 移動量を見る
         if (trans_.Velocity() != 0.0f) {
+
+            // 一旦もともと格納されていた中心座標群を初期化する
             cellCenterPoss.clear();
+
+            // セル中心座標群(ローカル)からセル中心座標群(ワールド)を算出する
             for (std::pair<const int, Vector3>p : cellCenterLocalPoss) { cellCenterPoss[p.first] = trans_.pos + p.second; }
         }
     }
@@ -97,9 +101,9 @@ void VoxelBase::Update(void)
     // 前フレーム、形状変化が起こっていたら（フラグがたっていたら）メッシュを再生成
     if (regeneration) {
 	    // メッシュ再生成処理
-        BuildGreedyMesh(density, Nx, Ny, Nz, cellSize, batches);
+        BuildGreedyMesh();
 
-		// フラグリセット（メッシュ再生成処理）
+		// メッシュ再生成完了
         regeneration = false;
     }
 }
@@ -169,7 +173,6 @@ void VoxelBase::AlphaDraw(void)
         // 座標を元に戻す
         M = MGetIdent();
         SetTransformToWorld(&M);
-
     }
 
 
@@ -204,46 +207,46 @@ void VoxelBase::Release(void)
 
 
 #pragma region メッシュ生成
-void VoxelBase::BuildVoxelMeshFromMV1Handle(int mv1, float cell, const Vector3& center, const Vector3& roughSize, std::vector<MeshBatch>& batches)
+void VoxelBase::BuildVoxelMeshFromMV1Handle(void)
 {
     // ①セル数を算出～～～～～～～～～～～～～～～～
-    Nx = (int)std::ceil(roughSize.x / cell);
-    Ny = (int)std::ceil(roughSize.y / cell);
-    Nz = (int)std::ceil(roughSize.z / cell);
+    Nx = (int)std::ceil(roughSize.x / cellSize);
+    Ny = (int)std::ceil(roughSize.y / cellSize);
+    Nz = (int)std::ceil(roughSize.z / cellSize);
     // ～～～～～～～～～～～～～～～～～～～～～～～～～
 
     // ②表面をマーキング～～～～～～～～～～～～～～～～～～～～～～～
-    MarkSurface(mv1, cell, center, roughSize, Nx, Ny, Nz, density);
+    MarkSurface();
     // ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
     // ③内部充填～～～～～～～～～～～～～～～～～～～
-    SolidFill(density, Nx, Ny, Nz);
+    SolidFill();
 
     // 初期密度情報を保持して簡単に戻せるようにしておく
     densityInit = density;
     // ～～～～～～～～～～～～～～～～～～～～～～～～
 
     // ④メッシュ化～～～～～～～～～～～～～～～～～～～～～
-    BuildGreedyMesh(density, Nx, Ny, Nz, cellSize, batches);
+    BuildGreedyMesh();
 
     // メッシュ生成が正常に行われたか否か（失敗があれば通知しておく）
     if (batches.empty()) { printfDx("ボクセルメッシュ生成に失敗しました"); }
     // ～～～～～～～～～～～～～～～～～～～～～～～～～～～
 }
 
-void VoxelBase::MarkSurface(int mv1, float cell, const Vector3& center, const Vector3& roughSize, int Nx, int Ny, int Nz, std::vector<unsigned char>& density)
+void VoxelBase::MarkSurface(void)
 {
     // 密度情報群の配列数をグリッド数分確保（０で初期化）
     density.resize(Nx * Ny * Nz, 0);
 
     // モデルのメッシュの当たり判定のセットアップ
-    MV1SetupCollInfo(mv1, -1);
+    MV1SetupCollInfo(trans_.model, -1);
 
-    // 
-    Vector3 minW = center - (roughSize / 2);
+    // グリッド最小座標を算出
+    Vector3 minW = (trans_.pos + gridCenter) - (roughSize / 2);
 
     // セルサイズの半分のサイズを半径として保存（処理効率的にセルを球体としてメッシュとの当たり判定を行う）
-    float r = cell * 0.5f;
+    float r = cellSize * 0.5f;
 
     // グリッド全てでメッシュとの当たり判定を行う
     for (int z = 0; z < Nz; ++z)
@@ -252,23 +255,24 @@ void VoxelBase::MarkSurface(int mv1, float cell, const Vector3& center, const Ve
 
                 // ３次元的なグリッド番号から座標を算出
                 Vector3 pc = Vector3(
-                    minW.x + (x * cell) + (cell * 0.5f),
-                    minW.y + (y * cell) + (cell * 0.5f),
-                    minW.z + (z * cell) + (cell * 0.5f));
+                    minW.x + (x * cellSize) + (cellSize * 0.5f),
+                    minW.y + (y * cellSize) + (cellSize * 0.5f),
+                    minW.z + (z * cellSize) + (cellSize * 0.5f));
 
                 // 取得した座標で当たり判定（メッシュVS球体）
-                auto res = MV1CollCheck_Sphere(mv1, -1, pc.ToVECTOR(), r);
+                auto res = MV1CollCheck_Sphere(trans_.model, -1, pc.ToVECTOR(), r);
 
-                // 当たっていたら、外側としてあとで判別可能なように２００を入れておく
-                if ((res.HitNum > 0)) { density[Idx(x, y, z, Nx, Ny)] = 200; }
+                // 当たっていたら、そのセルを埋める
+                if ((res.HitNum > 0)) { density[Idx(x, y, z, Nx, Ny)] = 255; }
 
                 // 衝突判定情報を破棄
                 MV1CollResultPolyDimTerminate(res);
             }
 }
 
-void VoxelBase::SolidFill(std::vector<unsigned char>& density, int Nx, int Ny, int Nz)
+void VoxelBase::SolidFill(void)
 {
+    // グリッド総数を計算
     const int total = Nx * Ny * Nz;
     std::vector<bool> ext(total, false);
     std::queue<int> q;
@@ -298,15 +302,12 @@ void VoxelBase::SolidFill(std::vector<unsigned char>& density, int Nx, int Ny, i
 
     // 外は0のまま、内部と表面を255へ
     for (int i = 0; i < total; ++i) {
-        if (!ext[i]) { density[i] = 255; }                  // 内部
-        else if (density[i] == 200) { density[i] = 255; }   // 外部側の表面
+        // フラグで内部を埋める
+        if (!ext[i]) { density[i] = 255; }
     }
 }
 
-void VoxelBase::BuildGreedyMesh(
-    const std::vector<unsigned char>& density,
-    int Nx, int Ny, int Nz, float cell,
-    std::vector<MeshBatch>& batches)
+void VoxelBase::BuildGreedyMesh(void)
 {
     // 生存しているセル中心位置リストを作成
     cellCenterLocalPoss.clear();
@@ -417,7 +418,7 @@ void VoxelBase::BuildGreedyMesh(
                     // 面の4頂点（ローカル空間）
                     // nSign: 法線符号 (+1: +d 方向, -1: -d 方向)
                     const int nSign = m0.fromL ? +1 : -1;
-                    const float half = cell * 0.5f;
+                    const float half = cellSize * 0.5f;
 
                     // ソリッド側のセルインデックス（面が属する“ソリッド”セル）
                     // fromL(=aL=1) → ソリッドは w-1
@@ -430,9 +431,9 @@ void VoxelBase::BuildGreedyMesh(
                         XYZ[v] = J;
                         XYZ[d] = w;
 
-                        float xf = (XYZ[0] - Nx * 0.5f) * cell;
-                        float yf = (XYZ[1] - Ny * 0.5f) * cell;
-                        float zf = (XYZ[2] - Nz * 0.5f) * cell;
+                        float xf = (XYZ[0] - Nx * 0.5f) * cellSize;
+                        float yf = (XYZ[1] - Ny * 0.5f) * cellSize;
+                        float zf = (XYZ[2] - Nz * 0.5f) * cellSize;
 
                         return VGet(xf, yf, zf);
                         };

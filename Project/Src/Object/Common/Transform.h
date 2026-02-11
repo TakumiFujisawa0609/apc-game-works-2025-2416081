@@ -74,12 +74,7 @@ struct Transform
 	/// </summary>
 	/// <param name="path">モデルのパス（Data/Model/～～.mv1）</param>
 	void Load(std::string path) { model = MV1LoadModel(("Data/Model/" + path + ".mv1").c_str()); }
-    //void Load(const char* path) {  
-    //    std::string fullPath = "Data/Model/";  
-    //    fullPath += path;  
-    //    fullPath += ".mv1";  
-    //    MV1LoadModel(fullPath.c_str());  
-    //}
+
 	// 制御情報をモデルに適用
 	void Attach(void) { Utility::MV1ModelMatrix(model, scale, pos + centerDiff, { localAngle,angle }); }
 

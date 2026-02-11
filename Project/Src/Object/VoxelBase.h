@@ -24,6 +24,7 @@ public:
 	void AlphaDraw(void)override;
 	void Release(void)override;
 
+	// メッシュ情報構造体
 	struct MeshBatch {
 		// 頂点配列
 		std::vector<VERTEX3D> v;
@@ -104,9 +105,9 @@ private:
 	const Vector3 kDirNrm[6] = { {+1,0,0},{-1,0,0},{0,+1,0},{0,-1,0},{0,0,+1},{0,0,-1} };
 
 #pragma region ボクセルメッシュを構成するメンバ変数
-	// 密度情報
+	// セル密度情報群
 	std::vector<unsigned char> density;
-	// 初期密度情報(破壊されたあと復活させるとき用)
+	// 初期セル密度情報群(破壊されたあと復活させるとき用)
 	std::vector<unsigned char> densityInit;
 
 	// グリッド数
@@ -136,6 +137,8 @@ private:
 
 	// テクスチャID
 	int texture;
+	// テクスチャスケール
+	float TEX_SCALE;
 
 	// その瞬間破壊されたセルのインデックスを格納する配列
 	std::vector<int>breakCellIdx;
@@ -147,72 +150,19 @@ private:
 #pragma region メッシュ生成
 	// 初期化時～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 																			 
-	/// <summary>
 	/// MV1モデルからボクセルメッシュを生成
-	/// </summary>
-	/// <param name="mv1">（in）MV1モデルハンドル</param>
-	/// <param name="cell">（in）セルサイズ</param>
-	/// <param name="center">（in）ボクセルメッシュの中心座標</param>
-	/// <param name="roughSize">（in）全体を囲める大まかなサイズ</param>
-	/// <param name="batches">（out）生成されたメッシュ情報を格納するため変数</param>
-	void BuildVoxelMeshFromMV1Handle(
-		int mv1,
-		float cell,
-		const Vector3& center,
-		const Vector3& roughSize,
-		std::vector<MeshBatch>& batches
-	);
+	void BuildVoxelMeshFromMV1Handle(void);
 
-	/// <summary>
 	/// メッシュとの衝突判定で表面をマーキング
-	/// </summary>
-	/// <param name="mv1">（in）MV1モデルハンドル</param>
-	/// <param name="cell">（in）セルサイズ</param>
-	/// <param name="center">（in）ボクセルメッシュの中心座標</param>
-	/// <param name="roughSize">（in）全体を囲める大まかなサイズ</param>
-	/// <param name="Nx">（in）X方向のセル数</param>
-	/// <param name="Ny">（in）Y方向のセル数</param>
-	/// <param name="Nz">（in）Z方向のセル数</param>
-	/// <param name="density">（out）密度情報格納用変数（ここでは表面のみ特定の数値を立てるだけ）</param>
-	void MarkSurface(
-		int mv1,
-		float cell,
-		const Vector3& center,
-		const Vector3& roughSize,
-		int Nx, int Ny, int Nz,
-		std::vector<unsigned char>& density
-	);
-																			 
+	void MarkSurface(void);
 
-	/// <summary>
-	/// MarkSurface()でマークした表面情報をもとにその中身を埋め、表面マーク用の数値を初期化
-	/// </summary>
-	/// <param name="density">（out）密度情報格納用変数（ここで初期密度情報は完成）</param>
-	/// <param name="Nx">（in）X方向のセル数</param>
-	/// <param name="Ny">（in）Y方向のセル数</param>
-	/// <param name="Nz">（in）Z方向のセル数</param>
-	void SolidFill(std::vector<unsigned char>& density, int Nx, int Ny, int Nz);
+	// MarkSurface()でマークした表面情報をもとにその中身を埋め、表面マーク用の数値を初期化
+	void SolidFill(void);
 																			 
 	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
-	/// <summary>
-	/// density （密度情報）をもとに、メッシュを生成（グリーディー方式）
-	/// </summary>
-	/// <param name="density">（in）密度情報</param>
-	/// <param name="Nx">（in）X方向のセル数</param>
-	/// <param name="Ny">（in）Y方向のセル数</param>
-	/// <param name="Nz">（in）Z方向のセル数</param>
-	/// <param name="cell">（in）セルサイズ</param>
-	/// <param name="batches">（out）生成されたメッシュ情報を格納するため変数</param>
-	void BuildGreedyMesh(
-		const std::vector<unsigned char>& density,
-		int Nx, int Ny, int Nz,
-		float cell, 
-		std::vector<MeshBatch>& batches
-	);
-
-	float TEX_SCALE;
-
+	// 密度情報(density)をもとに、メッシュを生成（グリーディー方式）
+	void BuildGreedyMesh(void);
 #pragma endregion
 
 protected:
@@ -264,6 +214,10 @@ protected:
 	// エフェクト
 	VoxelBreakEffectManager* effect;
 
+	/// <summary>
+	/// 破壊セル座標(breakCellIdx)にエフェクトを発生させる
+	/// </summary>
+	/// <param name="breakerPos"> (in) 破壊したオブジェクトの座標</param>
 	void BreakEffect(const Vector3& breakerPos);
 };
 
