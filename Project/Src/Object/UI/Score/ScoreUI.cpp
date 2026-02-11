@@ -17,7 +17,7 @@ ScoreUI::ScoreUI(const Vector2& SCORE_POS) :
 
 	comboAnimeIndex(),
 	comboAnimeSigned(),
-	comboBackImage(),
+	comboBackImage()
 {
 }
 
