@@ -139,7 +139,7 @@ void GameScene::Update(void)
 	}
 
 	// ゲームクリア判定
-	if ((ObjSerch<Boss>()->GetState() == (int)Boss::STATE::END) || KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) {
+	if ((ObjSerch<Boss>()->GetState() == (int)Boss::STATE::END)) {
 		// 追加予定で待機していたスコアを全て適用しておく
 		ObjSerch<ScoreUI>()->AllAddScoreApply();
 
