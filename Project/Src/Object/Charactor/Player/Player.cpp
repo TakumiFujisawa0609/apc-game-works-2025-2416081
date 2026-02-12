@@ -16,7 +16,7 @@
 Player::Player() :
 	CharactorBase(),
 
-	hp_(0),
+	hp(0),
 
 	isJump(),
 	jumpKeyCounter(),
@@ -27,6 +27,8 @@ Player::Player() :
 	attackStageCounter(0),
 
 	gouge(nullptr),
+	isGouge(false),
+
 	throwing(nullptr),
 
 	knockBackVec(),
@@ -97,7 +99,7 @@ void Player::CharactorInit(void)
 	for (auto& at : isAttack) { at = false; }
 	attackStageCounter = 0;
 
-	hp_ = HP_MAX;
+	hp = HP_MAX;
 
 	// プレイヤーが抱える下位クラスの初期化処理
 	LowerInit();
@@ -448,12 +450,12 @@ void Player::Damage(void)
 	trans.pos += knockBackVec;
 
 	if (IsAnimeEnd()) {
-		if (hp_ > 0) {
+		if (hp > 0) {
 			state = (int)STATE::MOVE;
 			AnimePlay((int)ANIME_TYPE::IDLE);
 		}
 		else {
-			hp_ = 0;
+			hp = 0;
 			state = (int)STATE::DEATH;
 			AnimePlay((int)ANIME_TYPE::DEATH, false);
 			return;
@@ -639,13 +641,13 @@ void Player::CarryJump(void)
 
 void Player::HpSharpen(int damage)
 {
-	if (hp_ <= 0) { return; }
+	if (hp <= 0) { return; }
 
 	punch->Off();
 	gouge->Reset();
 	throwing->Drop();
 
-	hp_ -= (hp_ >= damage) ? damage : hp_;
+	hp -= (hp >= damage) ? damage : hp;
 
 	Snd::GetIns().Stop("PlayerRun");
 	Snd::GetIns().Stop("PlayerEvasion");
@@ -679,7 +681,7 @@ void Player::LowerLoad(void)
 	preview->Load();
 
 	// HPバー
-	hpBar = new PlayerHpBarManager(hp_, HP_MAX);
+	hpBar = new PlayerHpBarManager(hp, HP_MAX);
 	hpBar->Load();
 
 	// 操作説明

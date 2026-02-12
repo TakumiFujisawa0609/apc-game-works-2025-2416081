@@ -43,25 +43,6 @@ public:
 		MAX
 	};
 
-	static constexpr unsigned char HP_MAX = 100;
-
-	// 移動状態で使用する～～-------------------------------------------------------------------
-	// 定数
-	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
-
-	static constexpr float MAX_JUMP_POWER = 25.0f;		//最大ジャンプ力
-	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ジャンプキーを受け付けるフレーム数
-	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
-	//----------------------------------------------------------------------------------------------
-
-	// 攻撃状態で使用する～～-------------------------------------------------------------------
-	// 定数
-	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, MAX, };		//攻撃の段数
-	static constexpr int INPUT_ATTACK_FRAME = 20;					//次の段につながる時間(フレーム数)
-
-	// 関数
-	//----------------------------------------------------------------------------------------------
-
 	std::vector<ColliderBase*> GetCollider(void)const override { 
 		std::vector<ColliderBase*>ret = {};
 
@@ -76,12 +57,11 @@ public:
 	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival = std::move(ptr); }
 
 	// 現在のHPの残り割合を返す
-	float HpRatio(void)const { return ((float)hp_ / (float)HP_MAX); }
+	float HpRatio(void)const { return ((float)hp / (float)HP_MAX); }
 private:
 
 #pragma region 定数定義
-	// スケール
-	//const float SCALE = 0.075f;
+	// モデルスケール
 	const float SCALE = 0.1f;
 
 	// モデルのサイズ
@@ -139,14 +119,19 @@ private:
 
 #pragma endregion
 
+	// 最大ヒットポイント
+	static constexpr unsigned char HP_MAX = 100;
 	// ヒットポイント
-	unsigned char hp_;
+	unsigned char hp;
 
 #pragma region 状態別関数の中身
 	// 移動処理関係--------------------------
 
-	//enum class DIRECTION { NON, FRONT, BACK };
-	//struct DIR_VEC { DIRECTION x = DIRECTION::NON, y = DIRECTION::NON, z = DIRECTION::NON; };
+	// 定数
+	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
+	static constexpr float MAX_JUMP_POWER = 25.0f;		//最大ジャンプ力
+	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ジャンプキーを受け付けるフレーム数
+	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
 
 	// 関数
 	void Run(void);			//横移動関数
@@ -158,6 +143,11 @@ private:
 	//---------------------------------------
 
 	// パンチ～～～～～～～～～～～～
+	
+	// 定数
+	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, MAX, };		//攻撃の段数
+	static constexpr int INPUT_ATTACK_FRAME = 20;					//次の段につながる時間(フレーム数)
+
 	// 関数
 	void AttackMove(void);
 
@@ -183,11 +173,14 @@ private:
 	//～～～～～～～～～～～～～～～～
 
 	// 投げ～～～～～～～～～～～～～～
+	
+	// インスタンス
 	Throwing* throwing;
 
 	// 関数
 	void CarryRun(void);		//横移動関数
 	void CarryJump(void);		//ジャンプ関数
+
 	//～～～～～～～～～～～～～～～～
 
 	// ノックバック時の移動ベクトル
@@ -243,6 +236,7 @@ private:
 
 		MAX,
 	};
+	// モーションの再生スピード配列
 	const float INFBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] =
 	{
 		0.5f,	//IDLE
