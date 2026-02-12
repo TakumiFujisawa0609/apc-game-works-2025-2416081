@@ -39,7 +39,7 @@ Player::Player() :
 
 void Player::Load(void)
 {
-	trans.Load("Player/Player試作");
+	trans.Load("Player/Player");
 	trans.scale = SCALE;
 	trans.localAngle = LOCAL_ROT;
 
@@ -64,7 +64,7 @@ void Player::Load(void)
 
 	// モーションの初期設定と初期モーション再生
 	CreateAnimationController();
-	AnimeLoad();
+	AddInFbxAnimation((int)ANIME_TYPE::MAX, INFBX_ANIME_SPEED);
 	AnimePlay((int)ANIME_TYPE::IDLE, true);
 
 	// コライダー生成
@@ -79,8 +79,6 @@ void Player::CharactorInit(void)
 {
 	SetIsDraw(true);
 	SetJudge(true);
-
-	SetInviEffectFlg(false);
 
 	trans.pos = Vector3(1000.0f, 1000.0f, 200.0f);
 	trans.centerDiff = CENTER_DIFF;
@@ -637,35 +635,6 @@ void Player::CarryJump(void)
 
 	// モーション更新
 	if (isJump[0] && IsAnimeEnd() && accelSum.y < 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
-}
-
-void Player::AnimeLoad(void)
-{
-	AddInFbxAnimation((int)ANIME_TYPE::MAX, INFBX_ANIME_SPEED);
-
-	const std::string ANIME_PATH = "Data/Model/Player/Animation/";
-	
-	//AddAnimation((int)ANIME_TYPE::IDLE, 1.0f, (ANIME_PATH + "Idle.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::RUN, 1.0f, (ANIME_PATH + "Run.mv1").c_str());
-
-	//AddAnimation((int)ANIME_TYPE::JUMP, 1.5f, (ANIME_PATH + "Jump.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::JUMP_POST, 1.5f, (ANIME_PATH + "JumpPost.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::FALL, 1.5f, (ANIME_PATH + "Fall.mv1").c_str());
-
-	//AddAnimation((int)ANIME_TYPE::EVASION, 1.5f, (ANIME_PATH + "Evasion.mv1").c_str());
-
-	//AddAnimation((int)ANIME_TYPE::punchFIRST, 1.5f, (ANIME_PATH + "PunchFirst.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::punchSECOND, 1.5f, (ANIME_PATH + "PunchSecond.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::punchTHIRD, 1.5f, (ANIME_PATH + "PunchThird.mv1").c_str());
-
-	//AddAnimation((int)ANIME_TYPE::GOUPE, 0.6f, (ANIME_PATH + "Goupe.mv1").c_str());
-
-	//AddAnimation((int)ANIME_TYPE::CARRY_IDLE, 0.5f, (ANIME_PATH + "CarryIdle.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::CARRY_RUN, 0.5f, (ANIME_PATH + "CarryRun.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::THROW, 0.5f, (ANIME_PATH + "Throw.mv1").c_str());
-
-	//AddAnimation((int)ANIME_TYPE::DAMAGE, 0.5f, (ANIME_PATH + "Damage.mv1").c_str());
-	//AddAnimation((int)ANIME_TYPE::DEATH, 0.5f, (ANIME_PATH + "Death.mv1").c_str());
 }
 
 void Player::HpSharpen(int damage)

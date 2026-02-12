@@ -262,9 +262,6 @@ private:
 		1.0f,	//DEATH
 	};
 
-	// ƒ‚[ƒVƒ‡ƒ“‚Ì‰Šúİ’è
-	void AnimeLoad(void);
-
 	void HpSharpen(int damage);
 #pragma endregion
 

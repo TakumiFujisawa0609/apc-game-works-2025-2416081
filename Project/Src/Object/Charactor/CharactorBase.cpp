@@ -18,7 +18,7 @@ CharactorBase::CharactorBase() :
 void CharactorBase::SubInit(void)
 {
 	// モデルのカラーの初期化
-	SetInviEffectFlg();
+ 	SetInviEffectFlg();
 
 	// キャラクター固有の初期化
 	CharactorInit();

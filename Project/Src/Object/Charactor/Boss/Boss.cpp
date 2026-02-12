@@ -72,8 +72,6 @@ void Boss::Load(void)
 
 	// Bossクラスが抱える子クラス達の読み込み処理
 	LowerLoad();
-
-	SetInviEffectFlg(true);
 }
 
 void Boss::CharactorInit(void)
