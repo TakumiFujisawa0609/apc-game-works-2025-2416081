@@ -2,11 +2,11 @@
 
 #include"../../Boss/Boss.h"
 
-ThrowObjBase::ThrowObjBase(const Vector3& playerPos_, const Vector3& playerAngle_) :
+ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle) :
 	ActorBase(),
 
-	playerPos(playerPos_),
-	playerAngle(playerAngle_),
+	playerModel(playerModel),
+	playerAngle(playerAngle),
 
 	model(-1),
 
@@ -92,7 +92,7 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 
 void ThrowObjBase::Throw(void)
 {
-	trans.pos = playerPos + LOCAL_THROW_POS.TransMat(MGetRotY(playerAngle.y));
+	trans.pos = PlayerRightHandPos();
 
 	moveVec = THROW_VEC.TransMat(MGetRotY(playerAngle.y)) * speed;
 
@@ -105,7 +105,7 @@ void ThrowObjBase::Throw(void)
 
 void ThrowObjBase::CarryStateFunc(void)
 {
-	trans.pos = playerPos + CARRY_OBJ_LOCAL_POS.TransMat(MatrixAllMultY({ playerAngle }));
+	trans.pos = PlayerRightHandPos();
 	trans.angle = playerAngle;
 }
 void ThrowObjBase::DropStateFunc(void)

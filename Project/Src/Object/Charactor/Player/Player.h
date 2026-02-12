@@ -49,7 +49,7 @@ public:
 	// 定数
 	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
 
-	static constexpr float MAX_JUMP_POWER = 20.0f;		//最大ジャンプ力
+	static constexpr float MAX_JUMP_POWER = 25.0f;		//最大ジャンプ力
 	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ジャンプキーを受け付けるフレーム数
 	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
 	//----------------------------------------------------------------------------------------------
@@ -81,13 +81,14 @@ private:
 
 #pragma region 定数定義
 	// スケール
-	const float SCALE = 2.5f;
+	//const float SCALE = 0.075f;
+	const float SCALE = 0.1f;
 
 	// モデルのサイズ
-	const Vector3 SIZE = Vector3(73.204f, 73.096f, 32.071f) * SCALE;
+	const Vector3 SIZE = Vector3(1785, 1600, 700) * SCALE;
 
 	// モデルの中心点のズレ
-	const Vector3 CENTER_DIFF = Vector3(0, -37, 0) * SCALE;
+	const Vector3 CENTER_DIFF = Vector3(0, -860, 0) * SCALE;
 
 	// モデルの角度のズレ
 	const Vector3 LOCAL_ROT = Vector3(0.0f, Deg2Rad(180.0f), 0.0f);
@@ -98,7 +99,7 @@ private:
 	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3::Yonly(RADIUS);
 
 	const Vector3 LINE_COLLIDER_START_POS = Vector3();
-	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y * 0.5f, 0.0f);
+	const Vector3 LINE_COLLIDER_END_POS = Vector3::Yonly(-SIZE.y * 0.5f);
 
 #pragma endregion
 
@@ -170,8 +171,15 @@ private:
 	// ～～～～～～～～～～～～～～～
 
 	// えぐり取る～～～～～～～～～～
+	
 	// インスタンス
 	PlayerGouge* gouge;
+	
+	// 変数
+	
+	// Gouge(えぐり取り)を実行したかどうかのフラグ
+	bool isGouge;
+
 	//～～～～～～～～～～～～～～～～
 
 	// 投げ～～～～～～～～～～～～～～
@@ -216,21 +224,42 @@ private:
 #pragma region モーション
 	// モーションの全て
 	enum class ANIME_TYPE {
+
 		IDLE,
 		RUN,
-		JUMP_POST,
 		JUMP,
 		FALL,
 		EVASION,
 		PUNCH_FIRST,
 		PUNCH_SECOND,
-		PUNCH_THIRD,
-		GOUPE,
+		GOUGE_IDLE,
+		CATCH,
+		GOUGE,
 		CARRY_IDLE,
 		CARRY_RUN,
 		THROW,
 		DAMAGE,
 		DEATH,
+
+		MAX,
+	};
+	const float INFBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] =
+	{
+		0.5f,	//IDLE
+		6.0f,	//RUN
+		5.0f,	//JUMP
+		1.5f,	//FALL
+		1.5f,	//EVASION
+		1.5f,	//PUNCH_FIRST
+		1.5f,	//PUNCH_SECOND
+		1.0f,	//GOUGE_IDLE
+		1.5f,	//CATCH
+		2.0f,	//GOUPE
+		1.0f,	//CARRY_IDLE
+		2.5f,	//CARRY_RUN
+		1.0f,	//THROW
+		1.0f,	//DAMAGE
+		1.0f,	//DEATH
 	};
 
 	// モーションの初期設定

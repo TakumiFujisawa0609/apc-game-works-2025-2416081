@@ -16,8 +16,8 @@ class Throwing
 {
 public:
 
-	Throwing(const Vector3& playerPos, const Vector3& playerAngle);
-	~Throwing();
+	Throwing(const int& playerModel, const Vector3& playerAngle);
+	~Throwing() = default;
 
 	void Load(void);
 	void Init(void);
@@ -62,8 +62,6 @@ private:
 	// タイプ別モデルハンドル
 	int models[(int)THROW_TYPE::MAX];
 
-	// プレイヤー座標(参照用)
-	const Vector3& playerPos;
-	// プレイヤー角度(参照用)
+	const int& playerModel;
 	const Vector3& playerAngle;
 };

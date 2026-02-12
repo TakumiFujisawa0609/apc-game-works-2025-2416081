@@ -2,12 +2,8 @@
 
 #include"../../../../Common/Collider/SphereCollider.h"
 
-ThrowRock::ThrowRock(const Vector3& playerPos_, const Vector3& playerAngle_) : 
-	ThrowObjBase(playerPos_,playerAngle_)
-{
-}
-
-ThrowRock::~ThrowRock()
+ThrowRock::ThrowRock(const int& playerModel, const Vector3& playerAngle) :
+	ThrowObjBase(playerModel, playerAngle)
 {
 }
 

@@ -1,15 +1,11 @@
 #include"Throwing.h"
 
 
-Throwing::Throwing(const Vector3& playerPos, const Vector3& playerAngle) :
+Throwing::Throwing(const int& playerModel, const Vector3& playerAngle) :
 	models(),
 
-	playerPos(playerPos),
+	playerModel(playerModel),
 	playerAngle(playerAngle)
-{
-}
-
-Throwing::~Throwing()
 {
 }
 
@@ -31,7 +27,7 @@ void Throwing::Load(void)
 			switch ((THROW_TYPE)type)
 			{
 			case THROW_TYPE::NON: { continue; }
-			case THROW_TYPE::ROCK: { throwObj[num].ins = new ThrowRock(playerPos, playerAngle); break; }
+			case THROW_TYPE::ROCK: { throwObj[num].ins = new ThrowRock(playerModel, playerAngle); break; }
 			}
 
 			num++;
