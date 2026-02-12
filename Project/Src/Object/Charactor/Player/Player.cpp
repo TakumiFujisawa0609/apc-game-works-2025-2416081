@@ -298,7 +298,7 @@ void Player::DoStateGouge(void)
 }
 void Player::DoStateThrowing(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_ATTACK).down) {
+	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).up) {
 		state = (int)STATE::THROWING_OBJ;
 		AnimePlay((int)ANIME_TYPE::THROW, false);
 	}

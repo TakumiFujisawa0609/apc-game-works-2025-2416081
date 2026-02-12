@@ -76,16 +76,16 @@ void PlayerOperationUI::Update(void)
 		actionPossibleFlg[(int)SORT::MOVE] = true;
 		actionPossibleFlg[(int)SORT::JUMP] = false;
 		actionPossibleFlg[(int)SORT::EVASION] = false;
-		actionPossibleFlg[(int)SORT::ATTACK] = true;
-		actionPossibleFlg[(int)SORT::GOUGE] = false;
+		actionPossibleFlg[(int)SORT::ATTACK] = false;
+		actionPossibleFlg[(int)SORT::GOUGE] = true;
 		break;
 	}
 	case (int)Player::STATE::THROWING_OBJ: {
 		actionPossibleFlg[(int)SORT::MOVE] = false;
 		actionPossibleFlg[(int)SORT::JUMP] = false;
 		actionPossibleFlg[(int)SORT::EVASION] = false;
-		actionPossibleFlg[(int)SORT::ATTACK] = true;
-		actionPossibleFlg[(int)SORT::GOUGE] = false;
+		actionPossibleFlg[(int)SORT::ATTACK] = false;
+		actionPossibleFlg[(int)SORT::GOUGE] = true;
 		break;
 	}
 	case (int)Player::STATE::EVASION: {
@@ -173,8 +173,8 @@ int PlayerOperationUI::SortNumToActionNum(int sort)
 	case (int)PlayerOperationUI::SORT::MOVE: { return (int)ACTION::MOVE; }
 	case (int)PlayerOperationUI::SORT::JUMP: { return (int)ACTION::JUMP; }
 	case (int)PlayerOperationUI::SORT::EVASION: { return (int)ACTION::EVASION; }
-	case (int)PlayerOperationUI::SORT::ATTACK: { return (int)((playerState == (int)Player::STATE::CARRY_OBJ) ? ACTION::THROWING : ACTION::PUNCH); }
-	case (int)PlayerOperationUI::SORT::GOUGE: { return (int)ACTION::GOUGE; }
+	case (int)PlayerOperationUI::SORT::ATTACK: { return (int)ACTION::PUNCH; }
+	case (int)PlayerOperationUI::SORT::GOUGE: { return (int)((playerState == (int)Player::STATE::CARRY_OBJ) ? ACTION::THROWING : ACTION::GOUGE); }
 	}
 
 	return (int)ACTION::MOVE;
