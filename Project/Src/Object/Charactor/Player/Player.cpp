@@ -78,7 +78,10 @@ void Player::Load(void)
 void Player::CharactorInit(void)
 {
 	SetIsDraw(true);
-	SetJudge(true);;
+	SetJudge(true);
+
+	SetInviEffectFlg(false);
+	SetLightFlg(false);
 
 	trans_.pos = Vector3(1000.0f, 1000.0f, 200.0f);
 	trans_.centerDiff = CENTER_DIFF;
@@ -412,8 +415,14 @@ void Player::CarryObj(void)
 void Player::ThrowingObj(void)
 {
 	float nowAnimeRatio = GetAnimeRatio();
-	if (nowAnimeRatio <= 0.65f) {}
-	else { throwing_->Throw(); }
+	if (nowAnimeRatio <= 0.25f) {}
+	else {
+		throwing_->Throw();
+		DoStateMove();
+		DoStateAttack();
+		DoStateEvasion();
+		DoStateGouge();
+	}
 	if (IsAnimeEnd()) { state_ = (int)STATE::MOVE; }
 }
 void Player::Evasion(void)

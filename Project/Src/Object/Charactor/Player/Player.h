@@ -85,10 +85,10 @@ private:
 	const float SCALE = 0.1f;
 
 	// モデルのサイズ
-	const Vector3 SIZE = Vector3(73.204f, 73.096f, 32.071f) * SCALE;
+	const Vector3 SIZE = Vector3(1785, 1600, 700) * SCALE;
 
 	// モデルの中心点のズレ
-	const Vector3 CENTER_DIFF = Vector3(0, -37, 0) * SCALE;
+	const Vector3 CENTER_DIFF = Vector3(0, -860, 0) * SCALE;
 
 	// モデルの角度のズレ
 	const Vector3 LOCAL_ROT = Vector3(0.0f, Utility::Deg2RadF(180.0f), 0.0f);
@@ -99,7 +99,7 @@ private:
 	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3::Yonly(RADIUS);
 
 	const Vector3 LINE_COLLIDER_START_POS = Vector3();
-	const Vector3 LINE_COLLIDER_END_POS = Vector3(0.0f, -SIZE.y * 0.5f, 0.0f);
+	const Vector3 LINE_COLLIDER_END_POS = Vector3::Yonly(-SIZE.y * 0.5f);
 
 #pragma endregion
 
@@ -255,11 +255,11 @@ private:
 		1.5f,	//PUNCH_FIRST
 		1.5f,	//PUNCH_SECOND
 		1.0f,	//GOUGE_IDLE
-		1.0f,	//CATCH
-		1.5f,	//GOUPE
+		1.5f,	//CATCH
+		2.0f,	//GOUPE
 		1.0f,	//CARRY_IDLE
 		2.5f,	//CARRY_RUN
-		1.5f,	//THROW
+		1.0f,	//THROW
 		1.0f,	//DAMAGE
 		1.0f,	//DEATH
 	};
