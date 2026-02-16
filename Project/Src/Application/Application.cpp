@@ -54,7 +54,9 @@ void Application::Init(void)
 
 	// キー制御初期化
 	SetUseDirectInputFlag(true);
-	KeyManager::CreateIns();
+
+	// 入力管理クラスの生成 / 初期化処理
+	Key::CreateIns();
 
 	// FPS初期化
 	fps = new FPS;
@@ -63,21 +65,20 @@ void Application::Init(void)
 	// カメラ
 	Camera::CreateIns();
 
-	// ランキング管理クラスの生成/初期化処理
+	// ランキング管理クラスの生成 / 初期化処理
 	Ranking::CreateIns();
 
-	// スコア管理クラスの生成/初期化処理
+	// スコア管理クラスの生成 / 初期化処理
 	Score::CreateIns();
 
-	// サウンド管理クラスの生成/初期化処理
+	// サウンド管理クラスの生成 / 初期化処理
 	Snd::CreateIns();
 
-	// フォントデータ生成
-	FontManager::CreateIns();
+	// フォントデータ生成 / 初期化処理
+	Font::CreateIns();
 
-	// シーン管理初期化
+	// シーン管理初期化 / 初期化処理
 	SceneManager::CreateIns();
-	SceneManager::GetIns().Init();
 }
 
 // ゲームループ
@@ -102,7 +103,7 @@ void Application::Run(void)
 		Snd::GetIns().Update();
 
 		// デバッグ表示切替
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_DRAW_SWITCH).down) { DrawDebugSwitch(); }
 
 		// フレームレート計算
 		fps->CalcFrameRate();
@@ -130,11 +131,10 @@ void Application::Run(void)
 void Application::Release(void)
 {
 	// シーン管理解放・削除	
-	SceneManager::GetIns().Release();
 	SceneManager::DeleteIns();
 
 	// フォントデータの削除
-	FontManager::DeleteIns();
+	Font::DeleteIns();
 
 	// サウンド管理解放・削除
 	Snd::DeleteIns();
@@ -152,7 +152,7 @@ void Application::Release(void)
 	delete fps;
 
 	// 入力制御削除
-	KeyManager::DeleteIns();
+	Key::DeleteIns();
 
 	// DxLib終了
 	if (DxLib_End() == -1) { isReleaseFail = true; }

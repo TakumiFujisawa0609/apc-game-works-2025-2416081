@@ -22,12 +22,12 @@ private:
 	void SubUpdate(void)override {
 		Vector3 vec = {};
 
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_FRONT).now) { vec.z++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_BACK).now) { vec.z--; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_RIGHT).now) { vec.x++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_LEFT).now) { vec.x--; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_UP).now) { vec.y++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_DOWN).now) { vec.y--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_FRONT).now) { vec.z++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_BACK).now) { vec.z--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_RIGHT).now) { vec.x++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_LEFT).now) { vec.x--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_UP).now) { vec.y++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_OBJECT_DOWN).now) { vec.y--; }
 
 		if (vec != 0.0f) { trans.pos += vec.TransMat(MGetRotY(Camera::GetIns().GetAngle().y)).Normalized() * 10.0f; }
 	};

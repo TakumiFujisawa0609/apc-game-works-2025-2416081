@@ -33,9 +33,9 @@ void RankInScene::Load(void)
 
 void RankInScene::Init(void)
 {
-	if (!KEY::GetIns().IsInputText()) { KEY::GetIns().IsInputTextSwitch(); }
-	KEY::GetIns().InputText().Reset();
-	KEY::GetIns().InputText().SetInputTextMax(8);
+	if (!Key::GetIns().IsInputText()) { Key::GetIns().IsInputTextSwitch(); }
+	Key::GetIns().InputText().Reset();
+	Key::GetIns().InputText().SetInputTextMax(8);
 
 	scale = START_SCALE;
 
@@ -44,8 +44,8 @@ void RankInScene::Init(void)
 
 void RankInScene::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
-		const std::wstring& text = KEY::GetIns().InputText().InputText();
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+		const std::wstring& text = Key::GetIns().InputText().InputText();
 		if (0 < text.size() && text.size() <= 7) {
 			SceneManager::GetIns().PopScene();
 			Snd::GetIns().Play("SystemButton");
@@ -110,8 +110,8 @@ void RankInScene::Draw(void)
 		DrawStringToHandle(
 			NAME_DISPLAY_POS.x, NAME_DISPLAY_POS.y,
 			(((int)(genericCounter * 20) / 30) % 2 == 0) ?
-			WStringToString(KEY::GetIns().InputText().InputText() + L"_").c_str() :
-			WStringToString(KEY::GetIns().InputText().InputText()).c_str(),
+			WStringToString(Key::GetIns().InputText().InputText() + L"_").c_str() :
+			WStringToString(Key::GetIns().InputText().InputText()).c_str(),
 			0xffffff, Font::GetIns().GetFont(FontKinds::GOKUSYOU_110)
 		);
 
@@ -158,6 +158,6 @@ void RankInScene::Release(void)
 	DeleteGraph(tempScreen);
 	DeleteGraph(mainScreen);
 
-	Ranking::GetIns().SetLastAddScoreName(WStringToString(KEY::GetIns().InputText().InputText()));
-	KEY::GetIns().InputText().Reset();
+	Ranking::GetIns().SetLastAddScoreName(WStringToString(Key::GetIns().InputText().InputText()));
+	Key::GetIns().InputText().Reset();
 }

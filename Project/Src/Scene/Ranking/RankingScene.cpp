@@ -30,14 +30,14 @@ void RankingScene::Load(void)
 
 void RankingScene::Init(void)
 {
-	KEY::GetIns().SetMouceFixed(false);
+	Key::GetIns().SetMouceFixed(false);
 }
 
 void RankingScene::Update(void)
 {
 #pragma region ÉXÉNÉçÅ[Éãèàóù
-	if (KEY::GetIns().GetInfo(KEY_TYPE::UP).now) { scrollHeight += 10; }
-	if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).now) { scrollHeight -= 10; }
+	if (Key::GetIns().GetInfo(KEY_TYPE::UP).now) { scrollHeight += 10; }
+	if (Key::GetIns().GetInfo(KEY_TYPE::DOWN).now) { scrollHeight -= 10; }
 	scrollHeight =
 		std::clamp(
 			scrollHeight,
@@ -46,12 +46,12 @@ void RankingScene::Update(void)
 		);
 #pragma endregion
 
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		Snd::GetIns().Play("SystemButton");
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GAME);
 		return;
 	}
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		Snd::GetIns().Play("SystemButton");
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::TITLE);
 		return;

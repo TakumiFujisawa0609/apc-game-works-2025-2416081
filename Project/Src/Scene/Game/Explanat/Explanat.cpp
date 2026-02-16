@@ -11,9 +11,9 @@
 
 #include"../../SceneManager/SceneManager.h"
 Explanat::Explanat():
-	img_(-1),
-	bottonImg_(),
-	s_(0.0f)
+	img(-1),
+	bottonImg(),
+	s(0.0f)
 {
 }
 
@@ -23,30 +23,30 @@ Explanat::~Explanat()
 
 void Explanat::Load(void)
 {
-	img_ = LoadImg("Data/Image/Game/Start/Illustrate.png");
-	bottonImg_[0] = LoadImg("Data/Image/Game/Start/SpaceKey.png");
-	bottonImg_[1] = LoadImg("Data/Image/Game/Start/X.png");
+	img = LoadImg("Data/Image/Game/Start/Illustrate.png");
+	bottonImg[0] = LoadImg("Data/Image/Game/Start/SpaceKey.png");
+	bottonImg[1] = LoadImg("Data/Image/Game/Start/X.png");
 }
 
 void Explanat::Init(void)
 {
-	s_ = 0.0f;
+	s = 0.0f;
 }
 
 void Explanat::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		SceneManager::GetIns().PopScene();
 		Snd::GetIns().Play("SystemButton");
 		return;
 	}
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().JumpSceneFade(SCENE_ID::TITLE);
 		Snd::GetIns().Play("SystemButton");
 		return;
 	}
 
-	s_ += 0.1f;
+	s += 0.1f;
 }
 
 void Explanat::Draw(void)
@@ -60,13 +60,13 @@ void Explanat::Draw(void)
 	DrawBox(0, 0, xx, yy, 0xffffff, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND,0);
 
-	DrawRotaGraph(x, y, 1, 0, img_, true);
-	DrawRotaGraphF(BUTTON_POS.x, BUTTON_POS.y, GetButtonExrate(), 0, bottonImg_[(KEY::GetIns().LastInputKinds()) ? 1 : 0], true);
+	DrawRotaGraph(x, y, 1, 0, img, true);
+	DrawRotaGraphF(BUTTON_POS.x, BUTTON_POS.y, GetButtonExrate(), 0, bottonImg[(Key::GetIns().LastInputKinds()) ? 1 : 0], true);
 }
 
 void Explanat::Release(void)
 {
-	for (auto& id : bottonImg_) { DeleteGraph(id); }
+	for (auto& id : bottonImg) { DeleteGraph(id); }
 
-	DeleteGraph(img_);
+	DeleteGraph(img);
 }

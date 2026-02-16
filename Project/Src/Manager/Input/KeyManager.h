@@ -182,5 +182,5 @@ private:
 #pragma endregion
 };
 
-using KEY = KeyManager;
-using KEY_TYPE = KEY::KEY_TYPE;
+using Key = KeyManager;
+using KEY_TYPE = Key::KEY_TYPE;

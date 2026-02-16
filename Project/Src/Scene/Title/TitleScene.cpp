@@ -17,88 +17,102 @@
 
 
 TitleScene::TitleScene():
-	img_(-1),
+	img(-1),
 	pushToImg(-1),
 
 	blinkingCounter(0),
 	blinkingSigned(5),
 
-	skyDome_(nullptr)
-{
-}
-
-TitleScene::~TitleScene()
+	skyDome(nullptr)
 {
 }
 
 void TitleScene::Load(void)
 {
+	// 音声のシーン切り替え
 	Snd::GetIns().ChangeScene("Title");
 
-	LoadImg(img_, "Data/Image/Title/Title.png");
-	LoadImg(pushToImg, "Data/Image/Title/PushToStart.png");
+#pragma region 画像の読み込み
+	// 背景
+	LoadImg(img, "Data/Image/Title/Title.png");
 
-	skyDome_ = new SkyDome();
-	skyDome_->Load();
-	skyDome_->SetPos({0.0f,0.0f,0.0f});
+	// プッシュトゥスタート（キーボード版 -> [0] / コントローラー版 -> [1]）
+	LoadImg(pushToImg[0], "Data/Image/Title/PushToStart/Keyboard.png");
+	LoadImg(pushToImg[1], "Data/Image/Title/PushToStart/Controller.png");
+#pragma endregion
 
-	KEY::GetIns().SetMouceFixed(false);
+	// スカイドームの生成
+	skyDome = new SkyDome();
+	skyDome->Load();
+
+	Key::GetIns().SetMouceFixed(false);
 }
 void TitleScene::Init(void)
 {
+	// カメラの初期化
 	Camera::GetIns().ChangeModeFixedPoint(Vector3(), Vector3());
 
-	blinkingCounter = 100;
+	// スカイドームの初期位置を設定
+	skyDome->SetPos(SKY_DOME_POS);
+
+	// 点滅のカウンターの初期化
+	blinkingCounter = BLINKING_COUNTER_MIN;
+	blinkingSigned = 2;
 
 	Snd::GetIns().Play("TitleBgm");
 }
 void TitleScene::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	// ゲーム終了処理
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+		Snd::GetIns().Pause();
  		Snd::GetIns().Play("SystemSelect");
 		SceneManager::GetIns().PushScene(std::make_shared<EndScene>());
 		return;
 	}
 
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+	// シーン進行処理
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 		Snd::GetIns().Play("SystemButton");
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::RANKING);
 		return;
 	}
-	skyDome_->Update();
 
+	// スカイドームの更新
+	skyDome->Update();
+
+	// 点滅の更新
 	blinkingCounter += blinkingSigned;
-	if (blinkingCounter <= 50 || blinkingCounter > 240) { blinkingSigned *= -1; }
+	if (blinkingCounter <= BLINKING_COUNTER_MIN || blinkingCounter > BLINKING_COUNTER_MAX) { blinkingSigned *= -1; }
 }
 void TitleScene::Draw(void)
 {
-	skyDome_->Draw();
+	// スカイドームの描画
+	skyDome->Draw();
 
-	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, img_, true);
+	// 背景の描画
+	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, img, true);
 
+	// プッシュトゥスタートの描画（点滅させる）
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, blinkingCounter);
-	DrawRotaGraph(App::SCREEN_SIZE_X / 2, (int)(App::SCREEN_SIZE_Y * 0.92f), 1, 0, pushToImg, true);
+	DrawRotaGraph(App::SCREEN_SIZE_X / 2, (int)(App::SCREEN_SIZE_Y * 0.92f), 1, 0, GetPushToImg(), true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
-	//SetFontSize(32);
-	//if (KEY::GetIns().GetControllerConnect()) {
-	//	DrawString(10, 0, 
-	//		"ゲームスタート：B\n\nゲーム終了：START",
-	//		0xffffff);
-	//} else {
-	//	DrawString(10, 0,
-	//		"ゲームスタート：SPACE\n\nゲーム終了：ESC",
-	//		0xffffff);
-	//}
-	//SetFontSize(16);
 }
 void TitleScene::Release(void)
 {
-	if (skyDome_) {
-		skyDome_->Release();
-		delete skyDome_;
-		skyDome_ = nullptr;
+	// スカイドームの解放
+	if (skyDome) {
+		skyDome->Release();
+		delete skyDome;
+		skyDome = nullptr;
 	}
-	DeleteGraph(pushToImg);
-	DeleteGraph(img_);
+
+	// 画像の解放
+	for (int& id : pushToImg) { DeleteGraph(id); }
+	DeleteGraph(img);
+}
+
+const int& TitleScene::GetPushToImg(void) const
+{
+	return pushToImg[Key::GetIns().LastInputKinds() ? 1 : 0];
 }

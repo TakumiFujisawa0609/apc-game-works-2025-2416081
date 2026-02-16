@@ -95,7 +95,7 @@ void GameScene::Load(void)
 void GameScene::Init(void)
 {
 	// マウスを中心に固定
-	KEY::GetIns().SetMouceFixed(true);
+	Key::GetIns().SetMouceFixed(true);
 
 	// オブジェクト全ての初期化処理
 	for (ActorBase*& obj : objects) { obj->Init(); }
@@ -133,7 +133,7 @@ void GameScene::Update(void)
 
 #pragma region 遷移判定（ポーズも含む）
 	// ポーズ判定
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().PushScene(std::make_shared<GamePause>());
 		return;
 	}
@@ -161,7 +161,7 @@ void GameScene::Update(void)
 	}
 
 	// デバッグモード突入
-	if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down) {
 		SceneManager::GetIns().PushScene(
 			std::make_shared<GameDebugScene>(
 				[this](void) { Camera::GetIns().ChangeModeFollowAuto(ObjSerch<Player>()->GetTrans(), &(ObjSerch<Boss>()->GetTrans().pos)); },

@@ -24,12 +24,12 @@ public:
 	void Init(void) override { Snd::GetIns().AllStop(); }
 	void Update(void) override {
 
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_TOPUPDATE).now) { TopUpdate(); Snd::GetIns().PausePlay(); }
+		if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_TOPUPDATE).now) { TopUpdate(); Snd::GetIns().PausePlay(); }
 		else { Snd::GetIns().AllStop(); }
 
 		if (
-			KEY::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down ||
-			KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down
+			Key::GetIns().GetInfo(KEY_TYPE::DEBUG_MODE_SWITCH).down ||
+			Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down
 			) {
 			SceneManager::GetIns().PopScene();
 			return;

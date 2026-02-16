@@ -8,8 +8,8 @@
 #include"../../../Manager/Sound/SoundManager.h"
 
 GamePause::GamePause() :
-	img_(),
-	nowSelect_(SELECT::YES)
+	img(),
+	nowSelect(SELECT::YES)
 {
 }
 
@@ -19,41 +19,41 @@ GamePause::~GamePause()
 
 void GamePause::Load(void)
 {
-	img_[(int)SELECT::YES] = LoadImg("Data/Image/Title/End/Yes.png");
-	img_[(int)SELECT::NO] = LoadImg("Data/Image/Title/End/No.png");
+	img[(int)SELECT::YES] = LoadImg("Data/Image/Title/End/Yes.png");
+	img[(int)SELECT::NO] = LoadImg("Data/Image/Title/End/No.png");
 }
 
 void GamePause::Init(void)
 {
-	nowSelect_ = SELECT::YES;
+	nowSelect = SELECT::YES;
 	SoundManager::GetIns().AllStop();
-	KEY::GetIns().SetMouceFixed(false);
+	Key::GetIns().SetMouceFixed(false);
 }
 
 void GamePause::Update(void)
 {
-	switch (nowSelect_)
+	switch (nowSelect)
 	{
 	case GamePause::SELECT::YES:
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect_ = GamePause::SELECT::NO; Snd::GetIns().Play("SystemSelect"); }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+		if (Key::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect = GamePause::SELECT::NO; Snd::GetIns().Play("SystemSelect"); }
+		if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			Snd::GetIns().Play("SystemButton");
 			SceneManager::GetIns().JumpSceneFade(SCENE_ID::TITLE);
 			return;
 		}
 		break;
 	case GamePause::SELECT::NO:
-		if (KEY::GetIns().GetInfo(KEY_TYPE::UP).down) { nowSelect_ = GamePause::SELECT::YES; Snd::GetIns().Play("SystemSelect"); }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+		if (Key::GetIns().GetInfo(KEY_TYPE::UP).down) { nowSelect = GamePause::SELECT::YES; Snd::GetIns().Play("SystemSelect"); }
+		if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			Snd::GetIns().PausePlay();
 			Snd::GetIns().Play("SystemButton");
 			SceneManager::GetIns().PopScene();
-			KEY::GetIns().SetMouceFixed(true);
+			Key::GetIns().SetMouceFixed(true);
 			return;
 		}
 		break;
 	}
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SoundManager::GetIns().PausePlay();
 		Snd::GetIns().Play("SystemButton");
 		SceneManager::GetIns().PopScene();
@@ -71,11 +71,11 @@ void GamePause::Draw(void)
 	DrawBox(0, 0, xx, yy, 0xffffff, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-	DrawRotaGraph(x, y, 1, 0, img_[(int)nowSelect_], true);
+	DrawRotaGraph(x, y, 1, 0, img[(int)nowSelect], true);
 }
 
 void GamePause::Release(void)
 {
-	for (auto& id : img_) { DeleteGraph(id); }
+	for (auto& id : img) { DeleteGraph(id); }
 
 }

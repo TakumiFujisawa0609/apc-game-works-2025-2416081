@@ -11,7 +11,7 @@
 #include"../SceneManager/SceneManager.h"
 
 OverScene::OverScene() :
-	img_(-1)
+	img(-1)
 {
 }
 
@@ -22,8 +22,8 @@ OverScene::~OverScene()
 void OverScene::Load(void)
 {
 	Snd::GetIns().ChangeScene("Over");
-	KEY::GetIns().SetMouceFixed(false);
-	LoadImg(img_, "Data/Image/Over/GameOver.png");
+	Key::GetIns().SetMouceFixed(false);
+	LoadImg(img, "Data/Image/Over/GameOver.png");
 }
 
 void OverScene::Init(void)
@@ -35,8 +35,8 @@ void OverScene::Init(void)
 
 void OverScene::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
-		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
+		Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::TITLE);
 		Snd::GetIns().Play("SystemButton");
 		return;
@@ -45,10 +45,10 @@ void OverScene::Update(void)
 
 void OverScene::Draw(void)
 {
-	DrawRotaGraph(App::SCREEN_SIZE_X / 2, App::SCREEN_SIZE_Y / 2, 1, 0, img_, true);
+	DrawRotaGraph(App::SCREEN_SIZE_X / 2, App::SCREEN_SIZE_Y / 2, 1, 0, img, true);
 }
 
 void OverScene::Release(void)
 {
-	DeleteGraph(img_);
+	DeleteGraph(img);
 }

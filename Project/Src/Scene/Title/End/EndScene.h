@@ -15,8 +15,8 @@ public:
 private:
 
 	enum class SELECT { YES, NO, MAX };
-	SELECT nowSelect_;
+	SELECT nowSelect;
 
-	int img_[(int)SELECT::MAX];
+	int img[(int)SELECT::MAX];
 };
 

@@ -13,18 +13,7 @@
 #include"../Common/Fade/FadeInScene.h"
 #include"../Common/Fade/FadeOutScene.h"
 
-SceneManager* SceneManager::ins_ = nullptr;
-
-// コンストラクタ
-SceneManager::SceneManager(void):
-	sceneId_(SCENE_ID::NONE)
-{
-}
-
-// デストラクタ
-SceneManager::~SceneManager(void)
-{
-}
+SceneManager* SceneManager::ins = nullptr;
 
 // 初期化
 void SceneManager::Init(void)
@@ -45,7 +34,7 @@ void SceneManager::Init(void)
 void SceneManager::Update(void)
 {
 	// シーンがなければ終了
-	if (scenes_.empty()) { return; }
+	if (scenes.empty()) { return; }
 
 	// ロード中
 	if (Loading::GetInstance()->IsLoading())
@@ -57,7 +46,7 @@ void SceneManager::Update(void)
 		if (Loading::GetInstance()->IsLoading() == false)
 		{
 			// ロード後の初期化
-			for (auto& scene : scenes_) { scene->Init(); }
+			for (auto& scene : scenes) { scene->Init(); }
 		}
 		
 	}		
@@ -65,7 +54,7 @@ void SceneManager::Update(void)
 	else
 	{
 		// 現在のシーンの更新
-		scenes_.back()->Update();
+		scenes.back()->Update();
 	}
 }
 
@@ -80,7 +69,7 @@ void SceneManager::Draw(void)
 	// 通常の更新
 	else {
 		// 積まれているもの全てを描画する
-		for (auto& scene : scenes_)
+		for (auto& scene : scenes)
 		{
 			scene->Draw();
 		}
@@ -91,8 +80,8 @@ void SceneManager::Draw(void)
 void SceneManager::Release(void)
 {
 	//全てのシーンの解放・削除
-	for (auto& scene : scenes_) { scene->Release(); }
-	scenes_.clear();
+	for (auto& scene : scenes) { scene->Release(); }
+	scenes.clear();
 
 	// ロード画面の削除
 	Loading::GetInstance()->Release();
@@ -103,19 +92,19 @@ void SceneManager::Release(void)
 void SceneManager::ChangeScene(std::shared_ptr<SceneBase>scene)
 {
 	// シーンが空か？
-	if (scenes_.empty()) {
+	if (scenes.empty()) {
 		//空なので新しく入れる
-		scenes_.push_back(scene);
+		scenes.push_back(scene);
 	}
 	else {
 		//末尾のものを新しい物に入れ替える
-		scenes_.back()->Release();
-		scenes_.back() = scene;
+		scenes.back()->Release();
+		scenes.back() = scene;
 	}
 
 	// 読み込み(非同期)
 	Loading::GetInstance()->StartAsyncLoad();
-	scenes_.back()->Load();
+	scenes.back()->Load();
 	Loading::GetInstance()->EndAsyncLoad();
 }
 
@@ -175,9 +164,9 @@ void SceneManager::ChangeSceneFade(SCENE_ID scene, unsigned short FADE_TIME, uns
 void SceneManager::PushScene(std::shared_ptr<SceneBase> scene)
 {
 	//新しく積むのでもともと入っている奴はまだ削除されない
-	scenes_.push_back(scene);
-	scenes_.back()->Load();
-	scenes_.back()->Init();
+	scenes.push_back(scene);
+	scenes.back()->Load();
+	scenes.back()->Init();
 }
 
 void SceneManager::PushScene(SCENE_ID scene)
@@ -207,18 +196,18 @@ void SceneManager::PushScene(SCENE_ID scene)
 void SceneManager::PopScene(void)
 {
 	//積んであるものを消して、もともとあったものを末尾にする
-	if (scenes_.size() > 0) 
+	if (scenes.size() > 0) 
 	{
-		scenes_.back()->Release();
-		scenes_.pop_back();
+		scenes.back()->Release();
+		scenes.pop_back();
 	}
 }
 
 void SceneManager::JumpScene(std::shared_ptr<SceneBase> scene)
 {
 	// 全て解放
-	for (auto& s : scenes_) { s->Release(); }
-	scenes_.clear();
+	for (auto& s : scenes) { s->Release(); }
+	scenes.clear();
 
 	// 新しく積む
 	ChangeScene(scene);
@@ -306,10 +295,10 @@ void SceneManager::Init3D(void)
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 
 	// ---- ライティング全体設定 ----
-	SetUseLighting(TRUE);
+	SetUseLighting(true);
 	ChangeLightTypeDir({ 0.00f, -1.00f, 0.00f });
 	SetLightDirection({ 0.00f, -1.00f, 0.00f });
-	SetUseSpecular(FALSE);
+	SetUseSpecular(false);
 
 	// ---- マテリアル（頂点カラー + 白拡散 + そこそこAmbient）----
 	MATERIALPARAM m{};

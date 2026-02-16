@@ -135,17 +135,17 @@ void Camera::FreeModeFunc(void)
 {
 #pragma region 角度 (コントローラースティック -> マウス -> ボタン の順に確認して入力があったもので回転させる)
 	// コントローラーの右スティックベクトルを代入
-	Vector3 rot = KEY::GetIns().GetRightStickVec().ToVector3YX();
+	Vector3 rot = Key::GetIns().GetRightStickVec().ToVector3YX();
 
 	// コントローラーの右スティックが入力なしならマウスの移動ベクトルを代入
-	if (rot == 0.0f) { rot = KEY::GetIns().GetMouceMove().ToVector3YX(); }
+	if (rot == 0.0f) { rot = Key::GetIns().GetMouceMove().ToVector3YX(); }
 
 	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
 	if (rot == 0.0f) {
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { rot.x -= ROT_POWER; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { rot.x += ROT_POWER; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { rot.y -= ROT_POWER; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { rot.y += ROT_POWER; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { rot.x -= ROT_POWER; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { rot.x += ROT_POWER; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { rot.y -= ROT_POWER; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { rot.y += ROT_POWER; }
 	}
 
 	// 最終的に入力が１つでもあれば回転させる
@@ -168,19 +168,19 @@ void Camera::FreeModeFunc(void)
 
 #pragma region 移動 (コントローラースティック -> ボタン の順に確認して入力があったもので移動させる)
 	// コントローラーの左スティックベクトルを代入
-	Vector3 dir = KEY::GetIns().GetLeftStickVec().ToVector3XZ();
+	Vector3 dir = Key::GetIns().GetLeftStickVec().ToVector3XZ();
 
 	// コントローラーの左スティックの入力が検出されなかった場合、ボタンでの入力を検出してボタンごとに移動方向を 加算/減算 していく
 	if (dir == 0.0f) {
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_FRONT).now) { dir.z++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_BACK).now) { dir.z--; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_RIGHT).now) { dir.x++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_LEFT).now) { dir.x--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_FRONT).now) { dir.z++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_BACK).now) { dir.z--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_RIGHT).now) { dir.x++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_LEFT).now) { dir.x--; }
 	}
 
 	// Y軸はボタンのため共通して検出する
-	if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_UP).now) { dir.y++; }
-	if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_DOWN).now) { dir.y--; }
+	if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_UP).now) { dir.y++; }
+	if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_MOVE_DOWN).now) { dir.y--; }
 
 	// 入力があれば、方向×スピードで移動量を作って、座標に足して移動
 	if (dir != 0.0f) { pos += dir.Normalized().TransMat(MGetRotY(angle.y)) * MOVE_POWER; }
@@ -224,17 +224,17 @@ void Camera::LookAtFreeModeFunc(void)
 	// 回転処理(コントローラー -> マウス-> ボタン の順に入力を確認していく)
 
 	// コントローラーの右スティックベクトルを代入
-	Vector3 vec = KEY::GetIns().GetRightStickVec().ToVector3YX();
+	Vector3 vec = Key::GetIns().GetRightStickVec().ToVector3YX();
 
 	// コントローラーの右スティックが入力なしならマウスの移動ベクトルを代入
-	if (vec == 0.0f) { vec = KEY::GetIns().GetMouceMove().ToVector3YX(); }
+	if (vec == 0.0f) { vec = Key::GetIns().GetMouceMove().ToVector3YX(); }
 
 	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
 	if (vec == 0.0f) {
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { vec.x++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { vec.x--; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { vec.y++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { vec.y--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { vec.x++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { vec.x--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { vec.y++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { vec.y--; }
 	}
 
 	// 最終的に入力が１つでもあれば回転させる
@@ -338,17 +338,17 @@ void Camera::FollowRemoteModeFunc(void)
 	// 回転処理(コントローラー -> マウス-> ボタン の順に入力を確認していく)
 
 	// コントローラーの右スティックベクトルを代入
-	Vector3 vec = KEY::GetIns().GetRightStickVec().ToVector3YX();
+	Vector3 vec = Key::GetIns().GetRightStickVec().ToVector3YX();
 
 	// コントローラーの右スティックが入力なしならマウスの移動ベクトルを代入
-	if (vec == 0.0f) { vec = KEY::GetIns().GetMouceMove().ToVector3YX(); }
+	if (vec == 0.0f) { vec = Key::GetIns().GetMouceMove().ToVector3YX(); }
 
 	// マウスが動いてなかったらボタンでの入力を検出してボタンごとに回転方向を 加算/減算 していく
 	if (vec == 0.0f) {
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { vec.x++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { vec.x--; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { vec.y++; }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { vec.y--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_FRONT).now) { vec.x++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_BACK).now) { vec.x--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_RIGHT).now) { vec.y++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::CAMERA_ROT_LEFT).now) { vec.y--; }
 	}
 
 	// 最終的に入力が１つでもあれば回転させる

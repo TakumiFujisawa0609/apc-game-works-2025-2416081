@@ -138,7 +138,7 @@ void PlayerOperationUI::Draw(void)
 
 		DrawRotaGraph3F(pos.x + (i * ACTION_DRAW_SPACE_X), pos.y, 0.0f, 0.0f, ACTION_IMG_DRAW_SCALE, ACTION_IMG_DRAW_SCALE, 0, actionImg[SortNumToActionNum(i)], true);
 
-		if (KEY::GetIns().LastInputKinds()) {
+		if (Key::GetIns().LastInputKinds()) {
 			DrawRotaGraphF(
 				pos.x + (i * ACTION_DRAW_SPACE_X) + OPERATION_CONTROLLER_IMG_DRAW_OFFSET_X,
 				pos.y + OPERATION_CONTROLLER_IMG_DRAW_OFFSET_Y,

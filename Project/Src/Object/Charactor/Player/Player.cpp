@@ -240,7 +240,7 @@ void Player::StateManager(void)
 
 void Player::DoStateMove(void)
 {
-	auto& key = KEY::GetIns();
+	auto& key = Key::GetIns();
 
 	if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).down ||
 		key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).down ||
@@ -254,7 +254,7 @@ void Player::DoStateMove(void)
 }
 void Player::DoStateAttack(void)
 {
-	if (!KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_ATTACK).down) { return; }
+	if (!Key::GetIns().GetInfo(KEY_TYPE::PLAYER_ATTACK).down) { return; }
 
 
 	state = (int)STATE::ATTACK;
@@ -292,7 +292,7 @@ void Player::DoStateGouge(void)
 {
 	if (isJump[0]) { return; }
 
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).down) {
 		state = (int)STATE::GOUGE;
 		gouge->SearchOn();
 		AnimePlay((int)ANIME_TYPE::CATCH, false);
@@ -300,14 +300,14 @@ void Player::DoStateGouge(void)
 }
 void Player::DoStateThrowing(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).up) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).up) {
 		state = (int)STATE::THROWING_OBJ;
 		AnimePlay((int)ANIME_TYPE::THROW, false);
 	}
 }
 void Player::DoStateEvasion(void)
 {
-	if (!KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_EVASION).down) { return; }
+	if (!Key::GetIns().GetInfo(KEY_TYPE::PLAYER_EVASION).down) { return; }
 
 	state = (int)STATE::EVASION;
 
@@ -356,7 +356,7 @@ void Player::Attack(void)
 }
 void Player::Gouge(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
 		// ボタンが押され続けている間処理を行う
 
 		// 現在のモーションを取得
@@ -402,7 +402,7 @@ void Player::Gouge(void)
 }
 void Player::CarryObj(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
 		CarryRun();
 	}
 	else {
@@ -472,7 +472,7 @@ void Player::Death(void)
 
 void Player::Run(void)
 {
-	auto& key = KEY::GetIns();
+	auto& key = Key::GetIns();
 
 	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
@@ -506,7 +506,7 @@ void Player::Run(void)
 }
 void Player::Jump(void)
 {
-	auto& key = KEY::GetIns();
+	auto& key = Key::GetIns();
 
 	for (int i = 0; i < JUMP_NUM; i++) {
 		if (isJump[i]) { continue; }
@@ -549,7 +549,7 @@ void Player::Jump(void)
 
 void Player::AttackMove(void)
 {
-	auto& key = KEY::GetIns();
+	auto& key = Key::GetIns();
 
 	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
@@ -570,7 +570,7 @@ void Player::AttackMove(void)
 
 void Player::CarryRun(void)
 {
-	auto& key = KEY::GetIns();
+	auto& key = Key::GetIns();
 
 	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
 
@@ -605,7 +605,7 @@ void Player::CarryRun(void)
 }
 void Player::CarryJump(void)
 {
-	auto& key = KEY::GetIns();
+	auto& key = Key::GetIns();
 
 	for (int i = 0; i < JUMP_NUM; i++) {
 		if (isJump[i]) { continue; }

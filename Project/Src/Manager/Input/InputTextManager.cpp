@@ -23,7 +23,7 @@ void InputTextManager::Update(void)
 	if (isConversionJapanese) { ConversionJapanese(inputText); }
 
 	// 日本語変換切り替え
-	if (KEY::GetIns().GetInfo(KEY_TYPE::TEXT_INPUT_LANGUAGE_SWITCH).down) { IsConversionJapaneseSwitch(); }
+	if (Key::GetIns().GetInfo(KEY_TYPE::TEXT_INPUT_LANGUAGE_SWITCH).down) { IsConversionJapaneseSwitch(); }
 }
 
 void InputTextManager::Input(std::wstring& inputText)

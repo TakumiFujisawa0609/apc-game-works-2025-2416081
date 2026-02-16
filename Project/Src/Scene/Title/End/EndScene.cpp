@@ -19,32 +19,30 @@ EndScene::~EndScene()
 
 void EndScene::Load(void)
 {
-	img_[(int)SELECT::YES] = LoadImg("Data/Image/Title/End/Yes.png");
-	img_[(int)SELECT::NO] = LoadImg("Data/Image/Title/End/No.png");
+	img[(int)SELECT::YES] = LoadImg("Data/Image/Title/End/Yes.png");
+	img[(int)SELECT::NO] = LoadImg("Data/Image/Title/End/No.png");
 }
 
 void EndScene::Init(void) 
 {
-	nowSelect_ = SELECT::YES;
-
-	SoundManager::GetIns().AllStop();
+	nowSelect = SELECT::YES;
 }
 
 void EndScene::Update(void)
 {
-	switch (nowSelect_)
+	switch (nowSelect)
 	{
 	case EndScene::SELECT::YES:
-		if (KEY::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect_ = EndScene::SELECT::NO; Snd::GetIns().Play("SystemSelect"); }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+		if (Key::GetIns().GetInfo(KEY_TYPE::DOWN).down) { nowSelect = EndScene::SELECT::NO; Snd::GetIns().Play("SystemSelect"); }
+		if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			Snd::GetIns().Play("SystemButton");
 			App::GetIns().GameEnd();
 			return;
 		}
 		break;
 	case EndScene::SELECT::NO:
-		if (KEY::GetIns().GetInfo(KEY_TYPE::UP).down) { nowSelect_ = EndScene::SELECT::YES; Snd::GetIns().Play("SystemSelect"); }
-		if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+		if (Key::GetIns().GetInfo(KEY_TYPE::UP).down) { nowSelect = EndScene::SELECT::YES; Snd::GetIns().Play("SystemSelect"); }
+		if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
 			SoundManager::GetIns().PausePlay();
 			Snd::GetIns().Play("SystemButton");
 			SceneManager::GetIns().PopScene();
@@ -52,7 +50,7 @@ void EndScene::Update(void)
 		}
 		break;
 	}
-	if (KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		SoundManager::GetIns().PausePlay();
 		Snd::GetIns().Play("SystemButton");
 		SceneManager::GetIns().PopScene();
@@ -70,10 +68,10 @@ void EndScene::Draw(void)
 	DrawBox(0, 0, xx, yy, 0xffffff, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-	DrawRotaGraph(x, y, 1, 0, img_[(int)nowSelect_], true);
+	DrawRotaGraph(x, y, 1, 0, img[(int)nowSelect], true);
 }
 
 void EndScene::Release(void) 
 {
-	for (auto& id : img_) { DeleteGraph(id); }
+	for (auto& id : img) { DeleteGraph(id); }
 }

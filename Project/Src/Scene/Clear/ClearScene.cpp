@@ -21,7 +21,7 @@
 ClearScene::ClearScene(std::vector<VoxelBase::MeshBatch> stageBatches, const char* stageTexturePath) :
 	mainScreen(-1),
 
-	img_(-1),
+	img(-1),
 
 	objects(),
 
@@ -40,8 +40,8 @@ void ClearScene::Load(void)
 {
 	Snd::GetIns().ChangeScene("Clear");
 
-	KEY::GetIns().SetMouceFixed(false);
-	LoadImg(img_, "Data/Image/Clear/GameClear.png");
+	Key::GetIns().SetMouceFixed(false);
+	LoadImg(img, "Data/Image/Clear/GameClear.png");
 
 	mainScreen = MakeScreen(App::SCREEN_SIZE_X, App::SCREEN_SIZE_Y, true);
 
@@ -68,8 +68,8 @@ void ClearScene::Init(void)
 
 void ClearScene::Update(void)
 {
-	if (KEY::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
-		KEY::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down ||
+		Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
 		if (!rankinJudge) { ObjSerch<ResultScore>()->EasingSkip(); }
 		else {
 			SceneManager::GetIns().ChangeSceneFade(SCENE_ID::TITLE);
@@ -120,7 +120,7 @@ void ClearScene::Draw(void)
 
 	for (ActorBase*& obj : objects) { obj->Draw(); }
 
-	DrawExtendGraph(0, 0, x, y, img_, true);
+	DrawExtendGraph(0, 0, x, y, img, true);
 
 	for (ActorBase*& obj : objects) { obj->UiDraw(); }
 
@@ -137,7 +137,7 @@ void ClearScene::Release(void)
 		obj = nullptr;
 	}
 
-	DeleteGraph(img_);
+	DeleteGraph(img);
 	if (stageTexture != -1) { DeleteGraph(stageTexture); }
 
 	DeleteGraph(mainScreen);

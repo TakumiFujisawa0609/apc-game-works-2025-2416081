@@ -23,7 +23,7 @@ public:
 private:
 	int mainScreen;
 
-	int img_;
+	int img;
 
 	std::vector<ActorBase*>objects;
 	// 配列の中から特定のオブジェクトを探す

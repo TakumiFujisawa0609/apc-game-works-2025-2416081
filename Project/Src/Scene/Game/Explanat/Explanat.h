@@ -17,12 +17,12 @@ public:
 	void Release(void)override;
 
 private:
-	int img_;
-	int bottonImg_[2];
-	float s_;
+	int img;
+	int bottonImg[2];
+	float s;
 
 	const Vector2 BUTTON_POS = Vector2(1140.0f, 680.0f);
 
-	float GetButtonExrate(void) { return abs(sinf(s_)) * 0.1f + 0.75f; }
+	float GetButtonExrate(void) { return abs(sinf(s)) * 0.1f + 0.75f; }
 };
 
