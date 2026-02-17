@@ -36,9 +36,9 @@ public:
 		}
 	}
 	void Draw(void) override {
-		SetFontSize(20);
-		DrawString(0, 0, "デバッグモード", 0xffffff);
-		SetFontSize(16);
+		//SetFontSize(20);
+		//DrawString(0, 0, "デバッグモード", 0xffffff);
+		//SetFontSize(16);
 	}
 	void Release(void) override { CameraReset(); Snd::GetIns().PausePlay(); }
 

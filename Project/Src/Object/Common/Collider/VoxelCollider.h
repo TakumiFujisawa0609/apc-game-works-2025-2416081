@@ -87,7 +87,7 @@ public:
 
 private:
 	// 全体を囲める大まかなサイズ
-	Vector3 roughSize;
+	const Vector3& roughSize;
 
 	// セルサイズ
 	const float& cellSize;
