@@ -129,7 +129,7 @@ private:
 
 	// 定数
 	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
-	static constexpr float MAX_JUMP_POWER = 25.0f;		//最大ジャンプ力
+	static constexpr float MAX_JUMP_POWER = 18.0f;		//最大ジャンプ力
 	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ジャンプキーを受け付けるフレーム数
 	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
 
