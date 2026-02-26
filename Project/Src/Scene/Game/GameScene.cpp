@@ -148,8 +148,7 @@ void GameScene::Update(void)
 		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>()->HpRatio() * 100000));
 		Score::GetIns().ScoreAddBonus(100000 - (timer * 10));
 
-		std::vector<VoxelBase::MeshBatch>meshBatchs = ObjSerch<BlockManager>()->GetMesh();
-		SceneManager::GetIns().ChangeSceneFade(std::make_shared<ClearScene>(meshBatchs, "Data/Model/Rock/Rock.png"));
+		SceneManager::GetIns().ChangeSceneFade(std::make_shared<ClearScene>(ObjSerch<BlockManager>()->GetMesh(), "Data/Model/Rock/Rock.png"));
 
 		return;
 	}
