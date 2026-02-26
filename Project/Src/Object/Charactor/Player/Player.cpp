@@ -474,7 +474,7 @@ void Player::Run(void)
 {
 	auto& key = Key::GetIns();
 
-	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
+	Vector3 vec = key.GetLeftStickVec().ToVector3XZ();
 
 	if (vec == 0.0f) {
 		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }

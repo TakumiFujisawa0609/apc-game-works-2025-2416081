@@ -9,14 +9,29 @@
 class KeyManager
 {
 private:
-	static KeyManager* ins;
-
+	
+	// コンストラクタ/デストラクタ
 	KeyManager();
 	~KeyManager() = default;
+
+	// コピー・ムーブ操作を禁止
+	KeyManager(const KeyManager&) = delete;
+	KeyManager& operator=(const KeyManager&) = delete;
+	KeyManager(KeyManager&&) = delete;
+	KeyManager& operator=(KeyManager&&) = delete;
+
+	static KeyManager* ins;
+
 public:
+
+#pragma region シングルトン定義
+	// 生成/初期化処理
 	static void CreateIns(void) { if (ins == nullptr) { ins = new KeyManager(); ins->Init(); } }
+	// 取得
 	static KeyManager& GetIns(void) { return *ins; }
+	// 終了処理/削除
 	static void DeleteIns(void) { if (ins != nullptr) { ins->Release(); delete ins; ins = nullptr; } }
+#pragma endregion
 
 	void Update(void);
 

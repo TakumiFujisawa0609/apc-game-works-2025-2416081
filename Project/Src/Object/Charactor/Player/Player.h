@@ -18,7 +18,7 @@ class Player : public CharactorBase
 {
 public:
 	Player();
-	~Player()override {};
+	~Player()override = default;
 
 	void Load(void)override;
 	void UiDraw(void)override;
