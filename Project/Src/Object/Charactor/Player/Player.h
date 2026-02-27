@@ -131,7 +131,7 @@ private:
 	static constexpr float RUN_SPEED = 10.0f;			//プレイヤーの走る速度
 	static constexpr float MAX_JUMP_POWER = 18.0f;		//最大ジャンプ力
 	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ジャンプキーを受け付けるフレーム数
-	static constexpr int JUMP_NUM = 2;					//ジャンプ可能回数
+	static constexpr int JUMP_NUM = 1;					//ジャンプ可能回数
 
 	// 関数
 	void Run(void);			//横移動関数
@@ -248,7 +248,7 @@ private:
 		1.5f,	//PUNCH_SECOND
 		1.0f,	//GOUGE_IDLE
 		1.5f,	//CATCH
-		2.0f,	//GOUPE
+		3.0f,	//GOUPE
 		1.0f,	//CARRY_IDLE
 		2.5f,	//CARRY_RUN
 		1.0f,	//THROW

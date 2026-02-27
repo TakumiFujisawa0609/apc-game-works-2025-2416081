@@ -225,7 +225,9 @@ void Player::StateManager(void)
 	case (int)STATE::GOUGE:
 		break;
 	case (int)STATE::CARRY_OBJ:
+		DoStateEvasion();
 		DoStateThrowing();
+		if (state == (int)STATE::EVASION) { throwing->Drop(); }
 		break;
 	case (int)STATE::THROWING_OBJ:
 		break;
@@ -519,6 +521,8 @@ void Player::Jump(void)
 			jumpKeyCounter[i]++;
 
 			accelSum.y = (std::max)(accelSum.y, (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME));
+
+			Snd::GetIns().Play("PlayerJump");
 		}
 
 		// ÉãÅ[ÉvÇ©ÇÁî≤ÇØÇÈ
