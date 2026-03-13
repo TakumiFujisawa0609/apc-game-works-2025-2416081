@@ -13,8 +13,8 @@ Block::Block(TYPE type, int baseModelId, int textureId, int mapX, int mapY, int 
 	ModelDuplicate(baseModelId);
 	
 	// ボクセルメッシュ生成に必要な情報を設定する
-	VoxelInfoInit(TAG::STAGE, Vector3(BlockManager::SIZE_BLOCK), textureId, 100.0f, 25.0f, Vector3(), 0.1f);
-
+	VoxelInfoInit(TAG::STAGE, Vector3(BlockManager::SIZE_BLOCK), textureId, TEXTURE_SIZE, CELL_SIZE, Vector3(), ALIVE_NEED_RATE);
+	
 	// 1ブロックあたりの半分の大きさ
 	const float SIZE_HALF_BLOCK = (BlockManager::SIZE_BLOCK / 2.0f);
 
@@ -52,9 +52,9 @@ void Block::OnCollision(const ColliderBase& collider)
 		// エフェクトを出す
 		BreakEffect(collider.GetPos());
 		// スコア加算
-		if (collider.GetTag() == TAG::PLAYER_PUNCH) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * 50); }
-		if (collider.GetTag() == TAG::PLAYER_GOUGE) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * 50); }
-		if (collider.GetTag() == TAG::PLAYER_THROWING) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * 50); }
+		if (collider.GetTag() == TAG::PLAYER_PUNCH) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * SCORE_PER_CELL); }
+		if (collider.GetTag() == TAG::PLAYER_GOUGE) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * SCORE_PER_CELL); }
+		if (collider.GetTag() == TAG::PLAYER_THROWING) { Score::GetIns().ScoreAddCombo((int)BreakCellIdx().size() * SCORE_PER_CELL); }
 
 		// 画面を揺らす
 		GameScene::Shake();

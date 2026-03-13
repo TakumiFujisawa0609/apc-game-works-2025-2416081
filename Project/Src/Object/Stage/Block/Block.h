@@ -8,9 +8,6 @@ constexpr int NumberConversion(int r, int g, int b) { return (r << 16) | (g << 8
 class Block : public VoxelBase
 {
 public:
-    // ブロックモデルの大きさ
-    static constexpr float SCALE = 1.0f;
-
     enum class TYPE
     {
         SIMPLE = NumberConversion(170, 170, 170),
@@ -25,6 +22,20 @@ public:
 private:
     // ブロック種別
     TYPE type;
+
+    // ブロックモデルの大きさ
+    const float SCALE = 1.0f;
+
+    // テクスチャサイズ
+    const float TEXTURE_SIZE = 100.0f;
+    // セルサイズ
+	const float CELL_SIZE = 25.0f;
+
+    // 生存に必要なセルの生存割合
+    const float ALIVE_NEED_RATE = 0.1f;
+
+    // セル1つにつき加算されるスコア
+	const int SCORE_PER_CELL = 50;
 
     void SubLoad(void)override {}
     void SubInit(void)override { SetJudge(true); SetIsDraw(true); }

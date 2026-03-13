@@ -50,12 +50,6 @@ void BlockManager::Draw(void)
 	for (Block*& b : blocks) { b->Draw(); }
 }
 
-void BlockManager::AlphaDraw(void)
-{
-	// 生成したブロック全てのアルファ描画処理
-	//for (Block*& b : blocks_) { b->AlphaDraw(); }
-}
-
 void BlockManager::Release(void)
 {
 	// 生成したブロック全ての解放
@@ -120,7 +114,7 @@ void BlockManager::LoadMapCsvData(void)
 		lineCount++;
 
 		// 11行目まではMagicaVoxel特有の無駄な情報なのでスキップ
-		if (lineCount <= 11) { continue; }
+		if (lineCount <= IGNORE_LINE) { continue; }
 
 		// 専用の構造体で1行から必要な情報を抜き出す
 		MagicaVoxelCSVRow info = MagicaVoxelCSVRow(Split(line, ' '));
@@ -136,20 +130,5 @@ void BlockManager::LoadMapCsvData(void)
 
 void BlockManager::StageRevival(void)
 {
-	blocks.at(382)->ReVival();
-	blocks.at(383)->ReVival();
-	blocks.at(384)->ReVival();
-	blocks.at(385)->ReVival();
-	blocks.at(399)->ReVival();
-	blocks.at(400)->ReVival();
-	blocks.at(401)->ReVival();
-	blocks.at(402)->ReVival();
-	blocks.at(418)->ReVival();
-	blocks.at(419)->ReVival();
-	blocks.at(420)->ReVival();
-	blocks.at(421)->ReVival();
-	blocks.at(438)->ReVival();
-	blocks.at(439)->ReVival();
-	blocks.at(440)->ReVival();
-	blocks.at(441)->ReVival();
+	for (const int& i : RESPAWN_BLOCK_NUM_TABLE) { blocks.at(i)->ReVival(); }
 }
