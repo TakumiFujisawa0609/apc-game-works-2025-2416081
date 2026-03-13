@@ -27,7 +27,13 @@ public:
 	STATE GetState(void)const { return state; }
 
 private:
+	// 右手のフレームインデックス(モデルによって変える必要があるかも)
 	const int PLAYER_RIGHTHAND_FRAME_INDEX = 14;
+	// 落下速度
+	const float DROP_SPEED = 5.0f;
+	// 落下中オブジェクトを消去する高さ
+	const float DROP_DELETE_HEIGHT = -50.0f;
+
 	const int& playerModel;
 	const Vector3& playerAngle;
 
@@ -58,10 +64,11 @@ protected:
 	// 投げた後の処理に使う～～～～～～
 	Vector3 moveVec;
 
-	float speed;
+	// 速度(派生先で設定)
+	float SPEED;
 
 	// 生存時間(派生先で設定)
-	int aliveTime;
+	int ALIVE_TIME;
 	int aliveCounter;
 
 	// 生存ヒット回数(派生先で設定)

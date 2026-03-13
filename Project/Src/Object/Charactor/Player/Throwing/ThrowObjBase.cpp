@@ -13,13 +13,13 @@ ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle) :
 	state(STATE::NON),
 	stateFuncPtr(),
 
-	aliveTime(100),
+	ALIVE_TIME(100),
 	aliveCounter(0),
 
 	ALIVE_HIT_NUM(5),
 	aliveHitCou(0),
 
-	speed(10.0f),
+	SPEED(10.0f),
 
 	moveVec()
 {
@@ -94,9 +94,9 @@ void ThrowObjBase::Throw(void)
 {
 	trans.pos = PlayerRightHandPos();
 
-	moveVec = THROW_VEC.TransMat(MGetRotY(playerAngle.y)) * speed;
+	moveVec = THROW_VEC.TransMat(MGetRotY(playerAngle.y)) * SPEED;
 
-	aliveCounter = aliveTime;
+	aliveCounter = ALIVE_TIME;
 
 	aliveHitCou = 0;
 
@@ -110,8 +110,8 @@ void ThrowObjBase::CarryStateFunc(void)
 }
 void ThrowObjBase::DropStateFunc(void)
 {
-	trans.pos.y -= 5.0f;
-	if (trans.pos.y < -50.0f) { state = STATE::NON; }
+	trans.pos.y -= DROP_SPEED;
+	if (trans.pos.y < DROP_DELETE_HEIGHT) { state = STATE::NON; }
 }
 
 void ThrowObjBase::ThrowStateFunc(void)

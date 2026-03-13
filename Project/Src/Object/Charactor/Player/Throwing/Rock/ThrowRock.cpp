@@ -9,13 +9,16 @@ ThrowRock::ThrowRock(const int& playerModel, const Vector3& playerAngle) :
 
 void ThrowRock::Load(void)
 {
+	// コライダー作成
 	ColliderCreate(new SphereCollider(TAG::PLAYER_THROWING, COLLIDER_RADIUS, COLLIDER_RADIUS));
 
-	speed = 15.0f;
+	// パラメーター設定
 
-	aliveTime = ALIVE_TIME;
+	ThrowObjBase::SPEED = this->SPEED;
 
-	ALIVE_HIT_NUM = 10;
+	ThrowObjBase::ALIVE_TIME = this->ALIVE_TIME;
+
+	ThrowObjBase::ALIVE_HIT_NUM = this->ALIVE_HIT_NUM;
 
 	trans.scale = SCALE;
 }
