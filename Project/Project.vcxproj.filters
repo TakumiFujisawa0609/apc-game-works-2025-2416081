@@ -129,7 +129,7 @@
     <ClCompile Include="Src\Object\Charactor\CharactorBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.cpp">
+    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBlock.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBlock.cpp">
@@ -138,7 +138,7 @@
     <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.cpp">
+    <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Charactor\Player\UI\Preview\PlayerPreview.cpp">
@@ -347,7 +347,7 @@
     <ClInclude Include="Src\Object\DebugObject\SphereDebugObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.h">
+    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBlock.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBlock.h">
@@ -356,7 +356,7 @@
     <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.h">
+    <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Charactor\Player\UI\Preview\PlayerPreview.h">

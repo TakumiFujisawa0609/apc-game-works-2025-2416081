@@ -742,7 +742,7 @@ void Player::LowerLoad(void)
 	preview->Load();
 
 	// HPƒo[
-	hpBar = new PlayerHpBarManager(hp, HP_MAX);
+	hpBar = new PlayerHpBar(hp, HP_MAX);
 	hpBar->Load();
 
 	// ‘€ìà–¾

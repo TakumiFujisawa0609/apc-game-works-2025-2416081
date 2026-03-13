@@ -8,7 +8,7 @@
 #include"Gouge/PlayerGouge.h"
 #include"Throwing/Throwing.h"
 
-#include"UI/HpBar/PlayerHpBarManager.h"
+#include"UI/HpBar/PlayerHpBar.h"
 #include"UI/Preview/PlayerPreview.h"
 #include"UI/OperationUI/PlayerOperationUI.h"
 
@@ -281,7 +281,7 @@ private:
 
 	// HPÉoÅ[Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 	// ÉCÉìÉXÉ^ÉìÉX
-	PlayerHpBarManager* hpBar;
+	PlayerHpBar* hpBar;
 
 	// ç¿ïW
 	const Vector2 HP_BAR_POS = Vector2(PREVIEW_POS.x + PlayerPreview::SIZE, PREVIEW_POS.y + (PlayerPreview::SIZE / 2));

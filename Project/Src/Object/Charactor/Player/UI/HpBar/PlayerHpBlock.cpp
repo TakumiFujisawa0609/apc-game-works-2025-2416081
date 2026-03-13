@@ -1,15 +1,12 @@
-#include"BossHpBlock.h"
+#include"PlayerHpBlock.h"
 
 #include"../../../../../Utility/Utility.h"
 
 #include"../../../../../Application/Application.h"
 
-BossHpBlock::BossHpBlock(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
+PlayerHpBlock::PlayerHpBlock(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
 	position(position),
 	HP_BAR_ONE_DIVISION_SIZE(HP_BAR_ONE_DIVISION_SIZE),
-
-	ALIVE_LOCAL_POSITION(),
-	localPosition(),
 
 	angle(0.0f),
 
@@ -27,9 +24,13 @@ BossHpBlock::BossHpBlock(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE
 {
 }
 
-void BossHpBlock::Init(const Vector2& localAlivePosition, unsigned short num, unsigned short HP_BAR_DIVISIONS_NUM)
+PlayerHpBlock::~PlayerHpBlock()
 {
-	localPosition = ALIVE_LOCAL_POSITION = localAlivePosition;
+}
+
+void PlayerHpBlock::Init(const Vector2& localAlivePosition, unsigned short num, unsigned char HP_BAR_DIVISIONS_NUM)
+{
+	localPosition = localAlivePosition;
 
 	angle = 0.0f;
 
@@ -39,28 +40,28 @@ void BossHpBlock::Init(const Vector2& localAlivePosition, unsigned short num, un
 
 	state = STATE::ALIVE;
 
-	stateFuncPtr[(int)STATE::NON] = &BossHpBlock::Non;
-	stateFuncPtr[(int)STATE::ALIVE] = &BossHpBlock::Alive;
-	stateFuncPtr[(int)STATE::LOST_IDLE] = &BossHpBlock::LostIdle;
-	stateFuncPtr[(int)STATE::LOST_DROP] = &BossHpBlock::LostDrop;
+	stateFuncPtr[(int)STATE::NON] = &PlayerHpBlock::Non;
+	stateFuncPtr[(int)STATE::ALIVE] = &PlayerHpBlock::Alive;
+	stateFuncPtr[(int)STATE::LOST_IDLE] = &PlayerHpBlock::LostIdle;
+	stateFuncPtr[(int)STATE::LOST_DROP] = &PlayerHpBlock::LostDrop;
 }
 
-void BossHpBlock::Update(void)
+void PlayerHpBlock::Update(void)
 {
 	(this->*stateFuncPtr[(int)state])();
 }
 
-void BossHpBlock::Draw(void)
+void PlayerHpBlock::Draw(void)
 {
 	if (state == STATE::NON) { return; }
 
-	BoxVertexs drawPoss = DrawPositionVertexs();
+	auto drawPoss = DrawPositionVertexs();
 
 	unsigned int aliveColor =
 		GetColor(
-			std::clamp((unsigned int)ALIVE_DEFAULT_R + (idleTimer / 2), 0u, 255u),
-			std::clamp((unsigned int)ALIVE_DEFAULT_G + (idleTimer / 2), 0u, 255u),
-			std::clamp((unsigned int)ALIVE_DEFAULT_B + (idleTimer / 2), 0u, 255u)
+			std::clamp((unsigned int)ALIVE_DEFAULT_R + idleTimer, 0u, 255u),
+			std::clamp((unsigned int)ALIVE_DEFAULT_G + idleTimer, 0u, 255u),
+			std::clamp((unsigned int)ALIVE_DEFAULT_B + idleTimer, 0u, 255u)
 		);
 
 	DrawQuadrangle(
@@ -73,21 +74,23 @@ void BossHpBlock::Draw(void)
 	);
 }
 
-void BossHpBlock::Alive(void)
+void PlayerHpBlock::Alive(void)
 {
 	idleTimer += idleShakeSign;
 	if (idleTimer > HP_BAR_DIVISION_NUM || idleTimer <= 0) { idleShakeSign *= -1; }
 }
 
-void BossHpBlock::SetLostIdle(void)
+void PlayerHpBlock::SetLostIdle(void)
 {
 	state = STATE::LOST_IDLE;
+
+	idleTimer = 0;
 
 	localPosition += (float)idleShakeSign * LOST_SHAKE_SIZE;
 	idleShakeSign *= -1;
 }
 
-void BossHpBlock::LostIdle(void)
+void PlayerHpBlock::LostIdle(void)
 {
 	if (idleTimer % LOST_SHAKE_CYCLE == 0) {
 		localPosition += (float)idleShakeSign;
@@ -97,27 +100,13 @@ void BossHpBlock::LostIdle(void)
 	idleTimer++;
 }
 
-void BossHpBlock::SetLostDrop(void)
+void PlayerHpBlock::SetLostDrop(void)
 {
 	state = STATE::LOST_DROP;
 
 	dropAccel = DropInitVelocity();
 }
-
-void BossHpBlock::Revival(unsigned short num)
-{
-	localPosition = ALIVE_LOCAL_POSITION;
-
-	angle = 0.0f;
-
-	idleTimer = num;
-
-	idleShakeSign = 1;
-
-	state = STATE::ALIVE;
-}
-
-void BossHpBlock::LostDrop(void)
+void PlayerHpBlock::LostDrop(void)
 {
 	// ‰ñ“]‚³‚¹‚é
 	angle += Deg2Rad(DROP_ROTATE_SPEED);

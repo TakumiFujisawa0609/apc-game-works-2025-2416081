@@ -42,6 +42,9 @@ private:
 	const float OPERATION_CONTROLLER_IMG_DRAW_OFFSET_X = (float)ACTION_IMG_SIZE_X / 2.0f;
 	const float OPERATION_CONTROLLER_IMG_DRAW_OFFSET_Y = 0.0f;
 
+	// 透明描画時のアルファ値
+	const unsigned char TRANSPARENT_DRAW_ALPHA = 150;
+
 	// 全アクションの列挙型定義
 	enum class ACTION
 	{
@@ -118,6 +121,6 @@ private:
 	// 配置番号からアクション番号に変換する関数
 	int SortNumToActionNum(int sort);
 
-	//
+	// アクションが可能かどうかのフラグ配列
 	bool actionPossibleFlg[(int)SORT::MAX];
 };

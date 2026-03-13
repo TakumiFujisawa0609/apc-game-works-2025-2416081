@@ -44,6 +44,7 @@ void PlayerOperationUI::Init(const Vector2& pos)
 
 void PlayerOperationUI::Update(void)
 {
+	// プレイヤーの状態に応じて、行動可能なアクションをセット
 	switch (playerState)
 	{
 	case (int)Player::STATE::NON: { break; }
@@ -126,13 +127,14 @@ void PlayerOperationUI::Update(void)
 
 void PlayerOperationUI::Draw(void)
 {
+	// 行動可能なアクションは通常描画、行動不可能なアクションは半透明で描画するためのフラグ
 	bool alpha = false;
 
 	for (unsigned char i = 0; i < (unsigned char)SORT::MAX; i++) {
 
 		if (alpha != !actionPossibleFlg[i]) {
 			alpha = !actionPossibleFlg[i];
-			if (alpha) { SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150); }
+			if (alpha) { SetDrawBlendMode(DX_BLENDMODE_ALPHA, TRANSPARENT_DRAW_ALPHA); }
 			else { SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); }
 		}
 

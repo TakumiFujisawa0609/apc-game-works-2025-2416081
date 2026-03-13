@@ -2,25 +2,21 @@
 
 #include"../../../../../Utility/Utility.h"
 
-#include"../../../../../Application/Application.h"
+PlayerHpBar::PlayerHpBar(const unsigned char& HP, const unsigned char HP_MAX):
+	HP(HP),
+	prevHP(this->HP),
+	HP_MAX(HP_MAX),
 
-PlayerHpBar::PlayerHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
-	position(position),
-	HP_BAR_ONE_DIVISION_SIZE(HP_BAR_ONE_DIVISION_SIZE),
+	hpBar(),
 
-	angle(0.0f),
+	hpBarFrameImageHandle(-1),
 
-	state(STATE::NON),
-	stateFuncPtr(),
+	position(),
 
-	idleTimer(0),
-	idleShakeSign(1),
+	aliveHpBarNum(0),
+	totalHpBarNum(0),
 
-	ALIVE_DEFAULT_R(0),
-	ALIVE_DEFAULT_G(0),
-	ALIVE_DEFAULT_B(0),
-
-	HP_BAR_DIVISION_NUM(0)
+	hpBarDropIntervalCounter(0)
 {
 }
 
@@ -28,93 +24,85 @@ PlayerHpBar::~PlayerHpBar()
 {
 }
 
-void PlayerHpBar::Init(const Vector2& localAlivePosition, unsigned short num, unsigned char HP_BAR_DIVISIONS_NUM)
+void PlayerHpBar::Load(void)
 {
-	localPosition = localAlivePosition;
+	LoadImg(hpBarFrameImageHandle, "Data/Image/Game/UI/PlayerHpBarFrame.png");
 
-	angle = 0.0f;
+	for (unsigned char i = 0; i < HP_BAR_DIVISION_NUM; i++) {
+		hpBar[i] = new PlayerHpBlock(position, HP_BAR_ONE_DIVISION_SIZE);
+	}
+}
 
-	idleTimer = num;
+void PlayerHpBar::Init(const Vector2& position)
+{
+	this->position = position;
 
-	this->HP_BAR_DIVISION_NUM = HP_BAR_DIVISIONS_NUM;
+	prevHP = HP;
 
-	state = STATE::ALIVE;
+	totalHpBarNum = aliveHpBarNum = HP_BAR_DIVISION_NUM;
 
-	stateFuncPtr[(int)STATE::NON] = &PlayerHpBar::Non;
-	stateFuncPtr[(int)STATE::ALIVE] = &PlayerHpBar::Alive;
-	stateFuncPtr[(int)STATE::LOST_IDLE] = &PlayerHpBar::LostIdle;
-	stateFuncPtr[(int)STATE::LOST_DROP] = &PlayerHpBar::LostDrop;
+	hpBarDropIntervalCounter = 0;
+
+	unsigned char num = 0;
+	Vector2 hpBarAlivePos = HP_BAR_FIRST_POS;
+
+
+	unsigned int color = 0x00ff00;
+
+	for (PlayerHpBlock*& h : hpBar) {
+		num++;
+
+		h->Init(hpBarAlivePos, num, HP_BAR_DIVISION_NUM);
+		h->SetDefaultColor(0, 255, 0);
+
+		hpBarAlivePos += ((num % HP_BAR_DIVISION_NUM_Y) == 0) ? HP_BAR_NEXT_POS_UNIQUE : HP_BAR_NEXT_POS_USUALLY;
+	}
 }
 
 void PlayerHpBar::Update(void)
-{
-	(this->*stateFuncPtr[(int)state])();
+{	
+	// HPが変化したかどうか
+	if (HP != prevHP) {
+
+		// 変化した数値を保持
+		prevHP = HP;
+
+		// 最大HPに対する現在のHPの割合を算出
+		const float hpRatio = (float)HP / (float)HP_MAX;
+
+		// 生きているHPバーブロックの数を算出
+		const unsigned char newAliveHpBarNum = (unsigned char)(hpRatio * (float)HP_BAR_DIVISION_NUM);
+
+		// 死んだHPバーブロックの処理
+		for (unsigned char i = newAliveHpBarNum; i < aliveHpBarNum; i++) { hpBar[i]->SetLostIdle(); }
+
+		// 変化した数値を保持
+		aliveHpBarNum = newAliveHpBarNum;
+	}
+
+	if (totalHpBarNum > aliveHpBarNum) {
+		if (++hpBarDropIntervalCounter >= HP_BAR_DROP_INTERVAL) {
+			hpBarDropIntervalCounter = 0;
+			hpBar[totalHpBarNum - 1]->SetLostDrop();
+			totalHpBarNum--;
+		}
+	}
+
+	for (PlayerHpBlock*& h : hpBar) { h->Update(); }
 }
 
 void PlayerHpBar::Draw(void)
 {
-	if (state == STATE::NON) { return; }
+	DrawGraph((int)position.x, (int)position.y, hpBarFrameImageHandle, true);
 
-	auto drawPoss = DrawPositionVertexs();
-
-	unsigned int aliveColor =
-		GetColor(
-			std::clamp((unsigned int)ALIVE_DEFAULT_R + idleTimer, 0u, 255u),
-			std::clamp((unsigned int)ALIVE_DEFAULT_G + idleTimer, 0u, 255u),
-			std::clamp((unsigned int)ALIVE_DEFAULT_B + idleTimer, 0u, 255u)
-		);
-
-	DrawQuadrangle(
-		(int)drawPoss.topLeft.x, (int)drawPoss.topLeft.y,
-		(int)drawPoss.topRight.x, (int)drawPoss.topRight.y,
-		(int)drawPoss.bottomRight.x, (int)drawPoss.bottomRight.y,
-		(int)drawPoss.bottomLeft.x, (int)drawPoss.bottomLeft.y,
-		(state == STATE::ALIVE) ? aliveColor : 0xff0000,
-		true
-	);
+	for (PlayerHpBlock*& h : hpBar) { h->Draw(); }
 }
 
-void PlayerHpBar::Alive(void)
+void PlayerHpBar::Release(void)
 {
-	idleTimer += idleShakeSign;
-	if (idleTimer > HP_BAR_DIVISION_NUM || idleTimer <= 0) { idleShakeSign *= -1; }
-}
-
-void PlayerHpBar::SetLostIdle(void)
-{
-	state = STATE::LOST_IDLE;
-
-	idleTimer = 0;
-
-	localPosition += (float)idleShakeSign * 0.5f;
-	idleShakeSign *= -1;
-}
-
-void PlayerHpBar::LostIdle(void)
-{
-	if (idleTimer % 3 == 0) {
-		localPosition += (float)idleShakeSign;
-		idleShakeSign *= -1;
+	for (PlayerHpBlock*& h : hpBar) {
+		if (!h) { continue; }
+		delete h;
 	}
-
-	idleTimer++;
-}
-
-void PlayerHpBar::SetLostDrop(void)
-{
-	state = STATE::LOST_DROP;
-
-	dropAccel = Vector2((float)(GetRand(3) + 2), -(float)(GetRand(3) + 2));
-}
-void PlayerHpBar::LostDrop(void)
-{
-	// 回転させる
-	angle += Deg2Rad(5.0f);
-
-	// 落下
-	localPosition += dropAccel;
-	dropAccel.y += DROP_GRAVITY;
-
-	// 画面外に出たら消す
-	if (DrawPosition().y - HP_BAR_ONE_DIVISION_SIZE > App::SCREEN_SIZE_Y) { state = STATE::NON; }
+	DeleteGraph(hpBarFrameImageHandle);
 }

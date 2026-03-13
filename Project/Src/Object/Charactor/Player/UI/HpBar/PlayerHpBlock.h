@@ -1,21 +1,20 @@
 #pragma once
+
 #include"../../../../../Common/Vector2.h"
 
-class BossHpBlock
+class PlayerHpBlock
 {
 public:
-	BossHpBlock(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
-	~BossHpBlock() {}
+	PlayerHpBlock(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
+	~PlayerHpBlock();
 
-	void Init(const Vector2& localAlivePosition, unsigned short num, unsigned short HP_BAR_DIVISIONS_NUM);
-
+	void Init(const Vector2& localAlivePosition, unsigned short num, unsigned char HP_BAR_DIVISION_NUM);
 	void SetDefaultColor(unsigned char r, unsigned char g, unsigned char b) { ALIVE_DEFAULT_R = r; ALIVE_DEFAULT_G = g; ALIVE_DEFAULT_B = b; }
 	void SetDefaultColor(unsigned int color) {
 		ALIVE_DEFAULT_R = (color >> 16) & 0xFF;
 		ALIVE_DEFAULT_G = (color >> 8) & 0xFF;
 		ALIVE_DEFAULT_B = color & 0xFF;
 	}
-
 	void Update(void);
 	void Draw(void);
 
@@ -33,22 +32,16 @@ public:
 	// 状態取得
 	STATE GetState(void) { return state; }
 
-	unsigned short GetIdleTimer(void) { return idleTimer; }
-
 	// 状態設定
 	void SetLostIdle(void);
 	void SetLostDrop(void);
 
-	// 復活
-	void Revival(unsigned short num);
 private:
-
 	// 大きさ
 	const float HP_BAR_ONE_DIVISION_SIZE;
 
 	// 座標
 	const Vector2& position;
-	Vector2 ALIVE_LOCAL_POSITION;
 	Vector2 localPosition;
 	Vector2 DrawPosition(void) { return position + localPosition; }
 
@@ -86,7 +79,7 @@ private:
 	const char LOST_SHAKE_CYCLE = 3;
 
 	// 全体の分割数
-	unsigned short HP_BAR_DIVISION_NUM;
+	unsigned char HP_BAR_DIVISION_NUM;
 
 	// 落下させる時の初速度の最低値
 	const char DROP_INIT_VELOCITY_MIN = 2;
@@ -128,7 +121,8 @@ private:
 	void LostDrop(void);
 
 	// 状態関数ポインタ型定義
-	using STATEFUNC = void (BossHpBlock::*)(void);
+	using STATEFUNC = void (PlayerHpBlock::*)(void);
 	// 状態関数ポインタ配列
 	STATEFUNC stateFuncPtr[(int)STATE::MAX];
+
 };
