@@ -1,131 +1,113 @@
 #include"BossHpBar.h"
 
+#include<string>
+
 #include"../../../../../Utility/Utility.h"
 
-#include"../../../../../Application/Application.h"
+BossHpBar::BossHpBar(const unsigned short& HP, const unsigned short HP_MAX, const unsigned char& LIFE, unsigned char number) :
+	HP(HP),
+	prevHP(this->HP),
+	HP_MAX(HP_MAX),
 
-BossHpBar::BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE) :
-	position(position),
-	HP_BAR_ONE_DIVISION_SIZE(HP_BAR_ONE_DIVISION_SIZE),
+	LIFE(LIFE),
 
-	ALIVE_LOCAL_POSITION(),
-	localPosition(),
+	NUMBER(number),
 
-	angle(0.0f),
+	hpBar(),
 
-	state(STATE::NON),
-	stateFuncPtr(),
+	position(),
 
-	idleTimer(0),
-	idleShakeSign(1),
+	aliveHpBarNum(0),
+	totalHpBarNum(0),
 
-	ALIVE_DEFAULT_R(0),
-	ALIVE_DEFAULT_G(0),
-	ALIVE_DEFAULT_B(0),
-
-	HP_BAR_DIVISION_NUM(0)
+	hpBarDropIntervalCounter(0)
 {
 }
 
-void BossHpBar::Init(const Vector2& localAlivePosition, unsigned short num, unsigned short HP_BAR_DIVISIONS_NUM)
+void BossHpBar::Load(void)
 {
-	localPosition = ALIVE_LOCAL_POSITION = localAlivePosition;
+	for (unsigned short i = 0; i < HP_BAR_DIVISIONS_NUM; i++) {
+		hpBar[i] = new BossHpBlock(position, HP_BAR_ONE_DIVISION_SIZE);
+	}
+}
 
-	angle = 0.0f;
+void BossHpBar::Init(const Vector2& position, unsigned int color)
+{
+	this->position = position;
 
-	idleTimer = num;
+	prevHP = HP;
 
-	this->HP_BAR_DIVISION_NUM = HP_BAR_DIVISIONS_NUM;
+	totalHpBarNum = aliveHpBarNum = HP_BAR_DIVISIONS_NUM;
 
-	state = STATE::ALIVE;
+	hpBarDropIntervalCounter = 0;
 
-	stateFuncPtr[(int)STATE::NON] = &BossHpBar::Non;
-	stateFuncPtr[(int)STATE::ALIVE] = &BossHpBar::Alive;
-	stateFuncPtr[(int)STATE::LOST_IDLE] = &BossHpBar::LostIdle;
-	stateFuncPtr[(int)STATE::LOST_DROP] = &BossHpBar::LostDrop;
+	unsigned short num = 0;
+	Vector2 hpBarAlivePos = HP_BAR_FIRST_POS;
+
+	for (BossHpBlock*& h : hpBar) {
+		num++;
+
+		unsigned char colorAround = num / 4;
+
+		h->Init(hpBarAlivePos, num, HP_BAR_DIVISIONS_NUM);
+		h->SetDefaultColor(color);
+
+		hpBarAlivePos += ((num % HP_BAR_DIVISION_NUM_Y) == 0) ? HP_BAR_NEXT_POS_UNIQUE : HP_BAR_NEXT_POS_USUALLY;
+	}
 }
 
 void BossHpBar::Update(void)
 {
-	(this->*stateFuncPtr[(int)state])();
+	// 現在のライフに合わせてHPバーの状態を更新する
+	if (LIFE - 1 == NUMBER) {
+		// HPが変化したかどうか
+		if (HP != prevHP) {
+
+			// 変化した数値を保持
+			prevHP = HP;
+
+			// 最大HPに対する現在のHPの割合を算出
+			const float hpRatio = (float)HP / (float)HP_MAX;
+
+			// 生きているHPバーブロックの数を算出
+			const unsigned short newAliveHpBarNum = (unsigned short)(hpRatio * (float)HP_BAR_DIVISIONS_NUM);
+
+			// 死んだHPバーブロックの処理
+			for (unsigned short i = newAliveHpBarNum; i < aliveHpBarNum; i++) { hpBar[i]->SetLostIdle(); }
+
+			// 復活したHPバーブロックの処理
+			for (unsigned short i = aliveHpBarNum; i < newAliveHpBarNum; i++) { hpBar[i]->Revival(i + 1); }
+
+			// 変化した数値を保持
+			aliveHpBarNum = newAliveHpBarNum;
+		}
+
+		if (totalHpBarNum > aliveHpBarNum) {
+			if (++hpBarDropIntervalCounter >= HP_BAR_DROP_INTERVAL) {
+				hpBarDropIntervalCounter = 0;
+				hpBar[totalHpBarNum - 1]->SetLostDrop();
+				totalHpBarNum--;
+			}
+		}
+
+		if (totalHpBarNum < aliveHpBarNum) { totalHpBarNum = aliveHpBarNum; }
+	}
+
+	// HPバーの状態を更新
+	for (BossHpBlock*& h : hpBar) { h->Update(); }
 }
 
 void BossHpBar::Draw(void)
 {
-	if (state == STATE::NON) { return; }
-
-	BoxVertexs drawPoss = DrawPositionVertexs();
-
-	unsigned int aliveColor =
-		GetColor(
-			std::clamp((unsigned int)ALIVE_DEFAULT_R + (idleTimer / 2), 0u, 255u),
-			std::clamp((unsigned int)ALIVE_DEFAULT_G + (idleTimer / 2), 0u, 255u),
-			std::clamp((unsigned int)ALIVE_DEFAULT_B + (idleTimer / 2), 0u, 255u)
-		);
-
-	DrawQuadrangle(
-		(int)drawPoss.topLeft.x, (int)drawPoss.topLeft.y,
-		(int)drawPoss.topRight.x, (int)drawPoss.topRight.y,
-		(int)drawPoss.bottomRight.x, (int)drawPoss.bottomRight.y,
-		(int)drawPoss.bottomLeft.x, (int)drawPoss.bottomLeft.y,
-		(state == STATE::ALIVE) ? aliveColor : 0xff0000,
-		true
-	);
+	// HPバーの描画
+	for (BossHpBlock*& h : hpBar) { h->Draw(); }
 }
 
-void BossHpBar::Alive(void)
+void BossHpBar::Release(void)
 {
-	idleTimer += idleShakeSign;
-	if (idleTimer > HP_BAR_DIVISION_NUM || idleTimer <= 0) { idleShakeSign *= -1; }
-}
-
-void BossHpBar::SetLostIdle(void)
-{
-	state = STATE::LOST_IDLE;
-
-	localPosition += (float)idleShakeSign * 0.5f;
-	idleShakeSign *= -1;
-}
-
-void BossHpBar::LostIdle(void)
-{
-	if (idleTimer % 3 == 0) {
-		localPosition += (float)idleShakeSign;
-		idleShakeSign *= -1;
+	// HPバーの解放
+	for (BossHpBlock*& h : hpBar) {
+		if (!h) { continue; }
+		delete h;
 	}
-
-	idleTimer++;
-}
-
-void BossHpBar::SetLostDrop(void)
-{
-	state = STATE::LOST_DROP;
-
-	dropAccel = Vector2(-(float)(GetRand(3) + 2), -(float)(GetRand(3) + 2));
-}
-
-void BossHpBar::Revival(unsigned short num)
-{
-	localPosition = ALIVE_LOCAL_POSITION;
-
-	angle = 0.0f;
-
-	idleTimer = num;
-
-	idleShakeSign = 1;
-
-	state = STATE::ALIVE;
-}
-
-void BossHpBar::LostDrop(void)
-{
-	// 回転させる
-	angle += Deg2Rad(5.0f);
-
-	// 落下
-	localPosition += dropAccel;
-	dropAccel.y += DROP_GRAVITY;
-
-	// 画面外に出たら消す
-	if (DrawPosition().y - HP_BAR_ONE_DIVISION_SIZE > App::SCREEN_SIZE_Y) { state = STATE::NON; }
 }

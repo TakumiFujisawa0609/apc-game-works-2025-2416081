@@ -171,6 +171,7 @@ void Player::OnCollision(const ColliderBase& collider)
 	if (GetInviCounter() > 0) { return; }
 	if (state == (int)STATE::DEATH) { return; }
 
+	// ノックバック処理 & 演出(画面揺れ & スロー)
 	auto knockBack = [&](Vector3 pos)->void {
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
 		GameScene::Slow(20);
@@ -186,21 +187,32 @@ void Player::OnCollision(const ColliderBase& collider)
 
 	switch (collider.GetTag())
 	{
-	case TAG::ENEMY:
-		knockBack(collider.GetPos());
-		HpSharpen(10);
-		return;
 	case TAG::GOLEM_ATTACK_FALL:
+
+		// ノックバック
 		knockBack(collider.GetPos());
-		HpSharpen(10);
+
+		// HP減少
+		HpSharpen(Boss::ATTACK_DAMAGE_TABLE[(int)Boss::ATTACK_DAMAGE_TYPE::FALL]);
+
 		return;
 	case TAG::GOLEM_ATTACK_PSYCHOROCK:
+
+		// ノックバック
 		knockBack(collider.GetPos());
-		HpSharpen(10);
+
+		// HP減少
+		HpSharpen(Boss::ATTACK_DAMAGE_TABLE[(int)Boss::ATTACK_DAMAGE_TYPE::PSYCHO]);
+
 		return;
 	case TAG::GOLEM_ATTACK_STONE:
+
+		// ノックバック
 		knockBack(collider.GetPos());
-		HpSharpen(10);
+
+		// HP減少
+		HpSharpen(Boss::ATTACK_DAMAGE_TABLE[(int)Boss::ATTACK_DAMAGE_TYPE::STONE]);
+
 		return;
 	}
 }
@@ -321,37 +333,41 @@ void Player::DoStateEvasion(void)
 
 void Player::Move(void)
 {
+	// 移動処理
 	Run();
 
+	// ジャンプ処理
 	Jump();
 
+	// 攻撃の段数を管理するカウンターを増やす
 	if (attackStageCounter <= INPUT_ATTACK_FRAME) { attackStageCounter++; }
 }
 void Player::Attack(void)
 {	
+	// 現在のアニメーションの再生率を取得する(0.0f～1.0f)
 	float nowAnimeRatio = GetAnimeRatio();
 
 	// 攻撃の判定が発生する前の間、前方に移動させる
-	if (nowAnimeRatio <= 0.6f) {
-		// 移動方向ベクトル
-		Vector3 vec = {};
+	if (nowAnimeRatio <= PUNCH_COLLIDER_END_RATE) {
 
-		// unit_.angle_(角度) から ベクトル(向き) を割り出す
-		vec.x = sinf(trans.angle.y);
-		vec.z = cosf(trans.angle.y);
-
-		// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
-		trans.pos += vec.Normalized() * 13.0f;
+		// 角度から割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
+		trans.pos += Vector3::XZonly(sinf(trans.angle.y), cosf(trans.angle.y)).Normalized() * ATTACK_MOVE_SPEED;
 	}
 
 	// 毎フレーム一旦オフ(攻撃判定)
 	punch->Off();
 
 	// 大体攻撃判定を発生させる時間
-	if (0.5f <= nowAnimeRatio && nowAnimeRatio <= 0.6f) { punch->On(); }
+	if (PUNCH_COLLIDER_START_RATE <= nowAnimeRatio && nowAnimeRatio <= PUNCH_COLLIDER_END_RATE) { punch->On(); }
 
 	// 攻撃判定終わったらボタンで次段攻撃に遷移可能にしておく(操作性向上)
-	if (nowAnimeRatio > 0.6f) { AttackMove(); DoStateAttack(); }
+	if (nowAnimeRatio > PUNCH_COLLIDER_END_RATE) {
+		// 移動入力によって向きを変えられるようにする
+		AttackRotate();
+
+		// 次段攻撃に遷移可能にする
+		DoStateAttack();
+	}
 
 	// 何も入力なく攻撃アニメーションが終了したら通常状態に自動で遷移
 	if (IsAnimeEnd()) { state = (int)STATE::MOVE; }
@@ -362,68 +378,107 @@ void Player::Gouge(void)
 		// ボタンが押され続けている間処理を行う
 
 		// 現在のモーションを取得
-		const int& animeType = GetAnimePlayType();
+		const int animeType = GetAnimePlayType();
 
-		// まだ破壊箇所探索中の処理
+		// まだ破壊箇所探索中(掴みアニメーション再生中)の処理
 		if (animeType == (int)ANIME_TYPE::CATCH) {
+			// 破壊箇所が見つかったら掴み成功のアニメーションに遷移させる
 			if (gouge->SearchHit()) {
+				// 掴み成功のアニメーションに遷移
 				AnimePlay((int)ANIME_TYPE::GOUGE, false);
+
+				// 掴み成功のフラグをリセット(掴み成功のアニメーションで一度だけ処理を行う為のフラグ)
 				isGouge = false;
 			}
-			// モーション終了で状態遷移
+			// 破壊箇所が見つからないままモーション終了で通常状態に遷移
 			if (IsAnimeEnd()) {
+				// 掴み処理管理クラスのリセット処理
 				gouge->Reset();
+
+				// 掴み失敗の為、持てるオブジェクトがない状態にする(安全処理)
 				throwing->Drop();
+
+				// 通常状態に遷移
 				state = (int)STATE::MOVE;
+
+				// アニメーションを通常状態のものにする
 				AnimePlay((int)ANIME_TYPE::IDLE);
 			}
 		}
-		// 破壊モーション待ち
+		// 掴み成功のアニメーションの処理
 		else if (animeType == (int)ANIME_TYPE::GOUGE) {
-			float animeRatio = GetAnimeRatio();
-			if (!isGouge && animeRatio > 0.33f) {
+			// 掴み成功アニメーション待ち
+			if (!isGouge && GetAnimeRatio() > GOUGE_COLLIDER_START_RATE) {
+				// 掴み成功のフラグを立てる(掴み成功のアニメーションで一度だけ処理を行う為のフラグ)
 				isGouge = true;
+
+				// 掴み成功の処理(破壊箇所を中心にえぐり取る)
 				gouge->GougeOn();
+
+				// 掴み成功の処理(掴んだオブジェクトを持つ)
 				throwing->Carry(THROW_TYPE::ROCK);
 			}
 
 			// モーション終了で状態遷移
 			if (IsAnimeEnd()) {
+				// 掴み処理管理クラスのリセット処理
 				gouge->Reset();
+
+				// 状態を掴んでいる状態にする
 				state = (int)STATE::CARRY_OBJ;
 			}
 		}
 
 	}
+	// ボタンが離されたら掴み失敗の処理 or 掴んでいる状態から通常状態への遷移
 	else {
+		// 掴み処理管理クラスのリセット処理
 		gouge->Reset();
+
+		// もし何かすでに掴んでいたら離す
 		throwing->Drop();
+
+		// 通常状態に遷移
 		state = (int)STATE::MOVE;
+
+		// アニメーションを通常状態のものにする
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 }
 void Player::CarryObj(void)
 {
+	// 掴みボタンが押されている間だけ 掴み続ける+移動が可能な状態にする
 	if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_GOUGE).now) {
+		// 移動処理
 		CarryRun();
 	}
+	// 掴みボタンが離されたら掴んでいる状態から通常状態への遷移
 	else {
+		// 掴んでいるものを離す
 		throwing->Drop();
+
+		// 通常状態に遷移
 		state = (int)STATE::MOVE;
+
+		// アニメーションを通常状態のものにする
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 }
 void Player::ThrowingObj(void)
 {
-	float nowAnimeRatio = GetAnimeRatio();
-	if (nowAnimeRatio <= 0.25f) {}
-	else {
+	// 投げるアニメーションの再生率が一定以上になったら抱えているオブジェクトを投げる処理を行う
+	if (GetAnimeRatio() > THROWING_RELEASE_ANIME_RATE) {
+		// 抱えているオブジェクトを投げる
 		throwing->Throw();
+
+		// オブジェクトを投げた後は、入力によって各状態に遷移可能にする(操作性向上の為、投げるアニメーションが終わる前から遷移可能にしておく)
 		DoStateMove();
 		DoStateAttack();
 		DoStateEvasion();
 		DoStateGouge();
 	}
+
+	// 何も入力なく投げるアニメーションが終了したら通常状態に自動で遷移
 	if (IsAnimeEnd()) { state = (int)STATE::MOVE; }
 }
 void Player::Evasion(void)
@@ -431,97 +486,121 @@ void Player::Evasion(void)
 	// 移動方向ベクトル
 	Vector3 vec = {};
 
-	// unit_.angle_(角度) から ベクトル(向き) を割り出す
+	// 角度(trans.angle) から 向き(ベクトル) を割り出す
 	vec.x = sinf(trans.angle.y);
 	vec.z = cosf(trans.angle.y);
 
 	// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
-	vec.Normalize();
-	trans.pos += vec * 15.0f/*unit_.para_.speed * 1.5f*/;
+	trans.pos += vec.Normalized() * EVASION_SPEED;
 
-	// 無敵(無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように １ を代入し続けておく)
-	if (GetAnimeRatio() <= 0.7f) { SetInviCounter(1); }
-	// 無敵判定が終わったらボタンで遷移可能にしておく(操作性向上)
-	//else { DoStateMove(); DoStateAttack(); }
+	// 回避アニメーションのローリング中無敵にしておく
+	// (無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように 1 を代入し続けておく)
+	if (GetAnimeRatio() <= EVASION_INVINCIBLE_ANIME_RATE) { SetInviCounter(); }
 
 	// 何も入力なく回避アニメーションが終了したら通常状態に自動で遷移
 	if (IsAnimeEnd()) { state = (int)STATE::MOVE; }
 }
 void Player::Damage(void)
 {
+	// ノックバック処理
 	trans.pos += knockBackVec;
 
+	// ダメージアニメーションが終わったら状態遷移
 	if (IsAnimeEnd()) {
+		// HPが残っていたら通常状態に遷移
 		if (hp > 0) {
+			// 通常状態に遷移
 			state = (int)STATE::MOVE;
+
+			// アニメーションを通常状態のものにする
 			AnimePlay((int)ANIME_TYPE::IDLE);
 		}
+		// HPが0以下なら死亡状態に遷移
 		else {
+			// HPがマイナスにならないように0で止める(安全処理)
 			hp = 0;
+
+			// 死亡状態に遷移
 			state = (int)STATE::DEATH;
+
+			// 死亡アニメーション再生
 			AnimePlay((int)ANIME_TYPE::DEATH, false);
+
 			return;
 		}
 	}
 }
 void Player::Death(void)
 {
+	// 死亡アニメーションが終了したら終了状態に遷移
 	if (IsAnimeEnd()) {
-		// 死亡処理
+		// 終了状態に遷移
 		state = (int)STATE::END;
 	}
 }
 
 void Player::Run(void)
 {
-	auto& key = Key::GetIns();
+	// 移動方向ベクトル
+	Vector3 vec = GetInputVec();
 
-	Vector3 vec = key.GetLeftStickVec().ToVector3XZ();
-
+	// 入力がなかったときの処理
 	if (vec == 0.0f) {
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
-	}
-
-	if (vec == 0.0f) {
+		// 地面に接地していたらアニメーションを通常状態にする(空中にいるときはそのままのアニメーションでいる為)
 		if (isGround) { AnimePlay((int)ANIME_TYPE::IDLE); }
+
+		// 走るSE停止
 		Snd::GetIns().Stop("PlayerRun");
 	}
+	// 入力があったときの処理
 	else {
-		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
+		// カメラの角度に合わせて回転させる行列を作成
+		MATRIX mat = MGetRotY(Camera::GetIns().GetAngle().y);
+
+		// 入力情報から割り出した移動方向ベクトルをカメラの角度に合わせて行列回転させる
 		vec.TransMatOwn(mat);
-		vec.Normalize();
 
-		trans.pos += vec * 10.0f;
+		// 移動方向ベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
+		trans.pos += vec.Normalized() * RUN_SPEED;
 
+		// 地面に接地していたら走るアニメーションにする(空中にいるときはそのままのアニメーションでいる為)
 		if (isGround) {
+			// 走るアニメーションを再生する
 			AnimePlay((int)ANIME_TYPE::RUN);
+
+			// 走るSE再生
 			Snd::GetIns().Play("PlayerRun");
 		}
+		// 地面に接地していなかったら走るSE停止
 		else { Snd::GetIns().Stop("PlayerRun"); }
 
+		// 移動方向ベクトルを角度に変換してプレイヤーの向きを変える
 		trans.angle.y = atan2(vec.x, vec.z);
 	}
 }
 void Player::Jump(void)
 {
-	auto& key = Key::GetIns();
-
+	// ジャンプ可能回数分だけループ
 	for (int i = 0; i < JUMP_NUM; i++) {
+		// フラグがすでに立っていたら次のループへ(多段ジャンプの為の処理)
 		if (isJump[i]) { continue; }
 
 		// ダウントリガーでジャンプ開始
-		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
-			isJump[i] = true; 
-			AnimePlay((int)ANIME_TYPE::JUMP, false);
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
 
+			// その段数のジャンプフラグを立てる
+			isJump[i] = true; 
+
+			// ジャンプキーの入力カウンターを増やす
 			jumpKeyCounter[i]++;
 
+			// ジャンプ力を分配加算する
 			accelSum.y = (std::max)(accelSum.y, (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME));
 
+			// ジャンプアニメーションを再生する
+			AnimePlay((int)ANIME_TYPE::JUMP, false);
+
+			// ジャンプSE再生
 			Snd::GetIns().Play("PlayerJump");
 		}
 
@@ -529,14 +608,16 @@ void Player::Jump(void)
 		break;
 	}
 
+	// ジャンプフラグを後ろから探索していって、ジャンプフラグが立っている段数のジャンプ入力処理を行う(多段ジャンプの為の処理)
 	for (int i = JUMP_NUM - 1; i >= 0; i--) {
+		// ジャンプフラグが立っていなかったら次のループへ
 		if (!isJump[i]) { continue; }
 
 		//ジャンプキーを離したら、ジャンプキー入力判定を終了
-		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).up) { jumpKeyCounter[i] = INPUT_JUMPKEY_FRAME; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_JUMP).up) { jumpKeyCounter[i] = INPUT_JUMPKEY_FRAME; }
 
 		//入力時間に応じてジャンプ量を変更する
-		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).now && jumpKeyCounter[i] < INPUT_JUMPKEY_FRAME) {
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_JUMP).now && jumpKeyCounter[i] < INPUT_JUMPKEY_FRAME) {
 			//ジャンプキーの入力カウンターを増やす
 			jumpKeyCounter[i]++;
 
@@ -544,124 +625,100 @@ void Player::Jump(void)
 			accelSum.y += (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
 		}
 
+		// 一番後ろのジャンプフラグが立っている段数の処理を行ったらループから抜ける(多段ジャンプの為の処理)
 		break;
 	}
 
 	// モーション更新
-	if (isJump[0] && IsAnimeEnd() && accelSum.y <= 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
+	if (isJump && IsAnimeEnd() && accelSum.y <= 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
 }
 
-void Player::AttackMove(void)
+void Player::AttackRotate(void)
 {
-	auto& key = Key::GetIns();
+	// 移動方向ベクトル
+	Vector3 vec = GetInputVec();
 
-	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
-
-	if (vec == 0.0f) {
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
-	}
-
+	// 入力があった場合、ベクトルをワールド座標に変換してプレイヤーの向きを変える
 	if (vec != 0.0f) {
-		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
+
+		// カメラの角度だけ回転させる為の行列を作成
+		MATRIX mat = MGetRotY(Camera::GetIns().GetAngle().y);
+
+		// 入力情報から割り出した移動方向ベクトルをカメラの角度に合わせて行列回転
 		vec = VTransform(vec, mat);
+
+		// 移動方向ベクトルを角度に変換
 		trans.angle.y = atan2(vec.x, vec.z);
 	}
 }
 
 void Player::CarryRun(void)
 {
-	auto& key = Key::GetIns();
+	// 移動方向ベクトル
+	Vector3 vec = GetInputVec();
 
-	Vector3 vec = { key.GetLeftStickVec().x,0.0f,-key.GetLeftStickVec().y };
-
+	// 入力がなかったときの処理
 	if (vec == 0.0f) {
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
-		if (key.GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
-	}
-
-
-	if (vec == 0.0f) {
-		if (!isJump[0]) { AnimePlay((int)ANIME_TYPE::CARRY_IDLE); }
+		if (isGround) { AnimePlay((int)ANIME_TYPE::CARRY_IDLE); }
 		Snd::GetIns().Stop("PlayerRun");
 	}
+	// 入力があったときの処理
 	else {
-		MATRIX mat = MGetIdent();
-		mat = MMult(mat, MGetRotY(Camera::GetIns().GetAngle().y));
+		// カメラの角度に合わせて回転させる行列を作成
+		MATRIX mat = MGetRotY(Camera::GetIns().GetAngle().y);
+
+		// 入力情報から割り出した移動方向ベクトルをカメラの角度に合わせて行列回転させる
 		vec.TransMatOwn(mat);
-		vec.Normalize();
 
-		trans.pos += vec * 5.0f;
+		// 移動方向ベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
+		trans.pos += vec.Normalized() * CARRY_MOVE_SPEED;
 
-		if (!isJump[0]) {
+		// 地面に接地していたら走るアニメーションにする(空中にいるときはそのままのアニメーションでいる為)
+		if (isGround) {
+			// 走るアニメーションを再生する
 			AnimePlay((int)ANIME_TYPE::CARRY_RUN);
+
+			// 走るSE再生
 			Snd::GetIns().Play("PlayerRun");
 		}
+		// 地面に接地していなかったら走るSE停止
 		else { Snd::GetIns().Stop("PlayerRun"); }
 
+		// 移動方向ベクトルを角度に変換してプレイヤーの向きを変える
 		trans.angle.y = atan2(vec.x, vec.z);
 	}
-}
-void Player::CarryJump(void)
-{
-	auto& key = Key::GetIns();
-
-	for (int i = 0; i < JUMP_NUM; i++) {
-		if (isJump[i]) { continue; }
-
-		// ダウントリガーでジャンプ開始
-		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).down) {
-			isJump[i] = true;
-			AnimePlay((int)ANIME_TYPE::JUMP, false);
-		}
-
-		// ジャンプしていなかったらループから抜ける
-		if (!isJump[i]) { break; }
-
-		//ジャンプキーを離したら、ジャンプキー入力判定を終了
-		if (key.GetInfo(KEY_TYPE::PLAYER_JUMP).up) { jumpKeyCounter[i] = INPUT_JUMPKEY_FRAME; }
-
-		//入力時間に応じてジャンプ量を変更する
-		if (isJump[i] && key.GetInfo(KEY_TYPE::PLAYER_JUMP).now && jumpKeyCounter[i] < INPUT_JUMPKEY_FRAME) {
-			//ジャンプキーの入力カウンターを増やす
-			jumpKeyCounter[i]++;
-
-			//ジャンプ力を分配加算する
-			accelSum.y = (MAX_JUMP_POWER / (float)INPUT_JUMPKEY_FRAME);
-
-			// その回のジャンプ処理をしたのでそれ以降のループに入らないようにする
-			break;
-		}
-	}
-
-	// モーション更新
-	if (isJump[0] && IsAnimeEnd() && accelSum.y < 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
 }
 
 void Player::HpSharpen(int damage)
 {
+	// HPが0以下のときはダメージ処理を行わない(安全処理)
 	if (hp <= 0) { return; }
 
+	// パンチの判定が切る(当たり判定が残り続けるバグが発生しないように安全処理)
 	punch->Off();
+	// 掴み処理管理クラスのリセット処理(掴み成功のフラグもリセットされる)
 	gouge->Reset();
+	// もし何か掴んでいたら離す
 	throwing->Drop();
 
+	// HPを減らす HPがダメージ以上の時はダメージ分減らし、そうでない時はHPを0にする(HPが0を下回らないように)
 	hp -= (hp >= damage) ? damage : hp;
 
+	// 各種SE停止(走るSEや回避SEが残り続けるバグが発生しないように安全処理)
 	Snd::GetIns().Stop("PlayerRun");
 	Snd::GetIns().Stop("PlayerEvasion");
 	Snd::GetIns().Stop("PlayerPunch");
 
+	// ダメージSE再生
 	Snd::GetIns().Play("PlayerDamage");
 
+	// ダメージ状態に遷移
 	state = (int)STATE::DAMAGE;
+	// ダメージアニメーションを再生
 	AnimePlay((int)ANIME_TYPE::DAMAGE, false);
-	SetInviCounter(60);
+
+	// 無敵時間を設定
+	SetInviCounter(DAMAGE_INVINCIBLE_FRAME);
 }
 
 
@@ -805,4 +862,23 @@ void Player::LowerRelease(void)
 		operationUi = nullptr;
 	}
 #pragma endregion
+}
+
+Vector3 Player::GetInputVec(void) const
+{
+	// 移動方向ベクトル
+	Vector3 vec = {};
+
+	// 左スティックの入力をXZ平面のベクトルに変換する
+	vec = Key::GetIns().GetLeftStickVec().ToVector3XZ();
+
+	// 左スティックの入力がない場合、個別登録キーの入力をベクトルに変換する
+	if (vec == 0.0f) {
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_MOVE_FRONT).now) { vec.z++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_MOVE_BACK).now) { vec.z--; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_MOVE_RIGHT).now) { vec.x++; }
+		if (Key::GetIns().GetInfo(KEY_TYPE::PLAYER_MOVE_LEFT).now) { vec.x--; }
+	}
+
+	return vec;
 }

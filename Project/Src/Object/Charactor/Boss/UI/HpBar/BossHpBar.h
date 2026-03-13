@@ -1,111 +1,68 @@
 #pragma once
-#include"../../../../../Common/Vector2.h"
+
+#include"BossHpBlock.h"
 
 class BossHpBar
 {
 public:
-	BossHpBar(const Vector2& position, float HP_BAR_ONE_DIVISION_SIZE);
-	~BossHpBar() {}
+	BossHpBar(const unsigned short& HP, const unsigned short HP_MAX, const unsigned char& LIFE, unsigned char number);
+	~BossHpBar() = default;
 
-	void Init(const Vector2& localAlivePosition, unsigned short num, unsigned short HP_BAR_DIVISIONS_NUM);
-
-	void SetDefaultColor(unsigned char r, unsigned char g, unsigned char b) { ALIVE_DEFAULT_R = r; ALIVE_DEFAULT_G = g; ALIVE_DEFAULT_B = b; }
-	void SetDefaultColor(unsigned int color) {
-		ALIVE_DEFAULT_R = (color >> 16) & 0xFF;
-		ALIVE_DEFAULT_G = (color >> 8) & 0xFF;
-		ALIVE_DEFAULT_B = color & 0xFF;
-	}
-
+	void Load(void);
+	void Init(const Vector2& position, unsigned int color);
 	void Update(void);
 	void Draw(void);
+	void Release(void);
 
-	// 状態
-	enum class STATE
-	{
-		NON,
-		ALIVE,
-		LOST_IDLE,
-		LOST_DROP,
-
-		MAX
-	};
-
-	// 状態取得
-	STATE GetState(void) { return state; }
-
-	unsigned short GetIdleTimer(void) { return idleTimer; }
-
-	// 状態設定
-	void SetLostIdle(void);
-	void SetLostDrop(void);
-
-	// 復活
-	void Revival(unsigned short num);
 private:
+#pragma region 定数定義（private）
+	// 自分が何番目かを示す番号
+	const unsigned char NUMBER;
 
-	// 大きさ
-	const float HP_BAR_ONE_DIVISION_SIZE;
+	// HPバーの分割数
+	static constexpr unsigned char HP_BAR_DIVISION_NUM_X = 63;
+	static constexpr unsigned char HP_BAR_DIVISION_NUM_Y = 6;
+	static constexpr unsigned short HP_BAR_DIVISIONS_NUM = HP_BAR_DIVISION_NUM_X * HP_BAR_DIVISION_NUM_Y;
 
-	// 座標
-	const Vector2& position;
-	Vector2 ALIVE_LOCAL_POSITION;
-	Vector2 localPosition;
-	Vector2 DrawPosition(void) { return position + localPosition; }
+	// HPバーの1分割あたりの大きさ（縦、横 同一）
+	const float HP_BAR_ONE_DIVISION_SIZE = 10.0f;
 
-	// 描画頂点オフセット
-	const Vector2 TOP_LEFT_OFFSET = Vector2(-HP_BAR_ONE_DIVISION_SIZE * 0.5f, -HP_BAR_ONE_DIVISION_SIZE * 0.5f);
-	const Vector2 TOP_RIGHT_OFFSET = Vector2(HP_BAR_ONE_DIVISION_SIZE * 0.5f, -HP_BAR_ONE_DIVISION_SIZE * 0.5f);
-	const Vector2 BOTTOM_LEFT_OFFSET = Vector2(-HP_BAR_ONE_DIVISION_SIZE * 0.5f, HP_BAR_ONE_DIVISION_SIZE * 0.5f);
-	const Vector2 BOTTOM_RIGHT_OFFSET = Vector2(HP_BAR_ONE_DIVISION_SIZE * 0.5f, HP_BAR_ONE_DIVISION_SIZE * 0.5f);
+	// HPバーフレームの描画位置から最初のHPバーの描画位置までのローカル座標
+	const Vector2 HP_BAR_FIRST_POS = Vector2(HP_BAR_ONE_DIVISION_SIZE * (HP_BAR_DIVISION_NUM_X + 0.5f), HP_BAR_ONE_DIVISION_SIZE * (HP_BAR_DIVISION_NUM_Y + 0.5f));
 
-	// 描画頂点座標取得
-	struct BoxVertexs {
-		Vector2 topLeft;
-		Vector2 topRight;
-		Vector2 bottomLeft;
-		Vector2 bottomRight;
-	} DrawPositionVertexs(void) {
-		Vector2 drawPos = DrawPosition();
-		return{
-			drawPos + TOP_LEFT_OFFSET.TransMat(angle),
-			drawPos + TOP_RIGHT_OFFSET.TransMat(angle),
-			drawPos + BOTTOM_LEFT_OFFSET.TransMat(angle),
-			drawPos + BOTTOM_RIGHT_OFFSET.TransMat(angle)
-		};
-	}
+	// 現在のHPバーの１ブロックの描画位置から次のHPバーの１ブロックの描画位置までのローカル座標（縦軸移動の場合）
+	const Vector2 HP_BAR_NEXT_POS_USUALLY = Vector2(HP_BAR_ONE_DIVISION_SIZE, -HP_BAR_ONE_DIVISION_SIZE);
+	// 現在のHPバーの１ブロックの描画位置から次のHPバーの１ブロックの描画位置までのローカル座標（横軸移動の場合）
+	const Vector2 HP_BAR_NEXT_POS_UNIQUE = Vector2(-(HP_BAR_ONE_DIVISION_SIZE * HP_BAR_DIVISION_NUM_Y), HP_BAR_ONE_DIVISION_SIZE * (HP_BAR_DIVISION_NUM_Y - 1));
 
-	// 生存時の色
-	unsigned char ALIVE_DEFAULT_R, ALIVE_DEFAULT_G, ALIVE_DEFAULT_B;
 
-	// 全体の分割数
-	unsigned short HP_BAR_DIVISION_NUM;
+	// HPバーブロックが１つ落ちてから、次のHPバーブロックが落ちるまでのフレーム数
+	const unsigned char HP_BAR_DROP_INTERVAL = 1;
+#pragma endregion
 
-	// 落下させるときの重力加速度
-	const float DROP_GRAVITY = 0.4f;
+	// HPバーオブジェクト
+	BossHpBlock* hpBar[HP_BAR_DIVISIONS_NUM];
 
-	// 落下させるときの加速度ベクトル
-	Vector2 dropAccel;
+	// 始点座標（左上）
+	Vector2 position;
 
-	// 待機時間
-	unsigned short idleTimer;
+	// ボスの現在のHPの参照
+	const unsigned short& HP;
+	// ボスの１フレーム前のHP
+	unsigned short prevHP;
 
-	// 待機時間中振動の符号
-	signed char idleShakeSign;
+	// ボスの最大HP
+	const unsigned short HP_MAX;
 
-	// 角度
-	float angle;
+	// ボスの現在のライフの参照
+	const unsigned char& LIFE;
 
-	// 状態
-	STATE state;
+	// 生存している（表示する）HPバーブロックの数
+	unsigned short aliveHpBarNum;
 
-	// 状態別更新処理
-	void Non(void) {}
-	void Alive(void);
-	void LostIdle(void);
-	void LostDrop(void);
+	// 死んでいるけどまだ表示しているもの（まだ落としてない、STATE::LOST_IDLE状態）も含めた合計のHPバーブロックの数
+	unsigned short totalHpBarNum;
 
-	// 状態関数ポインタ型定義
-	using STATEFUNC = void (BossHpBar::*)(void);
-	// 状態関数ポインタ配列
-	STATEFUNC stateFuncPtr[(int)STATE::MAX];
+	// HPバーブロックが１つ落ちてから、次のHPバーブロックが落ちるまでの間隔時間用カウンター
+	unsigned char hpBarDropIntervalCounter;
 };

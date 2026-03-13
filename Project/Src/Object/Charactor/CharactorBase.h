@@ -89,7 +89,7 @@ protected:
 	// 無敵カウンターのゲット関数
 	unsigned char GetInviCounter(void)const { return inviCounter; }
 	// 無敵カウンターのセット関数
-	void SetInviCounter(unsigned char counter) { inviCounter = (counter < 0) ? 0 : (counter > 255) ? 255 : counter; }
+	void SetInviCounter(unsigned char counter = 1) { inviCounter = (counter < 0) ? 0 : (counter > 255) ? 255 : counter; }
 
 	// 無敵演出フラグのセット関数（true = 「する」、false = 「しない」）← デフォルトは「する」
 	void SetInviEffectFlg(bool flg = true) {

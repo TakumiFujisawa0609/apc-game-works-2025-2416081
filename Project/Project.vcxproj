@@ -141,8 +141,9 @@
     <ClCompile Include="Src\Manager\Input\InputTextManager.cpp" />
     <ClCompile Include="Src\Manager\Score\Ranking.cpp" />
     <ClCompile Include="Src\Manager\Score\Score.cpp" />
-    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.cpp" />
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBlock.cpp" />
+    <ClCompile Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.cpp" />
@@ -202,8 +203,9 @@
     <ClInclude Include="Src\Manager\Input\InputTextManager.h" />
     <ClInclude Include="Src\Manager\Score\Ranking.h" />
     <ClInclude Include="Src\Manager\Score\Score.h" />
-    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBarManager.h" />
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBlock.h" />
+    <ClInclude Include="Src\Object\Charactor\Boss\UI\HpBar\BossHpBar.h" />
     <ClInclude Include="Src\Object\Charactor\Boss\UI\Preview\BossPreview.h" />
     <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBar.h" />
     <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBarManager.h" />

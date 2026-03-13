@@ -58,6 +58,22 @@ public:
 
 	// Œ»Ý‚ÌHP‚ÌŽc‚èŠ„‡‚ð•Ô‚·
 	float HpRatio(void)const { return ((float)hp / (float)HP_MAX); }
+
+	// UŒ‚‚ÌŽí—Þ
+	enum class ATTACK_DAMAGE_TYPE
+	{
+		PUNCH,
+		THROWING_ROCK,
+
+		MAX
+	};
+
+	// UŒ‚‚²‚Æ‚Ìƒ_ƒ[ƒW—Êƒe[ƒuƒ‹
+	static constexpr unsigned char ATTACK_DAMAGE_TABLE[(int)ATTACK_DAMAGE_TYPE::MAX] = {
+		5,	//PUNCH
+		30,	//THROWING_ROCK
+	};
+
 private:
 
 #pragma region ’è”’è‹`
@@ -73,15 +89,101 @@ private:
 	// ƒ‚ƒfƒ‹‚ÌŠp“x‚ÌƒYƒŒ
 	const Vector3 LOCAL_ROT = Vector3(0.0f, Deg2Rad(180.0f), 0.0f);
 
-	const float RADIUS = SIZE.z / 2;
+	// “–‚½‚è”»’èî•ñ````````````````````````````````
 
+	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ì”¼Œa
+	const float RADIUS = SIZE.z / 2;
+	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹Žn“_
 	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3::Yonly(SIZE.y / 2 - RADIUS);
+	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹I“_
 	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3::Yonly(RADIUS);
 
+	// ü•ªƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹Žn“_
 	const Vector3 LINE_COLLIDER_START_POS = Vector3();
+	// ü•ªƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹I“_
 	const Vector3 LINE_COLLIDER_END_POS = Vector3::Yonly(-SIZE.y * 0.5f);
 
+	// ```````````````````````````````````````
+
+	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
+	const unsigned char HP_MAX = 100;
+
+	// ˆÚ“®ˆ—```````````````````````````
+
+	//ƒvƒŒƒCƒ„[‚Ì‘–‚é‘¬“x
+	const float RUN_SPEED = 10.0f;
+
+	//Å‘åƒWƒƒƒ“ƒv—Í
+	const float MAX_JUMP_POWER = 18.0f;
+
+	//ƒWƒƒƒ“ƒvƒL[‚ðŽó‚¯•t‚¯‚éƒtƒŒ[ƒ€”
+	const int INPUT_JUMPKEY_FRAME = 12;
+
+	//ƒWƒƒƒ“ƒv‰Â”\‰ñ”
+	static constexpr int JUMP_NUM = 2;
+
+	// ```````````````````````````````
+
+	// ƒpƒ“ƒ`ˆ—``````````````````````````
+
+	// UŒ‚’†‚ÌˆÚ“®‘¬“x
+	const float ATTACK_MOVE_SPEED = 13.0f;
+
+	// UŒ‚‚Ì’i”
+	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, MAX, };
+	// ŽŸ‚Ì’i‚É‚Â‚È‚ª‚éŽžŠÔ(ƒtƒŒ[ƒ€”)
+	const int INPUT_ATTACK_FRAME = 20;
+
+	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì”­¶ŠJŽnŽžŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
+	const float PUNCH_COLLIDER_START_RATE = 0.5f;
+	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì”­¶I—¹ŽžŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
+	const float PUNCH_COLLIDER_END_RATE = 0.6f;
+
+
+	// ```````````````````````````````
+
+	// ‰ñ”ðˆ—```````````````````````````
+
+	// ƒvƒŒƒCƒ„[‚Ì‰ñ”ðˆÚ“®‚Ì‘¬“x
+	const float EVASION_SPEED = 15.0f;
+
+	// ‰ñ”ð‚Ì–³“G”»’è‚ð”­¶‚³‚¹‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡i0.0f`1.0fj
+	const float EVASION_INVINCIBLE_ANIME_RATE = 0.7f;
+
+	// ```````````````````````````````
+
+	// ’Í‚Ýˆ—```````````````````````````
+
+	// ’Í‚Ý¬Œ÷‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‚Ç‚±‚Å‚¦‚®‚èŽæ‚è‚Ì“–‚½‚è”»’è‚ð”­¶‚³‚¹‚é‚©(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
+	const float GOUGE_COLLIDER_START_RATE = 0.33f;
+
+	// ```````````````````````````````
+
+	// ƒIƒuƒWƒFƒNƒg‚ð’Í‚ñ‚Å‚¢‚é‚Æ‚«‚Ìˆ—``````````````
+
+	// ƒIƒuƒWƒFƒNƒg‚ð’Í‚ñ‚Å‚¢‚é‚Æ‚«‚ÌˆÚ“®‘¬“x
+	const float CARRY_MOVE_SPEED = 5.0f;
+
+	// ```````````````````````````````
+
+	// “Š±ˆ—```````````````````````````
+
+	// “Š±ƒIƒuƒWƒFƒNƒg‚ð•ú‚ÂuŠÔ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡
+	const float THROWING_RELEASE_ANIME_RATE = 0.25f;
+
+	// ```````````````````````````````
+
+	// ƒ_ƒ[ƒWˆ—`````````````````````````
+
+	// ƒ_ƒ[ƒW‚ðŽó‚¯‚½‚Æ‚«‚Ì–³“GŽžŠÔiƒtƒŒ[ƒ€”j
+	const int DAMAGE_INVINCIBLE_FRAME = 60;
+	
+	// ```````````````````````````````
+
 #pragma endregion
+
+	// ƒqƒbƒgƒ|ƒCƒ“ƒg
+	unsigned char hp;
 
 	void CharactorInit(void)override;
 	void CharactorUpdate(void)override;
@@ -90,7 +192,6 @@ private:
 	void CharactorRelease(void)override;
 
 #pragma region ó‘ÔŠÇ—
-
 	/// <summary>
 	/// ó‘Ô‚²‚Æ‚É‘JˆÚ‰Â”\‚ÌSTATE‚ðU‚è•ª‚¯‚Ä“ü—Í‘€ì‚É‰ž‚¶‚Ä‚»‚ÌSTATE‚É‘JˆÚ‚³‚¹‚é
 	/// </summary>
@@ -116,77 +217,58 @@ private:
 	void Death(void);
 	void End(void) {};
 	//`````````
-
 #pragma endregion
 
-	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
-	static constexpr unsigned char HP_MAX = 100;
-	// ƒqƒbƒgƒ|ƒCƒ“ƒg
-	unsigned char hp;
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
-	// ˆÚ“®ˆ—ŠÖŒW--------------------------
+	//‰¡ˆÚ“®ŠÖ”
+	void Run(void);
+	//ƒWƒƒƒ“ƒvŠÖ”
+	void Jump(void);
 
-	// ’è”
-	static constexpr float RUN_SPEED = 10.0f;			//ƒvƒŒƒCƒ„[‚Ì‘–‚é‘¬“x
-	static constexpr float MAX_JUMP_POWER = 18.0f;		//Å‘åƒWƒƒƒ“ƒv—Í
-	static constexpr int INPUT_JUMPKEY_FRAME = 12;		//ƒWƒƒƒ“ƒvƒL[‚ðŽó‚¯•t‚¯‚éƒtƒŒ[ƒ€”
-	static constexpr int JUMP_NUM = 1;					//ƒWƒƒƒ“ƒv‰Â”\‰ñ”
-
-	// ŠÖ”
-	void Run(void);			//‰¡ˆÚ“®ŠÖ”
-	void Jump(void);		//ƒWƒƒƒ“ƒvŠÖ”
-
-	// •Ï”
-	bool isJump[JUMP_NUM];	//ƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚é‚©‚Ì•Ï”
+	//ƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚é‚©‚Ìƒtƒ‰ƒO
+	bool isJump[JUMP_NUM];
+	//ƒWƒƒƒ“ƒvƒL[‚ðŽó‚¯•t‚¯‚éƒtƒŒ[ƒ€”‚ÌƒJƒEƒ“ƒ^[
 	int jumpKeyCounter[JUMP_NUM];
-	//---------------------------------------
-
-	// ƒpƒ“ƒ`````````````
 	
-	// ’è”
-	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, MAX, };		//UŒ‚‚Ì’i”
-	static constexpr int INPUT_ATTACK_FRAME = 20;					//ŽŸ‚Ì’i‚É‚Â‚È‚ª‚éŽžŠÔ(ƒtƒŒ[ƒ€”)
 
-	// ŠÖ”
-	void AttackMove(void);
+	// ƒpƒ“ƒ`’†‚Ì‰ñ“]
+	void AttackRotate(void);
 
-	// ƒCƒ“ƒXƒ^ƒ“ƒX
+	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚ÌŠÇ—‚ðs‚¤ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
 	PlayerPunch* punch;
 
-	// UŒ‚‚Ì’i”
+	// Œ»Ý‚ÌUŒ‚‚Ì’i”
 	ATTACK_STAGE attackStage;
-	bool isAttack[(int)ATTACK_STAGE::MAX];
-	int attackStageCounter;
-	// ```````````````
 
-	// ‚¦‚®‚èŽæ‚é``````````
-	
-	// ƒCƒ“ƒXƒ^ƒ“ƒX
+	// ’i”‚²‚Æ‚ÌUŒ‚’†‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO‚Æ’i”‚ÌƒJƒEƒ“ƒ^[
+	bool isAttack[(int)ATTACK_STAGE::MAX];
+
+	// ’i”‚²‚Æ‚ÌŽŸ‚Ì’i‚É‚Â‚È‚ª‚éŽžŠÔ‚ÌƒJƒEƒ“ƒ^[
+	int attackStageCounter;
+
+
+	// ‚¦‚®‚èŽæ‚è‚ðs‚¤ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
 	PlayerGouge* gouge;
-	
-	// •Ï”
 	
 	// Gouge(‚¦‚®‚èŽæ‚è)‚ðŽÀs‚µ‚½‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
 	bool isGouge;
 
-	//````````````````
 
-	// “Š‚°``````````````
-	
-	// ƒCƒ“ƒXƒ^ƒ“ƒX
+	// “Š±ƒIƒuƒWƒFƒNƒg‚ðŠÇ—‚·‚éƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
 	Throwing* throwing;
 
-	// ŠÖ”
-	void CarryRun(void);		//‰¡ˆÚ“®ŠÖ”
-	void CarryJump(void);		//ƒWƒƒƒ“ƒvŠÖ”
+	// ƒIƒuƒWƒFƒNƒg‚ð•ø‚¦‚Ä‚¢‚é‚Æ‚«‚ÌˆÚ“®ˆ—
+	void CarryRun(void);
 
-	//````````````````
 
 	// ƒmƒbƒNƒoƒbƒNŽž‚ÌˆÚ“®ƒxƒNƒgƒ‹
 	Vector3 knockBackVec;
 
 #pragma endregion
+
+	// HP‚ðŒ¸‚ç‚·
+	void HpSharpen(int damage);
 
 #pragma region UI
 	// ƒvƒŒƒCƒ„[ƒvƒŒƒrƒ…[``````
@@ -214,8 +296,8 @@ private:
 	// `````````````````
 #pragma endregion
 
-#pragma region ƒ‚[ƒVƒ‡ƒ“
-	// ƒ‚[ƒVƒ‡ƒ“‚Ì‘S‚Ä
+#pragma region ƒAƒjƒ[ƒVƒ‡ƒ“
+	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‘S‚Ä
 	enum class ANIME_TYPE {
 
 		IDLE,
@@ -236,7 +318,7 @@ private:
 
 		MAX,
 	};
-	// ƒ‚[ƒVƒ‡ƒ“‚ÌÄ¶ƒXƒs[ƒh”z—ñ
+	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶ƒXƒs[ƒhƒe[ƒuƒ‹
 	const float INFBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] =
 	{
 		0.5f,	//IDLE
@@ -256,7 +338,6 @@ private:
 		1.0f,	//DEATH
 	};
 
-	void HpSharpen(int damage);
 #pragma endregion
 
 #pragma region ƒvƒŒƒCƒ„[‚ª•ø‚¦‚é‰ºˆÊƒNƒ‰ƒX‚ÌƒƒCƒ“ˆ—‚ð‚Ü‚Æ‚ß‚ÄŒÄ‚Ño‚·
@@ -267,6 +348,10 @@ private:
 	void LowerAlphaDraw(void);
 	void LowerRelease(void);
 #pragma endregion
+
+
+	// “ü—ÍƒxƒNƒgƒ‹‚ðXZ•½–Ê‚ÅŽæ“¾i¶ƒXƒeƒBƒbƒN->ŒÂ•Ê“o˜^ƒL[j‚Ì—Dæ‡ˆÊ
+	Vector3 GetInputVec(void)const;
 
 	// ƒXƒe[ƒW•œŠˆŽž‚ÉŒÄ‚Ño‚·ŠÖ”ƒ|ƒCƒ“ƒ^
 	std::function<void(void)>stageRevival;

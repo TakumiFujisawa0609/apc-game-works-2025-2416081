@@ -3,6 +3,7 @@
 #include"../../../Manager/Input/KeyManager.h"
 #include"../../../Manager/Sound/SoundManager.h"
 #include"../../../Manager/Score/Score.h"
+#include"../../../Manager/Font/FontManager.h"
 
 #include"../../../Application/Application.h"
 #include"../../../Scene/Game/GameScene.h"
@@ -11,22 +12,24 @@
 
 Boss::Boss(const Vector3& playerPos):
 
-	rockWall_(nullptr),
-	stone_(nullptr),
-	fall_(nullptr),
+	fall(nullptr),
+	stone(nullptr),
+	psycho(nullptr),
+	rockWall(nullptr),
 
-	attackInterval_(0),
-	attackInit_(false),
-	attackStart_(false),
-	attackEnd_(false),
-	spAttackMeasu_(0),
+	attackState(),
+	attackInterval(0),
+	attackInit(false),
+	attackStart(false),
+	attackEnd(false),
 
-	stanTimer_(0),
+	stanTimer(0),
 
-	masterLife_(0),
+	life(LIFE_MAX),
+	hp(HP_MAX),
 
 	preview(nullptr),
-	hpBar_(nullptr),
+	hpBar(nullptr),
 
 	playerPos(playerPos)
 {
@@ -76,19 +79,25 @@ void Boss::Load(void)
 
 void Boss::CharactorInit(void)
 {
+	// 待機状態に設定
 	state = (int)STATE::IDLE;
 
-	trans.pos = Vector3(1000.0f, 300.0f, 1000.0f);
+	// 座標を初期化
+	trans.pos = INIT_POS;
 
+	// 当たり判定 / 描画 のフラグを初期化しておく(安全)
 	SetJudge(true);
 	SetIsDraw(true);
 
-	masterLife_ = MASTER_LIFE;
-	hp_ = HP_MAX;
+	// ライフとHPを初期化
+	life = LIFE_MAX;
+	hp = HP_MAX;
 
-	attackInterval_ = ATTACK_INTERVAL[0];
+	// 攻撃のインターバルを初期化
+	attackInterval = *ATTACK_INTERVAL;
 
-	stanTimer_ = 0;
+	// スタン状態のカウンター変数を初期化
+	stanTimer = 0;
 
 	// Bossクラスが抱える子クラスの初期化処理
 	LowerInit();
@@ -96,6 +105,7 @@ void Boss::CharactorInit(void)
 
 void Boss::CharactorUpdate(void)
 {
+	// Bossクラスが抱える子クラスの更新処理
 	LowerUpdate();
 }
 
@@ -117,13 +127,19 @@ void Boss::CharactorAlphaDraw(void)
 
 void Boss::UiDraw(void)
 {
+	// プレビュー表示
 	preview->Draw(DX_SCREEN_BACK);
-	for (unsigned char i = 0; i < masterLife_; i++) { hpBar_[i]->Draw(); }
 
-	if (state == (int)STATE::STAN && stanTimer_ / 15 % 2 == 0) {
-		SetFontSize(45);
-		DrawString((int)HP_BAR_POS.x + 60, 25, "チャンスだ！ぶん殴れ！！", 0xff0000);
-		SetFontSize(16);
+	// HPバーの表示
+	hpBar->Draw();
+
+	// スタン状態の時、HPバーの上にスタン中であることを知らせるテキストを点滅させて表示する
+	if (HpBarStanTextFlg()) {
+		DrawStringToHandle(
+			HP_BAR_STAN_TEXT_POS.x, HP_BAR_STAN_TEXT_POS.y,
+			HP_BAR_STAN_TEXT, HP_BAR_STAN_TEXT_COLOR,
+			Font::GetIns().GetFont(FontKinds::DEFAULT_45)
+		);
 	}
 }
 
@@ -135,74 +151,128 @@ void Boss::CharactorRelease(void)
 
 void Boss::OnCollision(const ColliderBase& collider)
 {
+	// 無敵時間中はダメージを受けない
 	if (GetInviCounter() > 0) { return; }
 
+	// スタン状態のときは処理を変更
 	if (state == (int)STATE::STAN) {
+
+		// パンチを受けたときの処理
 		if (collider.GetTag() == TAG::PLAYER_PUNCH) {
+
+			// 効果音を鳴らす
 			Snd::GetIns().Play("ObjBreak");
+
+			// ライフを減らす
 			LifeSharpen();
-			Score::GetIns().ScoreAddCombo(10000);
+
+			// 無敵時間を設定
+			SetInviCounter(LIFE_LOST_INVINCIBLE_TIME);
+
+			// スコアを加算
+			Score::GetIns().ScoreAddCombo(LIFE_LOST_SCORE);
 		}
+
 		return;
 	}
 
+	// 投擲攻撃(岩)を受けたときの処理
 	if (collider.GetTag() == TAG::PLAYER_THROWING) {
+		// 画面を揺らす
 		GameScene::Shake();
+		// 効果音を鳴らす
 		Snd::GetIns().Play("ObjBreak");
-		HpSharpen(30);
-		Score::GetIns().ScoreAddCombo(3000);
+
+		// HPを減らす
+		HpSharpen(Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::THROWING_ROCK]);
+
+		// 無敵時間を設定
+		SetInviCounter(THROWING_DAMAGE_INVINCIBLE_TIME);
+
+		// スコアを加算
+		Score::GetIns().ScoreAddCombo(
+			Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::THROWING_ROCK] * HP_SHARPEN_SCORE_RATE
+		);
+
 		return;
 	}
 
+	// パンチを受けたときの処理
 	if (collider.GetTag() == TAG::PLAYER_PUNCH) {
+		// 画面を揺らす
 		GameScene::Shake();
+		// 効果音を鳴らす
 		Snd::GetIns().Play("ObjBreak");
-		HpSharpen(5);
-		Score::GetIns().ScoreAddCombo(1000);
-		SetInviCounter(20);
+
+		// HPを減らす
+		HpSharpen(Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::PUNCH]);
+
+		// 無敵時間を設定
+		SetInviCounter(PUNCH_DAMAGE_INVINCIBLE_TIME);
+
+		// スコアを加算
+		Score::GetIns().ScoreAddCombo(
+			Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::PUNCH] * HP_SHARPEN_SCORE_RATE
+		);
+
 		return;
 	}
 }
 
 void Boss::Idle(void)
 {
+	// 待機状態のアニメーションを再生する
 	AnimePlay((int)ANIME_TYPE::IDLE);
 
+	// プレイヤーの方を向く
 	Vector3 vec = playerPos - trans.pos;
 	trans.angle.y = atan2f(vec.x, vec.z);
 
-	if (--attackInterval_ <= 0) {
-		attackInterval_ = 0;
-		attackInit_ = true;
+	// 攻撃のインターバルが0以下のときは攻撃状態へ遷移させる 攻撃のインターバルが0より大きいときは攻撃のインターバルを減らす
+	if (--attackInterval <= 0) {
+		// 攻撃のインターバルカウンターを0にする(安全処理)
+		attackInterval = 0;
+
+		// 攻撃開始のフラグを立てる
+		attackInit = true;
+
+		// 攻撃状態へ遷移させる
 		state = (int)STATE::ATTACK;
 	}
 }
 void Boss::Attack(void)
 {
 #pragma region 攻撃状態へ遷移後 １回目の処理
-	if (attackInit_) {
-		attackInit_ = false;
-		attackStart_ = true;
-		attackEnd_ = false;
+	if (attackInit) {
+		// 攻撃開始のフラグを初期化して2回目以降初期化処理を行わないようにする
+		attackInit = false;
 
-		attackState_ = AttackLottery();
-		if (attackState_ != ATTACK_KINDS::NON) { attackInterval_ = ATTACK_INTERVAL[(int)attackState_]; }
+		// 攻撃 開始/終了 のフラグを初期化
+		attackStart = true;
+		attackEnd = false;
 
-		switch (attackState_)
+		// 攻撃の抽選
+		attackState = AttackLottery();
+
+		// 攻撃の種類に合わせて攻撃のインターバルを設定する（何かしらのバグで攻撃の種類の抽選が上手くいかなかった場合は何もしない）
+		if (attackState != ATTACK_KINDS::NON) { attackInterval = ATTACK_INTERVAL[(int)attackState]; }
+
+		// 攻撃の種類に合わせて攻撃開始の処理を行う
+		switch (attackState)
 		{
 		case Boss::ATTACK_KINDS::NON:
-			attackEnd_ = true;
+			attackEnd = true;
 			break;
 		case Boss::ATTACK_KINDS::FALL:
 			AnimePlay((int)ANIME_TYPE::SLAP, false);
-			fall_->Set();
+			fall->Set();
 			break;
 		case Boss::ATTACK_KINDS::STONE:
 			AnimePlay((int)ANIME_TYPE::PUNCH, false);
 			break;
 		case Boss::ATTACK_KINDS::PSYCHO:
 			AnimePlay((int)ANIME_TYPE::SLAP, false);
-			psycho_->Set();
+			psycho->Set();
 			break;
 		case Boss::ATTACK_KINDS::WALL:
 			AnimePlay((int)ANIME_TYPE::SLAP, false);
@@ -211,37 +281,37 @@ void Boss::Attack(void)
 	}
 #pragma endregion
 #pragma region 攻撃開始の処理
-	if (attackStart_) {
-		switch (attackState_)
+	if (attackStart) {
+		switch (attackState)
 		{
 		case Boss::ATTACK_KINDS::NON:
-			attackStart_ = false;
+			attackStart = false;
 			break;
 		case Boss::ATTACK_KINDS::FALL:
 			if (IsAnimeEnd()) {
-				attackStart_ = false;
-				fall_->On();
+				attackStart = false;
+				fall->On();
 			}
 			else { return; }
 			break;
 		case Boss::ATTACK_KINDS::STONE:
 			if (IsAnimeEnd()) {
-				attackStart_ = false;
-				stone_->On();
+				attackStart = false;
+				stone->On();
 			}
 			else { return; }
 			break;
 		case Boss::ATTACK_KINDS::PSYCHO:
 			if (IsAnimeEnd()) {
-				attackStart_ = false;
-				psycho_->On();
+				attackStart = false;
+				psycho->On();
 			}
 			else { return; }
 			break;
 		case Boss::ATTACK_KINDS::WALL:
 			if (IsAnimeEnd()) {
-				attackStart_ = false;
-				rockWall_->On();
+				attackStart = false;
+				rockWall->On();
 			}
 			else { return; }
 			break;
@@ -249,177 +319,190 @@ void Boss::Attack(void)
 	}
 #pragma endregion
 #pragma region 攻撃状態中のみ行う更新処理 また攻撃終了判断
-	switch (attackState_)
+
+	// 各攻撃の攻撃中と攻撃終了の判断を行う
+	switch (attackState)
 	{
 	case Boss::ATTACK_KINDS::NON:
-		attackEnd_ = true;
+		attackEnd = true;
 		break;
 	case Boss::ATTACK_KINDS::FALL:
+		if (IsAnimeEnd()) { attackEnd = true; }
 		break;
 	case Boss::ATTACK_KINDS::STONE:
+		if (IsAnimeEnd()) { attackEnd = true; }
 		break;
 	case Boss::ATTACK_KINDS::PSYCHO:
+		if (IsAnimeEnd()) { attackEnd = true; }
 		break;
 	case Boss::ATTACK_KINDS::WALL:
+		if (IsAnimeEnd()) { attackEnd = true; }
 		break;
 	}
-	if (IsAnimeEnd()) { attackEnd_ = true; }
 #pragma endregion
 #pragma region 攻撃終了 通常状態へ遷移
-	if (attackEnd_) {
-		if (attackState_ != ATTACK_KINDS::NON) { attackInterval_ = ATTACK_INTERVAL[(int)attackState_]; }
+	if (attackEnd) {
+		// すでに設定してあるはずだが攻撃の種類に合わせてインターバルを設定する(安全処理)
+		if (attackState != ATTACK_KINDS::NON) { attackInterval = ATTACK_INTERVAL[(int)attackState]; }
+
+		// 通常状態に遷移させる
 		state = (int)STATE::IDLE;
+		// 通常状態のアニメーションを再生する
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 #pragma endregion
 }
 void Boss::Damage(void)
 {
-	if (IsAnimeEnd()) {
-		state = (int)STATE::IDLE;
-	}
+	// アニメーションが終わったら通常状態へ遷移
+	if (IsAnimeEnd()) { state = (int)STATE::IDLE; }
 }
 void Boss::Stan(void)
 {
-	if (--stanTimer_ <= 0) {
-		hp_ = (int)(HP_MAX * 0.2f);
+	// スタン状態の時間が終わったらHPを規定量回復して通常状態へ遷移
+	if (--stanTimer <= 0) {
+		// HPを規定量回復
+		hp = (int)(HP_MAX * STAN_RECOVERY_RATE);
+
+		// 通常状態へ遷移させる
 		state = (int)STATE::IDLE;
 	}
 }
 void Boss::BigDamage(void)
 {
-	if (GetAnimeRatio() > 0.4f) {
-		hp_ = HP_MAX;
+	// アニメーションが終わったらHPを戻して通常状態へ遷移
+	if (GetAnimeRatio() > BIG_DAMAGE_TIME) {
+		// HPを最大値に戻す
+		hp = HP_MAX;
+
+		// 通常状態へ遷移させる
 		state = (int)STATE::IDLE;
+		// 通常状態のアニメーションを再生する
 		AnimePlay((int)ANIME_TYPE::IDLE);
 	}
 }
 void Boss::Death(void)
 {
+	// アニメーションが終わったら当たり判定消して終了状態へ遷移
 	if (IsAnimeEnd()) {
+		// 当たり判定を消す
 		SetJudge(false);
+
+		// 終了状態へ遷移させる
 		state = (int)STATE::END;
 	}
 }
 
 Boss::ATTACK_KINDS Boss::AttackLottery(void)
 {
-	//return ATTACK_KINDS::FALL;
-	//return ATTACK_KINDS::STONE;
-	//return ATTACK_KINDS::PSYCHO;
-	//return ATTACK_KINDS::WALL;
-
+	// 最終結果を格納する変数を宣言、初期化
 	ATTACK_KINDS ret = ATTACK_KINDS::NON;
 
-	int rand = GetRand(10000);
+	// 乱数を生成
+	unsigned short rand = GetRand(ATTACK_LOTTERY_WORK_VALUE);
 
-	if (rand <= 3000) {
-		ret = ATTACK_KINDS::FALL;
-	}
-	else if (rand <= 6000) {
-		ret = ATTACK_KINDS::STONE;
-	}
-	else {
-		ret = ATTACK_KINDS::PSYCHO;
+	// 乱数と比べる為の数値を宣言、初期化
+	unsigned short value = 0;
+
+	// 攻撃の種類の数だけループ
+	for (unsigned char i = 0; i < (unsigned char)ATTACK_KINDS::MAX; i++) {
+
+		// 乱数と比べる為の数値に現在の攻撃の種類の確率を加算
+		value += (unsigned short)((float)ATTACK_LOTTERY_WORK_VALUE * ATTACK_LOTTERY_RATE[i]);
+
+		// 乱数が比べる為の数値以下ならば最終結果を現在の攻撃の種類にしてループを抜ける
+		if (rand <= value) { ret = (ATTACK_KINDS)i; break; }
 	}
 
-	if (++spAttackMeasu_ > SP_ATTACK_MEASU) { spAttackMeasu_ = 0; ret = ATTACK_KINDS::WALL; }
-
+	// 最終結果を返す
 	return ret;
 }
 
 void Boss::AnimeLoad(void)
 {
 	AddInFbxAnimation((int)ANIME_TYPE::MAX, IN_FBX_ANIME_SPEED);
-
-	const std::string ANIME_PATH = "Data/Model/Boss/Animation/";
-	//anime_->Add((int)ANIME_TYPE::FALL, 90.0f, (ANIME_PATH + "CarryIdle.mv1").c_str());
 }
 
 
 void Boss::LowerLoad(void)
 {
-	fall_ = new FallManager(playerPos);
-	fall_->Load();
+	fall = new FallManager(playerPos);
+	fall->Load();
 
-	stone_ = new StoneShooter(trans.pos, trans.angle);
-	stone_->Load();
+	stone = new StoneShooter(trans.pos, trans.angle);
+	stone->Load();
 
-	psycho_ = new PsychoRockShooter(trans.pos, playerPos);
-	psycho_->Load();
+	psycho = new PsychoRockShooter(trans.pos, playerPos);
+	psycho->Load();
 
-	rockWall_ = new RockWallShooter(trans.pos, trans.angle);
-	rockWall_->Load();
+	rockWall = new RockWallShooter(trans.pos, trans.angle);
+	rockWall->Load();
 
 	// プレビュー
-	preview = new BossPreview(trans.pos, [this](void) {trans.Draw(); });
+	preview = new BossPreview(trans.pos, [this](void) { trans.Draw(); });
 	preview->Load();
 
 	// HPバー
-	for (unsigned char i = 0; i < MASTER_LIFE; i++) {
-		hpBar_[i] = new BossHpBarManager(hp_, HP_MAX, masterLife_, i);
-		hpBar_[i]->Load();
-	}
+	hpBar = new BossHpBarManager(hp, HP_MAX, life);
+	hpBar->Load();
 }
 void Boss::LowerInit(void)
 {
-	fall_->Init();
-	stone_->Init();
-	psycho_->Init();
-	rockWall_->Init();
+	fall->Init();
+	stone->Init();
+	psycho->Init();
+	rockWall->Init();
 	
 	preview->Init(PREVIEW_POS);
 
-	for (unsigned char i = 0; i < MASTER_LIFE; i++) {
-		hpBar_[i]->Init(HP_BAR_POS, HP_BAR_COLOR[i]);
-	}
+	hpBar->Init(HP_BAR_POS, HP_BAR_COLOR);
 }
 void Boss::LowerUpdate(void)
 {
-	fall_->Update();
-	stone_->Update();
-	psycho_->Update();
-	rockWall_->Update();
+	fall->Update();
+	stone->Update();
+	psycho->Update();
+	rockWall->Update();
 
 	preview->Update();
 	
-	for (BossHpBarManager*& h : hpBar_) { h->Update(); }
+	hpBar->Update();
 }
 void Boss::LowerDraw(void)
 {
-	fall_->Draw();
-	rockWall_->Draw();
-	stone_->Draw();
-	psycho_->Draw();
+	fall->Draw();
+	rockWall->Draw();
+	stone->Draw();
+	psycho->Draw();
 }
 void Boss::LowerAlphaDraw(void)
 {
-	fall_->AlphaDraw();
-	rockWall_->AlphaDraw();
-	stone_->AlphaDraw();
-	psycho_->AlphaDraw();
+	fall->AlphaDraw();
+	rockWall->AlphaDraw();
+	stone->AlphaDraw();
+	psycho->AlphaDraw();
 }
 void Boss::LowerRelease(void)
 {
-	if (rockWall_) {
-		rockWall_->Release();
-		delete rockWall_;
-		rockWall_ = nullptr;
+	if (rockWall) {
+		rockWall->Release();
+		delete rockWall;
+		rockWall = nullptr;
 	}
-	if (stone_) {
-		stone_->Release();
-		delete stone_;
-		stone_ = nullptr;
+	if (stone) {
+		stone->Release();
+		delete stone;
+		stone = nullptr;
 	}
-	if (fall_) {
-		fall_->Release();
-		delete fall_;
-		fall_ = nullptr;
+	if (fall) {
+		fall->Release();
+		delete fall;
+		fall = nullptr;
 	}
-	if (psycho_) {
-		psycho_->Release();
-		delete psycho_;
-		psycho_ = nullptr;
+	if (psycho) {
+		psycho->Release();
+		delete psycho;
+		psycho = nullptr;
 	}
 
 	if (preview) {
@@ -428,64 +511,86 @@ void Boss::LowerRelease(void)
 		preview = nullptr;
 	}
 
-	for (BossHpBarManager*& h : hpBar_) {
-		if (!h) { continue; }
-		h->Release();
-		delete h;
+	if (hpBar) {
+		hpBar->Release();
+		delete hpBar;
+		hpBar = nullptr;
 	}
 }
 
 void Boss::HpSharpen(int damage)
 {
-	if (hp_ <= 0) { return; }
+	// HPが0以下の時はダメージを与えない
+	if (hp <= 0) { return; }
 
-	hp_ -= (hp_ >= damage) ? damage : hp_;
+	// HPを減らす HPがダメージ以上の時はダメージ分減らし、そうでない時はHPを0にする(HPが0を下回らないように)
+	hp -= (hp >= damage) ? damage : hp;
 
-	if (hp_ <= 0) {
-		hp_ = 0;
+	// HPが0になったらスタン状態へ遷移させる
+	if (hp <= 0) {
+		// HPを0にする(安全処理)
+		hp = 0;
 
-		SetInviCounter(60);
+		// スタン状態の時間を設定
+		stanTimer = STAN_TIME;
 
-		stanTimer_ = STAN_TIME;
-
+		// スタン状態へ遷移させる
 		state = (int)STATE::STAN;
+
+		// スタン状態のアニメーションを再生する
 		AnimePlay((int)ANIME_TYPE::STAN);
+
 		return;
 	}
 
+	// HPが0になっていない場合はダメージ状態へ遷移させる ただし、攻撃状態の時はダメージ状態へ遷移させない(攻撃状態のアニメーションを途中で止めない為)
 	if (state != (int)STATE::ATTACK) {
-		stanTimer_ = STAN_TIME;
 
+		// ダメージ状態へ遷移させる
 		state = (int)STATE::DAMAGE;
+
+		// ダメージ状態のアニメーションを再生する
 		AnimePlay((int)ANIME_TYPE::DAMAGE, false);
 	}
-	SetInviCounter(60);
 }
 void Boss::LifeSharpen(void)
 {
-	if (masterLife_ <= 0) { return; }
+	// ライフが0以下の時はダメージを与えない
+	if (life <= 0) { return; }
 
-	if (--masterLife_ <= 0) {
-		masterLife_ = 0;
+	// ライフを減らしつつライフがなくなったか判定を行う
+	if (--life <= 0) {
+		// マイナスにならないようにライフを0にする(安全処理)
+		life = 0;
+
+		// ヒットストップ
+		GameScene::HitStop(DEATH_HIT_STOP_TIME);
+		// スロー
+		GameScene::Slow(DEATH_SLOW_TIME);
+		// 画面を大きく揺らす
+		GameScene::Shake(ShakeKinds::WID, ShakeSize::BIG, DEATH_SCREEN_SHAKE_TIME);
+
+		// 死亡状態へ遷移させる
 		state = (int)STATE::DEATH;
+		// 死亡状態のアニメーションを再生する
 		AnimePlay((int)ANIME_TYPE::DEATH, false);
-
-		GameScene::HitStop(40);
-		GameScene::Slow(20);
-		GameScene::Shake(ShakeKinds::WID, ShakeSize::BIG, 100);
 		return;
 	}
 
-	hp_ = HP_MAX;
+	// HPを最大値に戻す
+	hp = HP_MAX;
 
-	SetInviCounter(60);
-
-	GameScene::Slow(20);
+	// スロー
+	GameScene::Slow(BIG_DAMAGE_SLOW_TIME);
+	// 画面を揺らす
 	GameScene::Shake();
 
+	// プレイヤーの方を向く
 	Vector3 vec = playerPos - trans.pos;
 	trans.angle.y = atan2f(vec.x, vec.z);
 
+	// 大ダメージ状態へ遷移させる
 	state = (int)STATE::BIG_DAMAGE;
+	// 大ダメージ状態のアニメーションを再生する
 	AnimePlay((int)ANIME_TYPE::DEATH, false);
 }

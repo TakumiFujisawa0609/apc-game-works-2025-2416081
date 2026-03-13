@@ -17,7 +17,7 @@ class Boss : public CharactorBase
 public:
 
 	Boss(const Vector3& playerPos);
-	~Boss()override {}
+	~Boss()override = default;
 
 	// “Ç‚İ‚İˆ—
 	void Load(void)override;
@@ -34,14 +34,14 @@ public:
 	// ó‘Ô’è‹`
 	enum class STATE
 	{
-		NON,
-		IDLE,
-		ATTACK,
-		DAMAGE,
-		STAN,
-		BIG_DAMAGE,
-		DEATH,
-		END,
+		NON,		// ó‘Ô‚È‚µ
+		IDLE,		// ‘Ò‹@
+		ATTACK,		// UŒ‚
+		DAMAGE,		// ƒ_ƒ[ƒW
+		STAN,		// ƒXƒ^ƒ“
+		BIG_DAMAGE,	// ‘åƒ_ƒ[ƒW
+		DEATH,		// €–S
+		END,		// I—¹
 
 		MAX
 	};
@@ -51,16 +51,30 @@ public:
 		std::vector<ColliderBase*>ret = {};
 
 		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : fall_->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : psycho_->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : stone_->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : rockWall_->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : fall->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : psycho->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : stone->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : rockWall->GetCollider()) { ret.emplace_back(collider); }
 
 		return ret;
 	}
 
-	// Å‘åHP
-	static constexpr int HP_MAX = 200;
+	// UŒ‚‚Ìí—Ş
+	enum class ATTACK_DAMAGE_TYPE
+	{
+		FALL,
+		STONE,
+		PSYCHO,
+
+		MAX
+	};
+
+	// UŒ‚‚²‚Æ‚Ìƒ_ƒ[ƒW—Êƒe[ƒuƒ‹
+	static constexpr unsigned char ATTACK_DAMAGE_TABLE[(int)ATTACK_DAMAGE_TYPE::MAX] = {
+		10,		// FALL
+		10,		// STONE
+		10,		// PSYCHO
+	};
 
 private:
 
@@ -91,33 +105,94 @@ private:
 
 	// `````````````````````````````````````````````````````````````````````
 
-	// ‘¬“x
-	const float SPEED = 10.0f;
-
 	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
-	const unsigned short MAX_HP = 200;
+	const unsigned short HP_MAX = 200;
 
-	// Å‘åƒ}ƒXƒ^[ƒ‰ƒCƒt”
-	static constexpr unsigned char MASTER_LIFE = 2;
-#pragma endregion
+	// Å‘åƒ‰ƒCƒt”
+	static constexpr unsigned char LIFE_MAX = 2;
 
-	// ƒqƒbƒgƒ|ƒCƒ“ƒg
-	unsigned short hp_;
+	// ƒ{ƒX‚Ì‰ŠúÀ•W(“®‚©‚È‚¢‚Ì‚Å‚±‚±‚ÅŒÅ’è)
+	const Vector3 INIT_POS = Vector3(1000.0f, 300.0f, 1000.0f);
 
-	// ƒ}ƒXƒ^[ƒ‰ƒCƒt”
-	unsigned char masterLife_;
+	// Še–³“GŠÔ``````````````````
 
-	// ƒvƒŒƒrƒ…[
-	BossPreview* preview;
+	// ƒ‰ƒCƒt‚ğ¸‚Á‚½‚Æ‚«‚Ì–³“GŠÔ
+	const char LIFE_LOST_INVINCIBLE_TIME = 80;
+	// “Š±UŒ‚‚ğó‚¯‚½‚Æ‚«‚Ì–³“GŠÔ
+	const char THROWING_DAMAGE_INVINCIBLE_TIME = 60;
+	// ƒpƒ“ƒ`UŒ‚‚ğó‚¯‚½‚Æ‚«‚Ì–³“GŠÔ
+	const char PUNCH_DAMAGE_INVINCIBLE_TIME = 20;
+
+	// ```````````````````````
+
+	// UŒ‚ó‘Ô`````````````````````````
+
+	enum class ATTACK_KINDS
+	{
+		NON = -1,
+
+		FALL,
+		STONE,
+		PSYCHO,
+		WALL,
+
+		MAX,
+	};
+
+	// ŠeUŒ‚‚Ì’Š‘IŠm—§
+	const float ATTACK_LOTTERY_RATE[(int)ATTACK_KINDS::MAX] =
+	{
+		0.3f,	//FALL
+		0.3f,	//STONE
+		0.3f,	//PSYCHO
+		0.1f,	//WALL
+	};
+
+	// ŠeUŒ‚‚ÌI—¹Œã‚Ì‘Ò‹@ŠÔ
+	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
+	{
+		150,	//FALL
+		150,	//STONE
+		200,	//PSYCHO
+		100,	//WALL
+	};
+
+	// UŒ‚‚Ì’Š‘I‚ğs‚¤‚½‚ß‚Ì—”¶¬‚ÌÅ‘å’l
+	const unsigned short ATTACK_LOTTERY_WORK_VALUE = 10000;
+
+	// `````````````````````````````
+
+
+	// ƒXƒ^ƒ“ó‘Ô````````````````````````
+
+	// ƒXƒ^ƒ“ó‘Ô‚ÌŒp‘±ŠÔ
+	const int STAN_TIME = 500;
+
+	// ƒXƒ^ƒ“ó‘Ô‚©‚ç“|‚³‚ê‚¸‚É•œ‹A‚µ‚½‚Æ‚«‚Ì‰ñ•œ‚·‚é‘Ì—Í‚ÌŠ„‡
+	const float STAN_RECOVERY_RATE = 0.2f;
+
+	// `````````````````````````````
+
+	// ‘åƒ_ƒ[ƒWó‘Ô‚ÌŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶Š„‡)
+	const float BIG_DAMAGE_TIME = 0.4f;
+
+	// ‘åƒ_ƒ[ƒWó‘Ô‚ÌƒXƒ[‚ÌŠÔiƒtƒŒ[ƒ€”j
+	const char BIG_DAMAGE_SLOW_TIME = 20;
+
+	// ƒ‰ƒCƒt‚ª0‚É‚È‚Á‚½‚ÌƒqƒbƒgƒXƒgƒbƒv‚ÌŠÔiƒtƒŒ[ƒ€”j
+	const char DEATH_HIT_STOP_TIME = 40;
+	// ƒ‰ƒCƒt‚ª0‚É‚È‚Á‚½‚ÌƒXƒ[‚ÌŠÔiƒtƒŒ[ƒ€”j
+	const char DEATH_SLOW_TIME = 20;
+	// ƒ‰ƒCƒt‚ª0‚É‚È‚Á‚½‚Ì‰æ–Ê—h‚ê‚ÌŠÔiƒtƒŒ[ƒ€”j
+	const char DEATH_SCREEN_SHAKE_TIME = 100;
 
 	// ƒvƒŒƒrƒ…[À•W
 	const Vector2 PREVIEW_POS = Vector2(App::SCREEN_SIZE_X - BossPreview::SIZE - 10, 10);
 
-	// HPƒo[ŠÇ—ƒNƒ‰ƒX
-	BossHpBarManager* hpBar_[MASTER_LIFE];
-
+	// HPƒo[`````````````````````````````````````````````
+	
 	// HPƒo[‚ÌF
-	const unsigned int HP_BAR_COLOR[MASTER_LIFE] =
+	const unsigned int HP_BAR_COLOR[LIFE_MAX] =
 	{
 		0xeeee00,//2‰ñ–Ú
 		0x0000ff,//1‰ñ–Ú
@@ -126,7 +201,58 @@ private:
 	// HPƒo[‚ÌÀ•W
 	const Vector2 HP_BAR_POS = Vector2(PREVIEW_POS.x - BossHpBarManager::HP_BAR_WHOLE_SIZE_X, 10.0f);
 
+	// `````````````````````````````````````````````````
+
+	// ƒXƒ^ƒ“ó‘Ô‚ÌHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg````````````````
+	
+	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚Ì“à—e
+	const char* HP_BAR_STAN_TEXT = "ƒ`ƒƒƒ“ƒX‚¾I‚Ô‚ñ‰£‚êII";
+
+	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚ÌÀ•W
+	const Vector2I HP_BAR_STAN_TEXT_POS = Vector2I(HP_BAR_POS.x + 60.0f, 25.0f);
+
+	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚ÌF
+	const unsigned int HP_BAR_STAN_TEXT_COLOR = 0xff0000;
+
+	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚Ì“_–Å‚ÌŠÔŠu
+	const char HP_BAR_STAN_TEXT_BLINK_INTERVAL = 15;
+	// ```````````````````````````````````
+
+	// ƒXƒRƒA````````````````````````
+
+	// HPŒ¸­‚É‚æ‚éƒXƒRƒA‰ÁZ‚Ì”{—¦iHP1‚É‚Â‚«‚ÌƒXƒRƒAj
+	const unsigned char HP_SHARPEN_SCORE_RATE = 100;
+
+	// ƒ‰ƒCƒtƒƒXƒg‚É‚æ‚éƒXƒRƒA‰ÁZ
+	const unsigned short LIFE_LOST_SCORE = 10000;
+
+	// ```````````````````````````
+
+#pragma endregion
+
+	// ƒqƒbƒgƒ|ƒCƒ“ƒg
+	unsigned short hp;
+
+	// ƒ}ƒXƒ^[ƒ‰ƒCƒt”
+	unsigned char life;
+
+	// ƒvƒŒƒrƒ…[
+	BossPreview* preview;
+
+	// HPƒo[ŠÇ—ƒNƒ‰ƒX
+	BossHpBarManager* hpBar;
+
+	// ¡ƒXƒ^ƒ“ó‘Ô‚ğ’m‚ç‚¹‚éƒeƒLƒXƒg‚ğ•\¦‚·‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·ŠÖ”i“_–Å‚à‰Á–¡‚µ‚½ÅIŒ‹‰Êj
+	bool HpBarStanTextFlg(void) {
+		return (
+			(state == (int)STATE::STAN) &&
+			(((stanTimer / HP_BAR_STAN_TEXT_BLINK_INTERVAL) % 2) == 0)
+			);
+	}
+
+	// HP‚ğŒ¸­‚³‚¹‚éŠÖ”
 	void HpSharpen(int damage);
+	// ƒ‰ƒCƒt‚ğŒ¸­‚³‚¹‚éŠÖ”
 	void LifeSharpen(void);
 
 	void CharactorInit(void)override;
@@ -150,65 +276,38 @@ private:
 
 	// UŒ‚ó‘Ô```````````````````
 
-	// ó‘Ô’è‹`
-	enum class ATTACK_KINDS
-	{
-		NON = -1,
-
-		FALL,
-		STONE,
-		PSYCHO,
-		WALL,
-
-		MAX,
-	};
-
 	// Œ»İ‚ÌUŒ‚ó‘Ô
-	ATTACK_KINDS attackState_;
+	ATTACK_KINDS attackState;
 
 	// UŒ‚‚Ìí—Ş‚Ì’Š‘I‚ğs‚¤ŠÖ”
 	ATTACK_KINDS AttackLottery(void);
 
 	//ŠeUŒ‚‚ÌƒCƒ“ƒXƒ^ƒ“ƒX----
-	FallManager* fall_;
-	StoneShooter* stone_;
-	PsychoRockShooter* psycho_;
-	RockWallShooter* rockWall_;
+	FallManager* fall;
+	StoneShooter* stone;
+	PsychoRockShooter* psycho;
+	RockWallShooter* rockWall;
 	//------------------------
 
 	// UŒ‚‚ÌŠÔŠu‚ğŠÇ—‚·‚éƒJƒEƒ“ƒ^[
-	unsigned short attackInterval_;
+	unsigned short attackInterval;
 
-	// ŠeUŒ‚‚ÌI—¹Œã‚Ì‘Ò‹@ŠÔ
-	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
-	{
-		150,//FALL
-		150,//STONE
-		200,//PSYCHO
-		100,//WALL
-	};
+	// UŒ‚‘JˆÚŒã1‰ñ–Ú‚ğŒ©•ª‚¯‚éƒtƒ‰ƒO
+	bool attackInit;
+	// UŒ‚ŠJn‚ÌuŠÔ‚ğŒ©•ª‚¯‚éƒtƒ‰ƒO
+	bool attackStart;
+	// UŒ‚I—¹‚ğŒ©•ª‚¯‚éƒtƒ‰ƒO
+	bool attackEnd;
 
-	// UŒ‚‘JˆÚŒã1‰ñ–Ú‚ğŒ©•ª‚¯‚é•Ï”
-	bool attackInit_;
-	// UŒ‚ŠJn‚ÌuŠÔ‚ğŒ©•ª‚¯‚é•Ï”
-	bool attackStart_;
-	// UŒ‚I—¹‚ğŒ©•ª‚¯‚é•Ï”
-	bool attackEnd_;
+	// ```````````````````````
 
-	const unsigned char SP_ATTACK_MEASU = 5;
-	unsigned char spAttackMeasu_;
-	// `````````````````````````
-
-	// UŒ‚ó‘Ô`````````````````````
-	const int STAN_TIME = 500;
-	int stanTimer_;
-	// `````````````````````````
-
+	// ƒXƒ^ƒ“ó‘Ô‚Ìc‚èŠÔ‚ğŠÇ—‚·‚éƒJƒEƒ“ƒ^[
+	int stanTimer;
 
 #pragma endregion
 
-#pragma region ƒ‚[ƒVƒ‡ƒ“
-	// ƒ‚[ƒVƒ‡ƒ“‚Ì‘S‚Ä
+#pragma region ƒAƒjƒ[ƒVƒ‡ƒ“
+	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‘S‚Ä
 	enum class ANIME_TYPE {
 		ATTACK,
 		DAMAGE,
@@ -222,12 +321,9 @@ private:
 		WALK,
 
 		MAX,
-
-		// ƒ‚ƒfƒ‹ŠO
-		FALL,
 	};
 
-	// ƒ‚ƒfƒ‹‚É•R‚Ã‚¢‚Ä‚¢‚éƒ‚[ƒVƒ‡ƒ“‚ÌƒXƒs[ƒh‚Ì’è‹`
+	// ƒ‚ƒfƒ‹‚É•R‚Ã‚¢‚Ä‚¢‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ÌƒXƒs[ƒh‚Ì’è‹`
 	const float IN_FBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] = {
 		1.0f, // ATTACK
 		1.0f, // DAMAGE
@@ -241,7 +337,7 @@ private:
 		1.0f, // WALK
 	};
 
-	// ƒ‚[ƒVƒ‡ƒ“‚Ì‰Šúİ’è
+	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‰Šúİ’è
 	void AnimeLoad(void);
 #pragma endregion
 
@@ -254,5 +350,6 @@ private:
 	void LowerRelease(void);
 #pragma endregion
 
+	// ƒvƒŒƒCƒ„[‚ÌÀ•W(QÆ—p)
 	const Vector3& playerPos;
 };
