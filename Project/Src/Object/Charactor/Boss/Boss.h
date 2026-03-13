@@ -233,7 +233,7 @@ private:
 	// ヒットポイント
 	unsigned short hp;
 
-	// マスターライフ数
+	// ライフ
 	unsigned char life;
 
 	// プレビュー
