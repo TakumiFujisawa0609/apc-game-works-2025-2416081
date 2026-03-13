@@ -49,7 +49,7 @@ void Player::Load(void)
 	SetGravityFlg(true);
 
 	SetPushFlg(true);
-	SetPushWeight(50);
+	SetPushWeight(PUSH_WEIGHT);
 
 #pragma region 関数ポインタ配列へ各関数を格納
 	CHARACTOR_SET_STATE(STATE::NON, &Player::Non);
@@ -82,10 +82,10 @@ void Player::CharactorInit(void)
 	SetIsDraw(true);
 	SetJudge(true);
 
-	trans.pos = Vector3(1000.0f, 1000.0f, 200.0f);
+	trans.pos = INIT_POS;
 	trans.centerDiff = CENTER_DIFF;
 
-	accelSum.x = 10.0f; accelSum.z = 10.0f;
+	accelSum = INIT_ACC;
 
 	trans.angle = {};
 	trans.localAngle = LOCAL_ROT;
@@ -113,13 +113,12 @@ void Player::CharactorUpdate(void)
 	// プレイヤーが抱える下位クラスの更新処理
 	LowerUpdate();
 
-	if (trans.pos.y < -500.0f) {
-		trans.pos = Vector3(1000.0f, 1000.0f, 200.0f);
-		accelSum.y = 0.0f;
-		accelSum.x = 10.0f; accelSum.z = 10.0f;
+	if (trans.pos.y < FALL_DAMAGE_HEIGHT) {
+		trans.pos = INIT_POS;
+		accelSum = INIT_ACC;
 
-		SetInviCounter(100);
-		HpSharpen(30);
+		SetInviCounter(DAMAGE_INVINCIBLE_FRAME);
+		HpSharpen(FALL_DAMAGE);
 		knockBackVec = {};
 		stageRevival();
 
@@ -174,13 +173,13 @@ void Player::OnCollision(const ColliderBase& collider)
 	// ノックバック処理 & 演出(画面揺れ & スロー)
 	auto knockBack = [&](Vector3 pos)->void {
 		GameScene::Shake(ShakeKinds::ROUND, ShakeSize::BIG);
-		GameScene::Slow(20);
+		GameScene::Slow(DAMAGE_SLOW_FRAME);
 
-		accelSum.y = 10.0f;
+		accelSum.y = DAMAGE_KNOCKBACK_POWER;
 
 		Vector3 vec = trans.pos - pos;
 		vec.y = 0.0f;
-		knockBackVec = vec.Normalized() * 10.0f;
+		knockBackVec = vec.Normalized() * DAMAGE_KNOCKBACK_POWER;
 
 		trans.angle.y = atan2f(-vec.x, -vec.z);
 		};

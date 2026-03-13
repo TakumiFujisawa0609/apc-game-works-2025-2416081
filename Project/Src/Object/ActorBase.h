@@ -96,7 +96,7 @@ protected:
 	Transform trans;
 
 	// 加速度
-	VECTOR accelSum;
+	Vector3 accelSum;
 
 	// 横軸加速度の１フレームごとの減衰量
 	float ATTENUATION = 3.0f;

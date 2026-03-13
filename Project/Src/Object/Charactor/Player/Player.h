@@ -103,10 +103,19 @@ private:
 	// ü•ªƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹I“_
 	const Vector3 LINE_COLLIDER_END_POS = Vector3::Yonly(-SIZE.y * 0.5f);
 
+	// ‰Ÿ‚µo‚µ‚Ìs‚¤Û‚Ìd‚³
+	const unsigned char PUSH_WEIGHT = 50;
+
 	// ```````````````````````````````````````
 
 	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
 	const unsigned char HP_MAX = 100;
+
+	// ‰ŠúÀ•W
+	const Vector3 INIT_POS = Vector3(1000.0f, 1000.0f, 200.0f);
+
+	// ‰Šú‰Á‘¬“x
+	const Vector3 INIT_ACC = Vector3(1);
 
 	// ˆÚ“®ˆ—```````````````````````````
 
@@ -173,12 +182,20 @@ private:
 
 	// ```````````````````````````````
 
-	// ƒ_ƒ[ƒWˆ—`````````````````````````
 
-	// ƒ_ƒ[ƒW‚ðŽó‚¯‚½‚Æ‚«‚Ì–³“GŽžŠÔiƒtƒŒ[ƒ€”j
+	// ƒ_ƒ[ƒW‚ðŽó‚¯‚½Žž‚Ì–³“GŽžŠÔiƒtƒŒ[ƒ€”j
 	const int DAMAGE_INVINCIBLE_FRAME = 60;
-	
-	// ```````````````````````````````
+
+	// ƒ_ƒ[ƒW‚ðŽó‚¯‚½Žž‚ÌƒmƒbƒNƒoƒbƒN‚Ì‹­‚³
+	const float DAMAGE_KNOCKBACK_POWER = 10.0f;
+
+	// ƒ_ƒ[ƒW‚ðŽó‚¯‚½Žž‚ÌƒXƒ[ŽžŠÔ‚Ì’·‚³iƒtƒŒ[ƒ€”j
+	const int DAMAGE_SLOW_FRAME = 20;
+
+	// —Ž‰ºƒ_ƒ[ƒW‚ðŽó‚¯‚é‚‚³
+	const float FALL_DAMAGE_HEIGHT = -500.0f;
+	// —Ž‰ºƒ_ƒ[ƒW‚Ì—Ê
+	const unsigned char FALL_DAMAGE = 30;
 
 #pragma endregion
 

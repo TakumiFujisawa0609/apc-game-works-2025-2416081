@@ -37,7 +37,7 @@ private:
 	const int& playerModel;
 	const Vector3& playerAngle;
 
-	const Vector3& PlayerRightHandPos(void)const { return Vector3(MV1GetFramePosition(playerModel, PLAYER_RIGHTHAND_FRAME_INDEX)); }
+	Vector3 PlayerRightHandPos(void)const { return Vector3(MV1GetFramePosition(playerModel, PLAYER_RIGHTHAND_FRAME_INDEX)); }
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
