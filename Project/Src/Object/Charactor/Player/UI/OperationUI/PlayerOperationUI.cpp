@@ -76,7 +76,7 @@ void PlayerOperationUI::Update(void)
 	case (int)Player::STATE::CARRY_OBJ: {
 		actionPossibleFlg[(int)SORT::MOVE] = true;
 		actionPossibleFlg[(int)SORT::JUMP] = false;
-		actionPossibleFlg[(int)SORT::EVASION] = false;
+		actionPossibleFlg[(int)SORT::EVASION] = true;
 		actionPossibleFlg[(int)SORT::ATTACK] = false;
 		actionPossibleFlg[(int)SORT::GOUGE] = true;
 		break;
