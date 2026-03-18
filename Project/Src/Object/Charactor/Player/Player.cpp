@@ -161,8 +161,8 @@ void Player::OnGrounded()
 {
 	ActorBase::OnGrounded();
 
-	for (auto& jump : isJump) { jump = false; }
-	for (auto& cou : jumpKeyCounter) { cou = 0; }
+	for (bool& jump : isJump) { jump = false; }
+	for (int& cou : jumpKeyCounter) { cou = 0; }
 }
 
 void Player::OnCollision(const ColliderBase& collider)
