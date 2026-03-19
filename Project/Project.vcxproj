@@ -173,6 +173,7 @@
     <ClCompile Include="Src\Object\Charactor\Player\Throwing\Throwing.cpp" />
     <ClCompile Include="Src\Object\Charactor\Player\Throwing\ThrowObjBase.cpp" />
     <ClCompile Include="Src\Object\Charactor\Boss\Attack\RockWall\RockWall.cpp" />
+    <ClCompile Include="Src\Object\Common\DataLoad\ParameterLoad.cpp" />
     <ClCompile Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffect.cpp" />
     <ClCompile Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffectManager.cpp" />
     <ClCompile Include="Src\Object\SkyDome\SkyDome.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="Src\Object\Common\Collider\ModelCollider.h" />
     <ClInclude Include="Src\Object\Common\Collider\SphereCollider.h" />
     <ClInclude Include="Src\Object\Common\Collider\VoxelCollider.h" />
+    <ClInclude Include="Src\Object\Common\DataLoad\ParameterLoad.h" />
     <ClInclude Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffect.h" />
     <ClInclude Include="Src\Object\Common\Effect\VoxelBreakEffect\VoxelBreakEffectManager.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
