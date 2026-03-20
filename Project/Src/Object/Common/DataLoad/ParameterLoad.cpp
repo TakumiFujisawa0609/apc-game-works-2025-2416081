@@ -6,12 +6,8 @@
 
 #include"../../../Utility/Utility.h"
 
-ParameterLoad::ParameterLoad() :
+ParameterLoad::ParameterLoad(std::string filePath) :
 	parameterMap()
-{
-}
-
-void ParameterLoad::LoadParameter(std::string filePath)
 {
 	// 指定のファイルを開く
 	std::ifstream ifs = std::ifstream(filePath.c_str());
@@ -40,6 +36,8 @@ void ParameterLoad::LoadParameter(std::string filePath)
 		parameterMap.insert(parameterPair);
 	}
 }
+
+const float ParameterLoad::GetParameter(std::string parameterName, int index) const { return parameterMap.at(parameterName).at(index); }
 
 const std::vector<float>& ParameterLoad::GetParameter(std::string parameterName) const { return parameterMap.at(parameterName); }
 

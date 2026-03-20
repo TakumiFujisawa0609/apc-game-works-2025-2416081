@@ -1,6 +1,7 @@
 #pragma once
 
 #include"Common/Collider/ColliderBase.h"
+#include"Common/DataLoad/ParameterLoad.h"
 
 class ActorBase
 {
@@ -90,6 +91,9 @@ private:
 
 	// アルファ判定（true = 「メインの描画にアルファをかける」、false = 「メインの描画を普通に描画する」）（メインの描画 = 基底クラスで自動で描画されるモデルなど）
 	bool isAlphaDraw;
+
+	// パラメーター外部ファイル管理クラス
+	ParameterLoad* parameter;
 
 protected:
 	// モデル制御情報構造体
@@ -196,6 +200,28 @@ protected:
 	void SetIsAlphaDraw(bool flg) { isAlphaDraw = flg; }
 	// アルファ判定の設定（引数省略で現在の逆にスイッチ）
 	void SetIsAlphaDraw(void) { isAlphaDraw = !isAlphaDraw; }
+
+	// パラメーター外部ファイル管理クラスの生成と初期化
+	void ParameterLoadInit(const std::string& filePath) {
+		// すでに生成されている場合は何もしない
+		if (parameter != nullptr) { return; }
+		
+		// 生成と読み込み
+		parameter = new ParameterLoad(filePath);
+	}
+
+	// パラメーター外部ファイル管理クラスから指定のパラメーターの配列の先頭だけを取得する（引数はパラメーターの名前）
+	float GetParameter(const std::string& parameterName, size_t index = 0)const {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		return parameter->GetParameter(parameterName, index);
+	}
+
+
+	// パラメーター外部ファイル管理クラスから指定のパラメーターを取得する（引数はパラメーターの名前）
+	std::vector<float> GetParameterArray(const std::string& parameterName)const {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		return parameter->GetParameter(parameterName);
+	}
 
 	// 派生先追加初期化
 	virtual void SubInit(void) {}

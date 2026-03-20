@@ -7,15 +7,16 @@
 class ParameterLoad
 {
 public:
-	// コンストラクタ
-	ParameterLoad();
+	// コンストラクタ / ファイルパスを引数にして、パラメーターを読み込む
+	ParameterLoad(std::string filePath);
 	// デストラクタ
 	~ParameterLoad() = default;
 
-	// パラメーターをファイルから読み込む関数
-	void LoadParameter(std::string filePath);
+	// パラメーターを取得する関数
+	const float GetParameter(std::string parameterName, int index) const;
 	// パラメーターを取得する関数
 	const std::vector<float>& GetParameter(std::string parameterName) const;
+
 	// パラメーターを解放する関数
 	void Release(void);
 

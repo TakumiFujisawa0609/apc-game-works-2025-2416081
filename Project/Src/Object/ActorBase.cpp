@@ -19,7 +19,9 @@ ActorBase::ActorBase() :
 	isGroundMaster(false),
 
 	isDraw(true),
-	isAlphaDraw(false)
+	isAlphaDraw(false),
+
+	parameter(nullptr)
 {
 }
 
@@ -81,6 +83,13 @@ void ActorBase::Release(void)
 {
 	// ”h¶æ’Ç‰Á‰ğ•ú
 	SubRelease();
+
+	// ƒpƒ‰ƒ[ƒ^‚Ì‰ğ•ú
+	if (parameter != nullptr) {
+		parameter->Release();
+		delete parameter;
+		parameter = nullptr;
+	}
 
 	// “–‚½‚è”»’èî•ñ‚ğ‰ğ•ú
 	for (ColliderBase*& c : collider) {
