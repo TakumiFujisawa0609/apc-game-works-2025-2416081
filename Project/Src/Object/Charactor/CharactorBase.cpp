@@ -15,6 +15,21 @@ CharactorBase::CharactorBase() :
 {
 }
 
+CharactorBase::CharactorBase(const std::string& parameterPath) :
+	ActorBase(parameterPath),
+
+	state(0),
+	stateFuncPtr(),
+
+	DEFAULT_COLOR(),
+
+	anime(nullptr),
+
+	inviCounter(0),
+	isInviEffect(false)
+{
+}
+
 void CharactorBase::SubInit(void)
 {
 	// ƒ‚ƒfƒ‹‚ÌƒJƒ‰[‚Ì‰Šú‰»

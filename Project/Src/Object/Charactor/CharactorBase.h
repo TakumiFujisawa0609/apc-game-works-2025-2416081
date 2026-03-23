@@ -7,7 +7,10 @@
 class CharactorBase : public ActorBase
 {
 public:
+	// デフォルトコンストラクタ
 	CharactorBase();
+	// パラメーターを外部から読み込む場合に使うコンストラクタ
+	CharactorBase(const std::string& parameterPath);
 	virtual ~CharactorBase()override = default;
 
 	virtual void Load(void) = 0;

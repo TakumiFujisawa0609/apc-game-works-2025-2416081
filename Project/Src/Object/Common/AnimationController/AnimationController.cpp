@@ -75,10 +75,10 @@ void AnimationController::Update(void)
 	playAnim.step += playAnim.speed;
 
 	if (loopflg) {
-		if (playAnim.step > playAnim.totalTime)playAnim.step = 0.0f;
+		if (playAnim.step >= playAnim.totalTime)playAnim.step = 0.0f;
 	}
 	else {
-		if (playAnim.step > playAnim.totalTime)playAnim.step = playAnim.totalTime;
+		if (playAnim.step >= playAnim.totalTime)playAnim.step = playAnim.totalTime;
 
 	}
 

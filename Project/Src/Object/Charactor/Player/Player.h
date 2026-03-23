@@ -1,4 +1,3 @@
-#pragma once
 
 #include <functional>
 
@@ -77,22 +76,23 @@ public:
 private:
 
 #pragma region ’è”’è‹`
+
 	// ƒ‚ƒfƒ‹ƒXƒP[ƒ‹
-	const float SCALE = 0.1f;
+	const float SCALE = GetParameter("ModelScale");
 
 	// ƒ‚ƒfƒ‹‚ÌƒTƒCƒY
-	const Vector3 SIZE = Vector3(1785, 1600, 700) * SCALE;
+	const Vector3 SIZE = GetParameterToVector3("ModelSize") * SCALE;
 
 	// ƒ‚ƒfƒ‹‚Ì’†S“_‚ÌƒYƒŒ
-	const Vector3 CENTER_DIFF = Vector3(0, -860, 0) * SCALE;
+	const Vector3 CENTER_DIFF = GetParameterToVector3("ModelCenterDiff") * SCALE;
 
 	// ƒ‚ƒfƒ‹‚ÌŠp“x‚ÌƒYƒŒ
-	const Vector3 LOCAL_ROT = Vector3(0.0f, Deg2Rad(180.0f), 0.0f);
+	const Vector3 LOCAL_ROT = GetParameterToVector3("ModelLocalRot") * (DX_PI_F / 180.0f);
 
 	// “–‚½‚è”»’èî•ñ````````````````````````````````
 
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ì”¼Œa
-	const float RADIUS = SIZE.z / 2;
+	const float RADIUS = SIZE.z * 0.5f;
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹n“_
 	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3::Yonly(SIZE.y / 2 - RADIUS);
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹I“_
@@ -104,98 +104,99 @@ private:
 	const Vector3 LINE_COLLIDER_END_POS = Vector3::Yonly(-SIZE.y * 0.5f);
 
 	// ‰Ÿ‚µo‚µ‚Ìs‚¤Û‚Ìd‚³
-	const unsigned char PUSH_WEIGHT = 50;
+	const unsigned char PUSH_WEIGHT = GetParameterToInt("PushWeight");
 
 	// ```````````````````````````````````````
 
 	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
-	const unsigned char HP_MAX = 100;
+	const unsigned char HP_MAX = GetParameterToInt("HpMax");
 
 	// ‰ŠúÀ•W
-	const Vector3 INIT_POS = Vector3(1000.0f, 1000.0f, 200.0f);
+	const Vector3 INIT_POS = GetParameterToVector3("InitPos");
 
 	// ‰Šú‰Á‘¬“x
-	const Vector3 INIT_ACC = Vector3(1);
+	const Vector3 INIT_ACC = GetParameter("InitAcc");
 
 	// ˆÚ“®ˆ—```````````````````````````
 
 	//ƒvƒŒƒCƒ„[‚Ì‘–‚é‘¬“x
-	const float RUN_SPEED = 10.0f;
+	const float RUN_SPEED = GetParameter("RunSpeed");
 
 	//Å‘åƒWƒƒƒ“ƒv—Í
-	const float MAX_JUMP_POWER = 18.0f;
+	const float MAX_JUMP_POWER = GetParameter("MaxJumpPower");
 
 	//ƒWƒƒƒ“ƒvƒL[‚ğó‚¯•t‚¯‚éƒtƒŒ[ƒ€”
-	const int INPUT_JUMPKEY_FRAME = 12;
+	const int INPUT_JUMPKEY_FRAME = GetParameterToInt("InputJumpKeyFrame");
 
 	//ƒWƒƒƒ“ƒv‰Â”\‰ñ”
-	static constexpr int JUMP_NUM = 2;
+	const int JUMP_NUM = GetParameterToInt("JumpNum");
 
 	// ```````````````````````````````
 
 	// ƒpƒ“ƒ`ˆ—``````````````````````````
 
 	// UŒ‚’†‚ÌˆÚ“®‘¬“x
-	const float ATTACK_MOVE_SPEED = 13.0f;
+	const float ATTACK_MOVE_SPEED = GetParameter("AttackMoveSpeed");
 
 	// UŒ‚‚Ì’i”
 	enum class ATTACK_STAGE { NON = -1, FIRST, SECOND, MAX, };
 	// Ÿ‚Ì’i‚É‚Â‚È‚ª‚éŠÔ(ƒtƒŒ[ƒ€”)
-	const int INPUT_ATTACK_FRAME = 20;
+	const int INPUT_ATTACK_FRAME = GetParameterToInt("InputAttackFrame");
 
 	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì”­¶ŠJnŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
-	const float PUNCH_COLLIDER_START_RATE = 0.5f;
+	const float PUNCH_COLLIDER_START_RATE = GetParameter("PunchColliderStartRate");
 	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì”­¶I—¹ŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
-	const float PUNCH_COLLIDER_END_RATE = 0.6f;
-
+	const float PUNCH_COLLIDER_END_RATE = GetParameter("PunchColliderEndRate");
 
 	// ```````````````````````````````
 
 	// ‰ñ”ğˆ—```````````````````````````
 
 	// ƒvƒŒƒCƒ„[‚Ì‰ñ”ğˆÚ“®‚Ì‘¬“x
-	const float EVASION_SPEED = 15.0f;
+	const float EVASION_SPEED = GetParameter("EvasionSpeed");
 
-	// ‰ñ”ğ‚Ì–³“G”»’è‚ğ”­¶‚³‚¹‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡i0.0f`1.0fj
-	const float EVASION_INVINCIBLE_ANIME_RATE = 0.7f;
+	// ‰ñ”ğ‚Ì–³“G”»’è‚Ì”­¶ŠJnŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
+	const float EVASION_INVINCIBLE_START_RATE = GetParameter("EvasionInvincibleStartRate");
+	// ‰ñ”ğ‚Ì–³“G”»’è‚Ì”­¶I—¹ŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
+	const float EVASION_INVINCIBLE_END_RATE = GetParameter("EvasionInvincibleEndRate");
 
 	// ```````````````````````````````
 
 	// ’Í‚İˆ—```````````````````````````
 
 	// ’Í‚İ¬Œ÷‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‚Ç‚±‚Å‚¦‚®‚èæ‚è‚Ì“–‚½‚è”»’è‚ğ”­¶‚³‚¹‚é‚©(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
-	const float GOUGE_COLLIDER_START_RATE = 0.33f;
+	const float GOUGE_COLLIDER_START_RATE = GetParameter("GougeColliderStartRate");
 
 	// ```````````````````````````````
 
 	// ƒIƒuƒWƒFƒNƒg‚ğ’Í‚ñ‚Å‚¢‚é‚Æ‚«‚Ìˆ—``````````````
 
 	// ƒIƒuƒWƒFƒNƒg‚ğ’Í‚ñ‚Å‚¢‚é‚Æ‚«‚ÌˆÚ“®‘¬“x
-	const float CARRY_MOVE_SPEED = 5.0f;
+	const float CARRY_MOVE_SPEED = GetParameter("CarryMoveSpeed");
 
 	// ```````````````````````````````
 
 	// “Š±ˆ—```````````````````````````
 
 	// “Š±ƒIƒuƒWƒFƒNƒg‚ğ•ú‚ÂuŠÔ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡
-	const float THROWING_RELEASE_ANIME_RATE = 0.25f;
+	const float THROWING_RELEASE_RATE = GetParameter("ThrowingReleaseRate");
 
 	// ```````````````````````````````
 
 
 	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚Ì–³“GŠÔiƒtƒŒ[ƒ€”j
-	const int DAMAGE_INVINCIBLE_FRAME = 60;
+	const int DAMAGE_INVINCIBLE_FRAME = GetParameterToInt("DamageInvincibleFrame");
 
 	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚ÌƒmƒbƒNƒoƒbƒN‚Ì‹­‚³
-	const float DAMAGE_KNOCKBACK_POWER = 10.0f;
+	const float DAMAGE_KNOCKBACK_POWER = GetParameter("DamageKnockBackPower");
 
 	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚ÌƒXƒ[ŠÔ‚Ì’·‚³iƒtƒŒ[ƒ€”j
-	const int DAMAGE_SLOW_FRAME = 20;
+	const int DAMAGE_SLOW_FRAME = GetParameterToInt("DamageSlowFrame");
 
 	// —‰ºƒ_ƒ[ƒW‚ğó‚¯‚é‚‚³
-	const float FALL_DAMAGE_HEIGHT = -500.0f;
+	const float FALL_DAMAGE_HEIGHT = GetParameter("FallDamageHeight");
 	// —‰ºƒ_ƒ[ƒW‚Ì—Ê
-	const unsigned char FALL_DAMAGE = 30;
+	const unsigned char FALL_DAMAGE = GetParameterToInt("FallDamage");
 
 #pragma endregion
 
@@ -244,9 +245,9 @@ private:
 	void Jump(void);
 
 	//ƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚é‚©‚Ìƒtƒ‰ƒO
-	bool isJump[JUMP_NUM];
+	std::vector<bool> isJump;
 	//ƒWƒƒƒ“ƒvƒL[‚ğó‚¯•t‚¯‚éƒtƒŒ[ƒ€”‚ÌƒJƒEƒ“ƒ^[
-	int jumpKeyCounter[JUMP_NUM];
+	std::vector<int> jumpKeyCounter;
 	
 
 	// ƒpƒ“ƒ`’†‚Ì‰ñ“]
@@ -293,7 +294,7 @@ private:
 	PlayerPreview* preview;
 
 	// À•W
-	const Vector2 PREVIEW_POS = Vector2(10, App::SCREEN_SIZE_Y - PlayerPreview::SIZE - 10);
+	const Vector2 PREVIEW_POS = Vector2(GetParameterToInt("PreviewPos", 0), App::SCREEN_SIZE_Y - PlayerPreview::SIZE - GetParameterToInt("PreviewPos", 1));
 	// ````````````````
 
 	// HPƒo[````````````
@@ -338,21 +339,21 @@ private:
 	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶ƒXƒs[ƒhƒe[ƒuƒ‹
 	const float INFBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] =
 	{
-		0.5f,	//IDLE
-		6.0f,	//RUN
-		5.0f,	//JUMP
-		1.5f,	//FALL
-		1.5f,	//EVASION
-		1.5f,	//PUNCH_FIRST
-		1.5f,	//PUNCH_SECOND
-		1.0f,	//GOUGE_IDLE
-		1.5f,	//CATCH
-		3.0f,	//GOUPE
-		1.0f,	//CARRY_IDLE
-		2.5f,	//CARRY_RUN
-		1.0f,	//THROW
-		1.0f,	//DAMAGE
-		1.0f,	//DEATH
+		GetParameter("IdleAnimeSpeed"),			//IDLE
+		GetParameter("RunAnimeSpeed"),			//RUN
+		GetParameter("JumpAnimeSpeed"),			//JUMP
+		GetParameter("FallAnimeSpeed"),			//FALL
+		GetParameter("EvasionAnimeSpeed"),		//EVASION
+		GetParameter("PunchFirstAnimeSpeed"),	//PUNCH_FIRST
+		GetParameter("PunchSecondAnimeSpeed"),	//PUNCH_SECOND
+		GetParameter("GougeIdleAnimeSpeed"),	//GOUGE_IDLE
+		GetParameter("CatchAnimeSpeed"),		//CATCH
+		GetParameter("GougeAnimeSpeed"),		//GOUGE
+		GetParameter("CarryIdleAnimeSpeed"),	//CARRY_IDLE
+		GetParameter("CarryRunAnimeSpeed"),		//CARRY_RUN
+		GetParameter("ThrowAnimeSpeed"),		//THROW
+		GetParameter("DamageAnimeSpeed"),		//DAMAGE
+		GetParameter("DeathAnimeSpeed"),		//DEATH
 	};
 
 #pragma endregion

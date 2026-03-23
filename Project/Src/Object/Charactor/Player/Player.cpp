@@ -14,12 +14,9 @@
 #include"../Boss/Boss.h"
 
 Player::Player() :
-	CharactorBase(),
+	CharactorBase("Data/Parameter/Player/PlayerParameter.csv"),
 
 	hp(0),
-
-	isJump(),
-	jumpKeyCounter(),
 
 	punch(nullptr),
 	attackStage(ATTACK_STAGE::NON),
@@ -37,6 +34,8 @@ Player::Player() :
 	hpBar(nullptr),
 	operationUi(nullptr)
 {
+	isJump.resize(JUMP_NUM, false);
+	jumpKeyCounter.resize(JUMP_NUM, 0);
 }
 
 void Player::Load(void)
@@ -92,8 +91,10 @@ void Player::CharactorInit(void)
 
 	state = (int)STATE::MOVE;
 
-	for (auto& jump : isJump) { jump = false; }
-	for (auto& cou : jumpKeyCounter) { cou = 0; }
+	for (int i = 0; i < JUMP_NUM; i++) {
+		isJump[i] = false;
+		jumpKeyCounter[i] = 0;
+	}
 
 	attackStage = ATTACK_STAGE::NON;
 	for (auto& at : isAttack) { at = false; }
@@ -122,8 +123,10 @@ void Player::CharactorUpdate(void)
 		knockBackVec = {};
 		stageRevival();
 
-		for (auto& jump : isJump) { jump = false; }
-		for (auto& cou : jumpKeyCounter) { cou = 0; }
+		for (int i = 0; i < JUMP_NUM; i++) {
+			isJump[i] = false;
+			jumpKeyCounter[i] = 0;
+		}
 	}
 }
 
@@ -161,8 +164,10 @@ void Player::OnGrounded()
 {
 	ActorBase::OnGrounded();
 
-	for (bool& jump : isJump) { jump = false; }
-	for (int& cou : jumpKeyCounter) { cou = 0; }
+	for (int i = 0; i < JUMP_NUM; i++) {
+		isJump[i] = false;
+		jumpKeyCounter[i] = 0;
+	}
 }
 
 void Player::OnCollision(const ColliderBase& collider)
@@ -466,7 +471,7 @@ void Player::CarryObj(void)
 void Player::ThrowingObj(void)
 {
 	// 投げるアニメーションの再生率が一定以上になったら抱えているオブジェクトを投げる処理を行う
-	if (GetAnimeRatio() > THROWING_RELEASE_ANIME_RATE) {
+	if (GetAnimeRatio() > THROWING_RELEASE_RATE) {
 		// 抱えているオブジェクトを投げる
 		throwing->Throw();
 
@@ -492,9 +497,10 @@ void Player::Evasion(void)
 	// 割り出したベクトルを単位ベクトルに直しスピードを乗算して座標情報に加算する
 	trans.pos += vec.Normalized() * EVASION_SPEED;
 
-	// 回避アニメーションのローリング中無敵にしておく
+	// 回避アニメーションの定数定義による指定時間内中無敵にしておく
 	// (無敵カウンターを使って当たり判定を無効にする。この状態を抜けたらすぐに無敵が解除されるように 1 を代入し続けておく)
-	if (GetAnimeRatio() <= EVASION_INVINCIBLE_ANIME_RATE) { SetInviCounter(); }
+	float animeRatio = GetAnimeRatio();
+	if (EVASION_INVINCIBLE_START_RATE <= animeRatio && animeRatio <= EVASION_INVINCIBLE_END_RATE) { SetInviCounter(); }
 
 	// 何も入力なく回避アニメーションが終了したら通常状態に自動で遷移
 	if (IsAnimeEnd()) { state = (int)STATE::MOVE; }
@@ -629,7 +635,7 @@ void Player::Jump(void)
 	}
 
 	// モーション更新
-	if (isJump && IsAnimeEnd() && accelSum.y <= 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
+	if (isJump[0] && IsAnimeEnd() && accelSum.y <= 0.0f) { AnimePlay((int)ANIME_TYPE::FALL); }
 }
 
 void Player::AttackRotate(void)

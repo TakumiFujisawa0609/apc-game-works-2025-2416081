@@ -6,7 +6,10 @@
 class ActorBase
 {
 public:
+	// デフォルトコンストラクタ
 	ActorBase();
+	// パラメーターを外部から読み込む場合に使うコンストラクタ
+	ActorBase(const std::string& parameterPath);
 	virtual ~ActorBase() = default;
 
 	virtual void Load(void) = 0;
@@ -175,6 +178,57 @@ protected:
 		pushWeight = weight;
 		for (ColliderBase*& coll : collider) { coll->SetPushWeight(weight); }
 	}
+
+#pragma region パラメーター外部ファイル管理に関する関数
+	/// <summary>
+	/// パラメーター外部ファイル管理クラスから指定のパラメーターの指定の配列番号の値だけを取得する
+	/// </summary>
+	/// <param name="parameterName">パラメーターのID</param>
+	/// <param name="index">配列番号（指定なしで0）</param>
+	/// <returns></returns>
+	float GetParameter(const std::string& parameterName, int index = 0)const {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		return parameter->GetParameter(parameterName, index);
+	}
+
+
+	/// <summary>
+	/// パラメーター外部ファイル管理クラスから指定のパラメーターを配列ごと取得する
+	/// </summary>
+	/// <param name="parameterName">パラメーターのID</param>
+	/// <returns></returns>
+	const std::vector<float>& GetParameterArray(const std::string& parameterName)const {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		return parameter->GetParameter(parameterName);
+	}
+
+	/// <summary>
+	/// パラメーター外部ファイル管理クラスから指定のパラメーターの指定の配列番号の値だけをint型にキャストして取得する
+	/// </summary>
+	/// <param name="parameterName">パラメーターのID</param>
+	/// <param name="index">配列番号（指定なしで0）</param>
+	/// <returns></returns>
+	int GetParameterToInt(const std::string& parameterName, int index = 0)const {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		return (int)GetParameter(parameterName, index);
+	}
+
+	/// <summary>
+	/// パラメーター外部ファイル管理クラスから指定のパラメーターをVector3構造体にして取得する
+	/// </summary>
+	/// <param name="parameterName">パラメーターのID</param>
+	/// <returns></returns>
+	Vector3 GetParameterToVector3(const std::string& parameterName) {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		const std::vector<float>& param = parameter->GetParameter(parameterName);
+
+		// 要素数がちょうどVector3構造体と合致していなければ0を返す
+		if (param.size() != 3) { return Vector3(); }
+
+		return Vector3(param[0], param[1], param[2]);
+	}
+#pragma endregion
+
 #pragma endregion
 
 	// 当たり判定の設定（true = 「判定する」、false = 「判定しない」）
@@ -200,28 +254,6 @@ protected:
 	void SetIsAlphaDraw(bool flg) { isAlphaDraw = flg; }
 	// アルファ判定の設定（引数省略で現在の逆にスイッチ）
 	void SetIsAlphaDraw(void) { isAlphaDraw = !isAlphaDraw; }
-
-	// パラメーター外部ファイル管理クラスの生成と初期化
-	void ParameterLoadInit(const std::string& filePath) {
-		// すでに生成されている場合は何もしない
-		if (parameter != nullptr) { return; }
-		
-		// 生成と読み込み
-		parameter = new ParameterLoad(filePath);
-	}
-
-	// パラメーター外部ファイル管理クラスから指定のパラメーターの配列の先頭だけを取得する（引数はパラメーターの名前）
-	float GetParameter(const std::string& parameterName, size_t index = 0)const {
-		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
-		return parameter->GetParameter(parameterName, index);
-	}
-
-
-	// パラメーター外部ファイル管理クラスから指定のパラメーターを取得する（引数はパラメーターの名前）
-	std::vector<float> GetParameterArray(const std::string& parameterName)const {
-		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
-		return parameter->GetParameter(parameterName);
-	}
 
 	// 派生先追加初期化
 	virtual void SubInit(void) {}

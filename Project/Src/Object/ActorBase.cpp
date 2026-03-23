@@ -25,6 +25,29 @@ ActorBase::ActorBase() :
 {
 }
 
+ActorBase::ActorBase(const std::string& parameterPath) :
+	trans(prevPos),
+	collider(),
+
+	dynamicFlg(true),
+	isGravity(false),
+
+	pushFlg(true),
+	pushWeight(0),
+
+	prevPos(trans.pos),
+
+	accelSum(0.0f, 0.0f, 0.0f),
+
+	isGroundMaster(false),
+
+	isDraw(true),
+	isAlphaDraw(false),
+
+	parameter(new ParameterLoad(parameterPath))
+{
+}
+
 void ActorBase::Init(void)
 {
 	SubInit();
