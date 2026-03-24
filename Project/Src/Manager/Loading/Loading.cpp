@@ -32,7 +32,6 @@ void Loading::Init(void)
 // “Ç‚İ‚İ
 void Loading::Load(void)
 {
-	//LoadArrayImg("Data/Image/Player/‚Ü‚Ú.png", 7, 7, 1, 42, 66, handle_);
 }
 
 // XV
