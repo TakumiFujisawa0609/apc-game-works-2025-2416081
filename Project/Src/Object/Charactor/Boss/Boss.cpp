@@ -184,14 +184,14 @@ void Boss::OnCollision(const ColliderBase& collider)
 		Snd::GetIns().Play("ObjBreak");
 
 		// HPを減らす
-		HpSharpen(Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::THROWING_ROCK]);
+		HpSharpen(playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::THROWING_ROCK]);
 
 		// 無敵時間を設定
 		SetInviCounter(THROWING_DAMAGE_INVINCIBLE_TIME);
 
 		// スコアを加算
 		Score::GetIns().ScoreAddCombo(
-			Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::THROWING_ROCK] * HP_SHARPEN_SCORE_RATE
+			playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::THROWING_ROCK] * HP_SHARPEN_SCORE_RATE
 		);
 
 		return;
@@ -205,14 +205,14 @@ void Boss::OnCollision(const ColliderBase& collider)
 		Snd::GetIns().Play("ObjBreak");
 
 		// HPを減らす
-		HpSharpen(Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::PUNCH]);
+		HpSharpen(playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::PUNCH]);
 
 		// 無敵時間を設定
 		SetInviCounter(PUNCH_DAMAGE_INVINCIBLE_TIME);
 
 		// スコアを加算
 		Score::GetIns().ScoreAddCombo(
-			Player::ATTACK_DAMAGE_TABLE[(int)Player::ATTACK_DAMAGE_TYPE::PUNCH] * HP_SHARPEN_SCORE_RATE
+			playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::PUNCH] * HP_SHARPEN_SCORE_RATE
 		);
 
 		return;

@@ -63,9 +63,6 @@ void GameScene::Load(void)
 	// 当たり判定管理クラスを生成
 	collision = new CollisionManager();
 
-	// オブジェクト配列の上限設定(追加時、無駄なメモリ探索をしないように)
-	objects.reserve(10);
-
 	// 初期化も含めたオブジェクト生成のラムダ関数
 	auto ObjAdd = [&](ActorBase* newClass)->void {
 		// 配列の末尾に追加
@@ -76,17 +73,18 @@ void GameScene::Load(void)
 		collision->Add(objects.back()->GetCollider());
 		};
 
-
 	// オブジェクト生成（生成の順番がそのまま(更新/描画)順）
 	ObjAdd(new SkyDome());
 	ObjAdd(new BlockManager());
 	ObjAdd(new Player());
 	ObjAdd(new Boss(ObjSerch<Player>()->GetTrans().pos));
 	ObjAdd(new ScoreUI());
-	//ObjAdd(new SphereDebugObject());
 	
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>()));
+
+	// ボスにプレイヤーの各攻撃の攻撃力を渡す
+	ObjSerch<Boss>()->SetPlayerAttackPowerTable(ObjSerch<Player>()->GetAttackPowerTable());
 
 	// イベントシーンをはさむ
 	SceneManager::GetIns().PushScene(std::make_shared<Explanat>());

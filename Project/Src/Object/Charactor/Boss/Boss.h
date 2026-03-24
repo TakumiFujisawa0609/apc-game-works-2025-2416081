@@ -76,6 +76,9 @@ public:
 		10,		// PSYCHO
 	};
 
+	// プレイヤーから攻撃ごとの攻撃力を受け取る
+	void SetPlayerAttackPowerTable(std::vector<unsigned char> playerAttackPowerTable) { this->playerAttackPowerTable = playerAttackPowerTable; }
+
 private:
 
 #pragma region 定数定義
@@ -352,4 +355,7 @@ private:
 
 	// プレイヤーの座標(参照用)
 	const Vector3& playerPos;
+
+	// プレイヤーから攻撃ごとの攻撃力を受け取り格納するための配列
+	std::vector<unsigned char> playerAttackPowerTable;
 };

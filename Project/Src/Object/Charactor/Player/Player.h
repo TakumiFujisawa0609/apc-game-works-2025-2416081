@@ -26,6 +26,43 @@ public:
 	void OnGrounded()override;
 
 
+	// Šù’è(ActorBase)‚ÌƒRƒ‰ƒCƒ_[æ“¾ŠÖ”‚ğã‘‚«‚µAƒvƒŒƒCƒ„[‚ª•ø‚¦‚é‰ºˆÊƒNƒ‰ƒX‚Ì•¨‚àŠÜ‚ß‚Äæ“¾‚·‚éŒ`‚É‚·‚é
+	std::vector<ColliderBase*> GetCollider(void)const override { 
+		std::vector<ColliderBase*>ret = {};
+
+		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : punch->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : gouge->GetCollider()) { ret.emplace_back(collider); }
+		for (ColliderBase*& collider : throwing->GetCollider()) { ret.emplace_back(collider); }
+
+		return ret;
+	}
+
+	// Œ»İ‚ÌHP‚Ìc‚èŠ„‡‚ğ•Ô‚·
+	float HpRatio(void)const { return ((float)hp / (float)HP_MAX); }
+
+	// UŒ‚‚Ìí—ŞiŠeUŒ‚‚ÌUŒ‚—Í‚ğ‚Ü‚Æ‚ß‚é‚½‚ßj
+	enum class ATTACK_POWER_TYPE
+	{
+		PUNCH,
+		THROWING_ROCK,
+
+		MAX
+	};
+
+	// ŠeUŒ‚‚ÌUŒ‚—Íƒe[ƒuƒ‹‚ğæ“¾
+	std::vector<unsigned char> GetAttackPowerTable(void) {
+		std::vector<unsigned char> ret = {};
+
+		for (unsigned char power : ATTACK_POWER_TABLE) { ret.emplace_back(power); }
+
+		return ret;
+	}
+
+	// ƒvƒŒƒCƒ„[‚ª—‰º‚µ‚½ê‡‚ÌƒXƒe[ƒW‚ğˆê•”•œŠˆ‚³‚¹‚éŠÖ”‚ğƒZƒbƒg‚·‚é
+	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival = std::move(ptr); }
+
+	// ó‘Ô’è‹`
 	enum class STATE
 	{
 		NON,
@@ -40,37 +77,6 @@ public:
 		END,
 
 		MAX
-	};
-
-	std::vector<ColliderBase*> GetCollider(void)const override { 
-		std::vector<ColliderBase*>ret = {};
-
-		for (ColliderBase*& collider : ActorBase::GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : punch->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : gouge->GetCollider()) { ret.emplace_back(collider); }
-		for (ColliderBase*& collider : throwing->GetCollider()) { ret.emplace_back(collider); }
-
-		return ret;
-	}
-
-	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival = std::move(ptr); }
-
-	// Œ»İ‚ÌHP‚Ìc‚èŠ„‡‚ğ•Ô‚·
-	float HpRatio(void)const { return ((float)hp / (float)HP_MAX); }
-
-	// UŒ‚‚Ìí—Ş
-	enum class ATTACK_DAMAGE_TYPE
-	{
-		PUNCH,
-		THROWING_ROCK,
-
-		MAX
-	};
-
-	// UŒ‚‚²‚Æ‚Ìƒ_ƒ[ƒW—Êƒe[ƒuƒ‹
-	static constexpr unsigned char ATTACK_DAMAGE_TABLE[(int)ATTACK_DAMAGE_TYPE::MAX] = {
-		5,	//PUNCH
-		30,	//THROWING_ROCK
 	};
 
 private:
@@ -94,7 +100,7 @@ private:
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ì”¼Œa
 	const float RADIUS = SIZE.z * 0.5f;
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹n“_
-	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3::Yonly(SIZE.y / 2 - RADIUS);
+	const Vector3 CAPSULE_COLLIDER_START_POS = Vector3::Yonly((SIZE.y * 0.5f) - RADIUS);
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ìƒ[ƒJƒ‹I“_
 	const Vector3 CAPSULE_COLLIDER_END_POS = Vector3::Yonly(RADIUS);
 
@@ -198,6 +204,15 @@ private:
 	// —‰ºƒ_ƒ[ƒW‚Ì—Ê
 	const unsigned char FALL_DAMAGE = GetParameterToInt("FallDamage");
 
+	// ŠeUŒ‚‚ÌUŒ‚—Íƒe[ƒuƒ‹````````````````````````
+
+	const unsigned char ATTACK_POWER_TABLE[(int)ATTACK_POWER_TYPE::MAX] = {
+		(unsigned char)GetParameterToInt("PunchAttackPower"),			//PUNCH
+		(unsigned char)GetParameterToInt("ThrowingRockAttackPower"),	//THROWING_ROCK
+	};
+
+	// ```````````````````````````````````
+
 #pragma endregion
 
 	// ƒqƒbƒgƒ|ƒCƒ“ƒg
@@ -239,6 +254,9 @@ private:
 
 
 #pragma region ó‘Ô•ÊŠÖ”‚Ì’†g
+
+	// ˆÚ“®ˆ—```````````````````````````
+	
 	//‰¡ˆÚ“®ŠÖ”
 	void Run(void);
 	//ƒWƒƒƒ“ƒvŠÖ”
@@ -249,6 +267,10 @@ private:
 	//ƒWƒƒƒ“ƒvƒL[‚ğó‚¯•t‚¯‚éƒtƒŒ[ƒ€”‚ÌƒJƒEƒ“ƒ^[
 	std::vector<int> jumpKeyCounter;
 	
+	// ```````````````````````````````
+
+
+	// ƒpƒ“ƒ`ˆ—```````````````````````````
 
 	// ƒpƒ“ƒ`’†‚Ì‰ñ“]
 	void AttackRotate(void);
@@ -265,19 +287,24 @@ private:
 	// ’i”‚²‚Æ‚ÌŸ‚Ì’i‚É‚Â‚È‚ª‚éŠÔ‚ÌƒJƒEƒ“ƒ^[
 	int attackStageCounter;
 
+	// ```````````````````````````````
 
-	// ‚¦‚®‚èæ‚è‚ğs‚¤ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
+
+	// ’Í‚İE•ø‚¦E“Š±  ˆ—````````````````````
+
+	// ‚¦‚®‚èæ‚è‚ğŠÇ—‚·‚éƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
 	PlayerGouge* gouge;
 	
 	// Gouge(‚¦‚®‚èæ‚è)‚ğÀs‚µ‚½‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
 	bool isGouge;
-
 
 	// “Š±ƒIƒuƒWƒFƒNƒg‚ğŠÇ—‚·‚éƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
 	Throwing* throwing;
 
 	// ƒIƒuƒWƒFƒNƒg‚ğ•ø‚¦‚Ä‚¢‚é‚Æ‚«‚ÌˆÚ“®ˆ—
 	void CarryRun(void);
+
+	// ```````````````````````````````
 
 
 	// ƒmƒbƒNƒoƒbƒN‚ÌˆÚ“®ƒxƒNƒgƒ‹

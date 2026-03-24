@@ -11,12 +11,12 @@ RunSpeed,10
 MaxJumpPower,18
 JumpNum,1
 InputAttackFrame,20
+AttackMoveSpeed,13
 PunchColliderStartRate,0.1
 PunchColliderEndRate,0.6
-AttackMoveSpeed,13
+EvasionSpeed,15
 EvasionInvincibleStartRate,0
 EvasionInvincibleEndRate,0.7
-EvasionSpeed,15
 GougeColliderStartRate,0.33
 CarryMoveSpeed,5
 ThrowingReleaseRate,0.25
@@ -41,3 +41,5 @@ CarryRunAnimeSpeed,2.5
 ThrowAnimeSpeed,1
 DamageAnimeSpeed,1
 DeathAnimeSpeed,1
+PunchAttackPower,5
+ThrowingRockAttackPower,30
