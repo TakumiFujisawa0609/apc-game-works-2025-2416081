@@ -170,7 +170,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 			SetInviCounter(LIFE_LOST_INVINCIBLE_TIME);
 
 			// スコアを加算
-			Score::GetIns().ScoreAddCombo(LIFE_LOST_SCORE);
+			Score::GetIns().ScoreAddCombo(Score::GetIns().BOSS_LIFE_LOST_SCORE);
 		}
 
 		return;
@@ -191,7 +191,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 
 		// スコアを加算
 		Score::GetIns().ScoreAddCombo(
-			playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::THROWING_ROCK] * HP_SHARPEN_SCORE_RATE
+			playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::THROWING_ROCK] * Score::GetIns().BOSS_HP_SHARPEN_SCORE_RATE
 		);
 
 		return;
@@ -212,7 +212,7 @@ void Boss::OnCollision(const ColliderBase& collider)
 
 		// スコアを加算
 		Score::GetIns().ScoreAddCombo(
-			playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::PUNCH] * HP_SHARPEN_SCORE_RATE
+			playerAttackPowerTable[(int)Player::ATTACK_POWER_TYPE::PUNCH] * Score::GetIns().BOSS_HP_SHARPEN_SCORE_RATE
 		);
 
 		return;

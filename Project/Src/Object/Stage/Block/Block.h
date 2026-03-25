@@ -34,9 +34,6 @@ private:
     // 生存に必要なセルの生存割合
     const float ALIVE_NEED_RATE = 0.1f;
 
-    // セル1つにつき加算されるスコア
-	const int SCORE_PER_CELL = 50;
-
     void SubLoad(void)override {}
     void SubInit(void)override { SetJudge(true); SetIsDraw(true); }
 };

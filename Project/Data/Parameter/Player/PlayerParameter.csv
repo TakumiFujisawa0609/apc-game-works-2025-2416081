@@ -12,7 +12,7 @@ MaxJumpPower,18
 JumpNum,1
 InputAttackFrame,20
 AttackMoveSpeed,13
-PunchColliderStartRate,0.1
+PunchColliderStartRate,0.4
 PunchColliderEndRate,0.6
 EvasionSpeed,15
 EvasionInvincibleStartRate,0

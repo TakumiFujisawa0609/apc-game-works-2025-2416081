@@ -13,9 +13,9 @@ public:
 	~ParameterLoad() = default;
 
 	// パラメーターを取得する関数
-	const float GetParameter(std::string parameterName, int index) const;
+	const float GetParameter(std::string parameterName, int index = 0) const;
 	// パラメーターを取得する関数
-	const std::vector<float>& GetParameter(std::string parameterName) const;
+	const std::vector<float>& GetParameterArray(std::string parameterName) const;
 
 	// パラメーターを解放する関数
 	void Release(void);

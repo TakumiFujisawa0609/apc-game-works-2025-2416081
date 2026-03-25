@@ -88,6 +88,7 @@ private:
 
 	// 戦闘時間計測用カウンター
 	unsigned int timer;
+
 };
 
 

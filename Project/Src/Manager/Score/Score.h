@@ -2,6 +2,8 @@
 
 #include<list>
 
+#include"../../Object/Common/DataLoad/ParameterLoad.h"
+
 class Score
 {
 private:
@@ -11,6 +13,9 @@ private:
 
 	// インスタンス
 	static Score* ins;
+
+	// 外部ファイル管理
+	ParameterLoad parameter;
 
 public:
 
@@ -50,6 +55,9 @@ public:
 	// コンボ数の最高記録の取得
 	unsigned char BestRecordCombo(void)const { return bestRecordCombo; }
 
+	// コンボ数の最高記録をコンボ上限数で割った最大コンボ数割合を取得
+	float BestRecordComboRatio(void)const { return ((float)bestRecordCombo / (float)COMBO_MAX); }
+
 #pragma endregion
 
 #pragma region スコア加算
@@ -68,6 +76,47 @@ public:
 	// 加算予定スコアを１つボーナススコアに適用するとともに加算量を取得する
 	int AddBonusScoreApplyAndGet(void);
 #pragma endregion
+
+
+#pragma region スコア値の定数定義
+
+	// ベーススコア～～～～～～～～～～～～～～～～～～～～～～～～
+
+	// ボスのHP減少によるスコア加算の倍率（HP1につきのスコア）
+	const unsigned char BOSS_HP_SHARPEN_SCORE_RATE = (unsigned char)parameter.GetParameter("BossHpSharpenScoreRate");
+
+	// ボスのライフロストによるスコア加算
+	const unsigned short BOSS_LIFE_LOST_SCORE = (unsigned short)parameter.GetParameter("BossLifeLostScore");
+
+	// プレイヤーがステージを破壊したときのスコア加算倍率（1セルごとのスコア）
+	const unsigned short STAGE_PER_CELL_SCORE = (unsigned short)parameter.GetParameter("StagePerCellScore");
+
+	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
+
+
+	// ボーナススコア～～～～～～～～～～～～～～～～～～～～～
+
+	// クリアタイムによるボーナススコアのベース値(理論値)
+	// 計算方法 <ベース値 - ( (ベース値 ÷ 下記減少量レート) × クリアタイム )>
+	const int TIME_BONUS_SCORE_BASE = (int)parameter.GetParameter("TimeBonusScoreBase");
+
+	// クリアタイムによるボーナススコアの減少量において
+	// 何フレームかけてボーナススコアが0になるか
+	const int TIME_BONUS_SCORE_DECREASE_SPEED = (int)parameter.GetParameter("TimeBonusScoreDecreaseSpeed");
+
+
+	// プレイヤーの残りHPによるボーナススコアのベース値(理論値)
+	// 計算方法 <ベース値 × プレイヤーの残りHP割合>
+	const int PLAYER_HP_BONUS_SCORE_BASE = (int)parameter.GetParameter("PlayerHpBonusScoreBase");
+
+	// 最大コンボ数によるボーナススコアのベース値(理論値)
+	// 計算方法 <ベース値 × (最大コンボ数 ÷ 上限コンボ数)>
+	const int MAX_COMBO_BONUS_SCORE_BASE = (int)parameter.GetParameter("MaxComboBonusScoreBase");
+
+	// ～～～～～～～～～～～～～～～～～～～～～～～～～～～～
+
+#pragma endregion
+
 
 private:
 

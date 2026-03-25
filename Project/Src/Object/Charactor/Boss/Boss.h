@@ -221,16 +221,6 @@ private:
 	const char HP_BAR_STAN_TEXT_BLINK_INTERVAL = 15;
 	// ```````````````````````````````````
 
-	// ƒXƒRƒA````````````````````````
-
-	// HPŒ¸­‚É‚æ‚éƒXƒRƒA‰ÁŽZ‚Ì”{—¦iHP1‚É‚Â‚«‚ÌƒXƒRƒAj
-	const unsigned char HP_SHARPEN_SCORE_RATE = 100;
-
-	// ƒ‰ƒCƒtƒƒXƒg‚É‚æ‚éƒXƒRƒA‰ÁŽZ
-	const unsigned short LIFE_LOST_SCORE = 10000;
-
-	// ```````````````````````````
-
 #pragma endregion
 
 	// ƒqƒbƒgƒ|ƒCƒ“ƒg

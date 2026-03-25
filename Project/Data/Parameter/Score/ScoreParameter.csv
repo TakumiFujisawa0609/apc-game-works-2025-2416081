@@ -1,0 +1,7 @@
+StagePerCellScore,50
+BossHpSharpenScoreRate,100
+BossLifeLostScore,10000
+TimeBonusScoreDecreaseSpeed,6000
+TimeBonusScoreBase,500000
+PlayerHpBonusScoreBase,200000
+MaxComboBonusScoreBase,100000

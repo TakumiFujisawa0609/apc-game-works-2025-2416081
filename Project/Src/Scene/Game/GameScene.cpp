@@ -25,7 +25,6 @@
 #include"../../Object/Charactor/Player/Player.h"
 #include"../../Object/Charactor/Boss/Boss.h"
 
-#include"../../Object/DebugObject/SphereDebugObject.h"
 #include"../Common/GameDebugScene.h"
 
 
@@ -142,9 +141,13 @@ void GameScene::Update(void)
 		ObjSerch<ScoreUI>()->AllAddScoreApply();
 
 		// ボーナススコアを追加
-		Score::GetIns().ScoreAddBonus(Score::GetIns().BestRecordCombo() * 1000);
-		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>()->HpRatio() * 100000));
-		Score::GetIns().ScoreAddBonus(100000 - (timer * 10));
+		Score::GetIns().ScoreAddBonus(Score::GetIns().MAX_COMBO_BONUS_SCORE_BASE * Score::GetIns().BestRecordComboRatio());
+		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>()->HpRatio() * Score::GetIns().PLAYER_HP_BONUS_SCORE_BASE));
+		Score::GetIns().ScoreAddBonus((int)(
+			Score::GetIns().TIME_BONUS_SCORE_BASE -
+			(((float)Score::GetIns().TIME_BONUS_SCORE_BASE / (float)Score::GetIns().TIME_BONUS_SCORE_DECREASE_SPEED) * timer)
+			)
+		);
 
 		SceneManager::GetIns().ChangeSceneFade(std::make_shared<ClearScene>(ObjSerch<BlockManager>()->GetMesh(), "Data/Model/Rock/Rock.png"));
 

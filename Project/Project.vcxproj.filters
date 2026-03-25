@@ -347,9 +347,6 @@
     <ClInclude Include="Src\Object\Common\Collider\ModelCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\DebugObject\SphereDebugObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Object\Charactor\Player\UI\HpBar\PlayerHpBlock.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

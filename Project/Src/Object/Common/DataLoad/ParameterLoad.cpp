@@ -39,6 +39,6 @@ ParameterLoad::ParameterLoad(std::string filePath) :
 
 const float ParameterLoad::GetParameter(std::string parameterName, int index) const { return parameterMap.at(parameterName).at(index); }
 
-const std::vector<float>& ParameterLoad::GetParameter(std::string parameterName) const { return parameterMap.at(parameterName); }
+const std::vector<float>& ParameterLoad::GetParameterArray(std::string parameterName) const { return parameterMap.at(parameterName); }
 
 void ParameterLoad::Release(void) { parameterMap.clear(); }

@@ -3,6 +3,8 @@
 Score* Score::ins = nullptr;
 
 Score::Score() :
+	parameter("Data/Parameter/Score/ScoreParameter.csv"),
+
 	baseScore(),
 	bonusScore(),
 	addScore(),
@@ -38,6 +40,8 @@ void Score::Reset(void)
 	comboTime = 0;
 	comboInterval = 0;
 	bestRecordCombo = 0;
+
+	parameter.Release();
 }
 
 #pragma region ÉXÉRÉAâ¡éZ

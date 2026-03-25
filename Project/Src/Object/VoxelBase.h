@@ -14,7 +14,7 @@ class VoxelBase : public ActorBase
 public:
 
 	VoxelBase();
-	virtual ~VoxelBase()override {};
+	virtual ~VoxelBase()override = default;
 
 	void Load(void)override;
 	void Init(void)override;
@@ -177,7 +177,7 @@ protected:
 	/// <param name="textureSize">テクスチャサイズ</param>
 	/// <param name="cellSize">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
-	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
+	/// <param name="aliveNeedRatio">生存に必要な密度比率（densityが１以上で生存扱い）（標準は１０％以上で生存）</param>
 	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, int texture = -1, float textureSize = 512.0f, float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
 		this->roughSize = roughSize;
 		this->texture = texture;
@@ -197,7 +197,7 @@ protected:
 	/// <param name="textureSize">テクスチャサイズ</param>
 	/// <param name="cellSize">セルサイズ（標準は２０）</param>
 	/// <param name="gridCenter">グリッド中心位置（モデルによる中心座標のズレの補完用）（標準は全て０）</param>
-	/// <param name="aliveNeedRatio">生存に必要な密度比率（density_が１以上で生存扱い）（標準は１０％以上で生存）</param>
+	/// <param name="aliveNeedRatio">生存に必要な密度比率（densityが１以上で生存扱い）（標準は１０％以上で生存）</param>
 	void VoxelInfoInit(TAG colliderTag, const Vector3& roughSize, std::string texturePath = "", float textureSize = 512.0f, float cellSize = 20.0f, const Vector3& gridCenter = Vector3(), float aliveNeedRatio = 0.1f) {
 		VoxelInfoInit(colliderTag, roughSize, (texturePath != "") ? LoadGraph(texturePath.c_str()) : -1, textureSize, cellSize, gridCenter, aliveNeedRatio);
 	}

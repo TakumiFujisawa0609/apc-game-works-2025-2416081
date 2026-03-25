@@ -199,7 +199,7 @@ protected:
 	/// <returns></returns>
 	const std::vector<float>& GetParameterArray(const std::string& parameterName)const {
 		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
-		return parameter->GetParameter(parameterName);
+		return parameter->GetParameterArray(parameterName);
 	}
 
 	/// <summary>
@@ -220,7 +220,7 @@ protected:
 	/// <returns></returns>
 	Vector3 GetParameterToVector3(const std::string& parameterName) {
 		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
-		const std::vector<float>& param = parameter->GetParameter(parameterName);
+		const std::vector<float>& param = parameter->GetParameterArray(parameterName);
 
 		// 要素数がちょうどVector3構造体と合致していなければ0を返す
 		if (param.size() != 3) { return Vector3(); }
