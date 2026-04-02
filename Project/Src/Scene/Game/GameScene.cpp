@@ -141,7 +141,7 @@ void GameScene::Update(void)
 		ObjSerch<ScoreUI>()->AllAddScoreApply();
 
 		// ボーナススコアを追加
-		Score::GetIns().ScoreAddBonus(Score::GetIns().MAX_COMBO_BONUS_SCORE_BASE * Score::GetIns().BestRecordComboRatio());
+		Score::GetIns().ScoreAddBonus(Score::GetIns().MAX_COMBO_BONUS_SCORE_BASE * (int)Score::GetIns().BestRecordComboRatio());
 		Score::GetIns().ScoreAddBonus((int)(ObjSerch<Player>()->HpRatio() * Score::GetIns().PLAYER_HP_BONUS_SCORE_BASE));
 		Score::GetIns().ScoreAddBonus((int)(
 			Score::GetIns().TIME_BONUS_SCORE_BASE -

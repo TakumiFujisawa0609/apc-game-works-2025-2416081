@@ -14,7 +14,7 @@ ActorBase::ActorBase() :
 
 	prevPos(trans.pos),
 
-	accelSum(0.0f, 0.0f, 0.0f),
+	accelSum(0.0f),
 
 	isGroundMaster(false),
 

@@ -5,7 +5,7 @@
 class ThrowObjBase : public ActorBase
 {
 public:
-	ThrowObjBase(const int& playerModel, const Vector3& playerAngle);
+	ThrowObjBase(const int& playerModel, const Vector3& playerAngle, const std::string& parameterPath);
 	virtual ~ThrowObjBase() = default;
 
 	void OnCollision(const ColliderBase& collider)override;
@@ -27,12 +27,6 @@ public:
 	STATE GetState(void)const { return state; }
 
 private:
-	// ‰Eè‚ÌƒtƒŒ[ƒ€ƒCƒ“ƒfƒbƒNƒX(ƒ‚ƒfƒ‹‚É‚æ‚Á‚Ä•Ï‚¦‚é•K—v‚ª‚ ‚é‚©‚à)
-	const int PLAYER_RIGHTHAND_FRAME_INDEX = 14;
-	// —‰º‘¬“x
-	const float DROP_SPEED = 5.0f;
-	// —‰º’†ƒIƒuƒWƒFƒNƒg‚ğÁ‹‚·‚é‚‚³
-	const float DROP_DELETE_HEIGHT = -50.0f;
 
 	const int& playerModel;
 	const Vector3& playerAngle;
@@ -42,9 +36,31 @@ private:
 	void SubInit(void)override;
 	void SubUpdate(void)override;
 
-protected:
-	int model;
+	// “Š‚°‚½Œã‚Ìˆ—‚Ég‚¤``````
+	Vector3 moveVec;
 
+	// ‰Eè‚ÌƒtƒŒ[ƒ€ƒCƒ“ƒfƒbƒNƒX(ƒ‚ƒfƒ‹‚É‚æ‚Á‚Ä•Ï‚¦‚é•K—v‚ª‚ ‚é‚©‚à)(”h¶æ‚Åİ’è)
+	const int PLAYER_RIGHTHAND_FRAME_INDEX = GetParameterToInt("PlayerRightHandFrameIndex");
+
+	// ‘¬“x(”h¶æ‚Åİ’è)
+	const float SPEED = GetParameter("Speed");
+
+	// ¶‘¶ŠÔ(”h¶æ‚Åİ’è)
+	const int ALIVE_TIME = GetParameterToInt("AliveTime");
+	int aliveCounter;
+
+	// ¶‘¶ƒqƒbƒg‰ñ”(”h¶æ‚Åİ’è)
+	const int ALIVE_HIT_NUM = GetParameterToInt("AliveHitNum");
+	int aliveHitCou;
+
+	// —‰º‘¬“x(”h¶æ‚Åİ’è)
+	const float DROP_SPEED = GetParameter("DropSpeed");
+
+	// —‰º’†ƒIƒuƒWƒFƒNƒg‚ğÁ‹‚·‚é‚‚³(”h¶æ‚Åİ’è)
+	const float DROP_DELETE_HEIGHT = GetParameter("DropDeleteHeight");
+	//````````````````
+
+protected:
 	// ó‘Ô
 	STATE state;
 
@@ -60,22 +76,5 @@ protected:
 	void ThrowStateFunc(void);
 	//`````````
 
-
-	// “Š‚°‚½Œã‚Ìˆ—‚Ég‚¤``````
-	Vector3 moveVec;
-
-	// ‘¬“x(”h¶æ‚Åİ’è)
-	float SPEED;
-
-	// ¶‘¶ŠÔ(”h¶æ‚Åİ’è)
-	int ALIVE_TIME;
-	int aliveCounter;
-
-	// ¶‘¶ƒqƒbƒg‰ñ”(”h¶æ‚Åİ’è)
-	int ALIVE_HIT_NUM;
-	int aliveHitCou;
-	//````````````````
-
-	const Vector3 THROW_VEC = { 0.0f,0.0f,1.0f };
-
+	const Vector3 THROW_VEC = Vector3::Zonly(1.0f);
 };

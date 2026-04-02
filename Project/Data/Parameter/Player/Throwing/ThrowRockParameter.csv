@@ -1,0 +1,8 @@
+PlayerRightHandFrameIndex,14
+Speed,15
+DropSpeed,5
+DropDeleteHeight,-50
+AliveHitNum,10
+AliveTime,300
+ModelScale,1
+ColliderRadius,65

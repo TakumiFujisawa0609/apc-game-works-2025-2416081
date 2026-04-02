@@ -2,11 +2,12 @@
 
 #include"Rock/ThrowRock.h"
 
+#include"../../../Common/DataLoad/ParameterLoad.h"
 
 enum class THROW_TYPE { NON = -1, ROCK, MAX };
 
 // 整数型配列の合計を返す
-static constexpr unsigned short ArraySum(const unsigned char* table, int num) {
+constexpr unsigned short ArraySum(const unsigned char* table, int num) {
 	unsigned short ret = 0;
 	for (int i = 0; i < num; i++) { ret += table[i]; }
 	return ret;
@@ -47,17 +48,20 @@ private:
 		THROW_TYPE type = THROW_TYPE::NON;
 	};
 
+	// パラメーターの外部読み込み
+	const ParameterLoad parameter;
+
 	// 各タイプごとの最大生成個数テーブル
-	static constexpr unsigned char BY_TYPE_NUM[(int)THROW_TYPE::MAX] = 
+	const unsigned char BY_TYPE_NUM[(int)THROW_TYPE::MAX] = 
 	{
-		10, // ROCK
+		(unsigned char)parameter.GetParameter("RockNum"), // ROCK
 	};
 
 	// 全体タイプの最大個数の合計
-	static constexpr short MAX_OBJ_NUM = ArraySum(BY_TYPE_NUM, (int)THROW_TYPE::MAX);
+	const short MAX_OBJ_NUM = ArraySum(BY_TYPE_NUM, (int)THROW_TYPE::MAX);
 
 	// 最大個数の合計の数でインスタンス格納配列を作成
-	THROW_OBJ_INFO throwObj[MAX_OBJ_NUM];
+	std::vector<THROW_OBJ_INFO> throwObj;
 
 	// タイプ別モデルハンドル
 	int models[(int)THROW_TYPE::MAX];

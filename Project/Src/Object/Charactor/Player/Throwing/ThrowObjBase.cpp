@@ -2,24 +2,18 @@
 
 #include"../../Boss/Boss.h"
 
-ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle) :
-	ActorBase(),
+ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle, const std::string& parameterPath) :
+	ActorBase(parameterPath),
 
 	playerModel(playerModel),
 	playerAngle(playerAngle),
 
-	model(-1),
-
 	state(STATE::NON),
 	stateFuncPtr(),
 
-	ALIVE_TIME(100),
 	aliveCounter(0),
 
-	ALIVE_HIT_NUM(5),
 	aliveHitCou(0),
-
-	SPEED(10.0f),
 
 	moveVec()
 {
@@ -82,10 +76,8 @@ void ThrowObjBase::OnCollision(const ColliderBase& collider)
 	case ThrowObjBase::STATE::DROP:
 		return;
 	case ThrowObjBase::STATE::THROW:
-		// ‰½‰ñ‚©“–‚½‚Á‚½‚çÁ‚¦‚éˆ—‚ð‚ ‚Æ‚Å‘‚«‚Ü‚·
-		if (++aliveHitCou >= ALIVE_HIT_NUM) {
-			state = STATE::DROP;
-		}
+		// ‰½‰ñ‚©“–‚½‚Á‚½‚çÁ‚¦‚é
+		if (++aliveHitCou >= ALIVE_HIT_NUM) { state = STATE::DROP; }
 		return;
 	}
 }

@@ -5,7 +5,9 @@ Throwing::Throwing(const int& playerModel, const Vector3& playerAngle) :
 	models(),
 
 	playerModel(playerModel),
-	playerAngle(playerAngle)
+	playerAngle(playerAngle),
+
+	parameter("Data/Parameter/Player/Throwing/ThrowingParameter.csv")
 {
 }
 
@@ -14,6 +16,8 @@ void Throwing::Load(void)
 #pragma region äeéÌÉÇÉfÉãÇì«Ç›çûÇﬁ
 	models[(int)THROW_TYPE::ROCK] = MV1LoadModel("Data/Model/Player/ThrowingObj/Rock/Rock.mv1");
 #pragma endregion
+
+	throwObj.resize(MAX_OBJ_NUM);
 
 	unsigned short num = 0;
 
