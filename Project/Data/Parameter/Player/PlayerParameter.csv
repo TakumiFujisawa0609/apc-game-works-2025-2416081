@@ -1,3 +1,4 @@
+RightHandFrameIndex,14
 ModelLocalRot,0,180,0
 ModelSize,1785,1600,700
 ModelCenterDiff,0,-860,0
@@ -12,8 +13,10 @@ MaxJumpPower,18
 JumpNum,1
 InputAttackFrame,20
 AttackMoveSpeed,13
+PunchColliderLocalPos,0,20,70
 PunchColliderStartRate,0.4
 PunchColliderEndRate,0.6
+PunchColliderRadius,100
 EvasionSpeed,15
 EvasionInvincibleStartRate,0
 EvasionInvincibleEndRate,0.7

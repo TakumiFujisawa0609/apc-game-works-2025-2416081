@@ -730,15 +730,15 @@ void Player::HpSharpen(int damage)
 void Player::LowerLoad(void)
 {
 	// ’ÊíUŒ‚iƒpƒ“ƒ`j
-	punch = new PlayerPunch(trans.pos, trans.angle);
+	punch = new PlayerPunch(trans.pos, trans.angle, PUNCH_COLLIDER_RADIUS, PUNCH_COLLIDER_LOCAL_POS);
 	punch->Load();
 
 	// P‚è
-	gouge = new PlayerGouge(trans.model);
+	gouge = new PlayerGouge(trans.model, RIGHTHAND_FRAME_INDEX);
 	gouge->Load();
 
 	// “ÁŽêUŒ‚i“Š‚°j
-	throwing = new Throwing(trans.model, trans.angle);
+	throwing = new Throwing(trans.model, trans.angle, RIGHTHAND_FRAME_INDEX);
 	throwing->Load();
 
 #pragma region UI

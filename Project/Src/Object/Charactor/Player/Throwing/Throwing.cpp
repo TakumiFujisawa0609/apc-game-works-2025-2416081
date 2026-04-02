@@ -1,11 +1,13 @@
 #include"Throwing.h"
 
 
-Throwing::Throwing(const int& playerModel, const Vector3& playerAngle) :
+Throwing::Throwing(const int& playerModel, const Vector3& playerAngle, int PLAYER_RIGHTHAND_FRAME_INDEX) :
 	models(),
 
 	playerModel(playerModel),
 	playerAngle(playerAngle),
+
+	PLAYER_RIGHTHAND_FRAME_INDEX(PLAYER_RIGHTHAND_FRAME_INDEX),
 
 	parameter("Data/Parameter/Player/Throwing/ThrowingParameter.csv")
 {
@@ -31,7 +33,7 @@ void Throwing::Load(void)
 			switch ((THROW_TYPE)type)
 			{
 			case THROW_TYPE::NON: { continue; }
-			case THROW_TYPE::ROCK: { throwObj[num].ins = new ThrowRock(playerModel, playerAngle); break; }
+			case THROW_TYPE::ROCK: { throwObj[num].ins = new ThrowRock(playerModel, playerAngle, PLAYER_RIGHTHAND_FRAME_INDEX); break; }
 			}
 
 			num++;

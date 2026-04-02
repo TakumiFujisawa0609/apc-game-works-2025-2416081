@@ -5,11 +5,8 @@
 class PlayerPunch : public ActorBase
 {
 public:
-	const float RADIUS = 100.0f;
-	const Vector3 LOCAL_POS = { 0.0f,0.0f,70.0f };
-
-	PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle);
-	~PlayerPunch()override {};
+	PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle, float RADIUS, const Vector3& LOCAL_POS);
+	~PlayerPunch()override = default;
 
 	void Load(void)override;
 
@@ -19,6 +16,11 @@ public:
 	void Off(void) { SetJudge(false); SetIsDraw(false); }
 
 private:
+
+	// UŒ‚”»’è‚Ì”¼Œa
+	const float RADIUS;
+	// UŒ‚”»’è‚Ìƒ[ƒJƒ‹À•W
+	const Vector3 LOCAL_POS;
 
 	void SubInit(void)override { Off(); }
 	void SubUpdate(void)override;

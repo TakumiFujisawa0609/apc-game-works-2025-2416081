@@ -2,11 +2,13 @@
 
 #include"../../Boss/Boss.h"
 
-ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle, const std::string& parameterPath) :
+ThrowObjBase::ThrowObjBase(const int& playerModel, const Vector3& playerAngle, int PLAYER_RIGHTHAND_FRAME_INDEX, const std::string& parameterPath) :
 	ActorBase(parameterPath),
 
 	playerModel(playerModel),
 	playerAngle(playerAngle),
+
+	PLAYER_RIGHTHAND_FRAME_INDEX(PLAYER_RIGHTHAND_FRAME_INDEX),
 
 	state(STATE::NON),
 	stateFuncPtr(),

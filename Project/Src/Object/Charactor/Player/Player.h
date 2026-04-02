@@ -95,6 +95,9 @@ private:
 	// ƒ‚ƒfƒ‹‚ÌŠp“x‚ÌƒYƒŒ
 	const Vector3 LOCAL_ROT = GetParameterToVector3("ModelLocalRot") * (DX_PI_F / 180.0f);
 
+	// ƒvƒŒƒCƒ„[ƒ‚ƒfƒ‹‚Ì‰Eè‚ÌˆÊ’u‚ÌƒtƒŒ[ƒ€”Ô†
+	const int RIGHTHAND_FRAME_INDEX = GetParameterToInt("RightHandFrameIndex");
+
 	// “–‚½‚è”»’èî•ñ````````````````````````````````
 
 	// ƒJƒvƒZƒ‹ƒRƒ‰ƒCƒ_[‚Ì”¼Œa
@@ -153,6 +156,12 @@ private:
 	const float PUNCH_COLLIDER_START_RATE = GetParameter("PunchColliderStartRate");
 	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì”­¶I—¹ŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡)
 	const float PUNCH_COLLIDER_END_RATE = GetParameter("PunchColliderEndRate");
+
+	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì”¼Œa
+	const float PUNCH_COLLIDER_RADIUS = GetParameter("PunchColliderRadius");
+
+	// ƒpƒ“ƒ`‚Ì“–‚½‚è”»’è‚Ì‘Š‘ÎÀ•W
+	const Vector3 PUNCH_COLLIDER_LOCAL_POS = GetParameterToVector3("PunchColliderLocalPos");
 
 	// ```````````````````````````````
 

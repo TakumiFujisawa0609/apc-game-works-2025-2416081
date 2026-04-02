@@ -4,10 +4,13 @@
 
 #include"../../../Common/Collider/SphereCollider.h"
 
-PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle):
+PlayerPunch::PlayerPunch(const Vector3& playerPos, const Vector3& playerAngle, float RADIUS, const Vector3& LOCAL_POS) :
 	ActorBase(),
 	playerPos(playerPos),
-	playerAngle(playerAngle)
+	playerAngle(playerAngle),
+	
+	RADIUS(RADIUS),
+	LOCAL_POS(LOCAL_POS)
 {
 }
 

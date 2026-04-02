@@ -15,7 +15,7 @@ public:
 		MAX
 	};
 
-	PlayerGouge(const int& playerModel);
+	PlayerGouge(const int& playerModel, int PLAYER_RIGHTHAND_FRAME_INDEX);
 	~PlayerGouge()override = default;
 
 	void Load(void)override;
@@ -32,7 +32,7 @@ public:
 	void Reset(void);
 
 private:
-	const int PLAYER_RIGHTHAND_FRAME_INDEX = 14;
+	const int PLAYER_RIGHTHAND_FRAME_INDEX;
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;

@@ -17,7 +17,7 @@ class Throwing
 {
 public:
 
-	Throwing(const int& playerModel, const Vector3& playerAngle);
+	Throwing(const int& playerModel, const Vector3& playerAngle, int PLAYER_RIGHTHAND_FRAME_INDEX);
 	~Throwing() = default;
 
 	void Load(void);
@@ -68,4 +68,7 @@ private:
 
 	const int& playerModel;
 	const Vector3& playerAngle;
+
+	// プレイヤーモデルの右手の位置のフレーム番号
+	const int PLAYER_RIGHTHAND_FRAME_INDEX;
 };

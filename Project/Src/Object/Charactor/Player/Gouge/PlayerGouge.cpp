@@ -4,10 +4,11 @@
 
 #include"../../../Common/Collider/SphereCollider.h"
 
-PlayerGouge::PlayerGouge(const int& playerModel):
+PlayerGouge::PlayerGouge(const int& playerModel, int PLAYER_RIGHTHAND_FRAME_INDEX):
 	ActorBase(),
 
 	playerModel(playerModel),
+	PLAYER_RIGHTHAND_FRAME_INDEX(PLAYER_RIGHTHAND_FRAME_INDEX),
 
 	state(STATE::NON),
 

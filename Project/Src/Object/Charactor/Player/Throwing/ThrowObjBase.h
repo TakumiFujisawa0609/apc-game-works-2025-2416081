@@ -5,7 +5,7 @@
 class ThrowObjBase : public ActorBase
 {
 public:
-	ThrowObjBase(const int& playerModel, const Vector3& playerAngle, const std::string& parameterPath);
+	ThrowObjBase(const int& playerModel, const Vector3& playerAngle, int PLAYER_RIGHTHAND_FRAME_INDEX, const std::string& parameterPath);
 	virtual ~ThrowObjBase() = default;
 
 	void OnCollision(const ColliderBase& collider)override;
@@ -40,7 +40,7 @@ private:
 	Vector3 moveVec;
 
 	// 右手のフレームインデックス(モデルによって変える必要があるかも)(派生先で設定)
-	const int PLAYER_RIGHTHAND_FRAME_INDEX = GetParameterToInt("PlayerRightHandFrameIndex");
+	const int PLAYER_RIGHTHAND_FRAME_INDEX;
 
 	// 速度(派生先で設定)
 	const float SPEED = GetParameter("Speed");
