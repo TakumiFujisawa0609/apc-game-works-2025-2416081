@@ -21,7 +21,7 @@ void BossHpBarManager::Load(void)
 	for (BossHpBar*& bar : hpBar) { bar->Load(); }
 }
 
-void BossHpBarManager::Init(const Vector2& position, const unsigned int* color)
+void BossHpBarManager::Init(const Vector2& position, const std::vector<unsigned int> color)
 {
 	// HPƒo[‚ÌˆÊ’u‚ðÝ’è‚·‚é
 	this->position = position;

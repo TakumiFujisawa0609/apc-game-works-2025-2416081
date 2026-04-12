@@ -11,7 +11,7 @@ public:
 	~BossHpBarManager() = default;
 
 	void Load(void);
-	void Init(const Vector2& position, const unsigned int* color);
+	void Init(const Vector2& position, const std::vector<unsigned int> color);
 	void Update(void);
 	void Draw(void);
 	void Release(void);

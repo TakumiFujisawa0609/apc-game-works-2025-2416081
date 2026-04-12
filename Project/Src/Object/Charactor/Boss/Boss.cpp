@@ -10,7 +10,8 @@
 
 #include"../Player/Player.h"
 
-Boss::Boss(const Vector3& playerPos):
+Boss::Boss(const Vector3& playerPos) :
+	CharactorBase("Data/Parameter/Boss/BossParameter.csv"),
 
 	fall(nullptr),
 	stone(nullptr),

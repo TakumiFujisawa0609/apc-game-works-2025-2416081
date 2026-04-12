@@ -60,7 +60,7 @@ public:
 	}
 
 	// UŒ‚‚Ìí—Ş
-	enum class ATTACK_DAMAGE_TYPE
+	enum class ATTACK_POWER_TYPE
 	{
 		FALL,
 		STONE,
@@ -69,12 +69,14 @@ public:
 		MAX
 	};
 
-	// UŒ‚‚²‚Æ‚Ìƒ_ƒ[ƒW—Êƒe[ƒuƒ‹
-	static constexpr unsigned char ATTACK_DAMAGE_TABLE[(int)ATTACK_DAMAGE_TYPE::MAX] = {
-		10,		// FALL
-		10,		// STONE
-		10,		// PSYCHO
-	};
+	// ŠeUŒ‚‚ÌUŒ‚—Íƒe[ƒuƒ‹‚ğæ“¾
+	std::vector<unsigned char> GetAttackPowerTable(void) {
+		std::vector<unsigned char> ret = {};
+
+		for (unsigned char power : ATTACK_POWER_TABLE) { ret.emplace_back(power); }
+
+		return ret;
+	}
 
 	// ƒvƒŒƒCƒ„[‚©‚çUŒ‚‚²‚Æ‚ÌUŒ‚—Í‚ğó‚¯æ‚é
 	void SetPlayerAttackPowerTable(std::vector<unsigned char> playerAttackPowerTable) { this->playerAttackPowerTable = playerAttackPowerTable; }
@@ -83,16 +85,16 @@ private:
 
 #pragma region ’è”’è‹`
 	// ƒ‚ƒfƒ‹‚Ì•\¦ƒXƒP[ƒ‹
-	const float SCALE = 2.0f;
+	const float SCALE = GetParameter("ModelScale");
 
 	// ƒTƒCƒY
-	const Vector3 SIZE = Vector3(304.004f, 387.109f, 205.034f) * SCALE;
+	const Vector3 SIZE = GetParameterToVector3("ModelSize") * SCALE;
 
 	// ’†S“_•â³
-	const Vector3 CENTER_DIFF = Vector3(0.0f, 190.9405f, 0.0f) * SCALE;
+	const Vector3 CENTER_DIFF = GetParameterToVector3("ModelCenterDiff") * SCALE;
 
 	// ƒ[ƒJƒ‹‰ñ“]Šp“x
-	const Vector3 LOCAL_ANGLE = { 0.0f,Deg2Rad(180.0f),0.0f };
+	const Vector3 LOCAL_ANGLE = GetParameterToVector3("ModelLocalRot") * (DX_PI_F / 180.0f);
 
 	// ƒJƒvƒZƒ‹“–‚½‚è”»’è—p’è”`````````````````````````````````````````````````````````
 
@@ -109,22 +111,22 @@ private:
 	// `````````````````````````````````````````````````````````````````````
 
 	// Å‘åƒqƒbƒgƒ|ƒCƒ“ƒg
-	const unsigned short HP_MAX = 200;
+	const unsigned short HP_MAX = GetParameterToInt("HpMax");
 
 	// Å‘åƒ‰ƒCƒt”
-	static constexpr unsigned char LIFE_MAX = 2;
+	const unsigned char LIFE_MAX = GetParameterToInt("LifeMax");
 
 	// ƒ{ƒX‚Ì‰ŠúÀ•W(“®‚©‚È‚¢‚Ì‚Å‚±‚±‚ÅŒÅ’è)
-	const Vector3 INIT_POS = Vector3(1000.0f, 300.0f, 1000.0f);
+	const Vector3 INIT_POS = GetParameterToVector3("InitPos");
 
 	// Še–³“GŠÔ``````````````````
 
 	// ƒ‰ƒCƒt‚ğ¸‚Á‚½‚Æ‚«‚Ì–³“GŠÔ
-	const char LIFE_LOST_INVINCIBLE_TIME = 80;
+	const char LIFE_LOST_INVINCIBLE_TIME = (char)GetParameterToInt("LifeLostInvincibleTime");
 	// “Š±UŒ‚‚ğó‚¯‚½‚Æ‚«‚Ì–³“GŠÔ
-	const char THROWING_DAMAGE_INVINCIBLE_TIME = 60;
+	const char THROWING_DAMAGE_INVINCIBLE_TIME = (char)GetParameterToInt("ThrowingDamageInvincibleTime");
 	// ƒpƒ“ƒ`UŒ‚‚ğó‚¯‚½‚Æ‚«‚Ì–³“GŠÔ
-	const char PUNCH_DAMAGE_INVINCIBLE_TIME = 20;
+	const char PUNCH_DAMAGE_INVINCIBLE_TIME = (char)GetParameterToInt("PunchDamageInvincibleTime");
 
 	// ```````````````````````
 
@@ -145,23 +147,23 @@ private:
 	// ŠeUŒ‚‚Ì’Š‘IŠm—§
 	const float ATTACK_LOTTERY_RATE[(int)ATTACK_KINDS::MAX] =
 	{
-		0.3f,	//FALL
-		0.3f,	//STONE
-		0.3f,	//PSYCHO
-		0.1f,	//WALL
+		GetParameter("FallAttackLotteryRate"),	//FALL
+		GetParameter("StoneAttackLotteryRate"),	//STONE
+		GetParameter("PsychoAttackLotteryRate"),//PSYCHO
+		GetParameter("WallAttackLotteryRate"),	//WALL
 	};
 
 	// ŠeUŒ‚‚ÌI—¹Œã‚Ì‘Ò‹@ŠÔ
 	const int ATTACK_INTERVAL[(int)ATTACK_KINDS::MAX] =
 	{
-		150,	//FALL
-		150,	//STONE
-		200,	//PSYCHO
-		100,	//WALL
+		GetParameterToInt("FallAttackInterval"),	//FALL
+		GetParameterToInt("StoneAttackInterval"),	//STONE
+		GetParameterToInt("PsychoAttackInterval"),	//PSYCHO
+		GetParameterToInt("WallAttackInterval"),	//WALL
 	};
 
 	// UŒ‚‚Ì’Š‘I‚ğs‚¤‚½‚ß‚Ì—”¶¬‚ÌÅ‘å’l
-	const unsigned short ATTACK_LOTTERY_WORK_VALUE = 10000;
+	const unsigned short ATTACK_LOTTERY_WORK_VALUE = (unsigned short)GetParameterToInt("AttackLotteryWorkValue");
 
 	// `````````````````````````````
 
@@ -169,40 +171,43 @@ private:
 	// ƒXƒ^ƒ“ó‘Ô````````````````````````
 
 	// ƒXƒ^ƒ“ó‘Ô‚ÌŒp‘±ŠÔ
-	const int STAN_TIME = 500;
+	const int STAN_TIME = GetParameterToInt("StanTime");
 
 	// ƒXƒ^ƒ“ó‘Ô‚©‚ç“|‚³‚ê‚¸‚É•œ‹A‚µ‚½‚Æ‚«‚Ì‰ñ•œ‚·‚é‘Ì—Í‚ÌŠ„‡
-	const float STAN_RECOVERY_RATE = 0.2f;
+	const float STAN_RECOVERY_RATE = GetParameter("StanRecoveryRate");
 
 	// `````````````````````````````
 
 	// ‘åƒ_ƒ[ƒWó‘Ô‚ÌŠÔ(ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶Š„‡)
-	const float BIG_DAMAGE_TIME = 0.4f;
+	const float BIG_DAMAGE_TIME = GetParameter("BigDamageTime");
 
 	// ‘åƒ_ƒ[ƒWó‘Ô‚ÌƒXƒ[‚ÌŠÔiƒtƒŒ[ƒ€”j
-	const char BIG_DAMAGE_SLOW_TIME = 20;
+	const char BIG_DAMAGE_SLOW_TIME = (char)GetParameterToInt("BigDamageSlowTime");
 
 	// ƒ‰ƒCƒt‚ª0‚É‚È‚Á‚½‚ÌƒqƒbƒgƒXƒgƒbƒv‚ÌŠÔiƒtƒŒ[ƒ€”j
-	const char DEATH_HIT_STOP_TIME = 40;
+	const char DEATH_HIT_STOP_TIME = (char)GetParameterToInt("DeathHitStopTime");
 	// ƒ‰ƒCƒt‚ª0‚É‚È‚Á‚½‚ÌƒXƒ[‚ÌŠÔiƒtƒŒ[ƒ€”j
-	const char DEATH_SLOW_TIME = 20;
+	const char DEATH_SLOW_TIME = (char)GetParameterToInt("DeathSlowTime");
 	// ƒ‰ƒCƒt‚ª0‚É‚È‚Á‚½‚Ì‰æ–Ê—h‚ê‚ÌŠÔiƒtƒŒ[ƒ€”j
-	const char DEATH_SCREEN_SHAKE_TIME = 100;
+	const char DEATH_SCREEN_SHAKE_TIME = (char)GetParameterToInt("DeathScreenShakeTime");
 
 	// ƒvƒŒƒrƒ…[À•W
-	const Vector2 PREVIEW_POS = Vector2(App::SCREEN_SIZE_X - BossPreview::SIZE - 10, 10);
+	const Vector2 PREVIEW_POS =
+		Vector2(
+			App::SCREEN_SIZE_X - BossPreview::SIZE - GetParameterToInt("PreviewPos", 0),
+			GetParameterToInt("PreviewPos", 1)
+		);
 
 	// HPƒo[`````````````````````````````````````````````
 	
 	// HPƒo[‚ÌF
-	const unsigned int HP_BAR_COLOR[LIFE_MAX] =
-	{
-		0xeeee00,//2‰ñ–Ú
-		0x0000ff,//1‰ñ–Ú
-	};
+	const std::vector<unsigned int> HP_BAR_COLOR = ArrayCast<float, unsigned int>(GetParameterArray("HpBarColor"));
 
 	// HPƒo[‚ÌÀ•W
-	const Vector2 HP_BAR_POS = Vector2(PREVIEW_POS.x - BossHpBarManager::HP_BAR_WHOLE_SIZE_X, 10.0f);
+	const Vector2 HP_BAR_POS = Vector2(
+		PREVIEW_POS.x - BossHpBarManager::HP_BAR_WHOLE_SIZE_X - GetParameter("HpBarPos", 0),
+		PREVIEW_POS.y + GetParameter("HpBarPos", 1)
+	);
 
 	// `````````````````````````````````````````````````
 
@@ -212,13 +217,23 @@ private:
 	const char* HP_BAR_STAN_TEXT = "ƒ`ƒƒƒ“ƒX‚¾I‚Ô‚ñ‰£‚êII";
 
 	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚ÌÀ•W
-	const Vector2I HP_BAR_STAN_TEXT_POS = Vector2I(HP_BAR_POS.x + 60.0f, 25.0f);
+	const Vector2I HP_BAR_STAN_TEXT_POS = HP_BAR_POS.ToVector2I() + GetParameterToVector2("HpBarStanTextPos").ToVector2I();
 
 	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚ÌF
-	const unsigned int HP_BAR_STAN_TEXT_COLOR = 0xff0000;
+	const unsigned int HP_BAR_STAN_TEXT_COLOR = (unsigned int)GetParameterToInt("HpBarStanTextColor");
 
 	// ƒXƒ^ƒ“ó‘ÔHPƒo[‚É•\¦‚·‚éƒeƒLƒXƒg‚Ì“_–Å‚ÌŠÔŠu
-	const char HP_BAR_STAN_TEXT_BLINK_INTERVAL = 15;
+	const char HP_BAR_STAN_TEXT_BLINK_INTERVAL = (char)GetParameterToInt("HpBarStanTextBlinkInterval");
+	// ```````````````````````````````````
+
+	// ŠeUŒ‚‚ÌUŒ‚—Íƒe[ƒuƒ‹````````````````````````
+
+	const unsigned char ATTACK_POWER_TABLE[(int)ATTACK_POWER_TYPE::MAX] = {
+		(unsigned char)GetParameterToInt("FallAttackPower"),	//FALL
+		(unsigned char)GetParameterToInt("StoneAttackPower"),	//STONE
+		(unsigned char)GetParameterToInt("PsychoAttackPower"),	//PSYCHO
+	};
+
 	// ```````````````````````````````````
 
 #pragma endregion
@@ -318,16 +333,16 @@ private:
 
 	// ƒ‚ƒfƒ‹‚É•R‚Ã‚¢‚Ä‚¢‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ÌƒXƒs[ƒh‚Ì’è‹`
 	const float IN_FBX_ANIME_SPEED[(int)ANIME_TYPE::MAX] = {
-		1.0f, // ATTACK
-		1.0f, // DAMAGE
-		1.0f, // DEATH
-		1.0f, // IDLE
-		1.0f, // JUMP
-		1.0f, // PUNCH
-		1.0f, // RUN
-		1.0f, // SLAP
-		0.5f, // STAN
-		1.0f, // WALK
+		GetParameter("AttackAnimeSpeed"),	// ATTACK
+		GetParameter("DamageAnimeSpeed"),	// DAMAGE
+		GetParameter("DeathAnimeSpeed"),	// DEATH
+		GetParameter("IdleAnimeSpeed"),		// IDLE
+		GetParameter("JumpAnimeSpeed"),		// JUMP
+		GetParameter("PunchAnimeSpeed"),	// PUNCH
+		GetParameter("RunAnimeSpeed"),		// RUN
+		GetParameter("SlapAnimeSpeed"),		// SLAP
+		GetParameter("StanAnimeSpeed"),		// STAN
+		GetParameter("WalkAnimeSpeed"),		// WALK
 	};
 
 	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‰Šúİ’è

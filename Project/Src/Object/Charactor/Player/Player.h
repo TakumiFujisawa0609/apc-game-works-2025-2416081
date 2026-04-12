@@ -62,6 +62,9 @@ public:
 	// プレイヤーが落下した場合のステージを一部復活させる関数をセットする
 	void SetStageRevivalFunc(std::function<void(void)>ptr) { stageRevival = std::move(ptr); }
 
+	// ボスから攻撃ごとの攻撃力を受け取る
+	void SetBossAttackPowerTable(std::vector<unsigned char> bossAttackPowerTable) { this->bossAttackPowerTable = bossAttackPowerTable; }
+
 	// 状態定義
 	enum class STATE
 	{
@@ -409,5 +412,8 @@ private:
 
 	// ステージ復活時に呼び出す関数ポインタ
 	std::function<void(void)>stageRevival;
+
+	// ボスから攻撃ごとの攻撃力を受け取り格納するための配列
+	std::vector<unsigned char> bossAttackPowerTable;
 };
 

@@ -227,6 +227,21 @@ protected:
 
 		return Vector3(param[0], param[1], param[2]);
 	}
+
+	/// <summary>
+	/// パラメーター外部ファイル管理クラスから指定のパラメーターをVector2構造体にして取得する
+	/// </summary>
+	/// <param name="parameterName">パラメーターのID</param>
+	/// <returns></returns>
+	Vector2 GetParameterToVector2(const std::string& parameterName) {
+		if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+		const std::vector<float>& param = parameter->GetParameterArray(parameterName);
+
+		// 要素数がちょうどVector2構造体と合致していなければ0を返す
+		if (param.size() != 2) { return Vector2(); }
+
+		return Vector2(param[0], param[1]);
+	}
 #pragma endregion
 
 #pragma endregion

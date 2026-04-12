@@ -82,6 +82,9 @@ void GameScene::Load(void)
 	// プレイヤーにリスポーン時ステージ復活の関数を渡す
 	ObjSerch<Player>()->SetStageRevivalFunc(std::bind(&BlockManager::StageRevival, ObjSerch<BlockManager>()));
 
+	// プレイヤーにボスの各攻撃の攻撃力を渡す
+	ObjSerch<Player>()->SetBossAttackPowerTable(ObjSerch<Boss>()->GetAttackPowerTable());
+
 	// ボスにプレイヤーの各攻撃の攻撃力を渡す
 	ObjSerch<Boss>()->SetPlayerAttackPowerTable(ObjSerch<Player>()->GetAttackPowerTable());
 

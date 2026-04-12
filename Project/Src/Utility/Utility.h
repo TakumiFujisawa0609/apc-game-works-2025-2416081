@@ -609,3 +609,26 @@ struct MagicaVoxelCSVRow {
 		);
 	}
 };
+
+/// <summary>
+/// 配列全ての要素を変換する関数（例：std::vector<int>からstd::vector<float>へ）
+/// </summary>
+/// <typeparam name="before">変換元の型</typeparam>
+/// <typeparam name="after">変換先の型</typeparam>
+/// <param name="array">変換元の型の要素を持つ配列</param>
+/// <returns>変換後の型の要素を持つ配列</returns>
+template<typename before,typename after>
+static std::vector<after> ArrayCast(const std::vector<before>& array) {
+
+    // 配列数取得
+    size_t size = array.size();
+
+    // 変換後の型の配列を作成する（初期値は0）
+    std::vector<after> ret(size, 0);
+
+    // 変換前の型の配列を変換後の型の配列にコピーしていく
+    for (size_t i = 0; i < size; i++) { ret.at(i) = (after)array.at(i); }
+
+    // 変換後の型の配列を返す
+    return ret;
+}

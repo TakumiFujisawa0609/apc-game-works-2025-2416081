@@ -197,7 +197,7 @@ void Player::OnCollision(const ColliderBase& collider)
 		knockBack(collider.GetPos());
 
 		// HPå∏è≠
-		HpSharpen(Boss::ATTACK_DAMAGE_TABLE[(int)Boss::ATTACK_DAMAGE_TYPE::FALL]);
+		HpSharpen(bossAttackPowerTable[(int)Boss::ATTACK_POWER_TYPE::FALL]);
 
 		return;
 	case TAG::GOLEM_ATTACK_PSYCHOROCK:
@@ -206,7 +206,7 @@ void Player::OnCollision(const ColliderBase& collider)
 		knockBack(collider.GetPos());
 
 		// HPå∏è≠
-		HpSharpen(Boss::ATTACK_DAMAGE_TABLE[(int)Boss::ATTACK_DAMAGE_TYPE::PSYCHO]);
+		HpSharpen(bossAttackPowerTable[(int)Boss::ATTACK_POWER_TYPE::PSYCHO]);
 
 		return;
 	case TAG::GOLEM_ATTACK_STONE:
@@ -215,7 +215,7 @@ void Player::OnCollision(const ColliderBase& collider)
 		knockBack(collider.GetPos());
 
 		// HPå∏è≠
-		HpSharpen(Boss::ATTACK_DAMAGE_TABLE[(int)Boss::ATTACK_DAMAGE_TYPE::STONE]);
+		HpSharpen(bossAttackPowerTable[(int)Boss::ATTACK_POWER_TYPE::STONE]);
 
 		return;
 	}
